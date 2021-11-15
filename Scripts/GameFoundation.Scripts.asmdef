@@ -1,0 +1,24 @@
+{
+    "name": "GameFoundation.Scripts",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.Extendsions",
+        "Unity.Addressables",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.ResourceManager",
+        "BlueprintReader",
+        "UniRx",
+        "MechSharingCode",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
