@@ -17,7 +17,8 @@ namespace Mech.Utils
                                                                                                         methodInfo.GetGenericArguments().Length == 1     && methodInfo.GetParameters().Length == 1);
 
             // Bind pool for all http request
-            foreach (var type in ReflectionUtils.GetAllDriveType<T>())
+            var allDriveType = ReflectionUtils.GetAllDerivedTypes<T>();
+            foreach (var type in allDriveType)
             {
                 var factoryToChoiceIdBinder = bindMemoryPoolMethod.MakeGenericMethod(type).Invoke(container, null);
                 fromPoolableMemoryPoolMethod.MakeGenericMethod(type).Invoke(null, new[] { factoryToChoiceIdBinder });
@@ -46,7 +47,7 @@ namespace Mech.Utils
         /// <typeparam name="T"></typeparam>
         public static void BindAllTypeDriveFrom<T>(this DiContainer diContainer)
         {
-            foreach (var type in ReflectionUtils.GetAllDriveType<T>())
+            foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>())
             {
                 diContainer.Bind(type).AsCached().NonLazy();
             }

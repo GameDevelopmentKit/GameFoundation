@@ -9,8 +9,8 @@
         "Unity.ResourceManager",
         "BlueprintReader",
         "UniRx",
-        "MechSharingCode",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "MechSharingCode"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

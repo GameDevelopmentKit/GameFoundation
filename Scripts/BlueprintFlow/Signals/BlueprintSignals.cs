@@ -1,10 +1,9 @@
 namespace MechSharingCode.Blueprints.Signals
 {
-    using MechSharingCode.WebService.Blueprint;
-
     public class LoadBlueprintDataSignal
     {
-        public BlueprintResponse BlueprintInfo;
+        public string Url;
+        public string Hash;
     }
 
     public class LoadBlueprintDataSuccessedSignal

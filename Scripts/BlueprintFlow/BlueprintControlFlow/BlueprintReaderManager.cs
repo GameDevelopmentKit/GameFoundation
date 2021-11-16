@@ -10,10 +10,8 @@ namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
     using Mech.Services;
     using Mech.Services.Network.WebService;
     using Mech.Utils;
-    using MechServerSharingCode.MechSharingCode.Utils.Encryption;
     using MechSharingCode.Blueprints.BlueprintReader;
     using MechSharingCode.Blueprints.Signals;
-    using MechSharingCode.WebService.Blueprint;
     using UnityEngine;
     using Zenject;
 
@@ -25,7 +23,7 @@ namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
         private readonly SignalBus                  signalBus;
         private readonly ILogService                logService;
         private readonly DiContainer                diContainer;
-        private readonly GameFoundationLocalData                  localData;
+        private readonly GameFoundationLocalData    localData;
         private readonly HandleLocalDataServices    handleLocalDataServices;
         private readonly IHttpService               httpService;
         private          Dictionary<string, string> listRawBlueprints;
@@ -46,17 +44,17 @@ namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
 
         private async void OnLoadBlueprint(LoadBlueprintDataSignal signal)
         {
-            if (!this.IsLoadLocalBlueprint(signal.BlueprintInfo))
+            if (!this.IsLoadLocalBlueprint(signal))
             {
                 //Download new blueprints version from remote
                 var progressSignal = new LoadBlueprintDataProgressSignal();
-                await this.httpService.Download(signal.BlueprintInfo.Url, string.Format(BlueprintConfig.BlueprintZipFilename, BlueprintConfig.CurrentBlueprintVersion), (downloaded, length) =>
+                await this.httpService.Download(signal.Url, string.Format(BlueprintConfig.BlueprintZipFilename, BlueprintConfig.CurrentBlueprintVersion), (downloaded, length) =>
                 {
                     progressSignal.percent = downloaded / (float)length * 100f;
                     this.signalBus.Fire(progressSignal);
                 });
 
-                this.localData.BlueprintModel.BlueprintDownloadUrl = signal.BlueprintInfo.Url;
+                this.localData.BlueprintModel.BlueprintDownloadUrl = signal.Url;
                 this.handleLocalDataServices.SaveLocalDataToFile();
             }
 
@@ -70,12 +68,12 @@ namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
             this.signalBus.Fire<LoadBlueprintDataSuccessedSignal>();
         }
 
-        private bool IsLoadLocalBlueprint(BlueprintResponse blueprintInfo)
+        private bool IsLoadLocalBlueprint(LoadBlueprintDataSignal blueprintInfo)
         {
 #if TEST_BLUEPRINT
             return true;
 #else
-            return this.localData.BlueprintModel.BlueprintDownloadUrl == blueprintInfo.Url /*&& MD5.GetMD5HashFromFile(BlueprintConfig.BlueprintZipFilepath) == blueprintInfo.Hash*/ &&
+            return this.localData.BlueprintModel.BlueprintDownloadUrl == blueprintInfo.Url && MD5Utils.GetMD5HashFromFile(BlueprintConfig.BlueprintZipFilepath) == blueprintInfo.Hash &&
                    File.Exists(BlueprintConfig.BlueprintZipFilepath);
 #endif
         }
@@ -105,7 +103,7 @@ namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
             }
 
             var listReadTask = new List<UniTask>();
-            foreach (var blueprintType in ReflectionUtils.GetAllDriveType<IGenericBlueprint>())
+            foreach (var blueprintType in ReflectionUtils.GetAllDerivedTypes<IGenericBlueprint>())
             {
                 var blueprintInstance = (IGenericBlueprint)this.diContainer.Resolve(blueprintType);
                 if (blueprintInstance != null)
