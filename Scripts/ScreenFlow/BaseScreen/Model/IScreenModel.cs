@@ -1,6 +1,6 @@
-namespace Mech.Core.ScreenFlow.BaseScreen.Model
+namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Model
 {
-    using Mech.Core.MVP;
+    using GameFoundation.Scripts.MVP;
 
     /// <summary>
     /// The traditional Model:

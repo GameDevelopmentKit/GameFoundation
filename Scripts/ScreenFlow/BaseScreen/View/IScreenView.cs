@@ -1,7 +1,7 @@
-namespace Mech.Core.ScreenFlow.BaseScreen.View
+namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
 {
     using System;
-    using Mech.Core.MVP;
+    using GameFoundation.Scripts.MVP;
     using UnityEngine;
 
     /// <summary>

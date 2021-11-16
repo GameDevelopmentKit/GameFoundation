@@ -1,4 +1,4 @@
-namespace MechSharingCode.Blueprints.BlueprintControlFlow
+namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 {
     // using System;
     // using System.Collections.Generic;

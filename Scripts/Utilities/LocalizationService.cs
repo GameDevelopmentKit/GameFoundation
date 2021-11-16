@@ -1,4 +1,4 @@
-namespace Mech.Services
+namespace GameFoundation.Scripts.Utilities
 {
     using I2.Loc;
 

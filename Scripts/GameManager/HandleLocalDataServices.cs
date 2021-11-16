@@ -1,8 +1,8 @@
-namespace Mech.GameManager
+namespace GameFoundation.Scripts.GameManager
 {
-    using Mech.Services;
-    using UnityEngine;
+    using GameFoundation.Scripts.Utilities.LogService;
     using Newtonsoft.Json;
+    using UnityEngine;
 
     /// <summary>
     /// Manager save Load Local data

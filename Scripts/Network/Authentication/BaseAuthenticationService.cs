@@ -1,11 +1,11 @@
-namespace Mech.Scenes.LoadingScene.LoginScreen
+namespace GameFoundation.Scripts.Network.Authentication
 {
     using System.Net;
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    using Mech.GameManager;
-    using Mech.Models;
-    using Mech.Services;
+    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Models;
+    using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;
 
     /// <summary>Base authentication with google, facebook...  </summary>

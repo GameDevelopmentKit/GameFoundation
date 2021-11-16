@@ -1,4 +1,4 @@
-namespace Mech.GameManager
+namespace GameFoundation.Scripts.GameManager
 {
 
     /// <summary>

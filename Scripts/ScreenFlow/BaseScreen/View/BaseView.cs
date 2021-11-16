@@ -1,8 +1,7 @@
-namespace Mech.Core.ScreenFlow.BaseScreen.View
+namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
 {
     using System;
     using UnityEngine;
-    using UnityEngine.UI;
 
     [RequireComponent(typeof(CanvasGroup))]
     public class BaseView : MonoBehaviour, IScreenView

@@ -1,4 +1,4 @@
-namespace Mech.Models
+namespace GameFoundation.Scripts.Models
 {
     public class PlayerState
     {

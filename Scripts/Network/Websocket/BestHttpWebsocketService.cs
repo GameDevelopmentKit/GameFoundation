@@ -1,4 +1,4 @@
-namespace Mech.Services.Network.Websocket
+namespace GameFoundation.Scripts.Network.Websocket
 {
     using System;
     using System.Threading;
@@ -6,7 +6,8 @@ namespace Mech.Services.Network.Websocket
     using BestHTTP.SignalRCore;
     using BestHTTP.SignalRCore.Authentication;
     using BestHTTP.SignalRCore.Encoders;
-    using Mech.GameManager;
+    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Utilities.LogService;
     using UniRx;
 
     /// <summary>Temporary websocket service (signalR) for battle.</summary>

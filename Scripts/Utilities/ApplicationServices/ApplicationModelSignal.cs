@@ -1,4 +1,4 @@
-﻿namespace Mech.Scenes.LoadingScene.LoginScreen
+﻿namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
     /// <summary>Model signal application event pause, focus...</summary>
     public class ApplicationModelSignal

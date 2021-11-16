@@ -1,17 +1,16 @@
-namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
+namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
     using Cysharp.Threading.Tasks;
-    using Mech.Core.Utilities.Extension;
-    using Mech.GameManager;
-    using Mech.Services;
-    using Mech.Services.Network.WebService;
-    using Mech.Utils;
+    using GameFoundation.Scripts.BlueprintFlow.Signals;
+    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Network.WebService;
+    using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.Blueprints.BlueprintReader;
-    using MechSharingCode.Blueprints.Signals;
     using UnityEngine;
     using Zenject;
 

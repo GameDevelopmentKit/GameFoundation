@@ -1,9 +1,8 @@
-namespace Mech.Core.ScreenFlow.BaseScreen.Presenter
+namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 {
-    using Mech.Core.ScreenFlow.BaseScreen.Model;
-    using Mech.Core.ScreenFlow.BaseScreen.View;
-    using Mech.Core.ScreenFlow.Signals;
-    using Mech.Services;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Scripts.ScreenFlow.Signals;
+    using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;
 
     public abstract class BasePopupPresenter<TView> : BaseScreenPresenter<TView> where TView : IScreenView
@@ -14,7 +13,7 @@ namespace Mech.Core.ScreenFlow.BaseScreen.Presenter
         {
             base.OnViewReady();
             this.View.ViewDidOpen  += this.OnViewDidOpen;
-            this.View.ViewDidClose += OnViewDidClose;
+            this.View.ViewDidClose += this.OnViewDidClose;
         }
         
         private            void OnViewDidOpen()   { this.SignalBus.Fire(new PopupShowedSignal() { ScreenPresenter = this }); }

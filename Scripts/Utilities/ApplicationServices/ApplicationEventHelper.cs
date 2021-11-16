@@ -1,6 +1,6 @@
-namespace Mech.Scenes.LoadingScene.LoginScreen
+namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
-    using Mech.GameManager;
+    using GameFoundation.Scripts.GameManager;
     using UnityEngine;
     using Zenject;
 

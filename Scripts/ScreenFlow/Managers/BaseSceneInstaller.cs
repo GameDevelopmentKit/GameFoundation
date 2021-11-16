@@ -1,4 +1,4 @@
-namespace Mech.Core.ScreenFlow.Managers
+namespace GameFoundation.Scripts.ScreenFlow.Managers
 {
     using UnityEngine;
     using Zenject;

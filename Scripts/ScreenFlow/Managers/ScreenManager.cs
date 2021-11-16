@@ -1,16 +1,15 @@
-namespace Mech.Core.ScreenFlow.Managers
+namespace GameFoundation.Scripts.ScreenFlow.Managers
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using Mech.Core.AssetLibrary;
-    using Mech.Core.ScreenFlow.BaseScreen.Model;
-    using Mech.Core.ScreenFlow.BaseScreen.Presenter;
-    using Mech.Core.ScreenFlow.BaseScreen.View;
-    using Mech.Core.ScreenFlow.Signals;
-    using Mech.Core.Utilities.Extension;
-    using Mech.Services;
+    using GameFoundation.Scripts.AssetLibrary;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Scripts.ScreenFlow.Signals;
+    using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
     using Zenject;
 

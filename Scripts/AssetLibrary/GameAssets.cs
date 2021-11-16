@@ -1,4 +1,4 @@
-namespace Mech.Core.AssetLibrary
+namespace GameFoundation.Scripts.AssetLibrary
 
 {
     using System;
@@ -6,7 +6,7 @@ namespace Mech.Core.AssetLibrary
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using Mech.Core.ScreenFlow.Managers;
+    using GameFoundation.Scripts.ScreenFlow.Managers;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;

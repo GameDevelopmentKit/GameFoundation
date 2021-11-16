@@ -1,4 +1,4 @@
-namespace Mech.Services.Network.Websocket
+namespace GameFoundation.Scripts.Network.Websocket
 {
     using System.Threading.Tasks;
     using UniRx;

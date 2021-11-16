@@ -1,11 +1,10 @@
-namespace Mech.Core.ScreenFlow.BaseScreen.Presenter
+namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 {
     using Cysharp.Threading.Tasks;
-    using Mech.Core.MVP;
-    using Mech.Core.ScreenFlow.BaseScreen.Model;
-    using Mech.Core.ScreenFlow.BaseScreen.View;
-    using Mech.Core.ScreenFlow.Signals;
-    using Mech.Services;
+    using GameFoundation.Scripts.MVP;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Scripts.ScreenFlow.Signals;
+    using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
     using Zenject;
 

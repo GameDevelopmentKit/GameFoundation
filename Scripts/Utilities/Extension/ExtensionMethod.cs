@@ -1,11 +1,11 @@
-namespace Mech.Utils
+namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
-    using Mech.Core.AssetLibrary;
-    using Mech.Core.MVP;
-    using Mech.Core.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Scripts.AssetLibrary;
+    using GameFoundation.Scripts.MVP;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
     using UnityEngine;
     using UnityEngine.UI;
     using Zenject;

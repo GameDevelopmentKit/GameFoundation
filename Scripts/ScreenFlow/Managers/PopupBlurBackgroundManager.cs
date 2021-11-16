@@ -1,12 +1,12 @@
-namespace Mech.Core.ScreenFlow.Managers
+namespace GameFoundation.Scripts.ScreenFlow.Managers
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Reflection;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
+    using GameFoundation.Scripts.ScreenFlow.Signals;
     using LeTai.Asset.TranslucentImage;
-    using Mech.Core.ScreenFlow.BaseScreen.Presenter;
-    using Mech.Core.ScreenFlow.Signals;
     using UnityEngine;
     using UnityEngine.UI;
     using Zenject;

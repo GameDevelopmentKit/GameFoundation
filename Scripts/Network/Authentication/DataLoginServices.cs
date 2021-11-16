@@ -1,4 +1,4 @@
-namespace Mech.Scenes.LoadingScene.LoginScreen
+namespace GameFoundation.Scripts.Network.Authentication
 {
     using UniRx;
 

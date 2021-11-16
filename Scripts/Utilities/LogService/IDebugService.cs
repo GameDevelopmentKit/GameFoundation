@@ -1,4 +1,4 @@
-namespace Mech.Services
+namespace GameFoundation.Scripts.Utilities.LogService
 {
     using System;
     using UnityEngine;

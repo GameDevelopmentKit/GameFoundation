@@ -1,6 +1,6 @@
-namespace Mech.GameManager
+namespace GameFoundation.Scripts.GameManager
 {
-    using Mech.Scenes.LoadingScene.LoginScreen;
+    using GameFoundation.Scripts.Network.Authentication;
 
     /// <summary>
     /// Manage all the local data in Game

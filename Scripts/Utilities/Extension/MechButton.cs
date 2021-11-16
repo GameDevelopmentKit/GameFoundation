@@ -1,7 +1,6 @@
-using UnityEngine;
-
-namespace Mech
+namespace GameFoundation.Scripts.Utilities.Extension
 {
+    using UnityEngine;
     using UnityEngine.UI;
 
     public class MechButton : MonoBehaviour

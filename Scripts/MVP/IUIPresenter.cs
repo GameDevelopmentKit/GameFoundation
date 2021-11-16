@@ -1,7 +1,5 @@
-namespace Mech.Core.MVP
+namespace GameFoundation.Scripts.MVP
 {
-    using Cysharp.Threading.Tasks;
-
     /// <summary>
     /// Represent logic affect to views
     /// </summary>

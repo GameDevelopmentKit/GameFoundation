@@ -1,4 +1,4 @@
-namespace Mech.Services.Network.Authentication
+namespace GameFoundation.Scripts.Network.Authentication
 {
     using System;
     using System.Collections.Generic;
@@ -8,10 +8,7 @@ namespace Mech.Services.Network.Authentication
     using System.Security.Cryptography;
     using System.Text;
     using System.Threading;
-    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
-    using Mech.GameManager;
-    using Mech.Scenes.LoadingScene.LoginScreen;
     using Newtonsoft.Json;
     using UnityEngine;
 
@@ -143,7 +140,7 @@ namespace Mech.Services.Network.Authentication
                     Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
                     accesstoken = tokenEndpointDecoded["access_token"];
                     // Debug.Log(access_token);
-                    userinfoCall(accesstoken);
+                    this.userinfoCall(accesstoken);
                     return accesstoken;
                     // userinfoCall(access_token);
                 }

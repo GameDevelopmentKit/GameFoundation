@@ -1,4 +1,4 @@
-namespace Mech.Core.ScreenFlow.BaseScreen.Presenter
+namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 {
     using System;
 

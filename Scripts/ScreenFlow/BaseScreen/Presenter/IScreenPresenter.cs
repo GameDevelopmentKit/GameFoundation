@@ -1,9 +1,7 @@
-namespace Mech.Core.ScreenFlow.BaseScreen.Presenter
+namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 {
     using System;
-    using Mech.Core.MVP;
-    using Mech.Core.ScreenFlow.BaseScreen.Model;
-    using Mech.Core.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Scripts.MVP;
     using UnityEngine;
     using Zenject;
 

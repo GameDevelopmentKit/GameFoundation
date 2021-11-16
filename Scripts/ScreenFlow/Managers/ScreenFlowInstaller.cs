@@ -1,6 +1,6 @@
-namespace Mech.Core.ScreenFlow.Managers
+namespace GameFoundation.Scripts.ScreenFlow.Managers
 {
-    using Mech.Core.ScreenFlow.Signals;
+    using GameFoundation.Scripts.ScreenFlow.Signals;
     using Zenject;
 
     public class ScreenFlowInstaller: Installer<ScreenFlowInstaller>

@@ -1,4 +1,4 @@
-namespace Mech.Core.ScreenFlow.Utils
+namespace GameFoundation.Scripts.ScreenFlow.Utils
 {
     using UnityEngine;
     using UnityEngine.UI;

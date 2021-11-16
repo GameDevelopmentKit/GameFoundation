@@ -1,4 +1,4 @@
-namespace Mech.Core.MVP
+namespace GameFoundation.Scripts.MVP
 {
     /// <summary>
     /// represent the state of View

@@ -1,6 +1,7 @@
-namespace Mech.Utils
+namespace GameFoundation.Scripts.Utilities.Extension
 {
-    using Mech.Services;
+    using GameFoundation.Scripts.Utilities;
+    using GameFoundation.Scripts.Utilities.LogService;
     using TMPro;
     using UnityEngine;
     using Zenject;

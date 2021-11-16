@@ -1,6 +1,6 @@
-namespace Mech.Core.ScreenFlow.Signals
+namespace GameFoundation.Scripts.ScreenFlow.Signals
 {
-    using Mech.Core.ScreenFlow.BaseScreen.Presenter;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
 
     public class PopupShowedSignal
     {

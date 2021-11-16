@@ -1,8 +1,8 @@
-namespace Mech.Utils
+namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System.Linq;
-    using Mech.Core.ScreenFlow.BaseScreen.Presenter;
-    using Mech.Core.ScreenFlow.Signals;
+    using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
+    using GameFoundation.Scripts.ScreenFlow.Signals;
     using Zenject;
 
     public static class ZenjectUtils

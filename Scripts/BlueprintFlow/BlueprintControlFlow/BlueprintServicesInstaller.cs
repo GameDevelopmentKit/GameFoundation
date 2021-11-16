@@ -1,9 +1,8 @@
-namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
+namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 {
-    using Mech.Utils;
-    using MechSharingCode.Blueprints.BlueprintControlFlow;
+    using GameFoundation.Scripts.BlueprintFlow.Signals;
+    using GameFoundation.Scripts.Utilities.Extension;
     using MechSharingCode.Blueprints.BlueprintReader;
-    using MechSharingCode.Blueprints.Signals;
     using Zenject;
 
     /// <summary>

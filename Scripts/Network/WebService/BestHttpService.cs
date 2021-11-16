@@ -1,11 +1,12 @@
-namespace Mech.Services.Network.WebService
+namespace GameFoundation.Scripts.Network.WebService
 {
     using System;
     using System.IO;
     using System.Text;
     using BestHTTP;
     using Cysharp.Threading.Tasks;
-    using Mech.GameManager;
+    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.Utils;
     using MechSharingCode.WebService.Interface;
     using Newtonsoft.Json;
@@ -87,7 +88,7 @@ namespace Mech.Services.Network.WebService
         /// <param name="address">Download uri</param>
         /// <param name="filePath">output file path</param>
         /// <param name="onDownloadProgress">% of download will be presented through this</param>
-        public async UniTask Download(string address, string filePath, OnDownloadProgressDelegate onDownloadProgress)
+        public async UniTask Download(string address, string filePath, WebService.OnDownloadProgressDelegate onDownloadProgress)
         {
             filePath = this.GetDownloadPath(filePath);
 

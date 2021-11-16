@@ -1,4 +1,4 @@
-namespace Mech.Core.AssetLibrary
+namespace GameFoundation.Scripts.AssetLibrary
 {
     using UnityEngine;
     using UnityEngine.AddressableAssets;

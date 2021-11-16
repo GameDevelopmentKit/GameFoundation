@@ -1,10 +1,10 @@
-namespace Mech.Core.ScreenFlow.Managers
+namespace GameFoundation.Scripts.ScreenFlow.Managers
 {
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using Mech.Core.AssetLibrary;
-    using Mech.Core.ScreenFlow.Signals;
+    using GameFoundation.Scripts.AssetLibrary;
+    using GameFoundation.Scripts.ScreenFlow.Signals;
     using UnityEngine;
     using UnityEngine.SceneManagement;
     using Zenject;

@@ -1,4 +1,4 @@
-namespace Mech.Core.ScreenFlow.Signals
+namespace GameFoundation.Scripts.ScreenFlow.Signals
 {
     public class StartLoadingNewSceneSignal
     {

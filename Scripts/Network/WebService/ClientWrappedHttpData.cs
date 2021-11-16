@@ -1,4 +1,4 @@
-namespace Mech.Services.Network.WebService
+namespace GameFoundation.Scripts.Network.WebService
 {
     using System;
     using MechSharingCode.WebService;

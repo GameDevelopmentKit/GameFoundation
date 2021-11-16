@@ -1,12 +1,9 @@
-namespace Mech.Services.Network.Authentication
+namespace GameFoundation.Scripts.Network.Authentication
 {
-    using System;
     using System.IO;
     using System.Net;
-    using System.Security.Policy;
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    using Mech.Scenes.LoadingScene.LoginScreen;
     using Newtonsoft.Json;
     using UnityEngine;
 
@@ -33,7 +30,7 @@ namespace Mech.Services.Network.Authentication
         {
             this.DataLoginServices.Status.Value = AuthenticationStatus.Authenticating;
             // this.tokenSource = cancellationToken;
-            CancelHttp();
+            this.CancelHttp();
             //string redirectURI = string.Format("http://{0}:{1}/", IPAddress.Loopback, GetRandomUnusedPort());
             var redirectURI = "http://localhost:5000/";
             //Debug.Log("redirect URI: " + redirectURI);
@@ -60,14 +57,14 @@ namespace Mech.Services.Network.Authentication
             var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
             this.responseOutput      = response.OutputStream;
-            await responseOutput.WriteAsync(buffer, 0, buffer.Length, tokenSource.Token).ContinueWith((task) =>
+            await this.responseOutput.WriteAsync(buffer, 0, buffer.Length, tokenSource.Token).ContinueWith((task) =>
             {
-                responseOutput.Close();
+                this.responseOutput.Close();
                 this.Http.Stop();
                 // logger.Log("HTTP server stopped.");
             });
             this.AccessToken = context.Request.QueryString.Get("access_token");
-            userinfoCall(AccessToken);
+            this.userinfoCall(this.AccessToken);
             return this.AccessToken;
         }
 

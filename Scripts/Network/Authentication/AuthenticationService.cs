@@ -1,11 +1,11 @@
-namespace Mech.Services.Network.Authentication
+namespace GameFoundation.Scripts.Network.Authentication
 {
     using System;
     using System.Text;
     using BestHTTP;
     using Cysharp.Threading.Tasks;
-    using Mech.Scenes.LoadingScene.LoginScreen;
-    using Mech.Services.Network.WebService;
+    using GameFoundation.Scripts.Network.WebService;
+    using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.Utils;
     using MechSharingCode.WebService.Interface;
     using Newtonsoft.Json;

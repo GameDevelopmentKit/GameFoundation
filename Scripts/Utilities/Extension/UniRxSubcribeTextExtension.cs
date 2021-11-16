@@ -1,8 +1,8 @@
-namespace UniRx
+namespace GameFoundation.Scripts.Utilities.Extension
 {
-    
     using System;
     using TMPro;
+    using UniRx;
 
     /// <summary>
     /// Extension for UniRx, use for Subcribe with TextMeshProUGUI

@@ -1,10 +1,9 @@
-namespace MechSharingCode.Blueprints.BlueprintControlFlow
+namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 {
     using System;
     using System.Net;
     using System.Threading.Tasks;
-    using Mech.Core.BlueprintFlow.BlueprintControlFlow;
-    using Mech.Services;
+    using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;
 
     /// <summary>

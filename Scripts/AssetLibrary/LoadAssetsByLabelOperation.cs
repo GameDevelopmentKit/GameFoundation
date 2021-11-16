@@ -1,4 +1,4 @@
-﻿namespace Mech.Core.AssetLibrary
+﻿namespace GameFoundation.Scripts.AssetLibrary
 {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-namespace Mech.Utils
+namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System;
     using System.Collections.Generic;

@@ -1,7 +1,8 @@
-namespace Mech.Services.Network.WebService
+namespace GameFoundation.Scripts.Network.WebService
 {
     using System;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.WebService.Interface;
     using Zenject;
 

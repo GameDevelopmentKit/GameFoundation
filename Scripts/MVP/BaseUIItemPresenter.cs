@@ -1,8 +1,8 @@
-﻿namespace Mech.Core.MVP
+﻿namespace GameFoundation.Scripts.MVP
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using Mech.Core.AssetLibrary;
+    using GameFoundation.Scripts.AssetLibrary;
     using UnityEngine;
     using Zenject;
     using Object = UnityEngine.Object;

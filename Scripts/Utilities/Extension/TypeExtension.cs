@@ -1,7 +1,6 @@
-namespace Mech.Core.Utilities.Extension
+namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System;
-    using System.Linq;
 
     public static class TypeExtension
     {

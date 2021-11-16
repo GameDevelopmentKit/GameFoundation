@@ -1,4 +1,4 @@
-namespace Mech.Core.BlueprintFlow.BlueprintControlFlow
+namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 {
     using UnityEngine;
 
