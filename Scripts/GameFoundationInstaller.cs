@@ -1,5 +1,6 @@
 ﻿namespace GameFoundation.Scripts
 {
+    using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Models;
@@ -14,10 +15,15 @@
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
     {
+        public MasterAudio MasterAudio;
         public override void InstallBindings()
         {
             SignalBusInstaller.Install(this.Container);
 
+            //CreateMasterAudio
+            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsSingle().NonLazy();
+            this.Container.Bind<IMechSoundManager>().To<MasterMechSoundManager>().AsSingle().NonLazy();            
+            
             //Localization services
             this.Container.Bind<LocalizationService>().AsCached().NonLazy();
 

@@ -3,7 +3,9 @@
     "rootNamespace": "",
     "references": [
         "Unity.TextMeshPro",
-        "MessagePack.Annotations"
+        "MessagePack.Annotations",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
