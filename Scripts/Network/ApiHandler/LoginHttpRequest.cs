@@ -1,4 +1,4 @@
-﻿namespace Mech.Network.HttpRequest
+﻿namespace GameFoundation.Scripts.Network.ApiHandler
 {
     using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Models;

@@ -15,7 +15,6 @@
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
     {
-        public MasterAudio MasterAudio;
         public override void InstallBindings()
         {
             SignalBusInstaller.Install(this.Container);
