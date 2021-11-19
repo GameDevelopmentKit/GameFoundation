@@ -7,7 +7,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
     {
         public override void InstallBindings()
         {
-            this.Container.Bind<SceneDirector>().AsSingle().NonLazy();
+            this.Container.Bind<SceneDirector>().AsCached();
             this.Container.BindInterfacesAndSelfTo<ScreenManager>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
             this.Container.DeclareSignal<StartLoadingNewSceneSignal>();
             this.Container.DeclareSignal<FinishLoadingNewSceneSignal>();
