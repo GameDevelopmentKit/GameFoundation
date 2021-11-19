@@ -12,6 +12,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
     public static class SceneName
     {
         public const string Loading        = "LoadingScene";
+        public const string Login          = "LoginScene";
+        public const string AR             = "MechaAR";
         public const string Main           = "MainScene";
         public const string Battle         = "BattleScene";
         public const string BattleEnvScene = "BattleEnvScene";
@@ -22,7 +24,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
     public class SceneDirector
     {
         private readonly SignalBus signalBus;
-        public static    string    CurrentSceneName = SceneName.Splash;
+        public static    string    CurrentSceneName = SceneName.Loading;
         public SceneDirector(SignalBus signalBus) { this.signalBus = signalBus; }
 
         /// <summary>Load scene async by name </summary>
@@ -70,6 +72,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         #region shortcut
 
         public async void LoadLoadingScene() => await this.LoadSingleSceneAsync(SceneName.Loading);
+        public async void LoadLoginScene()   => await this.LoadSingleSceneAsync(SceneName.Login);
+        public async void LoadARScene()      => await this.LoadSingleSceneAsync(SceneName.AR);
         public async void LoadMainScene()    => await this.LoadSingleSceneAsync(SceneName.Main);
         public async void LoadBattleScene()  { await this.LoadMultipleSceneAsync(SceneName.Battle, SceneName.BattleEnvScene); }
 
