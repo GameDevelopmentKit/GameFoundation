@@ -123,7 +123,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             var bpAttribute = blueprintReader.GetCustomAttribute<BlueprintReaderAttribute>();
             if (bpAttribute != null)
             {
-                if (bpAttribute.Ignore) return;
+                if (bpAttribute.BlueprintScope == BlueprintScope.Server) return;
 
                 // Try to load a raw blueprint file from local or resource folder
                 string rawCsv;
