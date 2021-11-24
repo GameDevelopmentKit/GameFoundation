@@ -10,7 +10,7 @@ namespace GameFoundation.Scripts.Network
         public override void InstallBindings()
         {
             // Network services
-            this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments("http://10.2.57.35:5000/api");
+            this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments("https://dev-game.mechmaster.io/api");
 
             // //TODO move this into BestHttpService instead of separate them
             this.Container.Bind<NetworkConfig>().AsSingle().NonLazy();
