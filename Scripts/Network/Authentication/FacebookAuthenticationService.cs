@@ -12,7 +12,7 @@ namespace GameFoundation.Scripts.Network.Authentication
     {
         private       Stream                  responseOutput;
         private const string                  AppId       = "1017989705439878";
-        private const string                  RedirectUrl = "https://auth.mechmaster.io/api/callback";
+        private const string                  RedirectUrl = "https://dev-auth.mechmaster.io/api/callback";
         private       CancellationTokenSource tokenSource;
 
         private const string FacebookGraphApi =
