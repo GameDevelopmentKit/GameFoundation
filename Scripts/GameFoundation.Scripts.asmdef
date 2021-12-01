@@ -10,7 +10,8 @@
         "BlueprintReader",
         "UniRx",
         "Unity.TextMeshPro",
-        "MechSharingCode"
+        "MechSharingCode",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
