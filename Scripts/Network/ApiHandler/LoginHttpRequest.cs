@@ -49,10 +49,14 @@
                     this.mechPlayerState.PlayerData.Name   = this.localData.UserDataLogin.GoogleLogin.UserName;
                     this.mechPlayerState.PlayerData.Avatar = this.localData.UserDataLogin.GoogleLogin.URLImage;
                     break;
+                case TypeLogIn.OTPCode:
+                    this.localData.UserDataLogin.LastLogin = TypeLogIn.OTPCode;
+                    this.mechPlayerState.PlayerData.Name   = "";
+                    this.mechPlayerState.PlayerData.Avatar = "";
+                    break;
                 case TypeLogIn.None:
                     break;
             }
-
             this.handleLocalDataServices.SaveLocalDataToString(this.localData);
             this.dataLoginServices.Status.Value = AuthenticationStatus.Authenticated;
         }
@@ -69,6 +73,9 @@
                     break;
                 case 3:
                     this.dataLoginServices.Status.Value = AuthenticationStatus.FailWithRefreshToken;
+                    break;
+                case 4:
+                    this.dataLoginServices.Status.Value = AuthenticationStatus.FailWithInvalidOTP;
                     break;
                 default:
                     base.ErrorProcess(statusCode);
