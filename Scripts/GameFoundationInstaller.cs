@@ -31,7 +31,7 @@
 
             //Game Manager
             this.Container.Bind<HandleLocalDataServices>().AsSingle().NonLazy();
-            this.Container.Bind<GameFoundationLocalData>().FromResolveGetter<HandleLocalDataServices>(services => services.LoadModel<GameFoundationLocalData>()).AsCached();
+            this.Container.Bind<GameFoundationLocalData>().FromResolveGetter<HandleLocalDataServices>(services => services.Load<GameFoundationLocalData>()).AsCached();
 
             //Player state
             this.Container.Bind<PlayerState>().AsCached();

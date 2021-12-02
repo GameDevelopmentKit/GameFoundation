@@ -57,7 +57,8 @@
                 case TypeLogIn.None:
                     break;
             }
-            this.handleLocalDataServices.SaveLocalDataToString(this.localData);
+
+            this.handleLocalDataServices.Save(this.localData);
             this.dataLoginServices.Status.Value = AuthenticationStatus.Authenticated;
         }
 

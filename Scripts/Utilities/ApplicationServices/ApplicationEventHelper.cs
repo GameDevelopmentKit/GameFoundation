@@ -19,13 +19,13 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
             // save local data to storage
             if (pauseStatus)
             {
-                this.localDataServices.SaveLocalDataToString(this.localData, true);
+                this.localDataServices.StoreAllToLocal();
             }
         }
 
         private void OnApplicationQuit()
         {
-            this.localDataServices.SaveLocalDataToString(this.localData, true);
+            this.localDataServices.StoreAllToLocal();
         }
     }
 }

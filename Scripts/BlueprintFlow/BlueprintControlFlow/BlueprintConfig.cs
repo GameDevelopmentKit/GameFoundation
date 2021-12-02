@@ -7,12 +7,12 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     /// </summary>
     public static class BlueprintConfig
     {
-        public static string CurrentBlueprintVersion = "v1.0";
+        public static string CurrentBlueprintVersion = Application.version;
 
         public static readonly string PersistentDataPath         = Application.persistentDataPath;
         public static readonly string BlueprintZipFilepathFormat = $"{PersistentDataPath}/{BlueprintZipFilename}";
 
-        public const string BlueprintZipFilename = "Blueprints_{0}.zip";
+        public const string BlueprintZipFilename = "Blueprints_v{0}.zip";
         public static string BlueprintZipFilepath
 #if TEST_BLUEPRINT
             => "Assets/Resources/BlueprintData/Blueprints_v1.0.zip";

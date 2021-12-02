@@ -54,7 +54,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                 });
 
                 this.localData.BlueprintModel.BlueprintDownloadUrl = signal.Url;
-                this.handleLocalDataServices.SaveLocalDataToFile();
+                this.handleLocalDataServices.Save(this.localData,true);
             }
 
             // Unzip file to memory

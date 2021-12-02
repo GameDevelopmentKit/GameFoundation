@@ -1,6 +1,6 @@
 namespace GameFoundation.Scripts.GameManager
 {
-    using GameFoundation.Scripts.Utilities.LogService;
+    using System.Collections.Generic;
     using Newtonsoft.Json;
     using UnityEngine;
 
@@ -9,37 +9,60 @@ namespace GameFoundation.Scripts.GameManager
     /// </summary>
     public class HandleLocalDataServices
     {
-        private readonly ILogService logger;
-        public HandleLocalDataServices(ILogService logger) { this.logger = logger; }
+        private const string LocalDataPrefix = "LD-";
 
-        public void SaveLocalDataToString<T>(T data, bool saveToFile = false)
+        private Dictionary<string, object> localDataCaches = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Save a class data to local
+        /// </summary>
+        /// <param name="data">class data</param>
+        /// <param name="force"> if true, save data immediately to local</param>
+        /// <typeparam name="T"> type of class</typeparam>
+        public void Save<T>(T data, bool force = false) where T : class
         {
-            var json = JsonConvert.SerializeObject(data);
-            PlayerPrefs.SetString(typeof(T).Name, json);
-            if (saveToFile)
+            var key = LocalDataPrefix + typeof(T).Name;
+            if (!this.localDataCaches.ContainsKey(key))
             {
-                this.SaveLocalDataToFile();
+                this.localDataCaches.Add(key, data);
             }
 
-            this.logger.Log("Save " + typeof(T).Name + ": " + json);
+            if (force)
+            {
+                var json = JsonConvert.SerializeObject(data);
+                PlayerPrefs.SetString(key, json);
+                Debug.Log("Save " + key + ": " + json);
+                PlayerPrefs.Save();
+            }
         }
 
-        //Load Any model
-        public T LoadModel<T>() where T : new()
+        /// <summary>
+        /// Load data from local
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T Load<T>() where T : class, new()
         {
-            var json = PlayerPrefs.GetString(typeof(T).Name);
-            var data = JsonConvert.DeserializeObject<T>(json);
-            if (string.IsNullOrEmpty(json))
-                data = new T();
-            return data;
+            var key = LocalDataPrefix + typeof(T).Name;
+            if (this.localDataCaches.TryGetValue(key, out var cache))
+            {
+                return (T)cache;
+            }
+
+            var json   = PlayerPrefs.GetString(key);
+            var result = string.IsNullOrEmpty(json) ? new T() : JsonConvert.DeserializeObject<T>(json);
+            this.localDataCaches.Add(key, result);
+            return result;
         }
 
-        public void SaveLocalDataToFile()
+        public void StoreAllToLocal()
         {
+            foreach (var localData in this.localDataCaches)
+            {
+                PlayerPrefs.SetString(localData.Key, JsonConvert.SerializeObject(localData.Value));
+            }
             PlayerPrefs.Save();
-            this.logger.Log("Save Data To File");
+            Debug.Log("Save Data To File");
         }
-        
-        public string GetKey<T>(){ return PlayerPrefs.GetString(typeof(T).Name); }
     }
 }
