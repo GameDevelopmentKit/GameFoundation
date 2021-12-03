@@ -101,8 +101,9 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                 return UniTask.CompletedTask;
             }
 
-            var listReadTask = new List<UniTask>();
-            foreach (var blueprintType in ReflectionUtils.GetAllDerivedTypes<IGenericBlueprint>())
+            var listReadTask    = new List<UniTask>();
+            var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprint>();
+            foreach (var blueprintType in allDerivedTypes)
             {
                 var blueprintInstance = (IGenericBlueprint)this.diContainer.Resolve(blueprintType);
                 if (blueprintInstance != null)
