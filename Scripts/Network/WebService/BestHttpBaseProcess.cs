@@ -5,8 +5,8 @@
     using BestHTTP;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Utilities.LogService;
+    using MechSharingCode.WebService;
     using MechSharingCode.WebService.Interface;
-    using MechSharingCode.WebService.Models.Base;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Zenject;
