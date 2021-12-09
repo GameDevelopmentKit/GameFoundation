@@ -1,10 +1,10 @@
-using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace I2.Loc
 {
+	using System.Collections.Generic;
+	using System.Linq;
+	using UnityEditor;
+	using UnityEngine;
+
 	public partial class LocalizationEditor
 	{
 		#region Variables
@@ -12,7 +12,7 @@ namespace I2.Loc
 		private Dictionary<string, TranslationQuery> mTranslationRequests = new Dictionary<string, TranslationQuery> ();
         private bool mAppNameTerm_Expanded;
 
-        private List<string> mLanguageCodePopupList = null;
+        private List<string> mLanguageCodePopupList;
 
 		#endregion
 
@@ -54,7 +54,8 @@ namespace I2.Loc
 				GUILayout.BeginVertical();
 					GUILayout.Space(7);
 
-            mProp_IgnoreDeviceLanguage.boolValue = EditorGUILayout.Popup(mProp_IgnoreDeviceLanguage.boolValue?1:0, new string[]{"Device Language", "First in List"+firstLanguage}, GUILayout.ExpandWidth(true))==1;
+					this.mProp_IgnoreDeviceLanguage.boolValue = EditorGUILayout.Popup(this.mProp_IgnoreDeviceLanguage.boolValue ? 1 : 0, new[] { "Device Language", "First in List" + firstLanguage },
+						GUILayout.ExpandWidth(true)) == 1;
 				GUILayout.EndVertical();
 			GUILayout.EndHorizontal();
         }
@@ -139,7 +140,7 @@ namespace I2.Loc
 
                 GUILayout.EndHorizontal();
 
-				GUI.enabled = (i<imax-1);
+                GUI.enabled = i < imax - 1;
 				if (GUILayout.Button( "\u25BC", EditorStyles.toolbarButton, GUILayout.Width(18))) LanguageToMoveDown = i;
 				GUI.enabled = i>0;
 				if (GUILayout.Button( "\u25B2", EditorStyles.toolbarButton, GUILayout.Width(18))) LanguageToMoveUp = i;
@@ -178,7 +179,7 @@ namespace I2.Loc
 			if (mConnection_WWW!=null || mConnection_Text.Contains("Translating"))
 			{
 				// Connection Status Bar
-				int time = (int)((Time.realtimeSinceStartup % 2) * 2.5);
+				var    time    = (int)(Time.realtimeSinceStartup % 2 * 2.5);
 				string Loading = mConnection_Text + ".....".Substring(0, time);
 				GUI.color = Color.gray;
 				GUILayout.BeginHorizontal(LocalizeInspector.GUIStyle_OldTextArea);
@@ -393,7 +394,7 @@ namespace I2.Loc
             {
                 foreach (var term in mTranslationTerms)
                 {
-                    var termData = mLanguageSource.GetTermData(term, false);
+	                var termData = mLanguageSource.GetTermData(term);
                     if (termData == null)
                         continue;
                     if (termData.TermType != eTermType.Text)

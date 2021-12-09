@@ -1,11 +1,12 @@
-﻿using UnityEditor;
-using UnityEditorInternal;
-using UnityEngine;
-using System.Collections.Generic;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-	#if !UNITY_5_0 && !UNITY_5_1
+	using System;
+	using System.Collections.Generic;
+	using UnityEditor;
+	using UnityEditorInternal;
+	using UnityEngine;
+
+#if !UNITY_5_0 && !UNITY_5_1
 
 	[CustomEditor(typeof(LocalizeDropdown))]
 	public class LocalizeDropdownInspector : Editor
@@ -34,7 +35,7 @@ namespace I2.Loc
 		{
 			serializedObject.ApplyModifiedProperties();
 
-			var objParams = (target as LocalizeDropdown);
+			var objParams = this.target as LocalizeDropdown;
 			objParams._Terms.Add(string.Empty);
 
 			list.index = objParams._Terms.Count - 1;
@@ -48,7 +49,7 @@ namespace I2.Loc
 				return;
 			serializedObject.ApplyModifiedProperties();
 
-			var objParams = (target as LocalizeDropdown);
+			var objParams = this.target as LocalizeDropdown;
 			objParams._Terms.RemoveAt(list.index);
 
 			serializedObject.Update();
@@ -65,9 +66,8 @@ namespace I2.Loc
 
 			EditorGUI.BeginChangeCheck ();
 
-			var prvIndex =  (serializedElement.stringValue == "-" || serializedElement.stringValue == "" ? terms.Count - 1 : 
-							(serializedElement.stringValue == " " ? terms.Count - 2 : 
-							terms.IndexOf(serializedElement.stringValue)));
+			var prvIndex = serializedElement.stringValue == "-" || serializedElement.stringValue == "" ? this.terms.Count - 1 :
+				serializedElement.stringValue == " "                                                   ? this.terms.Count - 2 : this.terms.IndexOf(serializedElement.stringValue);
 
 			var newIndex = EditorGUI.Popup(rect, prvIndex, terms.ToArray());
 
@@ -96,7 +96,7 @@ namespace I2.Loc
 				serializedObject.UpdateIfDirtyOrScript();
 			#endif
 			terms =  LocalizationManager.GetTermsList ();
-			terms.Sort(System.StringComparer.OrdinalIgnoreCase);
+			this.terms.Sort(StringComparer.OrdinalIgnoreCase);
 			terms.Add("");
 			terms.Add("<inferred from text>");
 			terms.Add("<none>");

@@ -2,17 +2,19 @@
 //#define NGUI
 //#define DFGUI
 
-using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Reflection;
+	using UnityEditor;
+	using UnityEngine;
+	using Object = UnityEngine.Object;
+
 	[CustomEditor(typeof(Localize))]
 	[CanEditMultipleObjects]
-	public partial class LocalizeInspector : Editor
+	public class LocalizeInspector : Editor
 	{
 		#region Variables
 
@@ -23,10 +25,10 @@ namespace I2.Loc
                             mProp_CallbackEvent;
 
 
-		bool mAllowEditKeyName = false;
-		string mNewKeyName = "";
+		private bool mAllowEditKeyName;
+		string       mNewKeyName = "";
 
-		string[] mTermsArray = null;
+		private string[] mTermsArray;
 
 
 		public static string HelpURL_forum 			= "http://goo.gl/Uiyu8C";//http://www.inter-illusion.com/forum/i2-localization";
@@ -183,15 +185,15 @@ namespace I2.Loc
 
 			GUILayout.Space (10);
 
-			GUITools.OnGUI_Footer("I2 Localization", LocalizationManager.GetVersion(), HelpURL_forum, HelpURL_Documentation, LocalizeInspector.HelpURL_AssetStore);
+			GUITools.OnGUI_Footer("I2 Localization", LocalizationManager.GetVersion(), HelpURL_forum, HelpURL_Documentation, HelpURL_AssetStore);
 
 			//GUILayout.EndVertical();
 
 			serializedObject.ApplyModifiedProperties();
             if (Event.current.type == EventType.Repaint)
             {
-                LocalizationEditor.mTestAction = LocalizationEditor.eTest_ActionType.None;
-                LocalizationEditor.mTestActionArg = null;
+                LocalizationEditor.mTestAction     = LocalizationEditor.eTest_ActionType.None;
+                LocalizationEditor.mTestActionArg  = null;
                 LocalizationEditor.mTestActionArg2 = null;
             }
         }
@@ -208,10 +210,10 @@ namespace I2.Loc
 
                 bool canTest = Event.current.type == EventType.Repaint;
 
-                var testAddObj = (canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Add) ? (Object)LocalizationEditor.mTestActionArg : null;
-                var testReplaceIndx = (canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Replace) ? (int)LocalizationEditor.mTestActionArg : -1;
-                var testReplaceObj = (canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Replace) ? (Object)LocalizationEditor.mTestActionArg2 : null;
-                var testDeleteIndx = (canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Delete) ? (int)LocalizationEditor.mTestActionArg : -1;
+                var testAddObj      = canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Add ? (Object)LocalizationEditor.mTestActionArg : null;
+                var testReplaceIndx = canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Replace ? (int)LocalizationEditor.mTestActionArg : -1;
+                var testReplaceObj  = canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Replace ? (Object)LocalizationEditor.mTestActionArg2 : null;
+                var testDeleteIndx  = canTest && LocalizationEditor.mTestAction == LocalizationEditor.eTest_ActionType.Button_Assets_Delete ? (int)LocalizationEditor.mTestActionArg : -1;
 
                 bool changed = GUITools.DrawObjectsArray( mProp_TranslatedObjects, false, false, true, testAddObj, testReplaceObj, testReplaceIndx, testDeleteIndx);
                 if (changed)
@@ -251,21 +253,21 @@ namespace I2.Loc
 
         #region Terms
 
-        int GUI_SelectedTerm = 0;
+        private int GUI_SelectedTerm;
 		void OnGUI_Terms()
 		{
-			if ((mLocalize.mGUI_ShowTems=GUITools.DrawHeader ("Terms", mLocalize.mGUI_ShowTems))==true)
+			if (this.mLocalize.mGUI_ShowTems = GUITools.DrawHeader("Terms", this.mLocalize.mGUI_ShowTems))
 			{
 				//--[ tabs: Main and Secondary Terms ]----------------
 				int oldTab = GUI_SelectedTerm;
 				if (mLocalize.mLocalizeTarget!=null && mLocalize.mLocalizeTarget.CanUseSecondaryTerm())
 				{
-					GUI_SelectedTerm = GUITools.DrawTabs (GUI_SelectedTerm, new string[]{"Main", "Secondary"});
+					this.GUI_SelectedTerm = GUITools.DrawTabs(this.GUI_SelectedTerm, new[] { "Main", "Secondary" });
 				}
 				else
 				{
 					GUI_SelectedTerm = 0;
-					GUITools.DrawTabs (GUI_SelectedTerm, new string[]{"Main", ""});
+					GUITools.DrawTabs(this.GUI_SelectedTerm, new[] { "Main", "" });
 				}
 
 				GUITools.BeginContents();
@@ -294,13 +296,14 @@ namespace I2.Loc
 							if (targets != null)
 							{
 								foreach (var t in targets)
-									if ((t as Localize) != null)
+									if (t as Localize != null)
 										(t as Localize).OnLocalize(true);
 							}
 						};
 					}
                     EditorGUI.BeginChangeCheck();
-                    int val = EditorGUILayout.Popup("Modifier", GUI_SelectedTerm == 0 ? (int)mLocalize.PrimaryTermModifier : (int)mLocalize.SecondaryTermModifier, System.Enum.GetNames(typeof(Localize.TermModification)));
+                    var val = EditorGUILayout.Popup("Modifier", this.GUI_SelectedTerm == 0 ? (int)this.mLocalize.PrimaryTermModifier : (int)this.mLocalize.SecondaryTermModifier,
+	                    Enum.GetNames(typeof(Localize.TermModification)));
                     if (EditorGUI.EndChangeCheck())
                     {
                         serializedObject.FindProperty(GUI_SelectedTerm == 0 ? "PrimaryTermModifier" : "SecondaryTermModifier").enumValueIndex = val;
@@ -393,7 +396,7 @@ namespace I2.Loc
 			if (OnOpen) mNewKeyName = Key;
 			if ( OnGUI_SelectKey( ref Key, string.IsNullOrEmpty(mLocalize.mTerm)))
 				mProp_mTerm.stringValue = Key;
-			return LocalizationEditor.OnGUI_Keys_Languages( Key, mLocalize, true );
+			return LocalizationEditor.OnGUI_Keys_Languages(Key, this.mLocalize);
 		}
 
         TermData OnGUI_SecondaryTerm( bool OnOpen )
@@ -426,13 +429,13 @@ namespace I2.Loc
 
 			bool bChanged = false;
 
-			if (mTermsArray==null || (Term!="-" && System.Array.IndexOf(mTermsArray, Term)<0))
+			if (this.mTermsArray == null || Term != "-" && Array.IndexOf(this.mTermsArray, Term) < 0)
 				UpdateTermsList(Term);
 
 			if (Inherited)
 				GUI.contentColor = Color.Lerp (Color.gray, Color.yellow, 0.1f);
 
-			int Index = (Term=="-" || Term=="") ? mTermsArray.Length-1 : System.Array.IndexOf( mTermsArray, Term );
+			var Index = Term == "-" || Term == "" ? this.mTermsArray.Length - 1 : Array.IndexOf(this.mTermsArray, Term);
 
 			GUI.changed = false;
 
@@ -503,8 +506,8 @@ namespace I2.Loc
 				string ValidatedName = mNewKeyName;
 				LanguageSourceData.ValidateFullTerm( ref ValidatedName );
 
-				bool CanUseNewName = (source.GetTermData(ValidatedName)==null);
-				GUI.enabled = (!string.IsNullOrEmpty(mNewKeyName) && CanUseNewName);
+				var CanUseNewName = source.GetTermData(ValidatedName) == null;
+				GUI.enabled = !string.IsNullOrEmpty(this.mNewKeyName) && CanUseNewName;
 				if (GUILayout.Button ("Create", EditorStyles.toolbarButton, GUILayout.ExpandWidth(false)))
 				{
 					mNewKeyName = ValidatedName;
@@ -528,17 +531,18 @@ namespace I2.Loc
 					bChanged = true;
 					GUIUtility.keyboardControl = 0;
 				}
-				GUI.enabled = (termData!=null && !string.IsNullOrEmpty(mNewKeyName) && CanUseNewName);
+
+				GUI.enabled = termData != null && !string.IsNullOrEmpty(this.mNewKeyName) && CanUseNewName;
 				if (GUILayout.Button (new GUIContent("Rename","Renames the term in the source and updates every object using it in the current scene"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false)))
 				{
-					mNewKeyName = ValidatedName;
-					Term = mNewKeyName;
-					mTermsArray=null;     // this recreates that terms array
-					mAllowEditKeyName = false;
-					bChanged = true;
-					LocalizationEditor.TermReplacements = new Dictionary<string, string>(System.StringComparer.Ordinal);
+					mNewKeyName                                          = ValidatedName;
+					Term                                                 = mNewKeyName;
+					mTermsArray                                          = null;     // this recreates that terms array
+					mAllowEditKeyName                                    = false;
+					bChanged                                             = true;
+					LocalizationEditor.TermReplacements                  = new Dictionary<string, string>(StringComparer.Ordinal);
 					LocalizationEditor.TermReplacements[ termData.Term ] = mNewKeyName;
-					termData.Term = mNewKeyName;
+					termData.Term                                        = mNewKeyName;
 					source.UpdateDictionary(true);
 					LocalizationEditor.ReplaceTermsInCurrentScene();
 					GUIUtility.keyboardControl = 0;
@@ -571,7 +575,7 @@ namespace I2.Loc
 			if (!string.IsNullOrEmpty(currentTerm) && currentTerm!="-" && !Terms.Contains(currentTerm))
 				Terms.Add (currentTerm);
 
-			Terms.Sort(System.StringComparer.OrdinalIgnoreCase);
+			Terms.Sort(StringComparer.OrdinalIgnoreCase);
 			Terms.Add("");
             if (mLocalize.Source != null)
             {
@@ -598,7 +602,7 @@ namespace I2.Loc
 
 			bool bChanged = false;
 			GUI.backgroundColor = Color.gray;
-			GUILayout.BeginVertical (LocalizeInspector.GUIStyle_OldTextArea);
+			GUILayout.BeginVertical(GUIStyle_OldTextArea);
 			for (int i = 0, imax = Mathf.Min (nTerms, 3); i < imax; ++i) 
 			{
 				ParsedTerm parsedTerm;
@@ -712,7 +716,7 @@ namespace I2.Loc
 
 				if (GUILayout.Button("Open Source", EditorStyles.toolbarButton, GUILayout.Width (100)))
 				{
-					Selection.activeObject = currentSource as UnityEngine.Object;
+					Selection.activeObject = currentSource as Object;
 
 					string sTerm, sSecondary;
 					mLocalize.GetFinalTerms( out sTerm, out sSecondary );
@@ -733,7 +737,7 @@ namespace I2.Loc
 					if (EditorGUI.EndChangeCheck())
 					{
                         ILanguageSource NewSource = obj as ILanguageSource;
-                        if (NewSource == null && (obj as GameObject != null))
+                        if (NewSource == null && obj as GameObject != null)
                         {
                             NewSource = (obj as GameObject).GetComponent<LanguageSource>();
                         }

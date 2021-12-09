@@ -1,8 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System.Collections;
+	using UnityEditor;
+	using UnityEngine;
+
 	// This class is used to spawn coroutines from outside of MonoBehaviors
 	public class CoroutineManager : MonoBehaviour 
 	{
@@ -35,13 +36,13 @@ namespace I2.Loc
 				// Special case to allow coroutines to run in the Editor
 				if (!Application.isPlaying)
 				{
-					UnityEditor.EditorApplication.CallbackFunction delg=null;
-					delg = delegate () 
+					EditorApplication.CallbackFunction delg = null;
+					delg = delegate
 					{
 						if (!coroutine.MoveNext())
-							UnityEditor.EditorApplication.update -= delg;
+							EditorApplication.update -= delg;
 					};
-					UnityEditor.EditorApplication.update += delg;
+					EditorApplication.update += delg;
 					return null;
 				}
 			#endif

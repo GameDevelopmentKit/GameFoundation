@@ -1,17 +1,23 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.Globalization;
-using System.Collections;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
+    using UnityEngine;
+    using Object = UnityEngine.Object;
+
     public static partial class LocalizationManager
     {
         #region Variables: Misc
 
         public static List<ILocalizationParamsManager> ParamManagers = new List<ILocalizationParamsManager>();
+
+
+        // returns true if this replaces the normal ApplyLocalizationParams
+        // returns false if after running this function the manager should also run the default ApplyLocalizationParams to replace parameters 
+        public delegate bool FnCustomApplyLocalizationParams(ref string translation, _GetParam getParam, bool allowLocalizedParameters);
+
+        public static FnCustomApplyLocalizationParams CustomApplyLocalizationParams;
         #endregion
 
         #region Parameters
@@ -32,18 +38,19 @@ namespace I2.Loc
 
         public static void ApplyLocalizationParams(ref string translation, bool allowLocalizedParameters = true)
         {
-            ApplyLocalizationParams(ref translation, (p) => GetLocalizationParam(p, null), allowLocalizedParameters);
+            ApplyLocalizationParams(ref translation, p => GetLocalizationParam(p, null), allowLocalizedParameters);
         }
 
 
         public static void ApplyLocalizationParams(ref string translation, GameObject root, bool allowLocalizedParameters = true)
         {
-            ApplyLocalizationParams(ref translation, (p) => GetLocalizationParam(p, root), allowLocalizedParameters);
+            ApplyLocalizationParams(ref translation, p => GetLocalizationParam(p, root), allowLocalizedParameters);
         }
 
         public static void ApplyLocalizationParams(ref string translation, Dictionary<string, object> parameters, bool allowLocalizedParameters = true)
         {
-            ApplyLocalizationParams(ref translation, (p) => {
+            ApplyLocalizationParams(ref translation, p =>
+            {
                     object o = null;
                     if (parameters.TryGetValue(p, out o))
                         return o;
@@ -57,6 +64,9 @@ namespace I2.Loc
             if (translation == null)
                 return;
 
+            var skip_processing = CustomApplyLocalizationParams != null && CustomApplyLocalizationParams.Invoke(ref translation, getParam, allowLocalizedParameters);
+            if (skip_processing) return;
+            
             string pluralType=null;
             int idx0 = 0;
             int idx1 = translation.Length;
@@ -64,14 +74,14 @@ namespace I2.Loc
             int index = 0;
             while (index>=0 && index<translation.Length)
             {
-                int iParamStart = translation.IndexOf("{[", index);
+                var iParamStart = translation.IndexOf("{[", index, StringComparison.Ordinal);
                 if (iParamStart < 0) break;
 
-                int iParamEnd = translation.IndexOf("]}", iParamStart);
+                var iParamEnd = translation.IndexOf("]}", iParamStart, StringComparison.Ordinal);
                 if (iParamEnd < 0) break;
 
                 // there is a sub param, so, skip this one:   "this {[helo{[hi]} end"
-                int isubParam = translation.IndexOf("{[", iParamStart+1);
+                var isubParam = translation.IndexOf("{[", iParamStart + 1, StringComparison.Ordinal);
                 if (isubParam>0 && isubParam<iParamEnd)
                 {
                     index = isubParam;
@@ -88,10 +98,10 @@ namespace I2.Loc
                     {
                         // check if Param is Localized
                         LanguageSourceData source;
-                        var termData = LocalizationManager.GetTermData(result, out source);
+                        var                termData = GetTermData(result, out source);
                         if (termData != null)
                         {
-                            int idx = source.GetLanguageIndex(LocalizationManager.CurrentLanguage);
+                            var idx = source.GetLanguageIndex(CurrentLanguage);
                             if (idx >= 0)
                             {
                                 result = termData.GetTranslation(idx);
@@ -119,11 +129,11 @@ namespace I2.Loc
             if (pluralType != null)
             {
                 var tag = "[i2p_" + pluralType + "]";
-                idx0 = translation.IndexOf(tag, System.StringComparison.OrdinalIgnoreCase);
+                idx0 = translation.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
                 if (idx0 < 0) idx0 = 0;
                 else idx0 += tag.Length;
 
-                idx1 = translation.IndexOf("[i2p_", idx0 + 1, System.StringComparison.OrdinalIgnoreCase);
+                idx1 = translation.IndexOf("[i2p_", idx0 + 1, StringComparison.OrdinalIgnoreCase);
                 if (idx1 < 0) idx1 = translation.Length;
 
                 translation = translation.Substring(idx0, idx1 - idx0);

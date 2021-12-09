@@ -1,9 +1,10 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System;
+	using System.IO;
+	using UnityEditor;
+	using UnityEngine;
+
 	public partial class LocalizationEditor
 	{
 		void OnGUI_Warning_SourceInScene()
@@ -145,11 +146,11 @@ Do you want the plugin to automatically move the LanguageSource to a folder outs
 			string pluginPath = UpgradeManager.GetI2LocalizationPath();
 			string assetPath = AssetDatabase.GetAssetPath(mLanguageSource.ownerObject);
 
-			string I2Path = pluginPath.Substring(0, pluginPath.Length-"/Localization".Length);
-			string newPath = I2Path + "/Resources/" + (mLanguageSource.ownerObject).name + ".prefab";
+			string I2Path  = pluginPath.Substring(0, pluginPath.Length-"/Localization".Length);
+			var    newPath = I2Path + "/Resources/" + mLanguageSource.ownerObject.name + ".prefab";
 
 			string fullresFolder = Application.dataPath + I2Path.Replace("Assets","") + "/Resources";
-			bool folderExists = System.IO.Directory.Exists (fullresFolder);
+			var    folderExists  = Directory.Exists(fullresFolder);
 			
 			if (!folderExists)
 				AssetDatabase.CreateFolder(I2Path, "Resources");

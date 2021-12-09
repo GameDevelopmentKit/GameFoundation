@@ -1,14 +1,12 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using UnityEngine.Networking;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-	using TranslationDictionary = Dictionary<string, TranslationQuery>;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using UnityEngine.Networking;
+    using TranslationDictionary = System.Collections.Generic.Dictionary<string, TranslationQuery>;
 
 
 	public static partial class GoogleTranslation
@@ -64,7 +62,7 @@ namespace I2.Loc
                 }
                 sb.Append("=");
 
-                var text = (TitleCase(request.Text) == request.Text) ? request.Text.ToLowerInvariant() : request.Text;
+                var text = TitleCase(request.Text) == request.Text ? request.Text.ToLowerInvariant() : request.Text;
 
                 if (!encodeGET)
                 {
@@ -89,7 +87,7 @@ namespace I2.Loc
             mTranslationJobs.Add(job);
             if (mTranslationJobs.Count==1)
             {
-                I2.Loc.CoroutineManager.Start(WaitForTranslations());
+                CoroutineManager.Start(WaitForTranslations());
             }
         }
 
@@ -114,19 +112,17 @@ namespace I2.Loc
 			//Debug.Log(html);
 			// Handle google restricting the webservice to run
 			if (html.StartsWith("<!DOCTYPE html>") || html.StartsWith("<HTML>"))
-			{
+            {
                 if (html.Contains("The script completed but did not return anything"))
                     return "The current Google WebService is not supported.\nPlease, delete the WebService from the Google Drive and Install the latest version.";
-                else
                 if (html.Contains("Service invoked too many times in a short time"))
                     return ""; // ignore and try again
-                else
-                    return "There was a problem contacting the WebService. Please try again later\n" + html;
-			}
+                return "There was a problem contacting the WebService. Please try again later\n" + html;
+            }
 
-			string[] texts = html.Split (new string[]{"<I2Loc>"}, StringSplitOptions.None);
-			string[] splitter = new string[]{"<i2>"};
-			int i = 0;
+            var      texts    = html.Split(new[] { "<I2Loc>" }, StringSplitOptions.None);
+            string[] splitter = { "<i2>" };
+			int      i        = 0;
 
 			var Keys = requests.Keys.ToArray();
 			foreach (var text in Keys)

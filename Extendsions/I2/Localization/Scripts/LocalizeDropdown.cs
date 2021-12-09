@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using System.Collections.Generic;
-
 namespace I2.Loc
 {
-	#if !UNITY_5_0 && !UNITY_5_1
+    using System.Collections.Generic;
+    using TMPro;
+    using UnityEngine;
+    using UnityEngine.UI;
+
+#if !UNITY_5_0 && !UNITY_5_1
     [AddComponentMenu("I2/Localization/Localize Dropdown")]
 	public class LocalizeDropdown : MonoBehaviour
 	{
@@ -79,7 +80,7 @@ namespace I2.Loc
         #if TextMeshPro
         public void UpdateLocalizationTMPro()
         {
-            var _Dropdown = GetComponent<TMPro.TMP_Dropdown>();
+            var _Dropdown = this.GetComponent<TMP_Dropdown>();
             if (_Dropdown == null)
                 return;
 
@@ -87,14 +88,14 @@ namespace I2.Loc
             foreach (var term in _Terms)
             {
                 var translation = LocalizationManager.GetTranslation(term);
-                _Dropdown.options.Add(new TMPro.TMP_Dropdown.OptionData(translation));
+                _Dropdown.options.Add(new TMP_Dropdown.OptionData(translation));
             }
             _Dropdown.RefreshShownValue();
         }
 
         void FillValuesTMPro()
         {
-            var _Dropdown = GetComponent<TMPro.TMP_Dropdown>();
+            var _Dropdown = this.GetComponent<TMP_Dropdown>();
             if (_Dropdown == null)
                 return;
 

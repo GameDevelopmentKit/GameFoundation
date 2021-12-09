@@ -1,17 +1,18 @@
 ﻿#if NGUI
-
+using UnityEditor;
 using UnityEngine;
 
 namespace I2.Loc
 {
     #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad] 
+    [InitializeOnLoad] 
     #endif
 
     public class LocalizeTarget_NGUI_Label : LocalizeTarget<UILabel>
     {
         static LocalizeTarget_NGUI_Label() { AutoRegister(); }
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<UILabel, LocalizeTarget_NGUI_Label>() { Name = "NGUI Label", Priority = 100 }); }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<UILabel, LocalizeTarget_NGUI_Label> { Name
+ = "NGUI Label", Priority = 100 }); }
 
         NGUIText.Alignment mAlignment_RTL = NGUIText.Alignment.Right;
         NGUIText.Alignment mAlignment_LTR = NGUIText.Alignment.Left;
@@ -27,7 +28,7 @@ namespace I2.Loc
         public override void GetFinalTerms(Localize cmp, string Main, string Secondary, out string primaryTerm, out string secondaryTerm)
         {
             primaryTerm = mTarget ? mTarget.text : null;
-            secondaryTerm = (mTarget.ambigiousFont != null ? mTarget.ambigiousFont.name : string.Empty); ;
+            secondaryTerm = mTarget.ambigiousFont != null ? mTarget.ambigiousFont.name : string.Empty;
         }
 
 
@@ -71,7 +72,7 @@ namespace I2.Loc
                 if (mainTranslation != null && input.defaultText != mainTranslation)
                 {
                     if (cmp.CorrectAlignmentForRTL && (input.label.alignment == NGUIText.Alignment.Left || input.label.alignment == NGUIText.Alignment.Right))
-                        input.label.alignment = (LocalizationManager.IsRight2Left ? mAlignment_RTL : mAlignment_LTR);
+                        input.label.alignment = LocalizationManager.IsRight2Left ? mAlignment_RTL : mAlignment_LTR;
 
                     input.defaultText = mainTranslation;
                 }
@@ -81,7 +82,7 @@ namespace I2.Loc
                 if (mainTranslation != null && mTarget.text != mainTranslation)
                 {
                     if (cmp.CorrectAlignmentForRTL && (mTarget.alignment == NGUIText.Alignment.Left || mTarget.alignment == NGUIText.Alignment.Right))
-                        mTarget.alignment = (LocalizationManager.IsRight2Left ? mAlignment_RTL : mAlignment_LTR);
+                        mTarget.alignment = LocalizationManager.IsRight2Left ? mAlignment_RTL : mAlignment_LTR;
 
                     mTarget.text = mainTranslation;
                 }

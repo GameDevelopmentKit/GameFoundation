@@ -1,14 +1,12 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Linq;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-	using TranslationDictionary = Dictionary<string, TranslationQuery>;
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using TranslationDictionary = System.Collections.Generic.Dictionary<string, TranslationQuery>;
 
     public struct TranslationQuery
     {
@@ -41,7 +39,7 @@ namespace I2.Loc
         {
             bool hasPluralParams = text.Contains("{[#");
             bool hasPluralTypes = text.Contains("[i2p_");
-            if (!HasParameters(text) || (!hasPluralParams && !hasPluralTypes))
+            if (!HasParameters(text) || !hasPluralParams && !hasPluralTypes)
             {
                 AddQuery(text, LanguageCodeFrom, LanguageCodeTo, dict);
                 return;
@@ -76,7 +74,7 @@ namespace I2.Loc
 
             if (!dict.ContainsKey(text))
             {
-                var query = new TranslationQuery() { OrigText = text, LanguageCode = LanguageCodeFrom, TargetLanguagesCode = new string[] { LanguageCodeTo } };
+                var query = new TranslationQuery { OrigText = text, LanguageCode = LanguageCodeFrom, TargetLanguagesCode = new[] { LanguageCodeTo } };
                 query.Text = text;
                 ParseNonTranslatableElements(ref query);
                 dict[text] = query;
@@ -84,9 +82,9 @@ namespace I2.Loc
             else
             {
                 var query = dict[text];
-                if (System.Array.IndexOf(query.TargetLanguagesCode, LanguageCodeTo) < 0)
+                if (Array.IndexOf(query.TargetLanguagesCode, LanguageCodeTo) < 0)
                 {
-                    query.TargetLanguagesCode = query.TargetLanguagesCode.Concat(new string[] { LanguageCodeTo }).Distinct().ToArray();
+                    query.TargetLanguagesCode = query.TargetLanguagesCode.Concat(new[] { LanguageCodeTo }).Distinct().ToArray();
                 }
                 dict[text] = query;
             }
@@ -98,7 +96,7 @@ namespace I2.Loc
                 return null;
             var query = dict[text];
 
-            int langIdx = System.Array.IndexOf(query.TargetLanguagesCode, LanguageCodeTo);
+            var langIdx = Array.IndexOf(query.TargetLanguagesCode, LanguageCodeTo);
             if (langIdx < 0)
                 return "";
 
@@ -119,25 +117,25 @@ namespace I2.Loc
 
         public static bool HasParameters( string text )
         {
-            int idx = text.IndexOf("{[");
+            var idx = text.IndexOf("{[", StringComparison.Ordinal);
             if (idx < 0) return false;
-            return text.IndexOf("]}", idx) > 0;
+            return text.IndexOf("]}", idx, StringComparison.Ordinal) > 0;
         }
 
         public static string GetPluralParameter(string text, bool forceTag)  // force tag requires that the parameter has the form {[#param]}
         {
             // Try finding the "plural parameter" that has the form {[#name]}
             // this allows using the second parameter as plural:  "Player {[name1]} has {[#value]} points"
-            int idx0 = text.IndexOf("{[#");
+            var idx0 = text.IndexOf("{[#", StringComparison.Ordinal);
             if (idx0 < 0)
             {
                 if (forceTag) return null;
-                idx0 = text.IndexOf("{["); // fallback to the first paremeter if no one has the # tag
+                idx0 = text.IndexOf("{[", StringComparison.Ordinal); // fallback to the first paremeter if no one has the # tag
             }
             if (idx0 < 0)
                 return null;
 
-            int idx1 = text.IndexOf("]}", idx0+2);
+            var idx1 = text.IndexOf("]}", idx0 + 2, StringComparison.Ordinal);
             if (idx1 < 0)
                 return null;     // no closing parameter tag
 
@@ -147,18 +145,18 @@ namespace I2.Loc
         public static string GetPluralText( string text, string pluralType )
         {
             pluralType = "[i2p_" + pluralType + "]";
-            int idx0 = text.IndexOf(pluralType);
+            var idx0 = text.IndexOf(pluralType, StringComparison.Ordinal);
             if (idx0>=0)
             {
                 idx0 += pluralType.Length;
-                int idx1 = text.IndexOf("[i2p_",idx0);
+                var idx1           = text.IndexOf("[i2p_", idx0, StringComparison.Ordinal);
                 if (idx1 < 0) idx1 = text.Length;
 
                 return text.Substring(idx0, idx1 - idx0);
             }
 
             // PluralType not found, fallback to the first one
-            idx0 = text.IndexOf("[i2p_");
+            idx0 = text.IndexOf("[i2p_", StringComparison.Ordinal);
             if (idx0 < 0)
                 return text;                      // No plural tags:   "my text"
 
@@ -166,11 +164,11 @@ namespace I2.Loc
                 return text.Substring(0, idx0);   // Case: "my text[i2p_zero]hello"
 
             // Case: "[i2p_plural]my text[i2p_zero]hello"
-            idx0 = text.IndexOf("]");
+            idx0 = text.IndexOf("]", StringComparison.Ordinal);
             if (idx0 < 0) return text;  // starts like a plural, but has none
 
             idx0 += 1;
-            int idx2 = text.IndexOf("[i2p_", idx0);
+            var idx2           = text.IndexOf("[i2p_", idx0, StringComparison.Ordinal);
             if (idx2 < 0) idx2 = text.Length;
             return text.Substring(idx0, idx2 - idx0);
         }
@@ -180,7 +178,7 @@ namespace I2.Loc
             for (int i = startIndex, imax = matches.Count; i < imax; ++i)
             {
                 var newTag = I2Utils.GetCaptureMatch(matches[i]);
-                if (newTag[0]=='/' && tag.StartsWith(newTag.Substring(1)))
+                if (newTag[0] == '/' && tag.StartsWith(newTag.Substring(1), StringComparison.Ordinal))
                     return i;
             }
             return -1;
@@ -217,7 +215,7 @@ namespace I2.Loc
                 {
                     // Its not a tag, its a parameter
                     var fulltag = matches[i].ToString();
-                    if (fulltag.StartsWith("{[") && fulltag.EndsWith("]}"))
+                    if (fulltag.StartsWith("{[", StringComparison.Ordinal) && fulltag.EndsWith("]}", StringComparison.Ordinal))
                     {
                         finalText = finalText.Replace(fulltag, GetGoogleNoTranslateTag(finalTags.Count)+" ");  //  0x2600 is the start of the UNICODE Miscellaneous Symbols table, so they are not going to be translated by google
                         //finalText = finalText.Replace(fulltag, /*"{[" + finalTags.Count + "]}"*/ ((char)(0x2600 + finalTags.Count)).ToString());  //  0x2600 is the start of the UNICODE Miscellaneous Symbols table, so they are not going to be translated by google
@@ -228,7 +226,7 @@ namespace I2.Loc
 
                 if (tag == "i2nt")
                 {
-                    var tag1 = query.Text.Substring(matches[i].Index, (matches[iClosingTag].Index-matches[i].Index) + matches[iClosingTag].Length);
+                    var tag1 = query.Text.Substring(matches[i].Index, matches[iClosingTag].Index - matches[i].Index + matches[iClosingTag].Length);
                     finalText = finalText.Replace(tag1, GetGoogleNoTranslateTag(finalTags.Count)+" ");
                     //finalText = finalText.Replace(tag1, /*"{[" + finalTags.Count + "]}"*/ ((char)(0x2600 + finalTags.Count)).ToString());
                     
@@ -264,7 +262,7 @@ namespace I2.Loc
             if (string.IsNullOrEmpty(LanguageCodeTo))
                 return query.Results[0];
 
-            int idx = System.Array.IndexOf(query.TargetLanguagesCode, LanguageCodeTo);
+            var idx = Array.IndexOf(query.TargetLanguagesCode, LanguageCodeTo);
             if (idx < 0)
                 return null;
 
@@ -279,7 +277,7 @@ namespace I2.Loc
             }
 
             var variants = SpecializationManager.GetSpecializations(text);
-            var results = new Dictionary<string,string>();
+            var results  = new Dictionary<string, string>(StringComparer.Ordinal);
 
             foreach (var kvp in variants)
             {
@@ -292,18 +290,18 @@ namespace I2.Loc
 		{
             bool hasPluralParams = text.Contains("{[#");
             bool hasPluralTypes = text.Contains("[i2p_");
-            if (!HasParameters(text) || (!hasPluralParams && !hasPluralTypes))
+            if (!HasParameters(text) || !hasPluralParams && !hasPluralTypes)
             {
 				return GetTranslation (text, LanguageCodeTo, dict);
 			}
 
-            var sb = new System.Text.StringBuilder();
+            var sb = new StringBuilder();
 
             string pluralTranslation = null;
             bool forcePluralParam = hasPluralParams;
 
 
-            for (var i = ePluralType.Plural; i >= (ePluralType)0; --i)
+            for (var i = ePluralType.Plural; i >= 0; --i)
             {
                 var pluralType = i.ToString();
                 if (!GoogleLanguages.LanguageHasPluralType(LanguageCodeTo, pluralType))
@@ -368,7 +366,7 @@ namespace I2.Loc
 			}
 			return sb.ToString();
 #else
-            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
 #endif
 		}
 	}

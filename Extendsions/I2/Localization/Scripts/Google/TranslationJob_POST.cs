@@ -1,19 +1,13 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Linq;
-using UnityEngine.Networking;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-    using TranslationDictionary = Dictionary<string, TranslationQuery>;
+    using System.Text;
+    using UnityEngine;
+    using UnityEngine.Networking;
+    using TranslationDictionary = System.Collections.Generic.Dictionary<string, TranslationQuery>;
 
     public class TranslationJob_POST : TranslationJob_WWW
     {
-        TranslationDictionary _requests;
+        TranslationDictionary                  _requests;
         GoogleTranslation.fnOnTranslationReady _OnTranslationReady;
 
         public TranslationJob_POST(TranslationDictionary requests, GoogleTranslation.fnOnTranslationReady OnTranslationReady)

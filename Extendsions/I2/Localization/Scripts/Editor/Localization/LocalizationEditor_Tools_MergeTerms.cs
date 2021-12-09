@@ -1,9 +1,10 @@
-using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using UnityEditor;
+	using UnityEngine;
+
 	public partial class LocalizationEditor
 	{
 		#region Variables
@@ -108,12 +109,12 @@ namespace I2.Loc
 				{
 					termData.TermType 		= oldTerm.TermType;
 					termData.Description	= oldTerm.Description;
-					System.Array.Copy(oldTerm.Languages, termData.Languages, oldTerm.Languages.Length);
+					Array.Copy(oldTerm.Languages, termData.Languages, oldTerm.Languages.Length);
 				}
 			}
 
 			//--[ Delete the selected Terms from the source ]-----------------
-            TermReplacements = new Dictionary<string, string>(System.StringComparer.Ordinal);
+			TermReplacements = new Dictionary<string, string>(StringComparer.Ordinal);
 			for (int i=mSelectedKeys.Count-1; i>=0; --i)
 			{
 				string OldTerm = mSelectedKeys[i];

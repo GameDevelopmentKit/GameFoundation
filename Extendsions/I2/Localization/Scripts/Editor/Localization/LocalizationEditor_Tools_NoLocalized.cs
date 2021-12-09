@@ -1,14 +1,17 @@
-﻿using UnityEditor;
-using UnityEngine;
-using System.Collections.Generic;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System.Collections.Generic;
+	using TMPro;
+	using UnityEditor;
+	using UnityEngine;
+	using UnityEngine.UI;
+
 	public partial class LocalizationEditor
 	{
 		#region Variables
-		static string _Tools_NoLocalized_Include = null, 
- 	   				  _Tools_NoLocalized_Exclude = null;
+
+		private static string _Tools_NoLocalized_Include,
+			_Tools_NoLocalized_Exclude;
 		const string _Help_Tool_NoLocalized = "This selects all labels in the current scene that don't have a Localized component.\n\nWhen Include or Exclude are set, labels will be filtered based on those settings.Separate by (,) if multiple strings are used.\n(e.g. Include:\"example,tutorial\")";
 		#endregion
 		
@@ -78,15 +81,15 @@ namespace I2.Loc
 			if (uiLabels!=null && uiLabels.Length>0)
 				labels.AddRange(uiLabels);
 #endif
-			UnityEngine.UI.Text[] uiTexts = (UnityEngine.UI.Text[])Resources.FindObjectsOfTypeAll(typeof(UnityEngine.UI.Text));
+			var uiTexts = (Text[])Resources.FindObjectsOfTypeAll(typeof(Text));
 			if (uiTexts!=null && uiTexts.Length>0)
 				labels.AddRange(uiTexts);
 #if TextMeshPro
-			TMPro.TextMeshPro[] tmpText = (TMPro.TextMeshPro[])Resources.FindObjectsOfTypeAll(typeof(TMPro.TextMeshPro));
+			var tmpText = (TextMeshPro[])Resources.FindObjectsOfTypeAll(typeof(TextMeshPro));
 			if (tmpText!=null && tmpText.Length>0)
 				labels.AddRange(tmpText);
 
-			TMPro.TextMeshProUGUI[] uiTextsUGUI = (TMPro.TextMeshProUGUI[])Resources.FindObjectsOfTypeAll(typeof(TMPro.TextMeshProUGUI));
+			var uiTextsUGUI = (TextMeshProUGUI[])Resources.FindObjectsOfTypeAll(typeof(TextMeshProUGUI));
 			if (uiTextsUGUI!=null && uiTextsUGUI.Length>0)
 				labels.AddRange(uiTextsUGUI);
 #endif
@@ -103,10 +106,10 @@ namespace I2.Loc
 			string[] Excludes = null; 
 
 			if (!string.IsNullOrEmpty (_Tools_NoLocalized_Include))
-				Includes = _Tools_NoLocalized_Include.ToLower().Split(new char[]{',',';'});
+				Includes = _Tools_NoLocalized_Include.ToLower().Split(',', ';');
 
 			if (!string.IsNullOrEmpty (_Tools_NoLocalized_Exclude))
-				Excludes = _Tools_NoLocalized_Exclude.ToLower().Split(new char[]{',',';'});
+				Excludes = _Tools_NoLocalized_Exclude.ToLower().Split(',', ';');
 
 			List<GameObject> Objs = new List<GameObject>();
 			

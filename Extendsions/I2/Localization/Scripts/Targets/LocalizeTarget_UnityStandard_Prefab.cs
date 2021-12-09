@@ -1,21 +1,24 @@
-﻿using UnityEngine;
-#pragma warning disable 618
+﻿#pragma warning disable 618
 
 namespace I2.Loc
 {
+    using UnityEditor;
+    using UnityEngine;
+
     public class LocalizeTargetDesc_Prefab : LocalizeTargetDesc<LocalizeTarget_UnityStandard_Prefab>
     {
         public override bool CanLocalize(Localize cmp) { return true; }
     }
 
     #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad] 
+    [InitializeOnLoad] 
     #endif
 
     public class LocalizeTarget_UnityStandard_Prefab : LocalizeTarget<GameObject>
     {
         static LocalizeTarget_UnityStandard_Prefab() { AutoRegister(); }
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Prefab() { Name = "Prefab", Priority = 250 }); }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Prefab { Name = "Prefab", Priority = 250 }); }
 
         public override bool IsValid(Localize cmp) { return true; }
         public override eTermType GetPrimaryTermType(Localize cmp) { return eTermType.GameObject; }
@@ -57,9 +60,9 @@ namespace I2.Loc
                 {
                     #if UNITY_EDITOR
                         if (Application.isPlaying)
-                            Object.Destroy(child.gameObject);
+                            Destroy(child.gameObject);
                         else
-                            Object.DestroyImmediate(child.gameObject);
+                            DestroyImmediate(child.gameObject);
                     #else
 				        Object.Destroy (child.gameObject);
                     #endif
@@ -73,17 +76,17 @@ namespace I2.Loc
             if (NewPrefab == null)
                 return null;
 
-            GameObject current = mTarget as GameObject;
+            var current = this.mTarget;
 
-            mTarget = Object.Instantiate(NewPrefab);
+            this.mTarget = Instantiate(NewPrefab);
             if (mTarget == null)
                 return null;
 
             Transform locTr = cmp.transform;
-            Transform mNew = (mTarget as GameObject).transform;
+            var       mNew  = this.mTarget.transform;
             mNew.SetParent(locTr);
 
-            Transform bBase = (current ? current.transform : locTr);
+            var bBase = current ? current.transform : locTr;
             //mNew.localScale = bBase.localScale;
             mNew.rotation = bBase.rotation;
             mNew.position = bBase.position;

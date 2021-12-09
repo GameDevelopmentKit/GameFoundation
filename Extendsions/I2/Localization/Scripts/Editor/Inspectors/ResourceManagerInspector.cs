@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEditor;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using UnityEditor;
+	using UnityEngine;
+
 	[CustomEditor(typeof(ResourceManager))]
 	public class ResourceManagerInspector : Editor 
 	{
@@ -20,7 +20,7 @@ namespace I2.Loc
 			GUITools.DrawHeader("Assets:", true);
 			GUITools.BeginContents();
 				///GUILayout.Label ("Assets:");
-				GUITools.DrawObjectsArray( mAssets, false, false, false );
+				GUITools.DrawObjectsArray(this.mAssets);
 			GUITools.EndContents();
 
 			serializedObject.ApplyModifiedProperties();

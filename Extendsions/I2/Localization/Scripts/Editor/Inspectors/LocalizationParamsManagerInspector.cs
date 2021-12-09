@@ -1,10 +1,10 @@
-﻿using UnityEditor;
-using UnityEditorInternal;
-using UnityEngine;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-    [CustomEditor(typeof(LocalizationParamsManager))]
+	using UnityEditor;
+	using UnityEditorInternal;
+	using UnityEngine;
+
+	[CustomEditor(typeof(LocalizationParamsManager))]
 	public class LocalizationParamsManagerInspector : Editor
 	{
 		private ReorderableList mList;
@@ -30,7 +30,7 @@ namespace I2.Loc
         private void addElementCallback( ReorderableList list )
         {
             serializedObject.ApplyModifiedProperties();
-            var objParams = (target as LocalizationParamsManager);
+            var objParams = this.target as LocalizationParamsManager;
             objParams._Params.Add(new LocalizationParamsManager.ParamValue());
             list.index = objParams._Params.Count - 1;
             serializedObject.Update();
@@ -41,7 +41,7 @@ namespace I2.Loc
             if (list.index < 0)
                 return;
             serializedObject.ApplyModifiedProperties();
-            var objParams = (target as LocalizationParamsManager);
+            var objParams = this.target as LocalizationParamsManager;
             objParams._Params.RemoveAt(list.index);
             serializedObject.Update();
         }
@@ -92,7 +92,11 @@ namespace I2.Loc
             }
 
             GUILayout.Space(5);
-            mProp_IsGlobalManager.boolValue = EditorGUILayout.Popup(new GUIContent("Manager Type", "Local Manager only apply parameters to the Localize component in the same GameObject\n\nGlobal Manager apply parameters to all Localize components"), mProp_IsGlobalManager.boolValue ? 1 : 0, new GUIContent[] { new GUIContent("Local"), new GUIContent("Global") }) == 1;
+            this.mProp_IsGlobalManager.boolValue =
+	            EditorGUILayout.Popup(
+		            new GUIContent("Manager Type",
+			            "Local Manager only apply parameters to the Localize component in the same GameObject\n\nGlobal Manager apply parameters to all Localize components"),
+		            this.mProp_IsGlobalManager.boolValue ? 1 : 0, new[] { new GUIContent("Local"), new GUIContent("Global") }) == 1;
 
 
             GUILayout.Space(5);

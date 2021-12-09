@@ -1,22 +1,16 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Linq;
-using UnityEngine.Networking;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-    using TranslationDictionary = Dictionary<string, TranslationQuery>;
+    using System.Collections.Generic;
+    using System.Text;
+    using UnityEngine.Networking;
+    using TranslationDictionary = System.Collections.Generic.Dictionary<string, TranslationQuery>;
 
     public class TranslationJob_GET : TranslationJob_WWW
     {
-        TranslationDictionary _requests;
+        TranslationDictionary                  _requests;
         GoogleTranslation.fnOnTranslationReady _OnTranslationReady;
-        List<string> mQueries;
-        public string mErrorMessage;
+        List<string>                           mQueries;
+        public string                          mErrorMessage;
 
         public TranslationJob_GET(TranslationDictionary requests, GoogleTranslation.fnOnTranslationReady OnTranslationReady)
         {
@@ -40,7 +34,7 @@ namespace I2.Loc
             var query = mQueries[lastQuery];
             mQueries.RemoveAt(lastQuery);
 
-            string url = string.Format("{0}?action=Translate&list={1}", LocalizationManager.GetWebServiceURL(), query);
+            var url = $"{LocalizationManager.GetWebServiceURL()}?action=Translate&list={query}";
             www = UnityWebRequest.Get(url);
             I2Utils.SendWebRequest(www);
         }

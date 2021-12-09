@@ -1,14 +1,17 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-#if UNITY_5_4_OR_NEWER
+﻿#if UNITY_5_4_OR_NEWER
 using UnityEngine.SceneManagement;
 #endif
 
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using UnityEngine;
+	using Object = UnityEngine.Object;
+
 	public interface IResourceManager_Bundles
 	{
-		Object LoadFromBundle(string path, System.Type assetType );
+		Object LoadFromBundle(string path, Type assetType );
 	}
 
 	public class ResourceManager : MonoBehaviour 
@@ -87,7 +90,7 @@ namespace I2.Loc
 		{
 			if (Assets==null)
 				return false;
-			return System.Array.IndexOf (Assets, Obj) >= 0;
+			return Array.IndexOf (Assets, Obj) >= 0;
 		}
 
 		#endregion
@@ -97,7 +100,7 @@ namespace I2.Loc
 		// This cache is kept for a few moments and then cleared
 		// Its meant to avoid doing several Resource.Load for the same Asset while Localizing 
 		// (e.g. Lot of labels could be trying to Load the same Font)
-		readonly Dictionary<string, Object> mResourcesCache = new Dictionary<string, Object>(System.StringComparer.Ordinal); // This is used to avoid re-loading the same object from resources in the same frame
+		readonly Dictionary<string, Object> mResourcesCache = new Dictionary<string, Object>(StringComparer.Ordinal); // This is used to avoid re-loading the same object from resources in the same frame
 		//bool mCleaningScheduled = false;
 
 		public T LoadFromResources<T>( string Path ) where T : Object
@@ -116,9 +119,9 @@ namespace I2.Loc
 
 				T obj = null;
 
-                if (Path.EndsWith("]", System.StringComparison.OrdinalIgnoreCase))  // Handle sprites (Multiple) loaded from resources :   "SpritePath[SpriteName]"
+                if (Path.EndsWith("]", StringComparison.OrdinalIgnoreCase))  // Handle sprites (Multiple) loaded from resources :   "SpritePath[SpriteName]"
                 {
-                    int idx = Path.LastIndexOf("[", System.StringComparison.OrdinalIgnoreCase);
+                    int idx = Path.LastIndexOf("[", StringComparison.OrdinalIgnoreCase);
                     int len = Path.Length - idx - 2;
                     string MultiSpriteName = Path.Substring(idx + 1, len);
                     Path = Path.Substring(0, idx);
@@ -152,7 +155,7 @@ namespace I2.Loc
 
 				return obj;
 			}
-			catch (System.Exception e)
+			catch (Exception e)
 			{
 				Debug.LogErrorFormat( "Unable to load {0} '{1}'\nERROR: {2}", typeof(T), Path, e.ToString() );
 				return null;
@@ -171,10 +174,11 @@ namespace I2.Loc
 			return null;
 		}
 
-		public void CleanResourceCache()
+		public void CleanResourceCache(bool unloadResources = false)
 		{
 			mResourcesCache.Clear();
-			Resources.UnloadUnusedAssets();
+			if (unloadResources)
+				Resources.UnloadUnusedAssets();
 
 			CancelInvoke();
 			//mCleaningScheduled = false;

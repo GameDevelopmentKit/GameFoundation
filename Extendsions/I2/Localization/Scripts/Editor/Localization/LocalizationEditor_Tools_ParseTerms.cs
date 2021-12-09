@@ -1,13 +1,13 @@
-﻿using UnityEditor;
-using UnityEngine;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using System.Text.RegularExpressions;
+	using UnityEditor;
+	using UnityEngine;
+
 	public class ParsedTerm
 	{
 		public string Category, Term, FullTerm;
@@ -186,11 +186,11 @@ namespace I2.Loc
 			{
                 if ((mFlagsViewKeys & (int)eFlagsViewKeys.Missing) > 0)
                 {
-                    mFlagsViewKeys = ((int)eFlagsViewKeys.Used | (int)eFlagsViewKeys.NotUsed | (int)eFlagsViewKeys.Missing);
+	                mFlagsViewKeys = (int)eFlagsViewKeys.Used | (int)eFlagsViewKeys.NotUsed | (int)eFlagsViewKeys.Missing;
                 }
                 else
                 {
-                    mFlagsViewKeys = ((int)eFlagsViewKeys.Used | (int)eFlagsViewKeys.NotUsed);
+	                mFlagsViewKeys = (int)eFlagsViewKeys.Used | (int)eFlagsViewKeys.NotUsed;
                 }
                 mCurrentViewMode = eViewMode.Keys;
 			}
@@ -207,7 +207,7 @@ namespace I2.Loc
 			for (int i=0, imax=Locals.Length; i<imax; ++i)
 			{
 				Localize localize = Locals[i];
-                if (localize==null || (localize.Source!=null && localize.Source.SourceData!=mLanguageSource) || localize.gameObject==null || !GUITools.ObjectExistInScene(localize.gameObject))
+				if (localize == null || localize.Source != null && localize.Source.SourceData != mLanguageSource || localize.gameObject == null || !GUITools.ObjectExistInScene(localize.gameObject))
 					continue;
 				 
 				string Term, SecondaryTerm;
@@ -225,8 +225,8 @@ namespace I2.Loc
 
         static void FindTermsInLocalizedStrings()
         {
-            MonoBehaviour[] behaviors = (MonoBehaviour[])Resources.FindObjectsOfTypeAll(typeof(MonoBehaviour));
-            System.Type Type_localizedString = typeof(LocalizedString);
+            MonoBehaviour[] behaviors            = (MonoBehaviour[])Resources.FindObjectsOfTypeAll(typeof(MonoBehaviour));
+            var             Type_localizedString = typeof(LocalizedString);
             foreach (var cmp in behaviors)
             {
                 if (cmp.GetType().Name.Contains("Example_LocalizedString"))
@@ -242,11 +242,11 @@ namespace I2.Loc
                     if (Type_localizedString.IsAssignableFrom(p.PropertyType))
                     {
                         var varObj = p.GetValue(cmp,null);
-                        value = System.Convert.ToString(varObj.GetType().GetField("mTerm").GetValue(varObj));
+                        value = Convert.ToString(varObj.GetType().GetField("mTerm").GetValue(varObj));
                     }
                     else
                     {
-                        value = System.Convert.ToString(p.GetValue(cmp,null));
+	                    value = Convert.ToString(p.GetValue(cmp, null));
                     }
                     if (!string.IsNullOrEmpty(value))
                     {
@@ -268,11 +268,11 @@ namespace I2.Loc
                     if (Type_localizedString.IsAssignableFrom(v.FieldType))
                     {
                         var varObj = v.GetValue(cmp);
-                        value = System.Convert.ToString(varObj.GetType().GetField("mTerm").GetValue(varObj));
+                        value = Convert.ToString(varObj.GetType().GetField("mTerm").GetValue(varObj));
                     }
                     else
                     {
-                        value = System.Convert.ToString(v.GetValue(cmp));
+	                    value = Convert.ToString(v.GetValue(cmp));
                     }
                     if (!string.IsNullOrEmpty(value))
                     {
@@ -334,7 +334,7 @@ namespace I2.Loc
 
 			foreach (var localize in Locals) 
 			{
-				if (localize == null || (localize.Source != null && localize.Source.SourceData != mLanguageSource) || localize.gameObject == null || !GUITools.ObjectExistInScene (localize.gameObject))
+				if (localize == null || localize.Source != null && localize.Source.SourceData != mLanguageSource || localize.gameObject == null || !GUITools.ObjectExistInScene(localize.gameObject))
 					continue;
 
 				if (!string.IsNullOrEmpty (localize.mTerm) && !string.IsNullOrEmpty (localize.SecondaryTerm))

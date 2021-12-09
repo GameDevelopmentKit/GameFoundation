@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using System;
-using System.Collections.Generic;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System;
+    using System.Collections.Generic;
+    using UnityEngine;
+
     public interface ILocalizationParamsManager
     {
         string GetParameterValue( string Param );
@@ -46,8 +46,7 @@ namespace I2.Loc
                     setted = true;
                     break;
                 }
-            if (!setted)
-                _Params.Add(new ParamValue(){ Name = ParamName, Value = ParamValue });
+            if (!setted) this._Params.Add(new ParamValue { Name = ParamName, Value = ParamValue });
         
 			if (localize)
 				OnLocalize();

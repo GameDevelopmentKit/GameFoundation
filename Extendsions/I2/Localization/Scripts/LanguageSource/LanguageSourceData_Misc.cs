@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System.Collections.Generic;
+
 	public partial class LanguageSourceData
 	{
 		public static string EmptyCategory = "Default";
@@ -26,24 +26,21 @@ namespace I2.Loc
 		
 		public static string GetKeyFromFullTerm( string FullTerm, bool OnlyMainCategory = false )
 		{
-			int Index = (OnlyMainCategory ? FullTerm.IndexOfAny(CategorySeparators) : 
-			             					FullTerm.LastIndexOfAny(CategorySeparators));
+			var Index = OnlyMainCategory ? FullTerm.IndexOfAny(CategorySeparators) : FullTerm.LastIndexOfAny(CategorySeparators);
 
-			return (Index<0 ? FullTerm :FullTerm.Substring(Index+1));
+			return Index < 0 ? FullTerm : FullTerm.Substring(Index + 1);
 		}
 		
 		public static string GetCategoryFromFullTerm( string FullTerm, bool OnlyMainCategory = false )
 		{
-			int Index = (OnlyMainCategory ? FullTerm.IndexOfAny(CategorySeparators) : 
-			             					FullTerm.LastIndexOfAny(CategorySeparators));
+			var Index = OnlyMainCategory ? FullTerm.IndexOfAny(CategorySeparators) : FullTerm.LastIndexOfAny(CategorySeparators);
 
-			return (Index<0 ? EmptyCategory : FullTerm.Substring(0, Index));
+			return Index < 0 ? EmptyCategory : FullTerm.Substring(0, Index);
 		}
 		
 		public static void DeserializeFullTerm( string FullTerm, out string Key, out string Category, bool OnlyMainCategory = false )
 		{
-			int Index = (OnlyMainCategory ? FullTerm.IndexOfAny(CategorySeparators) : 
-			             					FullTerm.LastIndexOfAny(CategorySeparators));
+			var Index = OnlyMainCategory ? FullTerm.IndexOfAny(CategorySeparators) : FullTerm.LastIndexOfAny(CategorySeparators);
 
 			if (Index<0) 
 			{

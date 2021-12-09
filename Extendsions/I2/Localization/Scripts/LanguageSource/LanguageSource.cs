@@ -1,11 +1,9 @@
-using System;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-using Object = UnityEngine.Object;
-
 namespace I2.Loc
 {
+    using System.Collections.Generic;
+    using UnityEditor;
+    using UnityEngine;
+
     [AddComponentMenu("I2/Localization/Source")]
     [ExecuteInEditMode]
 	public class LanguageSource : MonoBehaviour, ISerializationCallbackReceiver, ILanguageSource
@@ -24,11 +22,11 @@ namespace I2.Loc
 
         // TODO: also copy         public string name;   and owner
 
-        public int version = 0;
-        public bool NeverDestroy = false;  	// Keep between scenes (will call DontDestroyOnLoad )
+        public int  version;
+        public bool NeverDestroy; // Keep between scenes (will call DontDestroyOnLoad )
 
-		public bool UserAgreesToHaveItOnTheScene = false;
-		public bool UserAgreesToHaveItInsideThePluginsFolder = false;
+        public bool UserAgreesToHaveItOnTheScene;
+        public bool UserAgreesToHaveItInsideThePluginsFolder;
         public bool GoogleLiveSyncIsUptoDate = true;
 
         public List<Object> Assets = new List<Object>();	// References to Fonts, Atlasses and other objects the localization may need
@@ -54,7 +52,7 @@ namespace I2.Loc
 
         public List<TermData> mTerms = new List<TermData>();
 
-        public bool CaseInsensitiveTerms = false;
+        public bool CaseInsensitiveTerms;
 
         public LanguageSourceData.MissingTranslationAction OnMissingTranslation = LanguageSourceData.MissingTranslationAction.Fallback;
 
@@ -70,7 +68,7 @@ namespace I2.Loc
             public string Spreadsheet_LocalCSVEncoding = "utf-8";
             public bool Spreadsheet_SpecializationAsRows = true;
 
-            public string Google_Password = "change_this";
+            public string                                    Google_Password              = "change_this";
             public LanguageSourceData.eGoogleUpdateFrequency GoogleInEditorCheckFrequency = LanguageSourceData.eGoogleUpdateFrequency.Daily;
 #endif
         #endregion
@@ -78,7 +76,7 @@ namespace I2.Loc
         void Awake()
         {
             #if UNITY_EDITOR
-            if (UnityEditor.BuildPipeline.isBuildingPlayer)
+            if (BuildPipeline.isBuildingPlayer)
                 return;
             #endif
    //         NeverDestroy = false;

@@ -1,16 +1,18 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-    #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad] 
+	using UnityEditor;
+	using UnityEngine;
+	using UnityEngine.UI;
+
+#if UNITY_EDITOR
+	[InitializeOnLoad] 
     #endif
 
-    public class LocalizeTarget_UnityUI_Image : LocalizeTarget<UnityEngine.UI.Image>
+	public class LocalizeTarget_UnityUI_Image : LocalizeTarget<Image>
 	{
         static LocalizeTarget_UnityUI_Image() { AutoRegister(); }
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<Image, LocalizeTarget_UnityUI_Image>() { Name = "Image", Priority = 100 }); }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<Image, LocalizeTarget_UnityUI_Image> { Name = "Image", Priority = 100 }); }
 
 		public override bool CanUseSecondaryTerm () { return false; }
 		public override bool AllowMainTermToBeRTL () { return false; }
@@ -45,7 +47,7 @@ namespace I2.Loc
 			// In the editor, sometimes unity "forgets" to show the changes
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
-				UnityEditor.EditorUtility.SetDirty( mTarget );
+				EditorUtility.SetDirty(this.mTarget);
 #endif
 		}
 	}

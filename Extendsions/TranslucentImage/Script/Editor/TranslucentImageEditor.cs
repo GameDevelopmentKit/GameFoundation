@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using UnityEditor;
-using UnityEditor.UI;
-using UnityEngine;
-using Debug = System.Diagnostics.Debug;
-
-namespace LeTai.Asset.TranslucentImage.Editor
+﻿namespace LeTai.Asset.TranslucentImage.Editor
 {
-[CustomEditor(typeof(TranslucentImage))]
+    using System.Linq;
+    using UnityEditor;
+    using UnityEditor.UI;
+    using UnityEngine;
+    using Debug = System.Diagnostics.Debug;
+
+    [CustomEditor(typeof(TranslucentImage))]
 [CanEditMultipleObjects]
 public class TranslucentImageEditor : ImageEditor
 {
@@ -47,7 +47,7 @@ public class TranslucentImageEditor : ImageEditor
         serializedObject.Update();
         var ti = serializedObject.targetObject as TranslucentImage;
         Debug.Assert(ti != null, "Translucent Image Editor serializedObject target is null");
-        var oldSource = ti.source;
+        var oldSource   = ti.source;
         var oldMaterial = ti.material;
 
         base.OnInspectorGUI();
@@ -63,6 +63,27 @@ public class TranslucentImageEditor : ImageEditor
         EditorGUILayout.Space();
 
         EditorGUILayout.PropertyField(source);
+        if (this.source.objectReferenceValue == null)
+        {
+            var existingSources = FindObjectsOfType<TranslucentImageSource>();
+            if (existingSources.Length > 0)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PrefixLabel("From current Scene");
+                    using (new EditorGUILayout.VerticalScope())
+                    {
+                        foreach (var s in existingSources)
+                            if (GUILayout.Button(s.gameObject.name))
+                                this.source.objectReferenceValue = s;
+                    }
+                }
+
+                EditorGUILayout.Space();
+            }
+        }
+
         if (materialUsedInDifferentSource)
         {
             EditorGUILayout.HelpBox("Translucent Images with different Sources" +
@@ -103,6 +124,12 @@ public class TranslucentImageEditor : ImageEditor
 
     private void CheckMaterialUsedInDifferentSource(TranslucentImage self)
     {
+        if (!self.source)
+        {
+            this.materialUsedInDifferentSource = false;
+            return;
+        }
+
         var diffSource = FindObjectsOfType<TranslucentImage>()
                         .Where(ti => ti.source != self.source)
                         .ToList();

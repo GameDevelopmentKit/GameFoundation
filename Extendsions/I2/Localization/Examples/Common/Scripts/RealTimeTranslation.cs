@@ -1,13 +1,14 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System.Collections.Generic;
+    using UnityEngine;
+
     public class RealTimeTranslation : MonoBehaviour
     {
         string OriginalText = "This is an example showing how to use the google translator to translate chat messages within the game.\nIt also supports multiline translations.",
                TranslatedText = string.Empty;
-        bool IsTranslating = false;
+
+        private bool IsTranslating;
 
         public void OnGUI()
         {
@@ -65,7 +66,7 @@ namespace I2.Loc
         public void ExampleMultiTranslations_Blocking()
         {
             // This shows how to ask for many translations 
-            var dict = new System.Collections.Generic.Dictionary<string, TranslationQuery>();
+            var dict = new Dictionary<string, TranslationQuery>();
             GoogleTranslation.AddQuery("This is an example", "en", "es", dict);
             GoogleTranslation.AddQuery("This is an example", "auto", "zh", dict);
             GoogleTranslation.AddQuery("Hola", "es", "en", dict);

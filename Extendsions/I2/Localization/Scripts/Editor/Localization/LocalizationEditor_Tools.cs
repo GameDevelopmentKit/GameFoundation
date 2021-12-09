@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System.Collections.Generic;
+	using UnityEngine;
+
 	public partial class LocalizationEditor
 	{
 
@@ -12,7 +12,15 @@ namespace I2.Loc
 		
 		static List<string> mSelectedScenes = new List<string>();
 
-		public enum eToolsMode { Parse, Categorize, Merge, NoLocalized, Script, CharSet };
+		public enum eToolsMode
+		{
+			Parse,
+			Categorize,
+			Merge,
+			NoLocalized,
+			Script,
+			CharSet
+		}
 		public eToolsMode mCurrentToolsMode = eToolsMode.Parse;
 		
 		#endregion
@@ -23,7 +31,7 @@ namespace I2.Loc
 		{
 			GUILayout.Space(10);
 			eToolsMode OldMode = mCurrentToolsMode;
-			mCurrentToolsMode = (eToolsMode)GUITools.DrawShadowedTabs ((int)mCurrentToolsMode, new string[]{"Parse", "Categorize", "Merge", "No Localized", "Script", "CharSet"}, 30);
+			this.mCurrentToolsMode = (eToolsMode)GUITools.DrawShadowedTabs((int)this.mCurrentToolsMode, new[] { "Parse", "Categorize", "Merge", "No Localized", "Script", "CharSet" }, 30);
 			if (mCurrentToolsMode != OldMode || reset)
 			{
 				ClearErrors();

@@ -1,19 +1,19 @@
 ﻿//#define UGUI
 //#define NGUI
 
-using System;
-using System.Linq;
-using UnityEngine;
-using UnityEditor;
-using Object = UnityEngine.Object;
-
-
 namespace I2.Loc
 {
+	using System;
+	using TMPro;
+	using UnityEditor;
+	using UnityEngine;
+	using Object = UnityEngine.Object;
+
 	public partial class LocalizationEditor
 	{
-		#region Variables	
-		internal static bool mKeysDesc_AllowEdit = false;
+		#region Variables
+
+		internal static bool mKeysDesc_AllowEdit;
 		internal static string GUI_SelectedSpecialization
 		{
 			get{
@@ -27,7 +27,8 @@ namespace I2.Loc
 				 mGUI_SelectedSpecialization = value;
 			}
 		}
-		internal static string mGUI_SelectedSpecialization = null;
+
+		internal static string mGUI_SelectedSpecialization;
 
 		internal static bool GUI_ShowDisabledLanguagesTranslation = true;
 
@@ -153,7 +154,7 @@ namespace I2.Loc
 				if (localizeCmp == null)
 					source = LocalizationManager.Sources[0];
 				else
-					source = LocalizationManager.GetSourceContaining(IsPrimaryKey ? localizeCmp.SecondaryTerm : localizeCmp.Term, true);
+					source = LocalizationManager.GetSourceContaining(IsPrimaryKey ? localizeCmp.SecondaryTerm : localizeCmp.Term);
 			}
 
 
@@ -162,41 +163,40 @@ namespace I2.Loc
 				EditorGUILayout.HelpBox( "Select a Term to Localize", MessageType.Info );
 				return null;
 			}
-			else
-			{
-				termdata = source.GetTermData(Key);
-				if (termdata==null && localizeCmp!=null)
-				{
-					var realSource = LocalizationManager.GetSourceContaining(Key, false);
-					if (realSource != null)
-					{
-						termdata = realSource.GetTermData(Key);
-						source = realSource;
-					}
-				}
-				if (termdata==null)
-				{
-					if (Key == "-")
-						return null;
-					EditorGUILayout.HelpBox( string.Format("Key '{0}' is not Localized or it is in a different Language Source", Key), MessageType.Error );
-					GUILayout.BeginHorizontal();
-					GUILayout.FlexibleSpace();
-					if (GUILayout.Button("Add Term to Source"))
-					{
-                        var termType = eTermType.Text;
-                        if (localizeCmp!=null && localizeCmp.mLocalizeTarget != null)
-                        {
-                            termType = IsPrimaryKey ? localizeCmp.mLocalizeTarget.GetPrimaryTermType(localizeCmp)
-                                                    : localizeCmp.mLocalizeTarget.GetSecondaryTermType(localizeCmp);
-                        }
 
-                        AddTerm(Key, true, termType);
-					}
-					GUILayout.FlexibleSpace();
-					GUILayout.EndHorizontal();
-					
-					return null;
+			termdata = source.GetTermData(Key);
+			if (termdata == null && localizeCmp != null)
+			{
+				var realSource = LocalizationManager.GetSourceContaining(Key, false);
+				if (realSource != null)
+				{
+					termdata = realSource.GetTermData(Key);
+					source   = realSource;
 				}
+			}
+
+			if (termdata == null)
+			{
+				if (Key == "-")
+					return null;
+				EditorGUILayout.HelpBox(string.Format("Key '{0}' is not Localized or it is in a different Language Source", Key), MessageType.Error);
+				GUILayout.BeginHorizontal();
+				GUILayout.FlexibleSpace();
+				if (GUILayout.Button("Add Term to Source"))
+				{
+					var termType = eTermType.Text;
+					if (localizeCmp != null && localizeCmp.mLocalizeTarget != null)
+						termType = IsPrimaryKey
+							? localizeCmp.mLocalizeTarget.GetPrimaryTermType(localizeCmp)
+							: localizeCmp.mLocalizeTarget.GetSecondaryTermType(localizeCmp);
+
+					AddTerm(Key, true, termType);
+				}
+
+				GUILayout.FlexibleSpace();
+				GUILayout.EndHorizontal();
+
+				return null;
 			}
 
 			//--[ Type ]----------------------------------
@@ -287,7 +287,7 @@ namespace I2.Loc
 			if (GoogleTranslation.IsTranslating())
             {
                 // Connection Status Bar
-                int time = (int)((Time.realtimeSinceStartup % 2) * 2.5);
+                var    time    = (int)(Time.realtimeSinceStartup % 2 * 2.5);
                 string Loading = "Translating" + ".....".Substring(0, time);
                 GUI.color = Color.gray;
                 GUILayout.BeginHorizontal(LocalizeInspector.GUIStyle_OldTextArea);
@@ -327,7 +327,7 @@ namespace I2.Loc
                     if (!activeSpecializations.Contains(specialization) && specialization != GUI_SelectedSpecialization)
                         continue;
 
-                    bool isActive = (specialization == GUI_SelectedSpecialization);
+                    var isActive = specialization == GUI_SelectedSpecialization;
                     var labelContent = new GUIContent(specialization, "Specialization of the main translation (i.e. variants that show only on specific platforms or devices)\nThis allows using 'tap' instead of 'click' for touch devices.");
 
                     if (isActive && activeSpecializations.Count>1)
@@ -418,7 +418,7 @@ namespace I2.Loc
                     }
 
 					if (localizeCmp!=null &&
-						(forcePreview || /*GUI.changed || */(GUI.GetNameOfFocusedControl()==CtrName && IsSelect)))
+					    (forcePreview || /*GUI.changed || */GUI.GetNameOfFocusedControl() == CtrName && IsSelect))
 					{
 						if (IsPrimaryKey && string.IsNullOrEmpty(localizeCmp.Term))
 						{
@@ -505,7 +505,9 @@ namespace I2.Loc
 #endif
 
 #if TextMeshPro
-                        case eTermType.TextMeshPFont	: ObjType = typeof(TMPro.TMP_FontAsset); break;
+						case eTermType.TextMeshPFont:
+							ObjType = typeof(TMP_FontAsset);
+							break;
 #endif
 
 #if SVG
@@ -528,7 +530,7 @@ namespace I2.Loc
 							}
 					}
 
-					bool bShowTranslationLabel = (Obj==null && !string.IsNullOrEmpty(Translation));
+					var bShowTranslationLabel = Obj == null && !string.IsNullOrEmpty(Translation);
 					if (bShowTranslationLabel)
 					{
 						GUI.backgroundColor=GUITools.DarkGray;
@@ -603,7 +605,7 @@ namespace I2.Loc
 		{
 			bool hasParameters = false;
 			int paramStart = translation.IndexOf("{[");
-			hasParameters = (paramStart >= 0 && translation.IndexOf ("]}", paramStart) > 0);
+			hasParameters = paramStart >= 0 && translation.IndexOf("]}", paramStart) > 0;
 
 			if (mShowPlural == langIdx && string.IsNullOrEmpty (translation))
 				mShowPlural = -1;
@@ -641,13 +643,13 @@ namespace I2.Loc
 
 		static void ShowPluralTranslation(string pluralType, string langCode, string translation, ref string finalTranslation, bool show, bool allowDelete, bool showTag )
 		{
-			string tag = "[i2p_" + pluralType + "]";
-			int idx0 = translation.IndexOf (tag, System.StringComparison.OrdinalIgnoreCase);
-			bool hasTranslation = idx0 >= 0 || pluralType=="Plural";
+			string tag            = "[i2p_" + pluralType + "]";
+			var    idx0           = translation.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
+			bool   hasTranslation = idx0 >= 0 || pluralType=="Plural";
 			if (idx0 < 0) idx0 = 0;
 					 else idx0 += tag.Length;
 
-			int idx1 = translation.IndexOf ("[i2p_", idx0, System.StringComparison.OrdinalIgnoreCase);
+			var idx1           = translation.IndexOf("[i2p_", idx0, StringComparison.OrdinalIgnoreCase);
 			if (idx1 < 0) idx1 = translation.Length;
 
 			var pluralTranslation = translation.Substring(idx0, idx1-idx0);

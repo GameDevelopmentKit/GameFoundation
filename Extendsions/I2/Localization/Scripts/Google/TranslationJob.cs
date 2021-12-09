@@ -1,22 +1,20 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Linq;
-using UnityEngine.Networking;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
-    using TranslationDictionary = Dictionary<string, TranslationQuery>;
+    using System;
+    using UnityEngine.Networking;
+    using TranslationDictionary = System.Collections.Generic.Dictionary<string, TranslationQuery>;
 
 
     public class TranslationJob : IDisposable
     {
         public eJobState mJobState = eJobState.Running;
 
-        public enum eJobState { Running, Succeeded, Failed };
+        public enum eJobState
+        {
+            Running,
+            Succeeded,
+            Failed
+        }
 
         public virtual eJobState GetState() { return mJobState; }
 

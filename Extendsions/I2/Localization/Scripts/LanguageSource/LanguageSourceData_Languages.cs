@@ -1,11 +1,9 @@
-using System;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-using Object = UnityEngine.Object;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+
 	public partial class LanguageSourceData
 	{
 		#region Language
@@ -43,7 +41,7 @@ namespace I2.Loc
         public LanguageData GetLanguageData(string language, bool AllowDiscartingRegion = true)
         {
             int idx = GetLanguageIndex(language, AllowDiscartingRegion, false);
-            return (idx < 0) ? null : mLanguages[idx];
+            return idx < 0 ? null : this.mLanguages[idx];
         }
 
         // TODO: Fix IsCurrentLanguage when current=English  and there are two variants in the source (English Canada, English US)
@@ -103,7 +101,7 @@ namespace I2.Loc
 		{
 			Language1 = GetLanguageWithoutRegion(Language1);
 			Language2 = GetLanguageWithoutRegion(Language2);
-			return (string.Compare(Language1, Language2, StringComparison.OrdinalIgnoreCase)==0);
+			return string.Compare(Language1, Language2, StringComparison.OrdinalIgnoreCase) == 0;
 		}
 
 		public static string GetLanguageWithoutRegion(string Language)
@@ -111,8 +109,7 @@ namespace I2.Loc
 			int Index = Language.IndexOfAny("(/\\[,{".ToCharArray());
 			if (Index<0)
 				return Language;
-			else
-				return Language.Substring(0, Index).Trim();
+			return Language.Substring(0, Index).Trim();
 		}
 
         public void AddLanguage(string LanguageName)

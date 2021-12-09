@@ -1,14 +1,17 @@
-using UnityEngine;
-using UnityEditor;
-using System.Linq;
-using System.Collections.Generic;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using UnityEditor;
+	using UnityEngine;
+	using Object = UnityEngine.Object;
+
 	[InitializeOnLoad]
 	public class UpgradeManager
 	{
-		static bool mAlreadyCheckedPlugins = false;
+		private static bool mAlreadyCheckedPlugins;
 
 		static UpgradeManager()
 		{
@@ -94,8 +97,8 @@ namespace I2.Loc
 					return;
 			}
 			//var tar = System.Enum.GetValues(typeof(BuildTargetGroup));
-			foreach (BuildTargetGroup target in System.Enum.GetValues(typeof(BuildTargetGroup)))
-				if (target!=BuildTargetGroup.Unknown && !target.HasAttributeOfType<System.ObsoleteAttribute>())
+			foreach (BuildTargetGroup target in Enum.GetValues(typeof(BuildTargetGroup)))
+				if (target != BuildTargetGroup.Unknown && !target.HasAttributeOfType<ObsoleteAttribute>())
 				{
 					#if UNITY_5_6
 						if (target == BuildTargetGroup.Switch) continue;    // some releases of 5.6 defined BuildTargetGroup.Switch but didn't handled it correctly
@@ -132,7 +135,7 @@ namespace I2.Loc
 					}
 					PlayerSettings.SetScriptingDefineSymbolsForGroup(Platform, Settings );
 				}
-				catch (System.Exception)
+				catch (Exception)
 				{
 				}
 			}
@@ -146,7 +149,7 @@ namespace I2.Loc
 
 				if (!string.IsNullOrEmpty( AssemblyType ))
 				{
-					var rtype = System.AppDomain.CurrentDomain.GetAssemblies()
+					var rtype = AppDomain.CurrentDomain.GetAssemblies()
 								.Where( assembly => assembly.FullName.Contains(AssemblyType) )
 								.Select( assembly => assembly.GetType( mType, false ) )
 								.Where( t => t!=null )
@@ -158,8 +161,8 @@ namespace I2.Loc
 				if (!hasPluginClass)
 					hasPluginClass = typeof( Localize ).Assembly.GetType( mType, false )!=null;
 
-				
-				bool hasPluginDef = (symbols.IndexOf(mPlugin)>=0);
+
+				var hasPluginDef = symbols.IndexOf(mPlugin) >= 0;
 				
 				if (hasPluginClass != hasPluginDef)
 				{
@@ -168,7 +171,7 @@ namespace I2.Loc
 					return true;
 				}
 			}
-			catch(System.Exception)
+			catch (Exception)
 			{
 			}
 			return false;
@@ -213,8 +216,8 @@ namespace I2.Loc
                 string ResourcesFolder = "Assets/Resources";//PluginPath.Substring(0, PluginPath.Length-"/Localization".Length) + "/Resources";
 
                 string fullresFolder = Application.dataPath + ResourcesFolder.Replace("Assets", "");
-                if (!System.IO.Directory.Exists(fullresFolder))
-                    System.IO.Directory.CreateDirectory(fullresFolder);
+                if (!Directory.Exists(fullresFolder))
+	                Directory.CreateDirectory(fullresFolder);
 
                 sourcePath = ResourcesFolder + "/" + LocalizationManager.GlobalSources[0] + ".asset";
             }
@@ -289,7 +292,7 @@ namespace I2.Loc
 
 	public static class UpgradeManagerHelper
 	{
-		public static bool HasAttributeOfType<T>(this System.Enum enumVal) where T:System.Attribute
+		public static bool HasAttributeOfType<T>(this Enum enumVal) where T : Attribute
 		{
 			var type = enumVal.GetType();
 			var memInfo = type.GetMember(enumVal.ToString());

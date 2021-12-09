@@ -1,34 +1,29 @@
-﻿using System;
-using UnityEditor;
-using UnityEditor.AnimatedValues;
-using UnityEditor.SceneManagement;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
-namespace LeTai.Asset.TranslucentImage.Editor
+﻿namespace LeTai.Asset.TranslucentImage.Editor
 {
-[CustomEditor(typeof(TranslucentImageSource))]
+    using UnityEditor;
+    using UnityEngine;
+    using UnityEngine.SceneManagement;
+
+    [CustomEditor(typeof(TranslucentImageSource))]
 [CanEditMultipleObjects]
-public class TranslucentImageSourceEditor : UnityEditor.Editor
+public class TranslucentImageSourceEditor : Editor
 {
 #region constants
-
     readonly GUIContent downsampleLabel = new GUIContent("Downsample",
-                                                         "Reduce the size of the screen before processing. Increase will improve performance but create more artifact.");
+        "Reduce the size of the screen before processing. Increase will improve performance but create more artifact");
 
     readonly GUIContent regionLabel = new GUIContent("Blur Region",
-                                                     "Choose which part of the screen to blur. Blur smaller region is faster.");
+        "Choose which part of the screen to blur. Blur smaller region is faster");
 
     readonly GUIContent updateRateLabel = new GUIContent("Max Update Rate",
                                                          "How many time to blur per second. Reduce to increase performance and save battery for slow moving background");
 
     readonly GUIContent previewLabel = new GUIContent("Preview",
                                                       "Preview the effect over the entire screen");
-
 #endregion
 
 
-    UnityEditor.Editor configEditor;
+    Editor configEditor;
 
     public ScalableBlurConfigEditor ConfigEditor
     {
@@ -36,31 +31,30 @@ public class TranslucentImageSourceEditor : UnityEditor.Editor
         {
             if (configEditor == null)
             {
-                var config = ((TranslucentImageSource) target).BlurConfig;
+                var config = ((TranslucentImageSource)this.target).BlurConfig;
                 if (config != null)
                     configEditor = CreateEditor(config);
             }
 
-            return (ScalableBlurConfigEditor) configEditor;
+            return (ScalableBlurConfigEditor)this.configEditor;
         }
     }
-
 
     public override void OnInspectorGUI()
     {
         Undo.RecordObject(target, "Change Translucent Image Source property");
         PrefabUtility.RecordPrefabInstancePropertyModifications(target);
 
-        var tiSource = (TranslucentImageSource) target;
+        var tiSource = (TranslucentImageSource)this.target;
 
         using (var v = new EditorGUILayout.VerticalScope())
         {
             EditorGUILayout.Space();
             GUI.Box(v.rect, GUIContent.none);
-            tiSource.BlurConfig = (BlurConfig) EditorGUILayout.ObjectField("Config file",
-                                                                           tiSource.BlurConfig,
-                                                                           typeof(BlurConfig),
-                                                                           false);
+            tiSource.BlurConfig = (BlurConfig)EditorGUILayout.ObjectField("Config file",
+                tiSource.BlurConfig,
+                typeof(BlurConfig),
+                false);
 
             if (tiSource.BlurConfig == null)
             {
@@ -81,7 +75,7 @@ public class TranslucentImageSourceEditor : UnityEditor.Editor
             else
             {
                 // EditorGUILayout.LabelField("Blur settings", EditorStyles.centeredGreyMiniLabel);
-                ConfigEditor.Draw((ScalableBlurConfig) tiSource.BlurConfig);
+                this.ConfigEditor.Draw((ScalableBlurConfig)tiSource.BlurConfig);
             }
         }
 

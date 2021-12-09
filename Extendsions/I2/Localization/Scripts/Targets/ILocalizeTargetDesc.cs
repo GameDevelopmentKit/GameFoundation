@@ -1,22 +1,22 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System;
+    using UnityEngine;
+    using Object = UnityEngine.Object;
+
     public abstract class ILocalizeTargetDescriptor
     {
-        public string Name;
-        public int Priority;
-        public abstract bool CanLocalize(Localize cmp);
+        public          string          Name;
+        public          int             Priority;
+        public abstract bool            CanLocalize(Localize cmp);
         public abstract ILocalizeTarget CreateTarget(Localize cmp);
-        public abstract System.Type GetTargetType();
+        public abstract Type            GetTargetType();
     }
 
     public abstract class LocalizeTargetDesc<T> : ILocalizeTargetDescriptor where T : ILocalizeTarget
     {
         public override ILocalizeTarget CreateTarget(Localize cmp) { return ScriptableObject.CreateInstance<T>(); }
-        public override System.Type GetTargetType() { return typeof(T); }
+        public override Type            GetTargetType()            { return typeof(T); }
     }
 
 

@@ -1,22 +1,28 @@
-﻿using System;
-using UnityEngine;
-
-#if TextMeshPro
+﻿#if TextMeshPro
 namespace I2.Loc
 {
-    #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad] 
+    using System;
+    using TMPro;
+    using UnityEditor;
+    using UnityEngine;
+
+#if UNITY_EDITOR
+    [InitializeOnLoad] 
     #endif
 
-    public class LocalizeTarget_TextMeshPro_UGUI : LocalizeTarget<TMPro.TextMeshProUGUI>
+    public class LocalizeTarget_TextMeshPro_UGUI : LocalizeTarget<TextMeshProUGUI>
     {
         static LocalizeTarget_TextMeshPro_UGUI() { AutoRegister(); }
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<TMPro.TextMeshProUGUI, LocalizeTarget_TextMeshPro_UGUI>() { Name = "TextMeshPro UGUI", Priority = 100 }); }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void AutoRegister()
+        {
+            LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<TextMeshProUGUI, LocalizeTarget_TextMeshPro_UGUI> { Name = "TextMeshPro UGUI", Priority = 100 });
+        }
 
-        public TMPro.TextAlignmentOptions mAlignment_RTL = TMPro.TextAlignmentOptions.Right;
-        public TMPro.TextAlignmentOptions mAlignment_LTR = TMPro.TextAlignmentOptions.Left;
-        public bool mAlignmentWasRTL;
-        public bool mInitializeAlignment = true;
+        public TextAlignmentOptions mAlignment_RTL = TextAlignmentOptions.Right;
+        public TextAlignmentOptions mAlignment_LTR = TextAlignmentOptions.Left;
+        public bool                 mAlignmentWasRTL;
+        public bool                 mInitializeAlignment = true;
 
         public override eTermType GetPrimaryTermType(Localize cmp) { return eTermType.Text; }
         public override eTermType GetSecondaryTermType(Localize cmp) { return eTermType.TextMeshPFont; }
@@ -26,8 +32,8 @@ namespace I2.Loc
 
         public override void GetFinalTerms ( Localize cmp, string Main, string Secondary, out string primaryTerm, out string secondaryTerm)
         {
-            primaryTerm = mTarget ? mTarget.text : null;
-            secondaryTerm = (mTarget.font != null ? mTarget.font.name : string.Empty);
+            primaryTerm   = mTarget ? mTarget.text : null;
+            secondaryTerm = this.mTarget.font != null ? this.mTarget.font.name : string.Empty;
         }
 
 
@@ -36,7 +42,7 @@ namespace I2.Loc
         {
             {
                 //--[ Localize Font Object ]----------
-                TMPro.TMP_FontAsset newFont = cmp.GetSecondaryTranslatedObj<TMPro.TMP_FontAsset>(ref mainTranslation, ref secondaryTranslation);
+                var newFont = cmp.GetSecondaryTranslatedObj<TMP_FontAsset>(ref mainTranslation, ref secondaryTranslation);
 
                 if (newFont != null)
                 {
@@ -67,11 +73,11 @@ namespace I2.Loc
             }
             else
             {
-                TMPro.TextAlignmentOptions alignRTL, alignLTR;
+                TextAlignmentOptions alignRTL, alignLTR;
                 LocalizeTarget_TextMeshPro_Label.InitAlignment_TMPro(mAlignmentWasRTL, mTarget.alignment, out alignLTR, out alignRTL);
 
-                if ((mAlignmentWasRTL && mAlignment_RTL != alignRTL) ||
-                    (!mAlignmentWasRTL && mAlignment_LTR != alignLTR))
+                if (this.mAlignmentWasRTL && this.mAlignment_RTL != alignRTL ||
+                    !this.mAlignmentWasRTL && this.mAlignment_LTR != alignLTR)
                 {
                     mAlignment_LTR = alignLTR;
                     mAlignment_RTL = alignRTL;
@@ -81,12 +87,9 @@ namespace I2.Loc
 
             if (mainTranslation != null && mTarget.text != mainTranslation)
             {
-                if (mainTranslation != null && cmp.CorrectAlignmentForRTL)
-                {
-                    mTarget.alignment = (LocalizationManager.IsRight2Left ? mAlignment_RTL : mAlignment_LTR);
-                    mTarget.isRightToLeftText = LocalizationManager.IsRight2Left;
-                    if (LocalizationManager.IsRight2Left) mainTranslation = I2Utils.ReverseText(mainTranslation);
-                }
+                if (cmp.CorrectAlignmentForRTL) this.mTarget.alignment = LocalizationManager.IsRight2Left ? this.mAlignment_RTL : this.mAlignment_LTR;
+                this.mTarget.isRightToLeftText = LocalizationManager.IsRight2Left;
+                if (LocalizationManager.IsRight2Left) mainTranslation = I2Utils.ReverseText(mainTranslation);
 
                 mTarget.text = mainTranslation;
             }

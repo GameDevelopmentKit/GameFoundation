@@ -1,8 +1,9 @@
-﻿using UnityEditor;
-using UnityEngine;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System;
+	using UnityEditor;
+	using UnityEngine;
+
 	[CustomEditor(typeof(SetLanguage))]
 	public class SetLanguageInspector : Editor
 	{
@@ -23,15 +24,15 @@ namespace I2.Loc
 			{
 				LocalizationManager.UpdateSources();
 				Languages = LocalizationManager.GetAllLanguages().ToArray();
-				System.Array.Sort(Languages);
+				Array.Sort(Languages);
 			}
 			else
 			{
 				Languages = sourceObj.mSource.GetLanguages().ToArray();
-				System.Array.Sort(Languages);
+				Array.Sort(Languages);
 			}
 
-            int index = System.Array.IndexOf(Languages, mProp_Language.stringValue);
+			var index = Array.IndexOf(Languages, this.mProp_Language.stringValue);
 
 			GUI.changed = false;
 			index = EditorGUILayout.Popup("Language", index, Languages);

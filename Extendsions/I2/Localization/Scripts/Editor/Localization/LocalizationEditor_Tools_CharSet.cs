@@ -1,17 +1,18 @@
-using UnityEditor;
-using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace I2.Loc
 {
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text;
+	using UnityEditor;
+	using UnityEngine;
+
 	public partial class LocalizationEditor
 	{
 		#region Variables
 
 		List<string> mCharSetTool_Languages = new List<string>();
-		string mCharSet = string.Empty;
-        bool mCharSetTool_CaseSensitive = false;
+		string       mCharSet               = string.Empty;
+		private bool mCharSetTool_CaseSensitive;
 
 		#endregion
 		
@@ -135,8 +136,9 @@ namespace I2.Loc
 					AppendToCharSet( sb, termData.Languages[iLanguage], isRTL );
 				}
 			}
-            var bytes = System.Text.Encoding.UTF8.GetBytes( sb.ToArray().OrderBy(c => c).ToArray() );
-            mCharSet = System.Text.Encoding.UTF8.GetString(bytes);
+
+			var bytes = Encoding.UTF8.GetBytes(sb.ToArray().OrderBy(c => c).ToArray());
+			this.mCharSet = Encoding.UTF8.GetString(bytes);
 		}
 
 		void AppendToCharSet( HashSet<char> sb, string text, bool isRTL )

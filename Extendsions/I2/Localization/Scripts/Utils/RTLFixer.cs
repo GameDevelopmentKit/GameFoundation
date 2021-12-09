@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System;
+    using System.Collections.Generic;
 
     public class RTLFixer
     {
@@ -25,29 +23,25 @@ namespace I2.Loc
             {
                 return Fix(str);
             }
-            else
-            {
-                string[] words = str.Split(' ');
-                string result = "";
-                string arabicToIgnore = "";
-                foreach (string word in words)
+
+            var words          = str.Split(' ');
+            var result         = "";
+            var arabicToIgnore = "";
+            foreach (var word in words)
+                if (char.IsLower(word.ToLower()[word.Length / 2]))
                 {
-                    if (char.IsLower(word.ToLower()[word.Length / 2]))
-                    {
-                        result += Fix(arabicToIgnore) + word + " ";
-                        arabicToIgnore = "";
-                    }
-                    else
-                    {
-                        arabicToIgnore += word + " ";
-
-                    }
+                    result         += Fix(arabicToIgnore) + word + " ";
+                    arabicToIgnore =  "";
                 }
-                if (arabicToIgnore != "")
-                    result += Fix(arabicToIgnore);
+                else
+                {
+                    arabicToIgnore += word + " ";
+                }
 
-                return result;
-            }
+            if (arabicToIgnore != "")
+                result += Fix(arabicToIgnore);
+
+            return result;
         }
 
          /// <summary>
@@ -75,32 +69,26 @@ namespace I2.Loc
 
             if (str.Contains(Environment.NewLine))
             {
-                string[] stringSeparators = new string[] { Environment.NewLine };
-                string[] strSplit = str.Split(stringSeparators, StringSplitOptions.None);
+                string[] stringSeparators = { Environment.NewLine };
+                string[] strSplit         = str.Split(stringSeparators, StringSplitOptions.None);
 
                 if (strSplit.Length == 0)
                     return RTLFixerTool.FixLine(str);
-                else if (strSplit.Length == 1)
+                if (strSplit.Length == 1)
                     return RTLFixerTool.FixLine(str);
-                else
-                {
-                    string outputString = RTLFixerTool.FixLine(strSplit[0]);
-                    int iteration = 1;
-                    if (strSplit.Length > 1)
+                var outputString = RTLFixerTool.FixLine(strSplit[0]);
+                var iteration    = 1;
+                if (strSplit.Length > 1)
+                    while (iteration < strSplit.Length)
                     {
-                        while (iteration < strSplit.Length)
-                        {
-                            outputString += Environment.NewLine + RTLFixerTool.FixLine(strSplit[iteration]);
-                            iteration++;
-                        }
+                        outputString += Environment.NewLine + RTLFixerTool.FixLine(strSplit[iteration]);
+                        iteration++;
                     }
-                    return outputString;
-                }
+
+                return outputString;
             }
-            else
-            {
-                return RTLFixerTool.FixLine(str);
-            }
+
+            return RTLFixerTool.FixLine(str);
 
         }
 
@@ -331,7 +319,7 @@ namespace I2.Loc
     internal class RTLFixerTool
     {
         internal static bool showTashkeel = true;
-        internal static bool useHinduNumbers = false;
+        internal static bool useHinduNumbers;
 
 
         internal static string RemoveTashkeel(string str, out List<TashkeelLocation> tashkeelLocation)
@@ -435,10 +423,8 @@ namespace I2.Loc
                 }
             }
 
-            string[] split = str.Split(new char[]{(char)0x064B,(char)0x064C,(char)0x064D,
-                (char)0x064E,(char)0x064F,(char)0x0650,
-
-                (char)0x0651,(char)0x0652,(char)0x0653,(char)0xFC60,(char)0xFC61,(char)0xFC62});
+            var split = str.Split((char)0x064B, (char)0x064C, (char)0x064D, (char)0x064E, (char)0x064F, (char)0x0650, (char)0x0651, (char)0x0652, (char)0x0653, (char)0xFC60, (char)0xFC61,
+                (char)0xFC62);
             str = "";
 
             foreach (string s in split)
@@ -509,25 +495,25 @@ namespace I2.Loc
                     if (i < lettersOrigin.Length - 1)
                     {
                         //lettersOrigin[i + 1] = (char)ArabicTable.ArabicMapper.Convert(lettersOrigin[i + 1]);
-                        if ((lettersOrigin[i + 1] == (char)IsolatedArabicLetters.AlefMaksoor))
+                        if (lettersOrigin[i + 1] == (char)IsolatedArabicLetters.AlefMaksoor)
                         {
                             lettersOrigin[i] = (char)0xFEF7;
                             lettersFinal[i + 1] = (char)0xFFFF;
                             skip = true;
                         }
-                        else if ((lettersOrigin[i + 1] == (char)IsolatedArabicLetters.Alef))
+                        else if (lettersOrigin[i + 1] == (char)IsolatedArabicLetters.Alef)
                         {
                             lettersOrigin[i] = (char)0xFEF9;
                             lettersFinal[i + 1] = (char)0xFFFF;
                             skip = true;
                         }
-                        else if ((lettersOrigin[i + 1] == (char)IsolatedArabicLetters.AlefHamza))
+                        else if (lettersOrigin[i + 1] == (char)IsolatedArabicLetters.AlefHamza)
                         {
                             lettersOrigin[i] = (char)0xFEF5;
                             lettersFinal[i + 1] = (char)0xFFFF;
                             skip = true;
                         }
-                        else if ((lettersOrigin[i + 1] == (char)IsolatedArabicLetters.AlefMad))
+                        else if (lettersOrigin[i + 1] == (char)IsolatedArabicLetters.AlefMad)
                         {
                             lettersOrigin[i] = (char)0xFEF3;
                             lettersFinal[i + 1] = (char)0xFFFF;
@@ -554,7 +540,7 @@ namespace I2.Loc
                 //strOut = String.Format(@"\x{0:x4}", (ushort)lettersFinal[i]);
                 //UnityEngine.Debug.Log(strOut);
 
-                test += Convert.ToString((int)lettersOrigin[i], 16) + " ";
+                test += Convert.ToString(lettersOrigin[i], 16) + " ";
                 if (skip)
                     i++;
 
@@ -657,8 +643,8 @@ namespace I2.Loc
                     else
                         numberList.Add(lettersFinal[i]);
                 }
-                else if ((lettersFinal[i] >= (char)0xD800 && lettersFinal[i] <= (char)0xDBFF) ||
-                        (lettersFinal[i] >= (char)0xDC00 && lettersFinal[i] <= (char)0xDFFF))
+                else if (lettersFinal[i] >= (char)0xD800 && lettersFinal[i] <= (char)0xDBFF ||
+                         lettersFinal[i] >= (char)0xDC00 && lettersFinal[i] <= (char)0xDFFF)
                 {
                     numberList.Add(lettersFinal[i]);
                 }
@@ -699,13 +685,13 @@ namespace I2.Loc
         /// <returns>True if the character should be ignored, false if it should not be ignored.</returns>
         internal static bool IsIgnoredCharacter(char ch)
         {
-            bool isPunctuation = char.IsPunctuation(ch);
-            bool isNumber = char.IsNumber(ch);
-            bool isLower = char.IsLower(ch);
-            bool isUpper = char.IsUpper(ch);
-            bool isSymbol = char.IsSymbol(ch);
-            bool isPersianCharacter = ch == (char)0xFB56 || ch == (char)0xFB7A || ch == (char)0xFB8A || ch == (char)0xFB92 || ch == (char)0xFB8E;
-            bool isPresentationFormB = (ch <= (char)0xFEFF && ch >= (char)0xFE70);
+            bool isPunctuation         = char.IsPunctuation(ch);
+            bool isNumber              = char.IsNumber(ch);
+            bool isLower               = char.IsLower(ch);
+            bool isUpper               = char.IsUpper(ch);
+            bool isSymbol              = char.IsSymbol(ch);
+            bool isPersianCharacter    = ch == (char)0xFB56 || ch == (char)0xFB7A || ch == (char)0xFB8A || ch == (char)0xFB92 || ch == (char)0xFB8E;
+            var  isPresentationFormB   = ch <= (char)0xFEFF && ch >= (char)0xFE70;
             bool isAcceptableCharacter = isPresentationFormB || isPersianCharacter || ch == (char)0xFBFC;
 
 
@@ -808,8 +794,8 @@ namespace I2.Loc
             {
                 return true;
             }
-            else
-                return false;
+
+            return false;
         }
 
         /// <summary>
@@ -821,7 +807,9 @@ namespace I2.Loc
         internal static bool IsFinishingLetter(char[] letters, int index)
         {
             //bool indexZero = index != 0;
-            bool lettersThatCannotBeBeforeAFinishingLetter = (index == 0) ? false :
+            var lettersThatCannotBeBeforeAFinishingLetter = index == 0
+                ? false
+                :
                     letters[index - 1] != ' '
                     //				&& char.IsDigit(letters[index-1])
                     //				&& char.IsLower(letters[index-1])
@@ -886,8 +874,8 @@ namespace I2.Loc
                 return true;
             }
             //return true;
-            else
-                return false;
+
+            return false;
         }
 
         /// <summary>
@@ -898,7 +886,9 @@ namespace I2.Loc
         /// <returns>True if the character at index is a middle character, else, returns false</returns>
         internal static bool IsMiddleLetter(char[] letters, int index)
         {
-            bool lettersThatCannotBeMiddleLetters = (index == 0) ? false :
+            var lettersThatCannotBeMiddleLetters = index == 0
+                ? false
+                :
                 letters[index] != (int)IsolatedArabicLetters.Alef
                     && letters[index] != (int)IsolatedArabicLetters.Dal
                     && letters[index] != (int)IsolatedArabicLetters.Thal
@@ -913,7 +903,9 @@ namespace I2.Loc
                     && letters[index] != (int)IsolatedArabicLetters.WawHamza
                     && letters[index] != (int)IsolatedArabicLetters.Hamza;
 
-            bool lettersThatCannotBeBeforeMiddleCharacters = (index == 0) ? false :
+            var lettersThatCannotBeBeforeMiddleCharacters = index == 0
+                ? false
+                :
                     letters[index - 1] != (int)IsolatedArabicLetters.Alef
                     && letters[index - 1] != (int)IsolatedArabicLetters.Dal
                     && letters[index - 1] != (int)IsolatedArabicLetters.Thal
@@ -933,7 +925,9 @@ namespace I2.Loc
                     && letters[index - 1] != ' '
                     && letters[index - 1] != '*';
 
-            bool lettersThatCannotBeAfterMiddleCharacters = (index >= letters.Length - 1) ? false :
+            var lettersThatCannotBeAfterMiddleCharacters = index >= letters.Length - 1
+                ? false
+                :
                 letters[index + 1] != ' '
                     && letters[index + 1] != '\r'
                     && letters[index + 1] != (int)IsolatedArabicLetters.Hamza
@@ -967,8 +961,7 @@ namespace I2.Loc
                 {
                     if (char.IsPunctuation(letters[index + 1]))
                         return false;
-                    else
-                        return true;
+                    return true;
                 }
                 catch
                 {
@@ -976,8 +969,8 @@ namespace I2.Loc
                 }
                 //return true;
             }
-            else
-                return false;
+
+            return false;
         }
     }
 }

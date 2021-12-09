@@ -1,16 +1,20 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Serialization;
-using System.Collections.Generic;
-using System.Linq;
-using Object = UnityEngine.Object;
-
+﻿#if UNITY_EDITOR
+using UnityEditor.Events;
+using UnityEditor;
+#endif
 
 namespace I2.Loc
 {
-    [AddComponentMenu("I2/Localization/I2 Localize")]
-    public partial class Localize : MonoBehaviour
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text;
+	using UnityEngine;
+	using UnityEngine.Events;
+	using Object = UnityEngine.Object;
+
+	[AddComponentMenu("I2/Localization/I2 Localize")]
+    public class Localize : MonoBehaviour
     {
         #region Variables: Term
         public string Term
@@ -48,8 +52,8 @@ namespace I2.Loc
 
         #region Variables: Target
 
-        public bool IgnoreRTL = false;	// If false, no Right To Left processing will be done
-		public int  MaxCharactersInRTL = 0;     // If the language is RTL, the translation will be split in lines not longer than this amount and the RTL fix will be applied per line
+        public bool IgnoreRTL; // If false, no Right To Left processing will be done
+        public int  MaxCharactersInRTL; // If the language is RTL, the translation will be split in lines not longer than this amount and the RTL fix will be applied per line
 		public bool IgnoreNumbersInRTL = true; // If the language is RTL, the translation will not convert numbers (will preserve them like: e.g. 123)
 
 		public bool CorrectAlignmentForRTL = true;	// If true, when Right To Left language, alignment will be set to Right
@@ -81,16 +85,18 @@ namespace I2.Loc
 		public static string CallBackTerm, CallBackSecondaryTerm;		// during the callback, this will hold the FinalTerm and FinalSecondary  to know what terms are originating the translation
 		public static Localize CurrentLocalizeComponent;				// while in the LocalizeCallBack, this points to the Localize calling the callback
 
-		public bool AlwaysForceLocalize = false;			// Force localization when the object gets enabled (useful for callbacks and parameters that change the localization even through the language is the same as in the previous time it was localized)
+		public bool
+			AlwaysForceLocalize; // Force localization when the object gets enabled (useful for callbacks and parameters that change the localization even through the language is the same as in the previous time it was localized)
 
         [SerializeField] public EventCallback LocalizeCallBack = new EventCallback();    //LocalizeCallBack is deprecated. Please use LocalizeEvent instead.
 
         #endregion
 
         #region Variables: Editor Related
-        public bool mGUI_ShowReferences = false;
+
+        public bool mGUI_ShowReferences;
 		public bool mGUI_ShowTems = true;
-		public bool mGUI_ShowCallback = false;
+		public bool mGUI_ShowCallback;
         #endregion
 
         #region Variables: Runtime (LocalizeTarget)
@@ -105,7 +111,7 @@ namespace I2.Loc
         void Awake()
 		{
             #if UNITY_EDITOR
-            if (UnityEditor.BuildPipeline.isBuildingPlayer)
+			if (BuildPipeline.isBuildingPlayer)
                 return;
             #endif
 
@@ -123,13 +129,13 @@ namespace I2.Loc
             {
                 try
                 {
-                    var methodInfo = UnityEvent.GetValidMethodInfo(LocalizeCallBack.Target, LocalizeCallBack.MethodName, new Type[0]);
+	                var methodInfo = UnityEventBase.GetValidMethodInfo(this.LocalizeCallBack.Target, this.LocalizeCallBack.MethodName, Array.Empty<Type>());
 
                     if (methodInfo != null)
                     {
-                        UnityAction methodDelegate = System.Delegate.CreateDelegate(typeof(UnityAction), LocalizeCallBack.Target, methodInfo, false) as UnityAction;
+	                    var methodDelegate = Delegate.CreateDelegate(typeof(UnityAction), this.LocalizeCallBack.Target, methodInfo, false) as UnityAction;
                         if (methodDelegate != null)
-                            UnityEditor.Events.UnityEventTools.AddPersistentListener(LocalizeEvent, methodDelegate);
+	                        UnityEventTools.AddPersistentListener(this.LocalizeEvent, methodDelegate);
                     }
                 }
                 catch(Exception)
@@ -175,10 +181,10 @@ namespace I2.Loc
 			if (!hasCallback && string.IsNullOrEmpty (FinalTerm) && string.IsNullOrEmpty (FinalSecondaryTerm))
 				return;
 
-			CallBackTerm = FinalTerm;
+			CallBackTerm          = FinalTerm;
 			CallBackSecondaryTerm = FinalSecondaryTerm;
-			MainTranslation = (string.IsNullOrEmpty(FinalTerm) || FinalTerm=="-") ? null : LocalizationManager.GetTranslation (FinalTerm, false);
-			SecondaryTranslation = (string.IsNullOrEmpty(FinalSecondaryTerm) || FinalSecondaryTerm == "-") ? null : LocalizationManager.GetTranslation (FinalSecondaryTerm, false);
+			MainTranslation       = string.IsNullOrEmpty(this.FinalTerm) || this.FinalTerm == "-" ? null : LocalizationManager.GetTranslation(this.FinalTerm, false);
+			SecondaryTranslation  = string.IsNullOrEmpty(this.FinalSecondaryTerm) || this.FinalSecondaryTerm == "-" ? null : LocalizationManager.GetTranslation(this.FinalSecondaryTerm, false);
 
 			if (!hasCallback && /*string.IsNullOrEmpty (MainTranslation)*/ string.IsNullOrEmpty(FinalTerm) && string.IsNullOrEmpty (SecondaryTranslation))
 				return;
@@ -212,7 +218,7 @@ namespace I2.Loc
 
                 if (AddSpacesToJoinedLanguages && LocalizationManager.HasJoinedWords && !string.IsNullOrEmpty(MainTranslation))
                 {
-                    var sb = new System.Text.StringBuilder();
+	                var sb = new StringBuilder();
                     sb.Append(MainTranslation[0]);
                     for (int i = 1, imax = MainTranslation.Length; i < imax; ++i)
                     {
@@ -312,7 +318,7 @@ namespace I2.Loc
             if (mLocalizeTarget != null)
             {
                 mLocalizeTarget.GetFinalTerms(this, mTerm, mTermSecondary, out primaryTerm, out secondaryTerm);
-                primaryTerm = I2Utils.GetValidTermName(primaryTerm, false);
+                primaryTerm = I2Utils.GetValidTermName(primaryTerm);
             }
 
             // If there are values already set, go with those

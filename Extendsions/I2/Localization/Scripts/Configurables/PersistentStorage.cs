@@ -1,8 +1,11 @@
-﻿using UnityEngine;
-using System;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.Text;
+    using UnityEngine;
+
     public static class PersistentStorage
     {
         static I2CustomPersistentStorage mStorage;
@@ -97,7 +100,7 @@ namespace I2.Loc
                     for (int i=0; i<numSections; ++i)
                     {
                         int iStart = maxLength * i;
-                        PlayerPrefs.SetString(string.Format("[I2split]{0}{1}",i,key), value.Substring(iStart, Mathf.Min(maxLength, len-iStart)));
+                        PlayerPrefs.SetString($"[I2split]{i}{key}", value.Substring(iStart, Mathf.Min(maxLength, len - iStart)));
                     }
                     PlayerPrefs.SetString(key, "[$I2#@div$]" + numSections);
                 }                
@@ -112,13 +115,13 @@ namespace I2.Loc
                 var data = PlayerPrefs.GetString(key, defaultValue);
 
                 // Check if the data is splitted, if so, concat all the sections
-                if (!string.IsNullOrEmpty(data) && data.StartsWith("[I2split]"))
+                if (!string.IsNullOrEmpty(data) && data.StartsWith("[I2split]", StringComparison.Ordinal))
                 {
-                    int nSections = int.Parse(data.Substring("[I2split]".Length));
+                    var nSections = int.Parse(data.Substring("[I2split]".Length), CultureInfo.InvariantCulture);
                     data = "";
                     for (int i=0; i<nSections; ++i)
                     {
-                        data += PlayerPrefs.GetString(string.Format("[I2split]{0}{1}", i, key), "");
+                        data += PlayerPrefs.GetString($"[I2split]{i}{key}", "");
                     }
                 }
                 return data;
@@ -137,12 +140,12 @@ namespace I2.Loc
                 var data = PlayerPrefs.GetString(key, null);
 
                 // If the data is splitted, delete each section as well
-                if (!string.IsNullOrEmpty(data) && data.StartsWith("[I2split]"))
+                if (!string.IsNullOrEmpty(data) && data.StartsWith("[I2split]", StringComparison.Ordinal))
                 {
-                    int nSections = int.Parse(data.Substring("[I2split]".Length));
+                    var nSections = int.Parse(data.Substring("[I2split]".Length), CultureInfo.InvariantCulture);
                     for (int i = 0; i < nSections; ++i)
                     {
-                        PlayerPrefs.DeleteKey(string.Format("[I2split]{0}{1}", i, key));
+                        PlayerPrefs.DeleteKey($"[I2split]{i}{key}");
                     }
                 }
                 PlayerPrefs.DeleteKey(key);
@@ -185,7 +188,7 @@ namespace I2.Loc
             {
                 case PersistentStorage.eFileType.Persistent: fileName = Application.persistentDataPath + "/" + fileName; break;
                 case PersistentStorage.eFileType.Temporal:   fileName = Application.temporaryCachePath + "/" + fileName; break;
-                case PersistentStorage.eFileType.Streaming: fileName = Application.streamingAssetsPath + "/" + fileName; break;
+                case PersistentStorage.eFileType.Streaming:  fileName = Application.streamingAssetsPath + "/" + fileName; break;
             }
             return fileName;
         }
@@ -198,7 +201,7 @@ namespace I2.Loc
             try
             {
                 fileName = UpdateFilename(fileType, fileName);
-                System.IO.File.WriteAllText(fileName, data, System.Text.Encoding.UTF8);
+                File.WriteAllText(fileName, data, Encoding.UTF8);
                 return true;
             }
             catch (Exception e)
@@ -217,7 +220,7 @@ namespace I2.Loc
             try
             {
                 fileName = UpdateFilename(fileType, fileName);
-                return System.IO.File.ReadAllText(fileName, System.Text.Encoding.UTF8);
+                return File.ReadAllText(fileName, Encoding.UTF8);
             }
             catch (Exception e)
             {
@@ -235,7 +238,7 @@ namespace I2.Loc
             try
             {
                 fileName = UpdateFilename(fileType, fileName);
-                System.IO.File.Delete(fileName);
+                File.Delete(fileName);
                 return true;
             }
             catch (Exception e)
@@ -254,7 +257,7 @@ namespace I2.Loc
             try
             {
                 fileName = UpdateFilename(fileType, fileName);
-                return System.IO.File.Exists(fileName);
+                return File.Exists(fileName);
             }
             catch (Exception e)
             {
@@ -266,7 +269,7 @@ namespace I2.Loc
 #endregion
     }
 
-    public partial class I2CustomPersistentStorage : I2BasePersistentStorage
+    public class I2CustomPersistentStorage : I2BasePersistentStorage
     {
         //public override void SetSetting_String(string key, string value)
         //public override string GetSetting_String(string key, string defaultValue)

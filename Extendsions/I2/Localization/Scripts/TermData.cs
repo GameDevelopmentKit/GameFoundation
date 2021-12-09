@@ -1,11 +1,9 @@
-using System;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-using Object = UnityEngine.Object;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using UnityEngine;
+
 	public enum eTermType 
 	{ 
 		Text, Font, Texture, AudioClip, GameObject, Sprite, Material, Child, Mesh,
@@ -27,8 +25,8 @@ namespace I2.Loc
 
 	public enum TranslationFlag : byte
 	{
-		Normal = 1,
-		AutoTranslated = 2,
+		Normal         = 1,
+		AutoTranslated = 2
 	}
 
 
@@ -42,11 +40,11 @@ namespace I2.Loc
 		[NonSerialized]
 		#endif
 		public string 			Description;
-		
-        public string[]         Languages = new string[0];
-        public byte[]			Flags 			= new byte[0];  // flags for each translation
 
-        [SerializeField] private string[] Languages_Touch = null;      // TO BE REMOVED IN A FUTURE RELEASE
+		public string[] Languages = Array.Empty<string>();
+		public byte[]   Flags     = Array.Empty<byte>(); // flags for each translation
+
+		[SerializeField] private string[] Languages_Touch; // TO BE REMOVED IN A FUTURE RELEASE
 
         public string GetTranslation ( int idx, string specialization=null, bool editMode=false )
 		{
@@ -138,13 +136,13 @@ namespace I2.Loc
                 SpecializationManager.AppendSpecializations(Languages[i], values);
             return values;
         }
-    };
+	}
 
     public class TermsPopup : PropertyAttribute
     {
         public TermsPopup(string filter = "")
         {
-            this.Filter = filter;
+	        this.Filter = filter;
         }
 
         public string Filter { get; private set; }

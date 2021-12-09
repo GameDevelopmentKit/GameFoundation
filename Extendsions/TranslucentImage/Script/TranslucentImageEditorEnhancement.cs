@@ -1,10 +1,10 @@
 ﻿#if UNITY_EDITOR
-using UnityEditor;
-using UnityEngine;
-
 namespace LeTai.Asset.TranslucentImage
 {
-[ExecuteInEditMode]
+    using UnityEditor;
+    using UnityEngine;
+
+    [ExecuteAlways]
 [AddComponentMenu("UI/Translucent Image", 2)]
 public partial class TranslucentImage
 {
@@ -19,8 +19,6 @@ public partial class TranslucentImage
         flatten    = material.GetFloat(_flattenPropId);
 
         source = source ? source : FindObjectOfType<TranslucentImageSource>();
-
-        PrepareShader();
     }
 
     static Material FindDefaultMaterial()

@@ -1,7 +1,9 @@
-﻿using UnityEngine;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System;
+    using UnityEngine;
+    using Object = UnityEngine.Object;
+
     public class RegisterBundlesManager : MonoBehaviour, IResourceManager_Bundles
 	{
 		public void OnEnable()
@@ -17,7 +19,7 @@ namespace I2.Loc
             ResourceManager.pInstance.mBundleManagers.Remove(this);
         }
 
-        public virtual Object LoadFromBundle(string path, System.Type assetType)
+        public virtual Object LoadFromBundle(string path, Type assetType)
         {
             // load from a bundle using path and return the object
             return null;

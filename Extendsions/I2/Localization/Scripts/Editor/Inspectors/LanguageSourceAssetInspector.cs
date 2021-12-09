@@ -1,10 +1,9 @@
-﻿using UnityEngine;
-using UnityEditor;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using UnityEditor;
+
     [CustomEditor(typeof(LanguageSourceAsset))]
-    public partial class LanguageSourceAssetInspector : LocalizationEditor
+    public class LanguageSourceAssetInspector : LocalizationEditor
     {
         void OnEnable()
         {

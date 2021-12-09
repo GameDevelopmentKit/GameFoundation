@@ -1,12 +1,21 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System.Linq;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System;
+	using System.IO;
+	using System.Linq;
+	using System.Text;
+	using UnityEditor;
+	using UnityEngine;
+
 	public partial class LocalizationEditor
 	{
-		enum eLocalSpreadsheeet { CSV, XLS, XLSX, NONE };
+		private enum eLocalSpreadsheeet
+		{
+			CSV,
+			XLS,
+			XLSX,
+			NONE
+		}
 
 		void OnGUI_Spreadsheet_Local()
 		{
@@ -123,17 +132,17 @@ namespace I2.Loc
 
 				GUILayout.BeginHorizontal();
 					//--[ Encoding ]---------------
-					var encodings = System.Text.Encoding.GetEncodings ().OrderBy(e=>e.Name).ToArray();
+					var encodings     = Encoding.GetEncodings().OrderBy(e => e.Name).ToArray();
 					var encodingNames = encodings.Select(e=>e.Name).ToArray();
 
-					int idx = System.Array.IndexOf (encodingNames, mProp_Spreadsheet_LocalCSVEncoding.stringValue);
+					var idx = Array.IndexOf(encodingNames, this.mProp_Spreadsheet_LocalCSVEncoding.stringValue);
 					if (idx == -1)
-						idx = System.Array.IndexOf (encodingNames, "utf-8");
+						idx = Array.IndexOf(encodingNames, "utf-8");
 					EditorGUIUtility.labelWidth = 80;
 
 					idx = EditorGUILayout.Popup ("Encoding:", idx, encodingNames);
 					if (GUILayout.Button("Default", GUILayout.ExpandWidth(false)))
-				    	idx = System.Array.IndexOf (encodingNames, "utf-8");
+						idx = Array.IndexOf(encodingNames, "utf-8");
             
 					if (idx>=0 && mProp_Spreadsheet_LocalCSVEncoding.stringValue != encodings [idx].Name)
 						mProp_Spreadsheet_LocalCSVEncoding.stringValue = encodings [idx].Name;
@@ -186,7 +195,7 @@ namespace I2.Loc
 
 		void OnGUI_Spreadsheet_Local_ImportExport( eLocalSpreadsheeet CurrentExtension, string File )
 		{
-			GUI.enabled = (CurrentExtension!=eLocalSpreadsheeet.NONE);
+			GUI.enabled = CurrentExtension != eLocalSpreadsheeet.NONE;
 
 			GUILayout.BeginHorizontal();
 			GUILayout.Space(10);
@@ -227,8 +236,7 @@ namespace I2.Loc
 				
 				if (string.IsNullOrEmpty(File))
 					File = Application.dataPath + "/Localization.csv";
-				else
-					if (!System.IO.Path.IsPathRooted(File))
+				else if (!Path.IsPathRooted(File))
 						File = string.Concat(Application.dataPath, "/", File);
 
 				// On Mac there is an issue with previewing CSV files, so its forced to only TXT
@@ -249,7 +257,7 @@ namespace I2.Loc
 					AssetDatabase.SaveAssets();
 				}
 			}
-			catch (System.Exception ex) 
+			catch (Exception ex) 
 			{ 
 				ShowError("Unable to import file");
 				Debug.LogError(ex.Message); 
@@ -258,10 +266,10 @@ namespace I2.Loc
 
 		void Import_CSV( string FileName, eSpreadsheetUpdateMode UpdateMode )
 		{
-            LanguageSourceData source = GetSourceData();
-            var encoding = System.Text.Encoding.GetEncoding (mProp_Spreadsheet_LocalCSVEncoding.stringValue);
+            LanguageSourceData source   = GetSourceData();
+            var                encoding = Encoding.GetEncoding(this.mProp_Spreadsheet_LocalCSVEncoding.stringValue);
 			if (encoding == null)
-				encoding = System.Text.Encoding.UTF8;
+				encoding = Encoding.UTF8;
 			string CSVstring = LocalizationReader.ReadCSVfile (FileName, encoding);
 
 			char Separator = mProp_Spreadsheet_LocalCSVSeparator.stringValue.Length>0 ? mProp_Spreadsheet_LocalCSVSeparator.stringValue[0] : ',';
@@ -281,18 +289,20 @@ namespace I2.Loc
 				ClearErrors();
 				
 				string sPath = string.Empty;
-				if (!System.IO.Path.IsPathRooted(File))
+				if (!Path.IsPathRooted(File))
 					File = string.Concat(Application.dataPath, "/", File);
 				
 				try {
-					sPath = System.IO.Path.GetDirectoryName(File);
+					sPath = Path.GetDirectoryName(File);
 				}
-				catch( System.Exception){}
+				catch (Exception)
+				{
+				}
 				
 				if (string.IsNullOrEmpty(sPath))
 					sPath = Application.dataPath + "/";
-				
-				File = System.IO.Path.GetFileName(File);
+
+				File = Path.GetFileName(File);
 				if (string.IsNullOrEmpty(File))
 					File = "Localization.csv";
 				
@@ -305,9 +315,9 @@ namespace I2.Loc
 					mLanguageSource.Spreadsheet_LocalFileName = TryMakingPathRelativeToProject(File);
 
 					char Separator = mProp_Spreadsheet_LocalCSVSeparator.stringValue.Length>0 ? mProp_Spreadsheet_LocalCSVSeparator.stringValue[0] : ',';
-					var encoding = System.Text.Encoding.GetEncoding (mProp_Spreadsheet_LocalCSVEncoding.stringValue);
+					var  encoding  = Encoding.GetEncoding(this.mProp_Spreadsheet_LocalCSVEncoding.stringValue);
 					if (encoding == null)
-						encoding = System.Text.Encoding.UTF8;
+						encoding = Encoding.UTF8;
 
 					switch (CurrentExtension)
 					{
@@ -315,18 +325,18 @@ namespace I2.Loc
 					}
 				}
 			}
-			catch (System.Exception)
+			catch (Exception)
 			{
 				ShowError("Unable to export file\nCheck it is not READ-ONLY and that\nits not opened in an external viewer");
 			}
 		}
 
-		public void Export_CSV( string FileName, eSpreadsheetUpdateMode UpdateMode, char Separator, System.Text.Encoding encoding )
+		public void Export_CSV(string FileName, eSpreadsheetUpdateMode UpdateMode, char Separator, Encoding encoding)
 		{
             LanguageSourceData source = GetSourceData();
 
             string CSVstring = source.Export_CSV(null, Separator, mProp_Spreadsheet_SpecializationAsRows.boolValue);
-			System.IO.File.WriteAllText (FileName, CSVstring, encoding);
+            File.WriteAllText(FileName, CSVstring, encoding);
 		}
 	}
 }

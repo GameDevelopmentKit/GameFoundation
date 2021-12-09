@@ -1,5 +1,37 @@
 Changelog:
 
+v3.9.0:
+ - Improve error logging to be more relevant
+ - Assigning Source property on Translucent Image is now easier with automatic suggestions
+ - Fix compatibility with webgl in less capable browsers
+ - Improve compatibility with URP 12.1.2
+
+v3.8.3:
+ - Workflow improvements on URP 12
+
+v3.8.2:
+ - Fix some bugs on URP 12
+
+v3.8.1:
+ - Fix some bugs on URP 12
+
+v3.8.0:
+ - Support URP 12
+ - Fix prefab mode warning
+
+v3.7.0:
+ - Support latest True Shadow release
+ - Fix spurious error messages
+ - Improve PlayStation compatibility
+
+v3.6.0:
+ - Support Single Pass Instanced Stereo Render Mode
+ - Reduce log level
+
+v3.5.1:
+ - Reduce error logging.
+ - Improve compatibility with Addressable.
+
 v3.5.0:
  - Changing Sprite Blending from script is now applied immediately.
  TranslucentImage.spriteBlending is now a property instead of a field.

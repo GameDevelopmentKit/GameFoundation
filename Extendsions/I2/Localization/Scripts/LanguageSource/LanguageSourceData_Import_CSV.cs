@@ -1,9 +1,9 @@
-using UnityEngine;
-using System;
-using System.Collections.Generic;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using UnityEngine;
+
 	public partial class LanguageSourceData
 	{
 		public string Import_CSV( string Category, string CSVstring, eSpreadsheetUpdateMode UpdateMode = eSpreadsheetUpdateMode.Replace, char Separator = ',' )
@@ -26,9 +26,9 @@ namespace I2.Loc
 			int TypeColumnIdx = -1;
 			int DescColumnIdx = -1;
 
-			var ValidColumnName_Key  = new string[]{ "Key" };
-			var ValidColumnName_Type = new string[]{ "Type" };
-			var ValidColumnName_Desc = new string[]{ "Desc", "Description" };
+			var ValidColumnName_Key  = new[] { "Key" };
+			var ValidColumnName_Type = new[] { "Type" };
+			var ValidColumnName_Desc = new[] { "Desc", "Description" };
 
 			if (Tokens.Length>1 && ArrayContains(Tokens[0], ValidColumnName_Key))
 			{
@@ -80,7 +80,7 @@ namespace I2.Loc
 
 				string LanName, LanCode;
 				bool isLangEnabled = true;
-				if (langToken.StartsWith("$"))
+				if (langToken.StartsWith("$", StringComparison.Ordinal))
 				{
 					isLangEnabled = false;
 					langToken = langToken.Substring(1);
@@ -125,7 +125,7 @@ namespace I2.Loc
                 string sKey = string.IsNullOrEmpty(Category) ? Tokens[0] : string.Concat(Category, "/", Tokens[0]);
 
                 string specialization = null;
-                if (sKey.EndsWith("]"))
+                if (sKey.EndsWith("]", StringComparison.Ordinal))
                 {
                     int idx = sKey.LastIndexOf('[');
                     if (idx>0)
@@ -214,18 +214,18 @@ namespace I2.Loc
             int index = 0;
             while (index < langData.Length)
             {
-                int nextIndex = langData.IndexOf("[i2t]", index);
+	            var nextIndex                = langData.IndexOf("[i2t]", index, StringComparison.Ordinal);
                 if (nextIndex < 0) nextIndex = langData.Length;
 
                 // check for errors
-                int termNameEnd = langData.IndexOf("=", index);
+                var termNameEnd = langData.IndexOf("=", index, StringComparison.Ordinal);
                 if (termNameEnd >= nextIndex)
                     return;
 
                 string termName = langData.Substring(index, termNameEnd - index);
                 index = termNameEnd+1;
 
-                var termData = GetTermData(termName, false);
+                var termData = this.GetTermData(termName);
                 if (termData != null)
                 {
                     string translation = null;
@@ -233,13 +233,13 @@ namespace I2.Loc
                     if (index != nextIndex)
                     {
                         translation = langData.Substring(index, nextIndex - index);
-                        if (translation.StartsWith("[i2fb]"))
+                        if (translation.StartsWith("[i2fb]", StringComparison.Ordinal))
                         {
-                            translation = (useFallback) ? translation.Substring(6) : null;
+	                        translation = useFallback ? translation.Substring(6) : null;
                         }
                         if (onlyCurrentSpecialization && translation != null)
                         {
-                            translation = SpecializationManager.GetSpecializedText(translation, null);
+	                        translation = SpecializationManager.GetSpecializedText(translation);
                         }
                     }
                     termData.Languages[langIndex] = translation;

@@ -1,21 +1,20 @@
-using System;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-using Object = UnityEngine.Object;
-
 namespace I2.Loc
 {
+    using System;
+    using System.Collections.Generic;
+
     public class BaseSpecializationManager
     {
-        public string[] mSpecializations = null;
+        public string[]                   mSpecializations;
         public Dictionary<string, string> mSpecializationsFallbacks;
 
         public virtual void InitializeSpecializations()
         {
-            mSpecializations = new string[] { "Any", "PC", "Touch", "Controller", "VR",
+            this.mSpecializations = new[]
+            {
+                "Any", "PC", "Touch", "Controller", "VR",
                                               "XBox", "PS4", "OculusVR", "ViveVR", "GearVR", "Android", "IOS" };
-            mSpecializationsFallbacks = new Dictionary<string, string>()
+            this.mSpecializationsFallbacks = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 { "XBox", "Controller" }, { "PS4", "Controller" },
                 { "OculusVR", "VR" },   { "ViveVR", "VR" }, { "GearVR", "VR" },
@@ -51,11 +50,11 @@ namespace I2.Loc
             string fallback;
             if (mSpecializationsFallbacks.TryGetValue(specialization, out fallback))
                 return fallback;
-            else
-                return "Any";
+            return "Any";
         }
     }
-    public partial class SpecializationManager : BaseSpecializationManager
+
+    public class SpecializationManager : BaseSpecializationManager
     {
         public static SpecializationManager Singleton = new SpecializationManager();
 
@@ -66,7 +65,7 @@ namespace I2.Loc
 
         public static string GetSpecializedText(string text, string specialization = null)
         {
-            var idxFirst = text.IndexOf("[i2s_");
+            var idxFirst = text.IndexOf("[i2s_", StringComparison.Ordinal);
             if (idxFirst < 0)
                 return text;
 
@@ -76,7 +75,7 @@ namespace I2.Loc
             while (!string.IsNullOrEmpty(specialization) && specialization != "Any")
             {
                 var tag = "[i2s_" + specialization + "]";
-                int idx = text.IndexOf(tag);
+                var idx = text.IndexOf(tag, StringComparison.Ordinal);
                 if (idx < 0)
                 {
                     specialization = Singleton.GetFallbackSpecialization(specialization);
@@ -84,7 +83,7 @@ namespace I2.Loc
                 }
 
                 idx += tag.Length;
-                var idxEnd = text.IndexOf("[i2s_", idx);
+                var idxEnd             = text.IndexOf("[i2s_", idx, StringComparison.Ordinal);
                 if (idxEnd < 0) idxEnd = text.Length;
 
                 return text.Substring(idx, idxEnd - idx);
@@ -125,7 +124,7 @@ namespace I2.Loc
         public static Dictionary<string, string> GetSpecializations(string text, Dictionary<string, string> buffer = null)
         {
             if (buffer == null)
-                buffer = new Dictionary<string, string>();
+                buffer = new Dictionary<string, string>(StringComparer.Ordinal);
             else
                 buffer.Clear();
 
@@ -136,7 +135,7 @@ namespace I2.Loc
             }
 
             var idxFirst = 0;
-            var idxEnd = text.IndexOf("[i2s_");
+            var idxEnd   = text.IndexOf("[i2s_", StringComparison.Ordinal);
             if (idxEnd < 0)
                 idxEnd=text.Length;
 
@@ -151,7 +150,7 @@ namespace I2.Loc
                 var tag = text.Substring(idxFirst, idx - idxFirst);
                 idxFirst = idx+1; // ']'
 
-                idxEnd = text.IndexOf("[i2s_", idxFirst);
+                idxEnd = text.IndexOf("[i2s_", idxFirst, StringComparison.Ordinal);
                 if (idxEnd < 0) idxEnd = text.Length;
                 var value = text.Substring(idxFirst, idxEnd - idxFirst);
 
@@ -174,7 +173,7 @@ namespace I2.Loc
             var idxFirst = 0;
             while (idxFirst<text.Length)
             {
-                idxFirst = text.IndexOf("[i2s_", idxFirst);
+                idxFirst = text.IndexOf("[i2s_", idxFirst, StringComparison.Ordinal);
                 if (idxFirst < 0)
                     break;
 
@@ -188,5 +187,5 @@ namespace I2.Loc
                     list.Add(tag);
             }
         }
-    };
+    }
 }

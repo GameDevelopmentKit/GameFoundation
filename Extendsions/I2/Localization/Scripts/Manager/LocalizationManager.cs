@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.Globalization;
-using System.Collections;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System;
+    using System.IO;
+    using System.Linq;
+    using UnityEditor;
+    using UnityEngine;
+
     public static partial class LocalizationManager
     {
 
@@ -18,8 +17,8 @@ namespace I2.Loc
         {
             #if UNITY_EDITOR
                 #if UNITY_2017_2_OR_NEWER
-                                UnityEditor.EditorApplication.playModeStateChanged -= OnEditorPlayModeStateChanged;
-                                UnityEditor.EditorApplication.playModeStateChanged += OnEditorPlayModeStateChanged;
+            EditorApplication.playModeStateChanged -= OnEditorPlayModeStateChanged;
+            EditorApplication.playModeStateChanged += OnEditorPlayModeStateChanged;
                 #else
                             UnityEditor.EditorApplication.playmodeStateChanged -= OldOnEditorPlayModeStateChanged;
                             UnityEditor.EditorApplication.playmodeStateChanged += OldOnEditorPlayModeStateChanged;
@@ -36,7 +35,7 @@ namespace I2.Loc
 
         public static string GetVersion()
 		{
-			return "2.8.13 f1";
+            return "2.8.17 f1";
 		}
 
 		public static int GetRequiredWebServiceVersion()
@@ -58,9 +57,9 @@ namespace I2.Loc
 
 #if UNITY_EDITOR
     #if UNITY_2017_2_OR_NEWER
-        static void OnEditorPlayModeStateChanged( UnityEditor.PlayModeStateChange stateChange )
+        private static void OnEditorPlayModeStateChanged(PlayModeStateChange stateChange)
         {
-            if (stateChange != UnityEditor.PlayModeStateChange.ExitingPlayMode)
+            if (stateChange != PlayModeStateChange.ExitingPlayMode)
                 return;
     #else
         static void OldOnEditorPlayModeStateChanged()
@@ -79,12 +78,12 @@ namespace I2.Loc
             {
                 var tempPath = Application.temporaryCachePath;
 
-                foreach (var file in System.IO.Directory.GetFiles(tempPath).Where(f => f.Contains("LangSource_") && f.EndsWith(".loc")))
+                foreach (var file in Directory.GetFiles(tempPath).Where(f => f.Contains("LangSource_") && f.EndsWith(".loc", StringComparison.Ordinal)))
                 {
-                    System.IO.File.Delete(file);
+                    File.Delete(file);
                 }
             }
-            catch(System.Exception)
+            catch (Exception)
             {
             }
         }

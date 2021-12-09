@@ -1,8 +1,9 @@
-﻿using UnityEngine;
-using System.Text;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System;
+	using System.Text;
+	using UnityEngine;
+
 	public partial class LanguageSourceData
 	{
 		#region I2CSV format
@@ -24,16 +25,15 @@ namespace I2.Loc
 			
 			mTerms.Sort((a, b) => string.CompareOrdinal(a.Term, b.Term));
 
-			int nLanguages = (mLanguages.Count);
-			bool firstLine = true;
+			var  nLanguages = this.mLanguages.Count;
+			bool firstLine  = true;
 			foreach (TermData termData in mTerms)
 			{
 				string Term;
-				
-				if (string.IsNullOrEmpty(Category) || (Category==EmptyCategory && termData.Term.IndexOfAny(CategorySeparators)<0))
+
+				if (string.IsNullOrEmpty(Category) || Category == EmptyCategory && termData.Term.IndexOfAny(CategorySeparators) < 0)
 					Term = termData.Term;
-				else
-					if (termData.Term.StartsWith(Category + @"/") && Category!=termData.Term)
+				else if (termData.Term.StartsWith(Category + @"/", StringComparison.Ordinal) && Category != termData.Term)
 						Term = termData.Term.Substring(Category.Length+1);
 				else
 					continue;   // Term doesn't belong to this category
@@ -105,7 +105,7 @@ namespace I2.Loc
             if (string.IsNullOrEmpty(text))
                 return;
 
-            if (text.StartsWith("\'") || text.StartsWith("="))
+            if (text.StartsWith("\'", StringComparison.Ordinal) || text.StartsWith("=", StringComparison.Ordinal))
                 Builder.Append('\'');
             Builder.Append(text);
         }
@@ -153,8 +153,8 @@ namespace I2.Loc
         public string Export_CSV( string Category, char Separator = ',', bool specializationsAsRows = true)
 		{
 			StringBuilder Builder = new StringBuilder();
-			
-			int nLanguages = (mLanguages.Count);
+
+			var nLanguages = this.mLanguages.Count;
 			Builder.AppendFormat ("Key{0}Type{0}Desc", Separator);
 
 			foreach (LanguageData langData in mLanguages)
@@ -173,10 +173,9 @@ namespace I2.Loc
 			{
 				string Term;
 
-				if (string.IsNullOrEmpty(Category) || (Category==EmptyCategory && termData.Term.IndexOfAny(CategorySeparators)<0))
+				if (string.IsNullOrEmpty(Category) || Category == EmptyCategory && termData.Term.IndexOfAny(CategorySeparators) < 0)
 					Term = termData.Term;
-				else
-				if (termData.Term.StartsWith(Category + @"/") && Category!=termData.Term)
+				else if (termData.Term.StartsWith(Category + @"/", StringComparison.Ordinal) && Category != termData.Term)
 					Term = termData.Term.Substring(Category.Length+1);
 				else
 					continue;   // Term doesn't belong to this category

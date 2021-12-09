@@ -1,11 +1,11 @@
-using UnityEngine;
-using UnityEditor;
-
 namespace I2.Loc
 {
+    using System;
     using System.Collections.Generic;
+    using UnityEditor;
+    using UnityEngine;
 
-	[CustomPropertyDrawer (typeof (TermsPopup))]
+    [CustomPropertyDrawer(typeof(TermsPopup))]
 	public class TermsPopup_Drawer : PropertyDrawer 
 	{
         GUIContent[] mTerms_Context;
@@ -35,14 +35,14 @@ namespace I2.Loc
 
 			EditorGUI.BeginChangeCheck ();
 
-            var index = (property.stringValue == "-" || property.stringValue == "" ? terms_Contexts.Length - 1 : 
-                        (property.stringValue == " " ? terms_Contexts.Length - 2 :
-                        GetTermIndex(terms_Contexts, property.stringValue)));
+            var index = property.stringValue == "-" || property.stringValue == "" ? terms_Contexts.Length - 1 :
+                property.stringValue == " "                                       ? terms_Contexts.Length - 2 :
+                                                                                    GetTermIndex(terms_Contexts, property.stringValue);
             var newIndex = EditorGUI.Popup(position, label, index, terms_Contexts);
 
             if (EditorGUI.EndChangeCheck())
             {
-                property.stringValue = (newIndex < 0 || newIndex == terms_Contexts.Length - 1) ? string.Empty : terms_Contexts[newIndex].text;
+                property.stringValue = newIndex < 0 || newIndex == terms_Contexts.Length - 1 ? string.Empty : terms_Contexts[newIndex].text;
                 if (newIndex == terms_Contexts.Length - 1)
                     property.stringValue = "-";
                 else
@@ -78,14 +78,14 @@ namespace I2.Loc
             framesBeforeUpdating = 60;
             prevFilter = filter;
 
-            var Terms = (source == null ? LocalizationManager.GetTermsList() : source.GetTermsList());
+            var Terms = source == null ? LocalizationManager.GetTermsList() : source.GetTermsList();
 
             if (string.IsNullOrEmpty(filter) == false)
             {
                 Terms = Filter(Terms, filter);
             }
 
-            Terms.Sort(System.StringComparer.OrdinalIgnoreCase);
+            Terms.Sort(StringComparer.OrdinalIgnoreCase);
             Terms.Add("");
             Terms.Add("<inferred from text>");
             Terms.Add("<none>");
@@ -141,7 +141,7 @@ namespace I2.Loc
                        (termConvertNumbers.boolValue ? 0 : 2) +
                        (termDontLocalizeParams.boolValue ? 0 : 4);
 
-            int newMask = EditorGUI.MaskField(maskRect, mask, new string[] { "Arabic Fix", "Ignore Numbers in RTL", "Localize Parameters" });
+            var newMask = EditorGUI.MaskField(maskRect, mask, new[] { "Arabic Fix", "Ignore Numbers in RTL", "Localize Parameters" });
             if (newMask != mask)
             {
                 termIgnoreRTL.boolValue      = (newMask & 1) == 0;

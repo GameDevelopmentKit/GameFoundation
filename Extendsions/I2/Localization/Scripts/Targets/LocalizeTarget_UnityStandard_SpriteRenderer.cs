@@ -1,16 +1,22 @@
-﻿using UnityEngine;
-#pragma warning disable 618
+﻿#pragma warning disable 618
 
 namespace I2.Loc
 {
-    #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad] 
+    using UnityEditor;
+    using UnityEngine;
+
+#if UNITY_EDITOR
+    [InitializeOnLoad] 
     #endif
 
     public class LocalizeTarget_UnityStandard_SpriteRenderer : LocalizeTarget<SpriteRenderer>
     {
         static LocalizeTarget_UnityStandard_SpriteRenderer() { AutoRegister(); }
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<SpriteRenderer, LocalizeTarget_UnityStandard_SpriteRenderer>() { Name = "SpriteRenderer", Priority = 100 }); }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void AutoRegister()
+        {
+            LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<SpriteRenderer, LocalizeTarget_UnityStandard_SpriteRenderer> { Name = "SpriteRenderer", Priority = 100 });
+        }
 
         public override eTermType GetPrimaryTermType(Localize cmp) { return eTermType.Sprite; }
         public override eTermType GetSecondaryTermType(Localize cmp) { return eTermType.Text; }
@@ -20,7 +26,8 @@ namespace I2.Loc
 
         public override void GetFinalTerms ( Localize cmp, string Main, string Secondary, out string primaryTerm, out string secondaryTerm)
         {
-            primaryTerm = mTarget.sprite != null ? mTarget.sprite.name : string.Empty;
+            var sprite = this.mTarget.sprite;
+            primaryTerm   = sprite != null ? sprite.name : string.Empty;
             secondaryTerm = null;
         }
 

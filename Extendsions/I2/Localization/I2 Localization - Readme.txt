@@ -1,6 +1,6 @@
 ﻿----------------------------------------------
               I2 Localization
-                  2.8.14 f1
+                  2.8.16
         http://www.inter-illusion.com
           inter.illusion@gmail.com
 ----------------------------------------------
@@ -36,7 +36,7 @@ PLAYMAKER
 -----------------------
 
 If you use PlayMaker, please, install:
-   - Assets\I2\Localization\I2Localization_PlayMaker.unitypackage 
+   - https://www.inter-illusion.com/Downloads/I2Localization_PlayMaker.unitypackage
    - PlayMaker Unity UI Addon  (from the Playmaker website - only needed for the example scenes that use Unity UI)
 
 That will install custom actions to access and modify the localization.
@@ -66,6 +66,20 @@ AssetStore Deals   - A bot that constantly checks the Store to find you the late
 -----------------------
  Version History
 -----------------------
+2.8.17
+NEW: When generating ScriptLocalization.cs, if a term name is a C# keyword the variable now is set to start with @
+NEW: There is now LocalizationManager.CustomApplyLocalizationParams to process ALL translations before ApplyLocalizationParams runs
+FIX: Translations with RTL tags were failing (thanks @d xy for looking into this)
+
+2.8.16
+FIX: TextMesh Pro was not correctly displaying multi-line arabic texts
+ 
+2.8.15
+NEW: Performance improvement when switching levels by not calling Resources.UnloadUnusedAssets() unless the user requests it. 
+     For most common scenarios, there is no need to unloadUnusedAssets
+NEW: Lots of stability fixes by cleaning up all warnings detected by the Roslyn Analyzers
+NEW: Fixed several issues/obsolete calls when on the latest versions of Unity       
+
 2.8.14
 NEW: Added support for localizing Video Player
 NEW: Allow skipping Google Synchronization from script by creating a RegisterCallback_AllowSyncFromGoogle class 

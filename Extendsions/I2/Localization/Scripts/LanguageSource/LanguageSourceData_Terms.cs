@@ -1,11 +1,9 @@
-using System;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-using Object = UnityEngine.Object;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using UnityEditor;
+
 	public partial class LanguageSourceData
 	{
         #region Language
@@ -15,7 +13,7 @@ namespace I2.Loc
             if (!force && mDictionary != null && mDictionary.Count == mTerms.Count)
                 return;
 
-            StringComparer comparer = (CaseInsensitiveTerms ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+            var comparer = this.CaseInsensitiveTerms ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
             if (mDictionary.Comparer != comparer)
                 mDictionary = new Dictionary<string, TermData>(comparer);
             else
@@ -62,40 +60,39 @@ namespace I2.Loc
 						Translation = string.Empty;
 						return true;
 					}
-					else
+
 					if (!string.IsNullOrEmpty(Translation))
 					{
 						// has a valid translation
 						return true;
 					}
-					else
-						Translation = null;
+
+					Translation = null;
 				}
 
 				if (OnMissingTranslation == MissingTranslationAction.ShowWarning)
 				{
-					Translation = string.Format("<!-Missing Translation [{0}]-!>", term);
+					Translation = $"<!-Missing Translation [{term}]-!>";
 					return true;
 				}
-				else
+
 				if (OnMissingTranslation == MissingTranslationAction.Fallback && data!=null)
 				{
-                    return TryGetFallbackTranslation(data, out Translation, Index, overrideSpecialization, skipDisabled);
+					return this.TryGetFallbackTranslation(data, out Translation, Index, overrideSpecialization, skipDisabled);
 				}
-                else
-				if (OnMissingTranslation == MissingTranslationAction.Empty)
-                {
-                    Translation = string.Empty;
-                    return true;
-                }
-                else
-                if (OnMissingTranslation == MissingTranslationAction.ShowTerm)
-                {
-                    Translation = term;
-                    return true;
-                }
 
-            }
+				if (OnMissingTranslation == MissingTranslationAction.Empty)
+				{
+					Translation = string.Empty;
+					return true;
+				}
+
+				if (this.OnMissingTranslation == MissingTranslationAction.ShowTerm)
+				{
+					Translation = term;
+					return true;
+				}
+			}
 
             Translation = null;
 			return false;
@@ -115,8 +112,7 @@ namespace I2.Loc
                 // Try finding in any of the Region of the base language
                 for (int i = 0; i < mLanguages.Count; ++i)
                 {
-                    if (i != langIndex && 
-                        mLanguages[i].Code.StartsWith(baseLanguage) &&
+                    if (i != langIndex && this.mLanguages[i].Code.StartsWith(baseLanguage, StringComparison.Ordinal) &&
                         (!skipDisabled || mLanguages[i].IsEnabled()) )
                     {
                         Translation = termData.GetTranslation(i, overrideSpecialization, editMode: true);
@@ -131,8 +127,8 @@ namespace I2.Loc
             for (int i = 0; i < mLanguages.Count; ++i)
             {
                 if (i!=langIndex && 
-                    (!skipDisabled || mLanguages[i].IsEnabled()) && 
-                    (baseLanguage==null || !mLanguages[i].Code.StartsWith(baseLanguage)))
+                    (!skipDisabled || mLanguages[i].IsEnabled()) &&
+                    (baseLanguage == null || !this.mLanguages[i].Code.StartsWith(baseLanguage, StringComparison.Ordinal)))
                 {
                     Translation = termData.GetTranslation(i, overrideSpecialization, editMode: true);
                     if (!string.IsNullOrEmpty(Translation))
@@ -178,7 +174,7 @@ namespace I2.Loc
 
 		public bool ContainsTerm(string term)
 		{
-			return (GetTermData(term)!=null);
+			return this.GetTermData(term) != null;
 		}
 
 		public List<string> GetTermsList ( string Category = null )
@@ -187,17 +183,15 @@ namespace I2.Loc
 				UpdateDictionary();
 			if (string.IsNullOrEmpty( Category ))
 				return new List<string>( mDictionary.Keys );
-			else
+			var terms = new List<string>();
+			for (var i = 0; i < this.mTerms.Count; ++i)
 			{
-				var terms = new List<string>();
-				for (int i=0; i<mTerms.Count; ++i)
-				{
-					var term = mTerms[i];
-					if (GetCategoryFromFullTerm( term.Term ) == Category)
-						terms.Add( term.Term );
-				}
-				return terms;
+				var term = this.mTerms[i];
+				if (GetCategoryFromFullTerm(term.Term) == Category)
+					terms.Add(term.Term);
 			}
+
+			return terms;
 		}
 
 		public  TermData AddTerm( string NewTerm, eTermType termType, bool SaveSource = true )
@@ -223,7 +217,7 @@ namespace I2.Loc
 				if (SaveSource)
 				{
                     Editor_SetDirty();
-					UnityEditor.AssetDatabase.SaveAssets();
+                    AssetDatabase.SaveAssets();
 				}
 				#endif
 			}

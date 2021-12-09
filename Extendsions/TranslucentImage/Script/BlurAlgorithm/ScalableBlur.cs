@@ -1,7 +1,7 @@
-using UnityEngine;
-
 namespace LeTai.Asset.TranslucentImage
 {
+    using UnityEngine;
+
     public class ScalableBlur : IBlurAlgorithm
     {
         Shader             shader;
@@ -87,10 +87,11 @@ namespace LeTai.Asset.TranslucentImage
 
         RenderTexture CreateTempRenderTextureFrom(RenderTexture source, int downsampleFactor)
         {
-            int w = source.width >> downsampleFactor; //= width / 2^downsample
-            int h = source.height >> downsampleFactor;
+            var desc = source.descriptor;
+            desc.width  = source.width >> downsampleFactor; //= width / 2^downsample
+            desc.height = source.height >> downsampleFactor;
 
-            var rt = RenderTexture.GetTemporary(w, h, 0, source.format);
+            var rt = RenderTexture.GetTemporary(desc);
             rt.filterMode = FilterMode.Bilinear;
             return rt;
         }

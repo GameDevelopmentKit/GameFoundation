@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEditor;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using UnityEditor;
+	using UnityEngine;
+
 	public abstract partial class LocalizationEditor : Editor
 	{
 		#region Variables
@@ -18,7 +18,7 @@ namespace I2.Loc
         public static LocalizationEditor mLanguageSourceEditor;
         public static Editor mCurrentInspector;
 
-        static bool mIsParsing = false;  // This is true when the editor is opening several scenes to avoid reparsing objects
+        private static bool mIsParsing; // This is true when the editor is opening several scenes to avoid reparsing objects
 
 		#endregion
 		
@@ -55,7 +55,7 @@ namespace I2.Loc
 
 		public void Custom_OnEnable( LanguageSourceData sourceData, SerializedProperty propSource)
 		{
-			bool ForceParse = (mLanguageSource != sourceData);
+			var ForceParse = mLanguageSource != sourceData;
 
             mLanguageSource = sourceData;
             mLanguageSourceEditor = this;
@@ -92,7 +92,7 @@ namespace I2.Loc
 				else
 					mSpreadsheetMode = eSpreadsheetMode.Google;
 
-				mCurrentViewMode = (mLanguageSource.mLanguages.Count>0 ? eViewMode.Keys : eViewMode.Languages);
+				mCurrentViewMode = mLanguageSource.mLanguages.Count > 0 ? eViewMode.Keys : eViewMode.Languages;
 
 				UpdateSelectedKeys();
 

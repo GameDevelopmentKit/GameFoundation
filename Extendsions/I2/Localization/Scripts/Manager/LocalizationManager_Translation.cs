@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.Globalization;
-using System.Collections;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using UnityEditor;
+    using UnityEngine;
+
     public static partial class LocalizationManager
     {
 
@@ -15,8 +14,8 @@ namespace I2.Loc
         public delegate void OnLocalizeCallback();
         public static event OnLocalizeCallback OnLocalizeEvent;
 
-        static bool mLocalizeIsScheduled = false;
-        static bool mLocalizeIsScheduledWithForcedValue = false;
+        private static bool mLocalizeIsScheduled;
+        private static bool mLocalizeIsScheduledWithForcedValue;
 
         public static bool HighlightLocalizedTargets = false;
 
@@ -66,15 +65,13 @@ namespace I2.Loc
             {
                 return optionalLocComp.FindTranslatedObject<T>(AssetName);
             }
-            else
-            {
-                T obj = FindAsset(AssetName) as T;
-                if (obj)
-                    return obj;
 
-                obj = ResourceManager.pInstance.GetAsset<T>(AssetName);
+            var obj = FindAsset(AssetName) as T;
+            if (obj)
                 return obj;
-            }
+
+            obj = ResourceManager.pInstance.GetAsset<T>(AssetName);
+            return obj;
         }
         
         public static T GetTranslatedObjectByTermName<T>( string Term, Localize optionalLocComp=null) where T : Object
@@ -124,7 +121,8 @@ namespace I2.Loc
             {
                 return;
             }
-			I2.Loc.CoroutineManager.Start(Coroutine_LocalizeAll());
+
+            CoroutineManager.Start(Coroutine_LocalizeAll());
 		}
 
 		static IEnumerator Coroutine_LocalizeAll()
@@ -157,11 +155,11 @@ namespace I2.Loc
         #if UNITY_EDITOR
         static void RepaintInspectors()
         {
-            var assemblyEditor = System.Reflection.Assembly.GetAssembly(typeof(UnityEditor.Editor));
+            var assemblyEditor      = Assembly.GetAssembly(typeof(Editor));
             var typeInspectorWindow = assemblyEditor.GetType("UnityEditor.InspectorWindow");
             if (typeInspectorWindow != null)
             {
-                typeInspectorWindow.GetMethod("RepaintAllInspectors", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static).Invoke(null, null);
+                typeInspectorWindow.GetMethod("RepaintAllInspectors", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
             }
         }
         #endif

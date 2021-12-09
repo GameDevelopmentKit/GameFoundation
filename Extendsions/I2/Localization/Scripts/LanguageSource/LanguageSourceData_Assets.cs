@@ -1,11 +1,9 @@
-using System;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
-using Object = UnityEngine.Object;
-
 namespace I2.Loc
 {
+	using System;
+	using System.Linq;
+	using Object = UnityEngine.Object;
+
 	public partial class LanguageSourceData
 	{
         #region Assets
@@ -14,8 +12,8 @@ namespace I2.Loc
         {
             Assets.RemoveAll(x => x == null);
             mAssetDictionary = Assets.Distinct()
-                                     .GroupBy(o => o.name)
-                                     .ToDictionary(g => g.Key, g => g.First());
+	            .GroupBy(o => o.name, StringComparer.Ordinal)
+	            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
         }
 
         public Object FindAsset( string Name )

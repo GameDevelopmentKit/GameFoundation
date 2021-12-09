@@ -1,22 +1,28 @@
-﻿using System;
-using UnityEngine;
-
-#if TextMeshPro
+﻿#if TextMeshPro
 namespace I2.Loc
 {
-    #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad] 
+    using System;
+    using TMPro;
+    using UnityEditor;
+    using UnityEngine;
+
+#if UNITY_EDITOR
+    [InitializeOnLoad] 
     #endif
 
-    public class LocalizeTarget_TextMeshPro_Label : LocalizeTarget<TMPro.TextMeshPro>
+    public class LocalizeTarget_TextMeshPro_Label : LocalizeTarget<TextMeshPro>
     {
         static LocalizeTarget_TextMeshPro_Label() { AutoRegister(); }
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] static void AutoRegister() { LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<TMPro.TextMeshPro, LocalizeTarget_TextMeshPro_Label>() { Name = "TextMeshPro Label", Priority = 100 }); }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void AutoRegister()
+        {
+            LocalizationManager.RegisterTarget(new LocalizeTargetDesc_Type<TextMeshPro, LocalizeTarget_TextMeshPro_Label> { Name = "TextMeshPro Label", Priority = 100 });
+        }
 
-        TMPro.TextAlignmentOptions mAlignment_RTL = TMPro.TextAlignmentOptions.Right;
-        TMPro.TextAlignmentOptions mAlignment_LTR = TMPro.TextAlignmentOptions.Left;
-        bool mAlignmentWasRTL;
-        bool mInitializeAlignment = true;
+        private TextAlignmentOptions mAlignment_RTL = TextAlignmentOptions.Right;
+        private TextAlignmentOptions mAlignment_LTR = TextAlignmentOptions.Left;
+        bool                         mAlignmentWasRTL;
+        bool                         mInitializeAlignment = true;
 
         public override eTermType GetPrimaryTermType(Localize cmp) { return eTermType.Text; }
         public override eTermType GetSecondaryTermType(Localize cmp) { return eTermType.Font; }
@@ -26,15 +32,15 @@ namespace I2.Loc
 
         public override void GetFinalTerms ( Localize cmp, string Main, string Secondary, out string primaryTerm, out string secondaryTerm)
         {
-            primaryTerm = mTarget ? mTarget.text : null;
-            secondaryTerm = (mTarget.font != null ? mTarget.font.name : string.Empty);
+            primaryTerm   = mTarget ? mTarget.text : null;
+            secondaryTerm = this.mTarget.font != null ? this.mTarget.font.name : string.Empty;
         }
 
         public override void DoLocalize(Localize cmp, string mainTranslation, string secondaryTranslation)
         {
             //--[ Localize Font Object ]----------
             {
-                TMPro.TMP_FontAsset newFont = cmp.GetSecondaryTranslatedObj<TMPro.TMP_FontAsset>(ref mainTranslation, ref secondaryTranslation);
+                var newFont = cmp.GetSecondaryTranslatedObj<TMP_FontAsset>(ref mainTranslation, ref secondaryTranslation);
 
                 if (newFont != null)
                 {
@@ -65,11 +71,11 @@ namespace I2.Loc
             }
             else
             {
-                TMPro.TextAlignmentOptions alignRTL, alignLTR;
+                TextAlignmentOptions alignRTL, alignLTR;
                 InitAlignment_TMPro(mAlignmentWasRTL, mTarget.alignment, out alignLTR, out alignRTL);
 
-                if ((mAlignmentWasRTL && mAlignment_RTL != alignRTL) ||
-                    (!mAlignmentWasRTL && mAlignment_LTR != alignLTR))
+                if (this.mAlignmentWasRTL && this.mAlignment_RTL != alignRTL ||
+                    !this.mAlignmentWasRTL && this.mAlignment_LTR != alignLTR)
                 {
                     mAlignment_LTR = alignLTR;
                     mAlignment_RTL = alignRTL;
@@ -79,19 +85,18 @@ namespace I2.Loc
 
             if (mainTranslation != null && mTarget.text != mainTranslation)
             {
-                if (mainTranslation != null && cmp.CorrectAlignmentForRTL)
-                {
-                    mTarget.alignment = (LocalizationManager.IsRight2Left ? mAlignment_RTL : mAlignment_LTR);
-                    mTarget.isRightToLeftText = LocalizationManager.IsRight2Left;
-                    if (LocalizationManager.IsRight2Left) mainTranslation = I2Utils.ReverseText(mainTranslation);
-                }
+                if (cmp.CorrectAlignmentForRTL) this.mTarget.alignment = LocalizationManager.IsRight2Left ? this.mAlignment_RTL : this.mAlignment_LTR;
 
+                this.mTarget.isRightToLeftText = LocalizationManager.IsRight2Left;
+                if (LocalizationManager.IsRight2Left) mainTranslation = I2Utils.ReverseText(mainTranslation);
+                
                 mTarget.text = mainTranslation;
             }
         }
 
         #region Tools
-        internal static TMPro.TMP_FontAsset GetTMPFontFromMaterial(Localize cmp, string matName)
+
+        internal static TMP_FontAsset GetTMPFontFromMaterial(Localize cmp, string matName)
         {
             string splitChars = " .\\/-[]()";
             for (int i = matName.Length - 1; i > 0;)
@@ -103,7 +108,7 @@ namespace I2.Loc
                 if (i <= 0) break;
 
                 var fontName = matName.Substring(0, i + 1);
-                var obj = cmp.GetObject<TMPro.TMP_FontAsset>(fontName);
+                var obj      = cmp.GetObject<TMP_FontAsset>(fontName);
                 if (obj != null)
                     return obj;
 
@@ -115,7 +120,7 @@ namespace I2.Loc
             return null;
         }
 
-        internal static void InitAlignment_TMPro(bool isRTL, TMPro.TextAlignmentOptions alignment, out TMPro.TextAlignmentOptions alignLTR, out TMPro.TextAlignmentOptions alignRTL)
+        internal static void InitAlignment_TMPro(bool isRTL, TextAlignmentOptions alignment, out TextAlignmentOptions alignLTR, out TextAlignmentOptions alignRTL)
         {
             alignLTR = alignRTL = alignment;
 
@@ -123,19 +128,43 @@ namespace I2.Loc
             {
                 switch (alignment)
                 {
-                    case TMPro.TextAlignmentOptions.TopRight: alignLTR = TMPro.TextAlignmentOptions.TopLeft; break;
-                    case TMPro.TextAlignmentOptions.Right: alignLTR = TMPro.TextAlignmentOptions.Left; break;
-                    case TMPro.TextAlignmentOptions.BottomRight: alignLTR = TMPro.TextAlignmentOptions.BottomLeft; break;
-                    case TMPro.TextAlignmentOptions.BaselineRight: alignLTR = TMPro.TextAlignmentOptions.BaselineLeft; break;
-                    case TMPro.TextAlignmentOptions.MidlineRight: alignLTR = TMPro.TextAlignmentOptions.MidlineLeft; break;
-                    case TMPro.TextAlignmentOptions.CaplineRight: alignLTR = TMPro.TextAlignmentOptions.CaplineLeft; break;
+                    case TextAlignmentOptions.TopRight:
+                        alignLTR = TextAlignmentOptions.TopLeft;
+                        break;
+                    case TextAlignmentOptions.Right:
+                        alignLTR = TextAlignmentOptions.Left;
+                        break;
+                    case TextAlignmentOptions.BottomRight:
+                        alignLTR = TextAlignmentOptions.BottomLeft;
+                        break;
+                    case TextAlignmentOptions.BaselineRight:
+                        alignLTR = TextAlignmentOptions.BaselineLeft;
+                        break;
+                    case TextAlignmentOptions.MidlineRight:
+                        alignLTR = TextAlignmentOptions.MidlineLeft;
+                        break;
+                    case TextAlignmentOptions.CaplineRight:
+                        alignLTR = TextAlignmentOptions.CaplineLeft;
+                        break;
 
-                    case TMPro.TextAlignmentOptions.TopLeft: alignLTR = TMPro.TextAlignmentOptions.TopRight; break;
-                    case TMPro.TextAlignmentOptions.Left: alignLTR = TMPro.TextAlignmentOptions.Right; break;
-                    case TMPro.TextAlignmentOptions.BottomLeft: alignLTR = TMPro.TextAlignmentOptions.BottomRight; break;
-                    case TMPro.TextAlignmentOptions.BaselineLeft: alignLTR = TMPro.TextAlignmentOptions.BaselineRight; break;
-                    case TMPro.TextAlignmentOptions.MidlineLeft: alignLTR = TMPro.TextAlignmentOptions.MidlineRight; break;
-                    case TMPro.TextAlignmentOptions.CaplineLeft: alignLTR = TMPro.TextAlignmentOptions.CaplineRight; break;
+                    case TextAlignmentOptions.TopLeft:
+                        alignLTR = TextAlignmentOptions.TopRight;
+                        break;
+                    case TextAlignmentOptions.Left:
+                        alignLTR = TextAlignmentOptions.Right;
+                        break;
+                    case TextAlignmentOptions.BottomLeft:
+                        alignLTR = TextAlignmentOptions.BottomRight;
+                        break;
+                    case TextAlignmentOptions.BaselineLeft:
+                        alignLTR = TextAlignmentOptions.BaselineRight;
+                        break;
+                    case TextAlignmentOptions.MidlineLeft:
+                        alignLTR = TextAlignmentOptions.MidlineRight;
+                        break;
+                    case TextAlignmentOptions.CaplineLeft:
+                        alignLTR = TextAlignmentOptions.CaplineRight;
+                        break;
 
                 }
             }
@@ -143,24 +172,48 @@ namespace I2.Loc
             {
                 switch (alignment)
                 {
-                    case TMPro.TextAlignmentOptions.TopRight: alignRTL = TMPro.TextAlignmentOptions.TopLeft; break;
-                    case TMPro.TextAlignmentOptions.Right: alignRTL = TMPro.TextAlignmentOptions.Left; break;
-                    case TMPro.TextAlignmentOptions.BottomRight: alignRTL = TMPro.TextAlignmentOptions.BottomLeft; break;
-                    case TMPro.TextAlignmentOptions.BaselineRight: alignRTL = TMPro.TextAlignmentOptions.BaselineLeft; break;
-                    case TMPro.TextAlignmentOptions.MidlineRight: alignRTL = TMPro.TextAlignmentOptions.MidlineLeft; break;
-                    case TMPro.TextAlignmentOptions.CaplineRight: alignRTL = TMPro.TextAlignmentOptions.CaplineLeft; break;
+                    case TextAlignmentOptions.TopRight:
+                        alignRTL = TextAlignmentOptions.TopLeft;
+                        break;
+                    case TextAlignmentOptions.Right:
+                        alignRTL = TextAlignmentOptions.Left;
+                        break;
+                    case TextAlignmentOptions.BottomRight:
+                        alignRTL = TextAlignmentOptions.BottomLeft;
+                        break;
+                    case TextAlignmentOptions.BaselineRight:
+                        alignRTL = TextAlignmentOptions.BaselineLeft;
+                        break;
+                    case TextAlignmentOptions.MidlineRight:
+                        alignRTL = TextAlignmentOptions.MidlineLeft;
+                        break;
+                    case TextAlignmentOptions.CaplineRight:
+                        alignRTL = TextAlignmentOptions.CaplineLeft;
+                        break;
 
-                    case TMPro.TextAlignmentOptions.TopLeft: alignRTL = TMPro.TextAlignmentOptions.TopRight; break;
-                    case TMPro.TextAlignmentOptions.Left: alignRTL = TMPro.TextAlignmentOptions.Right; break;
-                    case TMPro.TextAlignmentOptions.BottomLeft: alignRTL = TMPro.TextAlignmentOptions.BottomRight; break;
-                    case TMPro.TextAlignmentOptions.BaselineLeft: alignRTL = TMPro.TextAlignmentOptions.BaselineRight; break;
-                    case TMPro.TextAlignmentOptions.MidlineLeft: alignRTL = TMPro.TextAlignmentOptions.MidlineRight; break;
-                    case TMPro.TextAlignmentOptions.CaplineLeft: alignRTL = TMPro.TextAlignmentOptions.CaplineRight; break;
+                    case TextAlignmentOptions.TopLeft:
+                        alignRTL = TextAlignmentOptions.TopRight;
+                        break;
+                    case TextAlignmentOptions.Left:
+                        alignRTL = TextAlignmentOptions.Right;
+                        break;
+                    case TextAlignmentOptions.BottomLeft:
+                        alignRTL = TextAlignmentOptions.BottomRight;
+                        break;
+                    case TextAlignmentOptions.BaselineLeft:
+                        alignRTL = TextAlignmentOptions.BaselineRight;
+                        break;
+                    case TextAlignmentOptions.MidlineLeft:
+                        alignRTL = TextAlignmentOptions.MidlineRight;
+                        break;
+                    case TextAlignmentOptions.CaplineLeft:
+                        alignRTL = TextAlignmentOptions.CaplineRight;
+                        break;
                 }
             }
         }
 
-        internal static void SetFont(TMPro.TMP_Text label, TMPro.TMP_FontAsset newFont)
+        internal static void SetFont(TMP_Text label, TMP_FontAsset newFont)
         {
             if (label.font != newFont)
             {
@@ -171,7 +224,7 @@ namespace I2.Loc
                 SetFont(label.linkedTextComponent, newFont);
             }
         }
-        internal static void SetMaterial(TMPro.TMP_Text label, Material newMat)
+        internal static void SetMaterial(TMP_Text label, Material newMat)
         {
             if (label.fontSharedMaterial != newMat)
             {

@@ -1,15 +1,16 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using UnityEditor;
+	using UnityEngine;
+
 	public partial class LocalizationEditor
 	{
 		#region Variables
 		EditorBuildSettingsScene[] mScenesInBuildSettings;
-		bool Tools_ShowScenesList = false;
+		private bool               Tools_ShowScenesList;
 		#endregion
 
 		#region GUI
@@ -59,10 +60,10 @@ namespace I2.Loc
 					OnGUI_SelectableToogleListItem( sceneList[i], ref mSelectedScenes, "OL Toggle" );
 					
 					bool bSelected = mSelectedScenes.Contains(sceneList[i]);
-					GUI.color = (bSelected ? Color.white : Color.Lerp(Color.gray, Color.white, 0.5f));
+					GUI.color = bSelected ? Color.white : Color.Lerp(Color.gray, Color.white, 0.5f);
 
 					string scenePath = sceneList[i];
-					if (scenePath.StartsWith("assets/", System.StringComparison.OrdinalIgnoreCase))
+					if (scenePath.StartsWith("assets/", StringComparison.OrdinalIgnoreCase))
 						scenePath = scenePath.Substring("Assets/".Length);
 
 					if (currentScene == sceneList[i])

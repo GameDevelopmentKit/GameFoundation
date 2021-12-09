@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+    using System.Linq;
 
     public class HindiFixer
     {
@@ -147,14 +144,12 @@ namespace I2.Loc
                 {
                     return text;
                 }
-                else
-                {
-                    var newText = new string(arr.Where(x => x != 0).ToArray());
-                    if (newText == text)
-                        return newText;
-                    text = newText;
-                    return text;   // remove this later to allow for several passes
-                }
+
+                var newText = new string(arr.Where(x => x != 0).ToArray());
+                if (newText == text)
+                    return newText;
+                text = newText;
+                return text; // remove this later to allow for several passes
             }
         }
     }

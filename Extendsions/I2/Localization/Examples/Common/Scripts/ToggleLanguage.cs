@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-
-namespace I2.Loc
+﻿namespace I2.Loc
 {
+	using System.Collections.Generic;
+	using UnityEngine;
+
 	public class ToggleLanguage : MonoBehaviour 
 	{
 		void Start () 

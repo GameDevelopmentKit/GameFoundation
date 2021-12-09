@@ -43,7 +43,7 @@ namespace I2.Loc
             if (newAtlas==null)
             {
                 NGUIAtlas newNGUIAtlas = cmp.GetSecondaryTranslatedObj<NGUIAtlas>(ref mainTranslation, ref secondaryTranslation);
-                if (newAtlas != null && ((mTarget.atlas as NGUIAtlas) != newAtlas))
+                if (newAtlas != null && ((mTarget.atlas as NGUIAtlas) != newNGUIAtlas))
                 {
                     mTarget.atlas = newAtlas;
                     bChanged = true;
