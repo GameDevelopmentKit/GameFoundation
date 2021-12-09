@@ -1,0 +1,19 @@
+{
+    "name": "GameFoundation.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.Extendsions",
+        "GameFoundation.Scripts"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [
+        "Editor"
+    ],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

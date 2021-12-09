@@ -1,12 +1,11 @@
 ﻿namespace GameFoundation.Editor.ServerConfig
 {
-    using GameFoundation.Scripts.Editor.ServerConfig;
-    using Sirenix.OdinInspector;
+    using GameFoundation.Scripts.Network;
     using UnityEngine;
 
     [CreateAssetMenu(fileName = "GameConfig", menuName = "Mech/Game config")]
     public class GameConfig : ScriptableObject
     {
-        [InlineEditor] public ServerConfig ServerConfig;
+        public ServerConfig ServerConfig;
     }
 }

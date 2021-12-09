@@ -1,4 +1,4 @@
-﻿namespace GameFoundation.Scripts.Editor.ServerConfig
+﻿namespace GameFoundation.Scripts.Network
 {
     using UnityEngine;
 
@@ -7,5 +7,6 @@
     {
         public string AuthServer;
         public string GameServer;
+        public string MatchMakerServer;
     }
 }

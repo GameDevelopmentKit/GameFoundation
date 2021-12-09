@@ -1,6 +1,6 @@
 ﻿namespace GameFoundation.Scripts
 {
-    using GameFoundation.Scripts.Editor.ServerConfig;
+    using GameFoundation.Scripts.Network;
     using UnityEngine;
 
     public static class ScriptableObjectUtils
