@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.Network
 {
+    using GameFoundation.Editor.ServerConfig;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Utilities.Extension;
     using Zenject;
@@ -9,8 +10,10 @@ namespace GameFoundation.Scripts.Network
     {
         public override void InstallBindings()
         {
+            var gameConfig = this.Container.Resolve<GameConfig>();
+
             // Network services
-            this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments("https://dev-game.mechmaster.io/api");
+            this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments(gameConfig.ServerConfig.GameServer);
 
             // //TODO move this into BestHttpService instead of separate them
             this.Container.Bind<NetworkConfig>().AsSingle().NonLazy();
