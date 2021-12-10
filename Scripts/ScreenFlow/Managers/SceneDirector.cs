@@ -77,6 +77,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         #region shortcut
 
         public async void LoadLoadingScene() => await this.LoadSingleSceneAsync(SceneName.Loading);
+        public async void LoadLoginScene() => await this.LoadSingleSceneAsync(SceneName.Login);
         public async void LoadMainScene()    => await this.LoadSingleSceneAsync(SceneName.Main);
         public async void LoadBattleScene()  { await this.LoadMultipleSceneAsync(SceneName.Battle, SceneName.BattleEnvScene); }
 
