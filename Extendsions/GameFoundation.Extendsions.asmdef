@@ -2,10 +2,10 @@
     "name": "GameFoundation.Extendsions",
     "rootNamespace": "",
     "references": [
-      "Unity.TextMeshPro",
-      "MessagePack.Annotations",
-      "Unity.Addressables",
-      "Unity.ResourceManager"
+        "Unity.TextMeshPro",
+        "MessagePack.Annotations",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
