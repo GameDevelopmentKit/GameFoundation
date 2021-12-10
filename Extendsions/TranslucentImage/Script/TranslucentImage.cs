@@ -1,8 +1,10 @@
 namespace LeTai.Asset.TranslucentImage
 {
-    using UnityEditor.SceneManagement;
     using UnityEngine;
     using UnityEngine.UI;
+#if UNITY_EDITOR
+    using UnityEditor.SceneManagement;
+#endif
 
     /// <summary>
 /// Dynamic blur-behind UI element
