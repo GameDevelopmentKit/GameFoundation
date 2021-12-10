@@ -11,7 +11,7 @@ namespace GameFoundation.Scripts.Utilities
     /// Usage: add to a camera that is rendered to screen. This shouldn't be added to camera that renders to a <see cref="RenderTexture"/>.
     /// </summary>
     public class CameraStacker : MonoBehaviour {
-        [SerializeField] private new Camera camera;
+        [SerializeField] private Camera camera;
     
         private static           CameraStacker       BaseCamera; // Universal Render Pipeline base camera. This camera will manage the camera stack.
         private static           List<CameraStacker> cameraStackers;

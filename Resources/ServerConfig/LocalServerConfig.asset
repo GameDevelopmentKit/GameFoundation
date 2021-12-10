@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f0c99b7efe245149981e2dfd8577012, type: 3}
   m_Name: LocalServerConfig
   m_EditorClassIdentifier: 
-  AuthServer: localhost:4000
-  GameServer: localhost:5000
+  AuthServer: https://dev-auth.mechmaster.io/api
+  GameServer: https://dev-game.mechmaster.io/api
+  MatchMakerServer: http://3fa9-210-245-54-42.ngrok.io/matchmaker
