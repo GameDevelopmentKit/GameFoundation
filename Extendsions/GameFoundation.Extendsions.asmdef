@@ -5,8 +5,7 @@
       "Unity.TextMeshPro",
       "MessagePack.Annotations",
       "Unity.Addressables",
-      "Unity.ResourceManager",
-      "LeTai.TranslucentImage"
+      "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
