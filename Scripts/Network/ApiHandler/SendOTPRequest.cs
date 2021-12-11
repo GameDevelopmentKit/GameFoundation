@@ -4,21 +4,20 @@ namespace GameFoundation.Scripts.Network.ApiHandler
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.WebService.Authentication;
-    using UniRx;
 
     public class SendOTPRequest : BaseHttpRequest<OtpSendResponseData>
     {
         private readonly DataLoginServices dataLoginServices;
         public SendOTPRequest(ILogService logger, DataLoginServices dataLoginServices) : base(logger) { this.dataLoginServices = dataLoginServices; }
-        public override void Process(OtpSendResponseData responseData)
+        public override void Process(OtpSendResponseData responseData) => this.dataLoginServices.SendCodeStatus.Value           = SendCodeStatus.Sent;
+
+        public override void ErrorProcess(int statusCode)
         {
-            if (responseData.Status == 1)
+            switch (statusCode)
             {
-                this.dataLoginServices.SendCodeComplete.Value = SendCodeStatus.Complete;
-            }
-            else
-            {
-                this.dataLoginServices.SendCodeComplete.Value = SendCodeStatus.Error;
+                case 0:
+                    this.dataLoginServices.SendCodeStatus.Value = SendCodeStatus.EmailIsInvalid;
+                    break;
             }
         }
     }

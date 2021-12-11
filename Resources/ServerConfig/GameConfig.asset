@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fccc7b539bd6477382550fa82803ff0e, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  ServerConfig: {fileID: 11400000, guid: f391373476923d84ba86d9035531008e, type: 2}
+  ServerConfig: {fileID: 11400000, guid: badbf5d1a92304747a765817f7833c81, type: 2}

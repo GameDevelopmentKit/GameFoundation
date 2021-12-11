@@ -73,10 +73,16 @@
                     this.dataLoginServices.Status.Value = this.dataLoginServices.currentTypeLogin == TypeLogIn.Google ? AuthenticationStatus.FailWithGoogleToken : AuthenticationStatus.FailWithFbToken;
                     break;
                 case 3:
-                    this.dataLoginServices.Status.Value = AuthenticationStatus.FailWithRefreshToken;
+                    this.dataLoginServices.Status.Value = AuthenticationStatus.InvalidRefreshToken;
                     break;
                 case 4:
-                    this.dataLoginServices.Status.Value = AuthenticationStatus.FailWithInvalidOTP;
+                    this.dataLoginServices.Status.Value = AuthenticationStatus.RefreshTokenNotFound;
+                    break;
+                case 5:
+                    this.dataLoginServices.Status.Value = AuthenticationStatus.InvalidOTP;
+                    break;
+                case 6:
+                    this.dataLoginServices.Status.Value = AuthenticationStatus.InvalidEmail;
                     break;
                 default:
                     base.ErrorProcess(statusCode);

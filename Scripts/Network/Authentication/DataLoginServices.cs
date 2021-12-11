@@ -10,9 +10,11 @@ namespace GameFoundation.Scripts.Network.Authentication
         Authenticating,
         FailWithFbToken,
         FailWithGoogleToken,
-        FailWithRefreshToken,
+        InvalidRefreshToken,
+        RefreshTokenNotFound,
         FailWithNoInternetOrTimeout,
-        FailWithInvalidOTP
+        InvalidOTP,
+        InvalidEmail
     }
 
     public enum TypeLogIn
@@ -27,8 +29,8 @@ namespace GameFoundation.Scripts.Network.Authentication
     {
         None,
         Sending,
-        Complete,
-        Error
+        Sent,
+        EmailIsInvalid
     }
 
     /// <summary>Check user authentication with google, facebook...  </summary>
@@ -36,6 +38,6 @@ namespace GameFoundation.Scripts.Network.Authentication
     {
         public TypeLogIn                              currentTypeLogin = TypeLogIn.None;
         public ReactiveProperty<AuthenticationStatus> Status           = new ReactiveProperty<AuthenticationStatus>(AuthenticationStatus.NonAuthen);
-        public ReactiveProperty<SendCodeStatus>       SendCodeComplete = new ReactiveProperty<SendCodeStatus>(SendCodeStatus.None);
+        public ReactiveProperty<SendCodeStatus>       SendCodeStatus = new ReactiveProperty<SendCodeStatus>(Authentication.SendCodeStatus.None);
     }
 }
