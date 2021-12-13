@@ -22,7 +22,7 @@ namespace Mech.Network.HttpRequest
         public override void Process(BlueprintResponse responseData)
         {
             this.Logger.Log($"Blueprint download link: {responseData.Url}");
-            this.signalBus.Fire(new LoadBlueprintDataSignal { Url = responseData.Url, Hash = responseData.Hash});
+            this.signalBus.Fire(new LoadBlueprintDataSignal { Url = "https://mmblueprints.s3.ap-southeast-1.amazonaws.com/jobs/BuildBlueprint/69/Blueprints_v0.0.0-develop.zip", Hash = responseData.Hash});
         }
     }
 }

@@ -13,6 +13,7 @@ namespace GameFoundation.Scripts.Network.Authentication
         InvalidRefreshToken,
         RefreshTokenNotFound,
         FailWithNoInternetOrTimeout,
+        FailWithRefreshToken,
         InvalidOTP,
         InvalidEmail
     }
