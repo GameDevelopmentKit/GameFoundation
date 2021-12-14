@@ -31,7 +31,8 @@ namespace GameFoundation.Scripts.Network.Authentication
         None,
         Sending,
         Sent,
-        EmailIsInvalid
+        EmailIsInvalid,
+        TooManyRequest
     }
 
     /// <summary>Check user authentication with google, facebook...  </summary>
@@ -39,6 +40,6 @@ namespace GameFoundation.Scripts.Network.Authentication
     {
         public TypeLogIn                              currentTypeLogin = TypeLogIn.None;
         public ReactiveProperty<AuthenticationStatus> Status           = new ReactiveProperty<AuthenticationStatus>(AuthenticationStatus.NonAuthen);
-        public ReactiveProperty<SendCodeStatus>       SendCodeStatus = new ReactiveProperty<SendCodeStatus>(Authentication.SendCodeStatus.None);
+        public ReactiveProperty<SendCodeStatus>       SendCodeStatus   = new ReactiveProperty<SendCodeStatus>(Authentication.SendCodeStatus.None);
     }
 }
