@@ -27,11 +27,14 @@
             var jwtToken       = responseData.JwtToken;
             var refreshToken   = responseData.RefreshToken;
             var expirationTime = responseData.ExpirationTime;
+            var email          = responseData.Email;
+            var fullName       = responseData.Fullname;
+            var avatar         = responseData.Picture;
             if (string.IsNullOrEmpty(jwtToken)) return;
-            this.SaveDataToLocalData(jwtToken, refreshToken, expirationTime);
+            this.SaveDataToLocalData(jwtToken, refreshToken, expirationTime, email, fullName, avatar);
         }
 
-        private void SaveDataToLocalData(string jwtToken, string refreshToken, long expirationTime)
+        private void SaveDataToLocalData(string jwtToken, string refreshToken, long expirationTime, string email, string fullName, string avatar)
         {
             this.localData.ServerToken.JwtToken       = jwtToken;
             this.localData.ServerToken.RefreshToken   = refreshToken;
@@ -51,8 +54,9 @@
                     break;
                 case TypeLogIn.OTPCode:
                     this.localData.UserDataLogin.LastLogin = TypeLogIn.OTPCode;
-                    this.mechPlayerState.PlayerData.Name   = "";
-                    this.mechPlayerState.PlayerData.Avatar = "";
+                    this.mechPlayerState.PlayerData.Name   = fullName;
+                    this.mechPlayerState.PlayerData.Avatar = avatar ?? "";
+                    this.mechPlayerState.PlayerData.Email  = email;
                     break;
                 case TypeLogIn.None:
                     break;
