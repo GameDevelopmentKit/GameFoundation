@@ -1,53 +1,86 @@
 ﻿namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System;
+    using GameFoundation.Scripts.Utilities.ApplicationServices;
     using UniRx;
+    using Zenject;
 
     /// <summary>
     /// A timer cooldown by cycle automatically, mainly use for UI
     /// </summary>
-    public class AutoCooldownTimer : IDisposable
+    public class AutoCooldownTimer : IDisposable, IPoolable<IMemoryPool>
     {
-        private IDisposable observableTimer;
-        private int         minDays, minHours, minMinutes;
+        private readonly int  minDays;
+        private readonly int  minHours;
+        private readonly int  minMinutes;
+        private          long currentCooldownTime;
 
-        public AutoCooldownTimer(int minMinutes = 60, int minHours = 24, int minDays = 30)
+        private IDisposable observableTimer;
+
+        private Action<long> onEveryCycle;
+        private Action       onComplete;
+
+        private readonly SignalBus   signalBus;
+        private          IMemoryPool pool;
+
+        public AutoCooldownTimer(SignalBus signalBus, int minMinutes = 60, int minHours = 24, int minDays = 30)
         {
+            this.signalBus = signalBus;
+
             this.minDays    = minDays;
             this.minHours   = minHours;
             this.minMinutes = minMinutes;
+            this.signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
         }
 
-        public IDisposable CountDown(long cooldownTime, Action<long> onEveryCyle, int Depth = 0)
+        private void OnUpdateTimeAfterFocus(UpdateTimeAfterFocusSignal signal)
         {
-            var currentCycle = this.GetCycleByTime(cooldownTime);
+            this.currentCooldownTime -= (long)signal.MinimizeTime;
+            if (this.currentCooldownTime <= 0)
+            {
+                this.onComplete?.Invoke();
+            }
+            else
+            {
+                this.observableTimer?.Dispose();
+                this.CountDown(this.currentCooldownTime, this.onEveryCycle, this.onComplete);
+            }
+        }
+
+        public void CountDown(long cooldownTime, Action<long> onEveryCycleParam, Action onCompleteParam = null, int depth = 0)
+        {
+            this.currentCooldownTime = cooldownTime;
+            this.onEveryCycle        = onEveryCycleParam;
+            this.onComplete          = onCompleteParam;
+
+            var currentCycle = this.GetCycleByTime(this.currentCooldownTime);
 //        Debug.Log("Create count down with depth = " + Depth);
             this.observableTimer = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(currentCycle))
-                .Subscribe(l =>
+                .Subscribe(_ =>
                 {
                     // Debug.Log($"count down = {cooldownTime} - depth = {Depth}");
-                    onEveryCyle?.Invoke(cooldownTime);
-                    if (cooldownTime <= 0)
+                    this.onEveryCycle?.Invoke(this.currentCooldownTime);
+                    if (this.currentCooldownTime <= 0)
                     {
+                        this.onComplete?.Invoke();
                         this.Dispose();
                         return;
                     }
 
                     if (currentCycle != 1)
                     {
-                        var nextCycle = this.GetCycleByTime(cooldownTime);
+                        var nextCycle = this.GetCycleByTime(this.currentCooldownTime);
 
                         if (nextCycle != currentCycle)
                         {
-                            this.Dispose();
-                            this.CountDown(cooldownTime, onEveryCyle, Depth + 1);
+                            this.observableTimer?.Dispose();
+                            this.CountDown(this.currentCooldownTime, this.onEveryCycle, this.onComplete, depth + 1);
                             return;
                         }
                     }
 
-                    cooldownTime = cooldownTime - currentCycle;
+                    this.currentCooldownTime -= currentCycle;
                 });
-            return this.observableTimer;
         }
 
         private long GetCycleByTime(long time)
@@ -74,6 +107,13 @@
             return cycle;
         }
 
-        public void Dispose() { this.observableTimer?.Dispose(); }
+        public void Dispose()
+        {
+            this.signalBus.Unsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
+            this.observableTimer?.Dispose();
+            this.pool.Despawn(this);
+        }
+        public void OnDespawned()               { this.pool = null; }
+        public void OnSpawned(IMemoryPool pool) { this.pool = pool; }
     }
 }
