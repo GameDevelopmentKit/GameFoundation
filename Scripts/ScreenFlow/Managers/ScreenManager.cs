@@ -5,6 +5,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
     using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
+    using GameFoundation.Scripts.CommonScreen;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.ScreenFlow.Signals;
@@ -93,8 +94,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         [Inject]
         public void Init(SignalBus signalBusParam, ILogService logServiceParam)
         {
-            this.signalBus   = signalBusParam;
-            this.logService  = logServiceParam;
+            this.signalBus  = signalBusParam;
+            this.logService = logServiceParam;
 
             this.activeScreens = new List<IScreenPresenter>();
             this.screenPool    = new Dictionary<Type, IScreenPresenter>();
@@ -212,7 +213,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.previousActiveScreen = this.currentActiveScreen;
             this.currentActiveScreen  = signal.ScreenPresenter;
             this.currentActiveScreen.SetViewParent(this.CurrentRootScreen);
-            
+
             // if show the screen that already in the active screens list, remove current one in list and add it to the last of list
             if (this.activeScreens.Contains(signal.ScreenPresenter))
                 this.activeScreens.Remove(signal.ScreenPresenter);
@@ -255,7 +256,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             {
                 this.activeScreens.Remove(closeScreenPresenter);
             }
-            
+
             closeScreenPresenter?.SetViewParent(this.CurrentHiddenRoot);
         }
 
@@ -278,8 +279,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
         private void OnDestroyScreen(ScreenSelfDestroyedSignal signal)
         {
-            var screenPresenter = signal.ScreenPresenter;
-            var screenType      = screenPresenter.GetType();
+            var screenPresenter                                                                                                   = signal.ScreenPresenter;
+            var screenType                                                                                                        = screenPresenter.GetType();
             if (this.previousActiveScreen != null && this.previousActiveScreen.Equals(screenPresenter)) this.previousActiveScreen = null;
             this.screenPool.Remove(screenType);
             this.activeScreens.Remove(screenPresenter);
@@ -291,6 +292,44 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             {
                 this.previousActiveScreen.HideView();
             }
+        }
+
+        #endregion
+
+        #region Monobehaviour
+
+        private void Update()
+        {
+            // back button flow
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (this.activeScreens.Count > 1)
+                {
+                    Debug.Log("Close last screen");
+                    this.activeScreens.Last().CloseView();
+                }
+                else
+                {
+                    Debug.Log("Show popup confirm quit app");
+                    _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
+                    {
+                        content     = "Do you really want to quit?",
+                        title       = "Are you sure?",
+                        type        = NotificationType.Option,
+                        OkAction = this.QuitApplication,
+                    });
+                }
+            }
+        }
+
+        private void QuitApplication()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+                             Application.Quit();
+#endif
+
         }
 
         #endregion
