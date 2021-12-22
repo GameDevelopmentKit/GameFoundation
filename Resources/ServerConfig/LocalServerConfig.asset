@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9f0c99b7efe245149981e2dfd8577012, type: 3}
-  m_Name: LocalServerConfig
+  m_Name: localServerConfig
   m_EditorClassIdentifier: 
   AuthServer: https://dev-auth.mechmaster.io/api
   GameServer: http://10.2.12.38:5000/api
