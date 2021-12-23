@@ -242,6 +242,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             if (this.activeScreens.LastOrDefault() == closeScreenPresenter)
             {
                 // If close the screen on the top, will be open again the behind screen if available
+                this.currentActiveScreen = null;
                 this.activeScreens.Remove(closeScreenPresenter);
                 if (this.activeScreens.Count > 0)
                 {

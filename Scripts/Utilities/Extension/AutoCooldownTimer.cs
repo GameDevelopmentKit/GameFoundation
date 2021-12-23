@@ -47,7 +47,7 @@
             }
         }
 
-        public void CountDown(long cooldownTime, Action<long> onEveryCycleParam, Action onCompleteParam = null, int depth = 0)
+        public IDisposable CountDown(long cooldownTime, Action<long> onEveryCycleParam, Action onCompleteParam = null, int depth = 0)
         {
             this.currentCooldownTime = cooldownTime;
             this.onEveryCycle        = onEveryCycleParam;
@@ -81,6 +81,8 @@
 
                     this.currentCooldownTime -= currentCycle;
                 });
+
+            return this;
         }
 
         private long GetCycleByTime(long time)
@@ -109,7 +111,7 @@
 
         public void Dispose()
         {
-            this.signalBus.Unsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
+            this.signalBus.TryUnsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
             this.observableTimer?.Dispose();
             this.pool.Despawn(this);
         }
