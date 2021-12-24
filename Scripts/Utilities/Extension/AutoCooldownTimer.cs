@@ -113,7 +113,7 @@
         {
             this.signalBus.TryUnsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
             this.observableTimer?.Dispose();
-            this.pool.Despawn(this);
+            this.pool?.Despawn(this);
         }
         public void OnDespawned()               { this.pool = null; }
         public void OnSpawned(IMemoryPool pool) { this.pool = pool; }
