@@ -30,7 +30,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
                 // Check for an Orientation Change
                 if (this.state.Value != Input.deviceOrientation)
                 {
-                    // this.state.Value = Input.deviceOrientation;
+                    this.state.Value = Input.deviceOrientation;
                     Debug.Log("Change Device Orientation = " + this.state.Value + " Screen Orientation = " + Screen.orientation);
                 }
 
