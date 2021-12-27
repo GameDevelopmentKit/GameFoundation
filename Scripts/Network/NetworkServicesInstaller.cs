@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.Network
 {
     using GameFoundation.Editor.ServerConfig;
+    using GameFoundation.Scripts.Network.Authentication;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Utilities.Extension;
     using Zenject;
@@ -12,7 +13,8 @@ namespace GameFoundation.Scripts.Network
         public override void InstallBindings()
         {
             // Network services
-            this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments(gameConfig.ServerConfig.GameServer);
+            this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments(this.gameConfig.ServerConfig.GameServer);
+            this.Container.Bind<AuthenticationService>().To<AuthenticationService>().AsCached().WithArguments(this.gameConfig.ServerConfig.AuthServer);
 
             // //TODO move this into BestHttpService instead of separate them
             this.Container.Bind<NetworkConfig>().AsSingle().NonLazy();
