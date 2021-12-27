@@ -34,7 +34,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
                     Debug.Log("Change Device Orientation = " + this.state.Value + " Screen Orientation = " + Screen.orientation);
                 }
 
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.1f);
             }
         }
     }

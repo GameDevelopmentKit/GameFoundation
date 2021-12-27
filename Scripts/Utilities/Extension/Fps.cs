@@ -1,14 +1,19 @@
-﻿using UnityEngine;
-
-namespace GameFoundation.Scripts.Utilities.Extension
+﻿namespace GameFoundation.Scripts.Utilities.Extension
 {
+    using UnityEngine;
+
     public class Fps : MonoBehaviour
     {
         float        deltaTime = 0.0f;
         public Color c         = Color.red;
 
         // Use this for initialization
-        void Start() { }
+        private void Start()
+        {
+#if !DEVELOPMENT_BUILD && !UNITY_EDITOR
+            this.gameObject.SetActive(false);
+#endif
+        }
 
         // Update is called once per frame
         void Update() { this.deltaTime += (Time.deltaTime - this.deltaTime) * 0.1f; }
