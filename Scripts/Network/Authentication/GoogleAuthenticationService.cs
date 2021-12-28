@@ -51,7 +51,7 @@ namespace GameFoundation.Scripts.Network.Authentication
             // logger.Log("Listening..");
             this.Http.Start();
             // Creates the OAuth 2.0 authorization request.
-            var authorizationRequest = string.Format("{0}?response_type=code&scope=openid%20profile&redirect_uri={1}&client_id={2}&state={3}&code_challenge={4}&code_challenge_method={5}",
+            var authorizationRequest = string.Format("{0}?response_type=code&scope=openid%20profile%20email&redirect_uri={1}&client_id={2}&state={3}&code_challenge={4}&code_challenge_method={5}",
                 AuthorizationEndpoint, Uri.EscapeDataString(redirectUri), ClientID, state, codeChallenge, codeChallengeMethod);
 
             // Opens request in the browser.

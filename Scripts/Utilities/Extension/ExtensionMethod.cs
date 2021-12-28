@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.MVP;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
+    using Newtonsoft.Json;
     using UnityEngine;
     using UnityEngine.UI;
     using Zenject;
@@ -61,6 +62,11 @@ namespace GameFoundation.Scripts.Utilities.Extension
             await presenter.SetView(parentView);
             presenter.BindData(model);
             listPresenter.Add(presenter);
+        }
+        
+        public static string ToJson<T>(this T obj)
+        {
+            return JsonConvert.SerializeObject(obj);
         }
     }
 }
