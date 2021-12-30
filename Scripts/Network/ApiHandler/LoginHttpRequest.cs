@@ -30,16 +30,17 @@
             var email          = responseData.Email;
             var fullName       = responseData.Fullname;
             var avatar         = responseData.Picture;
+            var wallet         = responseData.WalletAddress;
             if (string.IsNullOrEmpty(jwtToken)) return;
-            this.SaveDataToLocalData(jwtToken, refreshToken, expirationTime, email, fullName, avatar);
+            this.SaveDataToLocalData(jwtToken, refreshToken, expirationTime, email, fullName, avatar, wallet);
         }
 
-        private void SaveDataToLocalData(string jwtToken, string refreshToken, long expirationTime, string email, string fullName, string avatar)
+        private void SaveDataToLocalData(string jwtToken, string refreshToken, long expirationTime, string email, string fullName, string avatar, string wallet)
         {
             this.localData.ServerToken.JwtToken       = jwtToken;
             this.localData.ServerToken.RefreshToken   = refreshToken;
             this.localData.ServerToken.ExpirationTime = expirationTime;
-
+            this.localData.ServerToken.WalletAddress  = wallet;
             switch (this.dataLoginServices.currentTypeLogin)
             {
                 case TypeLogIn.Facebook:

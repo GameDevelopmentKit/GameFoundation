@@ -8,9 +8,9 @@ namespace GameFoundation.Scripts.GameManager
     public partial class GameFoundationLocalData
     {
         // user data
-        public UserDataLogin    UserDataLogin  { get; set; } = new UserDataLogin();
-        public ServerToken      ServerToken    { get; set; } = new ServerToken();
-        public BlueprintModel   BlueprintModel { get; set; } = new BlueprintModel();
+        public UserDataLogin  UserDataLogin  { get; set; } = new UserDataLogin();
+        public ServerToken    ServerToken    { get; set; } = new ServerToken();
+        public BlueprintModel BlueprintModel { get; set; } = new BlueprintModel();
     }
 
     public class UserDataLogin
@@ -32,6 +32,8 @@ namespace GameFoundation.Scripts.GameManager
         public string RefreshToken   { get; set; }
         public long   ExpirationTime { get; set; }
         public string JwtToken       { get; set; }
+
+        public string WalletAddress { get; set; }
     }
 
     public class BlueprintModel
