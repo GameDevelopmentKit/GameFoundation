@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f0c99b7efe245149981e2dfd8577012, type: 3}
   m_Name: stagingServerConfig
   m_EditorClassIdentifier: 
-  AuthServer: https://auth.mechmaster.io/api
-  GameServer: https://game.mechmaster.io/api
-  MatchMakerServer: https://game.mechmaster.io/matchmaker
+  AuthServer: https://staging-auth.mechmaster.io/api
+  GameServer: https://staging-game.mechmaster.io/api
+  MatchMakerServer: https://staging-game.mechmaster.io/matchmaker
