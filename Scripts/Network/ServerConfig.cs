@@ -8,5 +8,6 @@
         public string AuthServer;
         public string GameServer;
         public string MatchMakerServer;
+        public string BattleServer;
     }
 }

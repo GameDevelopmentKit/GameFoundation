@@ -15,3 +15,4 @@ MonoBehaviour:
   AuthServer: https://dev-auth.mechmaster.io/api
   GameServer: https://dev-game.mechmaster.io/api
   MatchMakerServer: https://dev-game.mechmaster.io/matchmaker
+  BattleServer: https://dev-battle.mechmaster.io/battle
