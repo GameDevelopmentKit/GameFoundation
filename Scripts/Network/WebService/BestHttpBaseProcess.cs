@@ -35,8 +35,13 @@
 
         protected async UniTask MainProcess<T, TK>(HTTPRequest request) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            this.Logger.Log($"{request.Uri} - [REQUEST] - Header: {request.DumpHeaders()} - \n Body:{Encoding.UTF8.GetString(request.GetEntityBody())}");
+#endif
             var response = await request.GetHTTPResponseAsync();
-
+#if UNITY_EDITOR || DEVELOPMENT_BUILD     
+            this.Logger.Log($"{request.Uri} - [RESPONSE] - raw data: {response.DataAsText}");
+#endif
             this.PreProcess(request, response, (statusCode) =>
                 {
                     var responseData = JObject.Parse(Encoding.UTF8.GetString(response.Data));

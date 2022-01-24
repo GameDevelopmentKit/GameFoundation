@@ -9,7 +9,7 @@ namespace Mech.Network.HttpRequest
     /// <summary>
     /// Get blueprint download link from server
     /// </summary>
-    public class BlueprintDownloadRequest : BaseHttpRequest<BlueprintResponse>
+    public class BlueprintDownloadRequest : BaseHttpRequest<GetBlueprintResponse>
     {
 
         private readonly SignalBus               signalBus;
@@ -19,7 +19,7 @@ namespace Mech.Network.HttpRequest
             this.signalBus               = signalBus;
         }
 
-        public override void Process(BlueprintResponse responseData)
+        public override void Process(GetBlueprintResponse responseData)
         {
             this.Logger.Log($"Blueprint download link: {responseData.Url}");
             this.signalBus.Fire(new LoadBlueprintDataSignal { Url = responseData.Url, Hash = responseData.Hash});
