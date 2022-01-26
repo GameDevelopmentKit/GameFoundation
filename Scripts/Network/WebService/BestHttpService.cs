@@ -63,7 +63,7 @@ namespace GameFoundation.Scripts.Network.WebService
 
                 if (!string.IsNullOrEmpty(GameVersion.Version))
                 {
-                    request.AddHeader("GameVersion", GameVersion.Version);
+                    request.AddHeader("game-version", Application.version);
                 }
 
                 request.RawData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(wrappedData));

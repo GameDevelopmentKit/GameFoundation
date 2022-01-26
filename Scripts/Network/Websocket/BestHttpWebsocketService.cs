@@ -4,11 +4,11 @@ namespace GameFoundation.Scripts.Network.Websocket
     using System.Threading;
     using System.Threading.Tasks;
     using BestHTTP.SignalRCore;
-    using BestHTTP.SignalRCore.Authentication;
     using BestHTTP.SignalRCore.Encoders;
     using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Utilities.LogService;
     using UniRx;
+    using UnityEngine;
 
     /// <summary>Temporary websocket service (signalR) for battle.</summary>
     public class BestHttpWebsocketService : IWebSocketService
@@ -36,7 +36,7 @@ namespace GameFoundation.Scripts.Network.Websocket
         {
             this.HubConnection = new HubConnection(new Uri(uri), new MessagePackProtocol())
             {
-                AuthenticationProvider = new HeaderAuthenticator(token)
+                AuthenticationProvider = new CustomAuthenticator(token, Application.version),
             };
             this.HubConnection.OnConnected    += this.OnConnected;
             this.HubConnection.OnClosed       += this.OnClose;
