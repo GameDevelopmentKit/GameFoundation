@@ -45,7 +45,7 @@ namespace GameFoundation.Scripts.Network.Websocket
         {
 #if !UNITY_WEBGL || UNITY_EDITOR
             request.SetHeader("Authorization", "Bearer " + this._credentials);
-            // request.AddHeader("game-version", this._gameVersion);
+            request.AddHeader("game-version", this._gameVersion);
 #endif
         }
 
