@@ -36,7 +36,7 @@ namespace GameFoundation.Scripts.Network.Websocket
         {
             this.HubConnection = new HubConnection(new Uri(uri), new MessagePackProtocol())
             {
-                AuthenticationProvider = new CustomAuthenticator(token, Application.version),
+                AuthenticationProvider = new CustomAuthenticator(token, MechVersion.Version),
             };
             this.HubConnection.OnConnected    += this.OnConnected;
             this.HubConnection.OnClosed       += this.OnClose;
