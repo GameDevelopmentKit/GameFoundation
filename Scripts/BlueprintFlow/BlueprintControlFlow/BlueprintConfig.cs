@@ -5,23 +5,20 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     /// <summary>
     /// Contains all the constants, the configuration of Blueprint control flow
     /// </summary>
-    public static class BlueprintConfig
+    public class BlueprintConfig
     {
-        public static string CurrentBlueprintVersion = Application.version;
+        public readonly string CurrentBlueprintVersion = Application.version;
 
-        public static readonly string PersistentDataPath         = Application.persistentDataPath;
-        public static readonly string BlueprintZipFilepathFormat = $"{PersistentDataPath}/{BlueprintZipFilename}";
-
-        public const string BlueprintZipFilename = "Blueprints_v{0}.zip";
-        public static string BlueprintZipFilepath
-#if TEST_BLUEPRINT
-            => "Assets/Resources/BlueprintData/Blueprints_v1.0.zip";
-#else
-            => string.Format(BlueprintZipFilepathFormat, CurrentBlueprintVersion);
-#endif
-
+        private readonly string persistentDataPath = Application.persistentDataPath;
+        
+        private         string BlueprintZipFilepathFormat => $"{this.persistentDataPath}/{this.BlueprintZipFilename}";
+        
+        public readonly string BlueprintZipFilename = "Blueprints_v{0}.zip";
+        
+        public virtual string BlueprintZipFilepath => string.Format(this.BlueprintZipFilepathFormat, this.CurrentBlueprintVersion);
+        
         public const string ResourceBlueprintPath = "BlueprintData/";
+        
         public const string BlueprintFileType     = ".csv";
-        public const string BlueprintVersionKey   = "bp_version";
     }
 }

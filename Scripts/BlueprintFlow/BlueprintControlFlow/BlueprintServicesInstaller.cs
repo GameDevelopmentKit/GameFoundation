@@ -13,11 +13,11 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         public override void InstallBindings()
         {
             this.Container.Bind<BlueprintDownloader>().WhenInjectedInto<BlueprintReaderManager>();
-            this.Container.BindInterfacesAndSelfTo<BlueprintReaderManager>().AsSingle().NonLazy();
+            this.Container.Bind<BlueprintReaderManager>().AsCached();
+            this.Container.Bind<BlueprintConfig>().AsCached();
 
             this.Container.BindAllTypeDriveFrom<IGenericBlueprint>();
 
-            this.Container.DeclareSignal<LoadBlueprintDataSignal>();
             this.Container.DeclareSignal<LoadBlueprintDataSuccessedSignal>();
             this.Container.DeclareSignal<LoadBlueprintDataProgressSignal>();
         }

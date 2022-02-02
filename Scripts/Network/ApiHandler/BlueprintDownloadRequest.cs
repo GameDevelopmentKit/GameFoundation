@@ -1,5 +1,6 @@
 namespace Mech.Network.HttpRequest
 {
+    using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.Scripts.BlueprintFlow.Signals;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Utilities.LogService;
@@ -11,18 +12,21 @@ namespace Mech.Network.HttpRequest
     /// </summary>
     public class BlueprintDownloadRequest : BaseHttpRequest<GetBlueprintResponse>
     {
+        #region zenject
 
-        private readonly SignalBus               signalBus;
+        private readonly BlueprintReaderManager blueprintReaderManager;
 
-        public BlueprintDownloadRequest(ILogService logger, SignalBus signalBus) : base(logger)
+        #endregion
+        
+        public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) : base(logger)
         {
-            this.signalBus               = signalBus;
+            this.blueprintReaderManager = blueprintReaderManager;
         }
 
         public override void Process(GetBlueprintResponse responseData)
         {
             this.Logger.Log($"Blueprint download link: {responseData.Url}");
-            this.signalBus.Fire(new LoadBlueprintDataSignal { Url = responseData.Url, Hash = responseData.Hash});
+            this.blueprintReaderManager.LoadBlueprint(responseData.Url, responseData.Hash);
         }
     }
 }

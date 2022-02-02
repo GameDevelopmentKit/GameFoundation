@@ -15,10 +15,12 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     using Zenject;
 
     /// <summary>
-    ///  The main manager for reading blueprints pipeline, trigger by <see cref="LoadBlueprintDataSignal"/>.
+    ///  The main manager for reading blueprints pipeline/>.
     /// </summary>
-    public class BlueprintReaderManager : IInitializable, IDisposable
+    public class BlueprintReaderManager
     {
+        #region zeject
+
         private readonly SignalBus                  signalBus;
         private readonly ILogService                logService;
         private readonly DiContainer                diContainer;
@@ -26,9 +28,12 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         private readonly HandleLocalDataServices    handleLocalDataServices;
         private readonly IHttpService               httpService;
         private          Dictionary<string, string> listRawBlueprints;
+        private readonly BlueprintConfig            blueprintConfig;
+        
+        #endregion
 
         public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer, GameFoundationLocalData localData, HandleLocalDataServices handleLocalDataServices,
-            IHttpService httpService)
+            IHttpService httpService, BlueprintConfig blueprintConfig)
         {
             this.signalBus               = signalBus;
             this.logService              = logService;
@@ -36,24 +41,22 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             this.localData               = localData;
             this.handleLocalDataServices = handleLocalDataServices;
             this.httpService             = httpService;
+            this.blueprintConfig         = blueprintConfig;
         }
 
-        public void Initialize() { this.signalBus.Subscribe<LoadBlueprintDataSignal>(this.OnLoadBlueprint); }
-        public void Dispose()    { this.signalBus.Unsubscribe<LoadBlueprintDataSignal>(this.OnLoadBlueprint); }
-
-        private async void OnLoadBlueprint(LoadBlueprintDataSignal signal)
+        public async void LoadBlueprint(string url, string hash = "test")
         {
-            if (!this.IsLoadLocalBlueprint(signal))
+            if (!this.IsLoadLocalBlueprint(url, hash))
             {
                 //Download new blueprints version from remote
                 var progressSignal = new LoadBlueprintDataProgressSignal();
-                await this.httpService.Download(signal.Url, string.Format(BlueprintConfig.BlueprintZipFilename, BlueprintConfig.CurrentBlueprintVersion), (downloaded, length) =>
+                await this.httpService.Download(url, string.Format(this.blueprintConfig.BlueprintZipFilename, this.blueprintConfig.CurrentBlueprintVersion), (downloaded, length) =>
                 {
                     progressSignal.percent = downloaded / (float)length * 100f;
                     this.signalBus.Fire(progressSignal);
                 });
 
-                this.localData.BlueprintModel.BlueprintDownloadUrl = signal.Url;
+                this.localData.BlueprintModel.BlueprintDownloadUrl = url;
                 this.handleLocalDataServices.Save(this.localData,true);
             }
 
@@ -67,20 +70,14 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             this.signalBus.Fire<LoadBlueprintDataSuccessedSignal>();
         }
 
-        private bool IsLoadLocalBlueprint(LoadBlueprintDataSignal blueprintInfo)
-        {
-#if TEST_BLUEPRINT
-            return true;
-#else
-            return this.localData.BlueprintModel.BlueprintDownloadUrl == blueprintInfo.Url && MD5Utils.GetMD5HashFromFile(BlueprintConfig.BlueprintZipFilepath) == blueprintInfo.Hash &&
-                   File.Exists(BlueprintConfig.BlueprintZipFilepath);
-#endif
-        }
+        protected virtual bool IsLoadLocalBlueprint(string url, string hash) =>
+            this.localData.BlueprintModel.BlueprintDownloadUrl == url && MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash &&
+            File.Exists(this.blueprintConfig.BlueprintZipFilepath);
 
         private async UniTask<Dictionary<string, string>> UnzipBlueprint()
         {
             var result = new Dictionary<string, string>();
-            using (var archive = ZipFile.OpenRead(BlueprintConfig.BlueprintZipFilepath))
+            using (var archive = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath))
             {
                 foreach (var entry in archive.Entries)
                 {
@@ -95,9 +92,9 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 
         private UniTask ReadAllBlueprint()
         {
-            if (!File.Exists(BlueprintConfig.BlueprintZipFilepath))
+            if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
-                this.logService.Error($"[BlueprintReader] {BlueprintConfig.BlueprintZipFilepath} is not exists!!!");
+                this.logService.Error($"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!");
                 return UniTask.CompletedTask;
             }
 
