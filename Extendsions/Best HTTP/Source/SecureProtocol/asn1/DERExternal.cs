@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+	using System;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/**
 	* Class representing the DER-type External
 	*/
@@ -91,7 +90,24 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			ExternalContent = externalData.ToAsn1Object();
 		}
 
-		internal override void Encode(DerOutputStream derOut)
+		internal override int EncodedLength(bool withID)
+		{
+			var contentsLength                                 = 0;
+			if (this.directReference != null) contentsLength   += this.directReference.EncodedLength(true);
+			if (this.indirectReference != null) contentsLength += this.indirectReference.EncodedLength(true);
+			if (this.dataValueDescriptor != null)
+				// TODO[asn1]
+				//contentsLength += dataValueDescriptor.ToDerObject().EncodedLength(true);
+				contentsLength += this.dataValueDescriptor.GetDerEncoded().Length;
+
+			// TODO[asn1]
+			//contentsLength += new DerTaggedObject(true, encoding, externalContent).EncodedLength(true);
+			contentsLength += new DerTaggedObject(Asn1Tags.External, this.externalContent).EncodedLength(true);
+
+			return Asn1OutputStream.GetLengthOfEncodingDL(withID, contentsLength);
+		}
+
+		internal override void Encode(Asn1OutputStream asn1Out, bool withID)
 		{
 			MemoryStream ms = new MemoryStream();
 			WriteEncodable(ms, directReference);
@@ -99,7 +115,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			WriteEncodable(ms, dataValueDescriptor);
 			WriteEncodable(ms, new DerTaggedObject(Asn1Tags.External, externalContent));
 
-			derOut.WriteEncoded(Asn1Tags.Constructed, Asn1Tags.External, ms.ToArray());
+			asn1Out.WriteEncodingDL(withID, Asn1Tags.Constructed | Asn1Tags.External, ms.ToArray());
 		}
 
 		protected override int Asn1GetHashCode()
@@ -131,9 +147,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			if (other == null)
 				return false;
 
-			return BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Equals(directReference, other.directReference)
-				&& BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Equals(indirectReference, other.indirectReference)
-				&& BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Equals(dataValueDescriptor, other.dataValueDescriptor)
+			return Equals(directReference, other.directReference)
+				&& Equals(indirectReference, other.indirectReference)
+				&& Equals(dataValueDescriptor, other.dataValueDescriptor)
 				&& externalContent.Equals(other.externalContent);
 		}
 

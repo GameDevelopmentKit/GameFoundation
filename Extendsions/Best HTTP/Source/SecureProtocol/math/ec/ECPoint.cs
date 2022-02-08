@@ -1,19 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.Diagnostics;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
 {
+    using System;
+    using System.Collections;
+    using System.Text;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+
     /**
      * base class for points on elliptic curves.
      */
     public abstract class ECPoint
     {
+        private static readonly SecureRandom Random = new();
+
         protected static ECFieldElement[] EMPTY_ZS = new ECFieldElement[0];
 
         protected static ECFieldElement[] GetInitialZCoords(ECCurve curve)
@@ -232,13 +233,29 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
                 }
                 default:
                 {
-                    ECFieldElement Z1 = RawZCoords[0];
-                    if (Z1.IsOne)
-                    {
+                    var z = this.RawZCoords[0];
+                    if (z.IsOne)
                         return this;
-                    }
 
-                    return Normalize(Z1.Invert());
+                    if (null == this.m_curve)
+                        throw new InvalidOperationException("Detached points must be in affine coordinates");
+
+                    /*
+                     * Use blinding to avoid the side-channel leak identified and analyzed in the paper
+                     * "Yet another GCD based inversion side-channel affecting ECC implementations" by Nir
+                     * Drucker and Shay Gueron.
+                     *
+                     * To blind the calculation of z^-1, choose a multiplicative (i.e. non-zero) field
+                     * element 'b' uniformly at random, then calculate the result instead as (z * b)^-1 * b.
+                     * Any side-channel in the implementation of 'inverse' now only leaks information about
+                     * the value (z * b), and no longer reveals information about 'z' itself.
+                     */
+                    // TODO Add CryptoServicesRegistrar class and use here
+                    //SecureRandom r = CryptoServicesRegistrar.GetSecureRandom();
+                    var r    = Random;
+                    var b    = this.m_curve.RandomFieldElementMult(r);
+                    var zInv = z.Multiply(b).Invert().Multiply(b);
+                    return this.Normalize(zInv);
                 }
             }
         }
@@ -1948,7 +1965,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
             ECFieldElement X1 = this.RawXCoord;
             if (X1.IsZero)
             {
-                // A point with X == 0 is it's own additive inverse
+                // A point with X == 0 is its own additive inverse
                 return curve.Infinity;
             }
 
@@ -2058,7 +2075,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
             ECFieldElement X1 = this.RawXCoord;
             if (X1.IsZero)
             {
-                // A point with X == 0 is it's own additive inverse
+                // A point with X == 0 is its own additive inverse
                 return b;
             }
 

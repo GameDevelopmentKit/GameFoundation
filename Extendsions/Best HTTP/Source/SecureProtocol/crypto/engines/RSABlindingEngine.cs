@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 {
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/**
 	* This does your basic RSA Chaum's blinding and unblinding as outlined in
 	* "Handbook of Applied Cryptography", page 475. You need to use this if you are
@@ -139,9 +138,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 		private BigInteger UnblindMessage(
 			BigInteger blindedMsg)
 		{
-			BigInteger m = key.Modulus;
-			BigInteger msg = blindedMsg;
-			BigInteger blindFactorInverse = blindingFactor.ModInverse(m);
+			BigInteger m                  = key.Modulus;
+			BigInteger msg                = blindedMsg;
+			var        blindFactorInverse = BigIntegers.ModOddInverse(m, this.blindingFactor);
 			msg = msg.Multiply(blindFactorInverse);
 			msg = msg.Mod(m);
 

@@ -1,10 +1,5 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
 {
     public class EnvelopedData
@@ -156,7 +151,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
             {
                 RecipientInfo ri = RecipientInfo.GetInstance(o);
 
-                if (ri.Version.IntValueExact != 0)
+                if (!ri.Version.HasValue(0))
                 {
                     return 2;
                 }

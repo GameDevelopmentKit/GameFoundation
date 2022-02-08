@@ -1,14 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
     * this does your basic Pkcs 1 v1.5 padding - whether or not you should be using this
     * depends on your application - see Pkcs1 Version 2 for details.
@@ -41,9 +39,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
 
         static Pkcs1Encoding()
         {
-            string strictProperty = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetEnvironmentVariable(StrictLengthEnabledProperty);
+            string strictProperty = Platform.GetEnvironmentVariable(StrictLengthEnabledProperty);
 
-            strictLengthEnabled = new bool[]{ strictProperty == null || BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EqualsIgnoreCase("true", strictProperty) };
+            strictLengthEnabled = new bool[]{ strictProperty == null || Platform.EqualsIgnoreCase("true", strictProperty) };
         }
 
 
@@ -226,7 +224,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
              * Now the padding check, check for no 0 byte in the padding
              */
             int plen = encoded.Length - (
-                      pLen /* Lenght of the PMS */
+                pLen /* Length of the PMS */
                     +  1 /* Final 0-byte before PMS */
             );
 

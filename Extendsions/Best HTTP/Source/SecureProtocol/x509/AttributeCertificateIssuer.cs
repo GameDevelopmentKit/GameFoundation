@@ -1,16 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 {
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
+
 	/**
 	 * Carrying class for an attribute certificate issuer.
 	 */
@@ -138,23 +134,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 		}
 
 		public bool Match(
-//			Certificate cert)
 			X509Certificate x509Cert)
 		{
-//			if (!(cert is X509Certificate))
-//			{
-//				return false;
-//			}
-//
-//			X509Certificate x509Cert = (X509Certificate)cert;
-
 			if (form is V2Form)
 			{
 				V2Form issuer = (V2Form) form;
 				if (issuer.BaseCertificateID != null)
 				{
-					return issuer.BaseCertificateID.Serial.Value.Equals(x509Cert.SerialNumber)
-						&& MatchesDN(x509Cert.IssuerDN, issuer.BaseCertificateID.Issuer);
+					return issuer.BaseCertificateID.Serial.HasValue(x509Cert.SerialNumber)
+					       && MatchesDN(x509Cert.IssuerDN, issuer.BaseCertificateID.Issuer);
 				}
 
 				return MatchesDN(x509Cert.SubjectDN, issuer.IssuerName);

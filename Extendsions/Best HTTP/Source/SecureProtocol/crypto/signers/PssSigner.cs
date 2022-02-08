@@ -1,14 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 {
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/// <summary> RSA-PSS as described in Pkcs# 1 v 2.1.
 	/// <p>
 	/// Note: the usual value for the salt length is the number of
@@ -247,7 +246,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 			block[block.Length - sLen - 1 - hLen - 1] = (byte) (0x01);
 			salt.CopyTo(block, block.Length - sLen - hLen - 1);
 
-			byte[] dbMask = MaskGeneratorFunction1(h, 0, h.Length, block.Length - hLen - 1);
+			var dbMask = this.MaskGeneratorFunction(h, 0, h.Length, this.block.Length - this.hLen - 1);
 			for (int i = 0; i != dbMask.Length; i++)
 			{
 				block[i] ^= dbMask[i];
@@ -288,7 +287,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 				return false;
 			}
 
-			byte[] dbMask = MaskGeneratorFunction1(block, block.Length - hLen - 1, hLen, block.Length - hLen - 1);
+			var dbMask = this.MaskGeneratorFunction(this.block, this.block.Length - this.hLen - 1, this.hLen, this.block.Length - this.hLen - 1);
 
 			for (int i = 0; i != dbMask.Length; i++)
 			{
@@ -349,6 +348,24 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 			sp[1] = (byte)((uint) i >> 16);
 			sp[2] = (byte)((uint) i >> 8);
 			sp[3] = (byte)((uint) i >> 0);
+		}
+
+		private byte[] MaskGeneratorFunction(
+			byte[] Z,
+			int zOff,
+			int zLen,
+			int length)
+		{
+			if (this.mgfDigest is IXof)
+			{
+				var mask = new byte[length];
+				this.mgfDigest.BlockUpdate(Z, zOff, zLen);
+				((IXof)this.mgfDigest).DoFinal(mask, 0, mask.Length);
+
+				return mask;
+			}
+
+			return this.MaskGeneratorFunction1(Z, zOff, zLen, length);
 		}
 
 		/// <summary> mask generator function, as described in Pkcs1v2.</summary>

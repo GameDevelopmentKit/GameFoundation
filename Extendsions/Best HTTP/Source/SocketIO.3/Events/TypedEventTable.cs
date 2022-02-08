@@ -1,12 +1,14 @@
 #if !BESTHTTP_DISABLE_SOCKETIO
-using System;
-using System.Collections.Generic;
-
 namespace BestHTTP.SocketIO3.Events
 {
+    using System;
+    using System.Collections.Generic;
+    using BestHTTP.PlatformSupport.IL2CPP;
+
+    [Preserve]
     public sealed class ConnectResponse
     {
-        public string sid;
+        [Preserve] public string sid;
     }
 
     public struct CallbackDescriptor

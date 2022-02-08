@@ -1,10 +1,8 @@
 #if !BESTHTTP_DISABLE_SOCKETIO
 
-using System;
-
 namespace BestHTTP.SocketIO3
 {
-    using BestHTTP;
+    using System;
     using BestHTTP.Logger;
     using BestHTTP.SocketIO3.Events;
 
@@ -90,15 +88,13 @@ namespace BestHTTP.SocketIO3
         /// </summary>
         public bool IsOpen { get; private set; }
 
+        public IncomingPacket CurrentPacket { get; private set; } = IncomingPacket.Empty;
+
         public LoggingContext Context { get; private set; }
 
         #endregion
 
-        #region Privates
-
         internal TypedEventTable TypedEventTable;
-
-        #endregion
 
         /// <summary>
         /// Internal constructor.
@@ -197,18 +193,22 @@ namespace BestHTTP.SocketIO3
             return new EmitBuilder(this).Emit(eventName, args);
         }
 
-        private IncomingPacket currentPacket = IncomingPacket.Empty;
         public Socket EmitAck(params object[] args)
         {
-            if (this.currentPacket.Equals(IncomingPacket.Empty))
+            return this.EmitAck(this.CurrentPacket, args);
+        }
+
+        public Socket EmitAck(IncomingPacket packet, params object[] args)
+        {
+            if (packet.Equals(IncomingPacket.Empty))
                 throw new ArgumentNullException("currentPacket");
 
-            if (currentPacket.Id < 0 || (currentPacket.SocketIOEvent != SocketIOEventTypes.Event && currentPacket.SocketIOEvent != SocketIOEventTypes.BinaryEvent))
+            if (packet.Id < 0 || packet.SocketIOEvent != SocketIOEventTypes.Event && packet.SocketIOEvent != SocketIOEventTypes.BinaryEvent)
                 throw new ArgumentException("Wrong packet - you can't send an Ack for a packet with id < 0 or SocketIOEvent != Event or SocketIOEvent != BinaryEvent!");
 
-            var eventType = currentPacket.SocketIOEvent == SocketIOEventTypes.Event ? SocketIOEventTypes.Ack : SocketIOEventTypes.BinaryAck;
+            var eventType = packet.SocketIOEvent == SocketIOEventTypes.Event ? SocketIOEventTypes.Ack : SocketIOEventTypes.BinaryAck;
 
-            (Manager as IManager).SendPacket(this.Manager.Parser.CreateOutgoing(this, eventType, currentPacket.Id, null, args));
+            (this.Manager as IManager).SendPacket(this.Manager.Parser.CreateOutgoing(this, eventType, packet.Id, null, args));
 
             return this;
         }
@@ -346,14 +346,14 @@ namespace BestHTTP.SocketIO3
 
             try
             {
-                this.currentPacket = packet;
+                this.CurrentPacket = packet;
 
                 // Dispatch the event to all subscriber
                 this.TypedEventTable.Call(packet);
             }
             finally
             {
-                this.currentPacket = IncomingPacket.Empty;
+                this.CurrentPacket = IncomingPacket.Empty;
             }
         }
 

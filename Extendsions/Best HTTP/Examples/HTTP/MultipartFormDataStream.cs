@@ -1,16 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using BestHTTP.Extensions;
-using BestHTTP.PlatformSupport.Memory;
-
 namespace BestHTTP
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
+    using BestHTTP.Extensions;
+    using BestHTTP.PlatformSupport.Memory;
+
     /// <summary>
     /// Stream based implementation of the multipart/form-data Content-Type. Using this class reading a whole file into memory can be avoided.
     /// This implementation expects that all streams has a final, accessible Length.
     /// </summary>
-    public sealed class MultipartFormDataStream : System.IO.Stream
+    public sealed class MultipartFormDataStream : Stream
     {
         public override bool CanRead { get { return true; } }
 
@@ -57,31 +58,34 @@ namespace BestHTTP
 
         public void AddField(string fieldName, string value)
         {
-            AddField(fieldName, value, System.Text.Encoding.UTF8);
+            AddField(fieldName, value, Encoding.UTF8);
         }
 
-        public void AddField(string fieldName, string value, System.Text.Encoding encoding)
+        public void AddField(string fieldName, string value, Encoding encoding)
         {
             var byteCount = encoding.GetByteCount(value);
-            var buffer = BufferPool.Get(byteCount, true);
-            var stream = new BufferPoolMemoryStream(buffer, 0, byteCount);
+            var buffer    = BufferPool.Get(byteCount, true);
+            var stream    = new BufferPoolMemoryStream();
 
             encoding.GetBytes(value, 0, value.Length, buffer, 0);
 
+            stream.Write(buffer, 0, byteCount);
+
+            stream.Position = 0;
             AddStreamField(stream, fieldName, null, "text/plain; charset=" + encoding.WebName);
         }
 
-        public void AddStreamField(System.IO.Stream stream, string fieldName)
+        public void AddStreamField(Stream stream, string fieldName)
         {
             AddStreamField(stream, fieldName, null, null);
         }
 
-        public void AddStreamField(System.IO.Stream stream, string fieldName, string fileName)
+        public void AddStreamField(Stream stream, string fieldName, string fileName)
         {
             AddStreamField(stream, fieldName, fileName, null);
         }
 
-        public void AddStreamField(System.IO.Stream stream, string fieldName, string fileName, string mimeType)
+        public void AddStreamField(Stream stream, string fieldName, string fileName, string mimeType)
         {
             var header = new BufferPoolMemoryStream();
             header.WriteLine("--" + this.boundary);
@@ -89,7 +93,7 @@ namespace BestHTTP
             // Set up Content-Type head for the form.
             if (!string.IsNullOrEmpty(mimeType))
                 header.WriteLine("Content-Type: " + mimeType);
-            header.WriteLine("Content-Length: " + stream.Length.ToString());
+            //header.WriteLine("Content-Length: " + stream.Length.ToString());
             header.WriteLine();
             header.Position = 0;
 

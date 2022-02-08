@@ -1,21 +1,20 @@
 #if !BESTHTTP_DISABLE_WEBSOCKET
 
-using System;
-
-using BestHTTP.Examples.Helpers;
-
-using UnityEngine;
-using UnityEngine.UI;
-
 namespace BestHTTP.Examples.Websockets
 {
-    public class WebSocketSample : BestHTTP.Examples.Helpers.SampleBase
+    using System;
+    using BestHTTP.Examples.Helpers;
+    using BestHTTP.WebSocket;
+    using UnityEngine;
+    using UnityEngine.UI;
+
+    public class WebSocketSample : SampleBase
     {
 #pragma warning disable 0649
 
         [SerializeField]
         [Tooltip("The WebSocket address to connect")]
-        private string address = "wss://echo.websocket.org";
+        private string address = "wss://besthttpwebgldemo.azurewebsites.net/ws";
 
         [SerializeField]
         private InputField _input;
@@ -43,7 +42,7 @@ namespace BestHTTP.Examples.Websockets
         /// <summary>
         /// Saved WebSocket instance
         /// </summary>
-        WebSocket.WebSocket webSocket;
+        WebSocket webSocket;
 
         protected override void Start()
         {
@@ -65,7 +64,7 @@ namespace BestHTTP.Examples.Websockets
         public void OnConnectButton()
         {
             // Create the WebSocket instance
-            this.webSocket = new WebSocket.WebSocket(new Uri(address));
+            this.webSocket = new WebSocket(new Uri(address));
 
 #if !UNITY_WEBGL || UNITY_EDITOR
             this.webSocket.StartPingThread = true;
@@ -118,7 +117,7 @@ namespace BestHTTP.Examples.Websockets
         /// <summary>
         /// Called when the web socket is open, and we are ready to send and receive data
         /// </summary>
-        void OnOpen(WebSocket.WebSocket ws)
+        void OnOpen(WebSocket ws)
         {
             AddText("WebSocket Open!");
 
@@ -128,7 +127,7 @@ namespace BestHTTP.Examples.Websockets
         /// <summary>
         /// Called when we received a text message from the server
         /// </summary>
-        void OnMessageReceived(WebSocket.WebSocket ws, string message)
+        void OnMessageReceived(WebSocket ws, string message)
         {
             AddText(string.Format("Message received: <color=yellow>{0}</color>", message))
                 .AddLeftPadding(20);
@@ -137,7 +136,7 @@ namespace BestHTTP.Examples.Websockets
         /// <summary>
         /// Called when the web socket closed
         /// </summary>
-        void OnClosed(WebSocket.WebSocket ws, UInt16 code, string message)
+        void OnClosed(WebSocket ws, UInt16 code, string message)
         {
             AddText(string.Format("WebSocket closed! Code: {0} Message: {1}", code, message));
 
@@ -149,7 +148,7 @@ namespace BestHTTP.Examples.Websockets
         /// <summary>
         /// Called when an error occured on client side
         /// </summary>
-        void OnError(WebSocket.WebSocket ws, string error)
+        void OnError(WebSocket ws, string error)
         {
             AddText(string.Format("An error occured: <color=red>{0}</color>", error));
 

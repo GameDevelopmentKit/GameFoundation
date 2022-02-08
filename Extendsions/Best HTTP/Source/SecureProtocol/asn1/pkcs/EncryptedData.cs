@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 {
-    /**
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	/**
      * The EncryptedData object.
      * <pre>
      *      EncryptedData ::= Sequence {
@@ -45,7 +44,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 				return new EncryptedData((Asn1Sequence) obj);
 			}
 
-			throw new ArgumentException("Unknown object in factory: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+			throw new ArgumentException("Unknown object in factory: " + Platform.GetTypeName(obj), "obj");
 		}
 
 		private EncryptedData(
@@ -54,11 +53,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 			if (seq.Count != 2)
 				throw new ArgumentException("Wrong number of elements in sequence", "seq");
 
-            int version = ((DerInteger)seq[0]).IntValueExact;
-			if (version != 0)
-            {
+			var version = (DerInteger)seq[0];
+			if (!version.HasValue(0))
                 throw new ArgumentException("sequence not version 0");
-            }
 
 			this.data = (Asn1Sequence) seq[1];
         }

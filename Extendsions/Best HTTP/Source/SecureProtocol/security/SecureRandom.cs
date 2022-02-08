@@ -1,16 +1,14 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Threading;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Prng;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
 {
+    using System;
+    using System.Threading;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Prng;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class SecureRandom
         : Random
     {
@@ -100,8 +98,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
         /// <param name="autoSeed">If true, the instance will be auto-seeded.</param>
         public static SecureRandom GetInstance(string algorithm, bool autoSeed)
         {
-            string upper = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithm);
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(upper, "PRNG"))
+            string upper = Platform.ToUpperInvariant(algorithm);
+            if (Platform.EndsWith(upper, "PRNG"))
             {
                 string digestName = upper.Substring(0, upper.Length - "PRNG".Length);
                 DigestRandomGenerator prng = CreatePrng(digestName, autoSeed);
@@ -248,14 +246,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
         {
             byte[] bytes = new byte[4];
             NextBytes(bytes);
-            return (int)Pack.BE_To_UInt32(bytes);
+            return (int)Pack.BE_To_UInt32(bytes, 0);
         }
 
         public virtual long NextLong()
         {
             byte[] bytes = new byte[8];
             NextBytes(bytes);
-            return (long)Pack.BE_To_UInt64(bytes);
+            return (long)Pack.BE_To_UInt64(bytes, 0);
         }
     }
 }

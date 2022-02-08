@@ -1,38 +1,35 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 {
+    using System;
+    using System.Collections;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+
     public class Pkcs12Store
     {
         public const string IgnoreUselessPasswordProperty = "BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs12.IgnoreUselessPassword";
 
-        private readonly IgnoresCaseHashtable	keys = new IgnoresCaseHashtable();
-        private readonly IDictionary            localIds = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-        private readonly IgnoresCaseHashtable	certs = new IgnoresCaseHashtable();
-        private readonly IDictionary            chainCerts = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-        private readonly IDictionary            keyCerts = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-        private readonly DerObjectIdentifier	keyAlgorithm;
-        private readonly DerObjectIdentifier    keyPrfAlgorithm;
-        private readonly DerObjectIdentifier	certAlgorithm;
-        private readonly DerObjectIdentifier    certPrfAlgorithm;
-        private readonly bool					useDerEncoding;
+        private readonly IgnoresCaseHashtable keys       = new();
+        private readonly IDictionary          localIds   = Platform.CreateHashtable();
+        private readonly IgnoresCaseHashtable certs      = new();
+        private readonly IDictionary          chainCerts = Platform.CreateHashtable();
+        private readonly IDictionary          keyCerts   = Platform.CreateHashtable();
+        private readonly DerObjectIdentifier  keyAlgorithm;
+        private readonly DerObjectIdentifier  keyPrfAlgorithm;
+        private readonly DerObjectIdentifier  certAlgorithm;
+        private readonly DerObjectIdentifier  certPrfAlgorithm;
+        private readonly bool                 useDerEncoding;
 
         private AsymmetricKeyEntry unmarkedKeyEntry = null;
 
@@ -88,9 +85,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         }
 
         internal Pkcs12Store(
-            DerObjectIdentifier	keyAlgorithm,
-            DerObjectIdentifier	certAlgorithm,
-            bool				useDerEncoding)
+            DerObjectIdentifier keyAlgorithm,
+            DerObjectIdentifier certAlgorithm,
+            bool useDerEncoding)
         {
             this.keyAlgorithm = keyAlgorithm;
             this.keyPrfAlgorithm = null;
@@ -124,8 +121,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         // TODO Consider making obsolete
 
         public Pkcs12Store(
-            Stream	input,
-            char[]	password)
+            Stream input,
+            char[] password)
             : this()
         {
             Load(input, password);
@@ -135,7 +132,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         {
             AsymmetricKeyParameter privKey = PrivateKeyFactory.CreateKey(privKeyInfo);
 
-            IDictionary attributes = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+            IDictionary attributes = Platform.CreateHashtable();
             AsymmetricKeyEntry keyEntry = new AsymmetricKeyEntry(privKey, attributes);
 
             string alias = null;
@@ -214,8 +211,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         }
 
         public void Load(
-            Stream	input,
-            char[]	password)
+            Stream input,
+            char[] password)
         {
             if (input == null)
                 throw new ArgumentNullException("input");
@@ -256,8 +253,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
             }
             else if (password != null)
             {
-                string ignoreProperty = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetEnvironmentVariable(IgnoreUselessPasswordProperty);
-                bool ignore = ignoreProperty != null && BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EqualsIgnoreCase("true", ignoreProperty);
+                string ignoreProperty = Platform.GetEnvironmentVariable(IgnoreUselessPasswordProperty);
+                bool ignore = ignoreProperty != null && Platform.EqualsIgnoreCase("true", ignoreProperty);
 
                 if (!ignore)
                 {
@@ -269,7 +266,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
             localIds.Clear();
             unmarkedKeyEntry = null;
 
-            IList certBags = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+            IList certBags = Platform.CreateArrayList();
 
             if (info.ContentType.Equals(PkcsObjectIdentifiers.Data))
             {
@@ -306,7 +303,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 
                         foreach (Asn1Sequence subSeq in seq)
                         {
-                            SafeBag b = new SafeBag(subSeq);
+                            var b = SafeBag.GetInstance(subSeq);
 
                             if (b.BagID.Equals(PkcsObjectIdentifiers.CertBag))
                             {
@@ -336,14 +333,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 
             foreach (SafeBag b in certBags)
             {
-                CertBag certBag = new CertBag((Asn1Sequence)b.BagValue);
-                byte[] octets = ((Asn1OctetString)certBag.CertValue).GetOctets();
-                X509Certificate cert = new X509CertificateParser().ReadCertificate(octets);
+                var             certBag = CertBag.GetInstance(b.BagValue);
+                byte[]          octets  = ((Asn1OctetString)certBag.CertValue).GetOctets();
+                X509Certificate cert    = new X509CertificateParser().ReadCertificate(octets);
 
                 //
                 // set the attributes
                 //
-                IDictionary attributes = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+                IDictionary attributes = Platform.CreateHashtable();
                 Asn1OctetString localId = null;
                 string alias = null;
 
@@ -363,6 +360,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
                             // the same OID - currently, differing values give an error
                             if (attributes.Contains(aOid.Id))
                             {
+                                // we've found more than one - one might be incorrect
+                                if (aOid.Equals(PkcsObjectIdentifiers.Pkcs9AtLocalKeyID))
+                                {
+                                    var id = Hex.ToHexString(Asn1OctetString.GetInstance(attr).GetOctets());
+                                    if (!(this.keys[id] != null || this.localIds[id] != null)) continue; // ignore this one - it's not valid
+                                }
+
                                 // OK, but the value has to be the same
                                 if (!attributes[aOid.Id].Equals(attr))
                                 {
@@ -452,7 +456,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 
         private IDictionary GetAliasesTable()
         {
-            IDictionary tab = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+            IDictionary tab = Platform.CreateHashtable();
 
             foreach (string key in certs.Keys)
             {
@@ -553,7 +557,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 
             if (c != null)
             {
-                IList cs = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+                IList cs = Platform.CreateArrayList();
 
                 while (c != null)
                 {
@@ -630,8 +634,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         }
 
         public void SetCertificateEntry(
-            string					alias,
-            X509CertificateEntry	certEntry)
+            string alias,
+            X509CertificateEntry certEntry)
         {
             if (alias == null)
                 throw new ArgumentNullException("alias");
@@ -645,9 +649,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         }
 
         public void SetKeyEntry(
-            string					alias,
-            AsymmetricKeyEntry		keyEntry,
-            X509CertificateEntry[]	chain)
+            string alias,
+            AsymmetricKeyEntry keyEntry,
+            X509CertificateEntry[] chain)
         {
             if (alias == null)
                 throw new ArgumentNullException("alias");
@@ -712,8 +716,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         }
 
         public bool IsEntryOfType(
-            string	alias,
-            Type	entryType)
+            string alias,
+            Type entryType)
         {
             if (entryType == typeof(X509CertificateEntry))
                 return IsCertificateEntry(alias);
@@ -737,9 +741,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         }
 
         public void Save(
-            Stream			stream,
-            char[]			password,
-            SecureRandom	random)
+            Stream stream,
+            char[] password,
+            SecureRandom random)
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
@@ -836,10 +840,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 
             random.NextBytes(cSalt);
 
-            Asn1EncodableVector	certBags = new Asn1EncodableVector();
-            Pkcs12PbeParams		cParams = new Pkcs12PbeParams(cSalt, MinIterations);
-            AlgorithmIdentifier	cAlgId = new AlgorithmIdentifier(certAlgorithm, cParams.ToAsn1Object());
-            ISet				doneCerts = new HashSet();
+            var  certBags  = new Asn1EncodableVector();
+            var  cParams   = new Pkcs12PbeParams(cSalt, MinIterations);
+            var  cAlgId    = new AlgorithmIdentifier(this.certAlgorithm, cParams.ToAsn1Object());
+            ISet doneCerts = new HashSet();
 
             foreach (string name in keys.Keys)
             {
@@ -1022,26 +1026,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
             //
             Pfx pfx = new Pfx(mainInfo, macData);
 
-            DerOutputStream derOut;
-            if (useDerEncoding)
-            {
-                derOut = new DerOutputStream(stream);
-            }
-            else
-            {
-                derOut = new BerOutputStream(stream);
-            }
-
-            derOut.WriteObject(pfx);
+            pfx.EncodeTo(stream, this.useDerEncoding ? Asn1Encodable.Der : Asn1Encodable.Ber);
         }
 
         internal static byte[] CalculatePbeMac(
-            DerObjectIdentifier	oid,
-            byte[]				salt,
-            int					itCount,
-            char[]				password,
-            bool				wrongPkcs12Zero,
-            byte[]				data)
+            DerObjectIdentifier oid,
+            byte[] salt,
+            int itCount,
+            char[] password,
+            bool wrongPkcs12Zero,
+            byte[] data)
         {
             Asn1Encodable asn1Params = PbeUtilities.GenerateAlgorithmParameters(
                 oid, salt, itCount);
@@ -1054,29 +1048,40 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
         }
 
         private static byte[] CryptPbeData(
-            bool				forEncryption,
-            AlgorithmIdentifier	algId,
-            char[]				password,
-            bool				wrongPkcs12Zero,
-            byte[]				data)
+            bool forEncryption,
+            AlgorithmIdentifier algId,
+            char[] password,
+            bool wrongPkcs12Zero,
+            byte[] data)
         {
-            IBufferedCipher cipher = PbeUtilities.CreateEngine(algId.Algorithm) as IBufferedCipher;
+            var cipher = PbeUtilities.CreateEngine(algId) as IBufferedCipher;
 
             if (cipher == null)
                 throw new Exception("Unknown encryption algorithm: " + algId.Algorithm);
 
-            Pkcs12PbeParams pbeParameters = Pkcs12PbeParams.GetInstance(algId.Parameters);
-            ICipherParameters cipherParams = PbeUtilities.GenerateCipherParameters(
-                algId.Algorithm, password, wrongPkcs12Zero, pbeParameters);
-            cipher.Init(forEncryption, cipherParams);
-            return cipher.DoFinal(data);
+            if (algId.Algorithm.Equals(PkcsObjectIdentifiers.IdPbeS2))
+            {
+                var pbeParameters = PbeS2Parameters.GetInstance(algId.Parameters);
+                var cipherParams = PbeUtilities.GenerateCipherParameters(
+                    algId.Algorithm, password, pbeParameters);
+                cipher.Init(forEncryption, cipherParams);
+                return cipher.DoFinal(data);
+            }
+            else
+            {
+                var pbeParameters = Pkcs12PbeParams.GetInstance(algId.Parameters);
+                var cipherParams = PbeUtilities.GenerateCipherParameters(
+                    algId.Algorithm, password, wrongPkcs12Zero, pbeParameters);
+                cipher.Init(forEncryption, cipherParams);
+                return cipher.DoFinal(data);
+            }
         }
 
         private class IgnoresCaseHashtable
             : IEnumerable
         {
-            private readonly IDictionary orig = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-            private readonly IDictionary keys = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+            private readonly IDictionary orig = Platform.CreateHashtable();
+            private readonly IDictionary keys = Platform.CreateHashtable();
 
             public void Clear()
             {
@@ -1097,7 +1102,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
             public object Remove(
                 string alias)
             {
-                string upper = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(alias);
+                string upper = Platform.ToUpperInvariant(alias);
                 string k = (string)keys[upper];
 
                 if (k == null)
@@ -1115,7 +1120,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
             {
                 get
                 {
-                    string upper = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(alias);
+                    string upper = Platform.ToUpperInvariant(alias);
                     string k = (string)keys[upper];
 
                     if (k == null)
@@ -1125,7 +1130,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
                 }
                 set
                 {
-                    string upper = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(alias);
+                    string upper = Platform.ToUpperInvariant(alias);
                     string k = (string)keys[upper];
                     if (k != null)
                     {

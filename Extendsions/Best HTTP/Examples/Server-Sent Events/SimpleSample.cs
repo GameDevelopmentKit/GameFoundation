@@ -1,14 +1,16 @@
 #if !BESTHTTP_DISABLE_SERVERSENT_EVENTS
 
-using System;
-using BestHTTP.Examples.Helpers;
-using BestHTTP.ServerSentEvents;
-using UnityEngine;
-using UnityEngine.UI;
-
 namespace BestHTTP.Examples.ServerSentEvents
 {
-    public class SimpleSample : BestHTTP.Examples.Helpers.SampleBase
+    using System;
+    using BestHTTP.Examples.Helpers;
+    using BestHTTP.JSON.LitJson;
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.ServerSentEvents;
+    using UnityEngine;
+    using UnityEngine.UI;
+
+    public class SimpleSample : SampleBase
     {
 #pragma warning disable 0649
 
@@ -116,7 +118,7 @@ namespace BestHTTP.Examples.ServerSentEvents
 
         private void OnDateTime(EventSource eventSource, Message message)
         {
-            DateTimeData dtData = BestHTTP.JSON.LitJson.JsonMapper.ToObject<DateTimeData>(message.Data);
+            DateTimeData dtData = JsonMapper.ToObject<DateTimeData>(message.Data);
 
             AddText(string.Format("OnDateTime: <color=yellow>{0}</color>", dtData.ToString()));
         }
@@ -136,10 +138,14 @@ namespace BestHTTP.Examples.ServerSentEvents
         }
     }
 
+    [Preserve]
     sealed class DateTimeData
     {
 #pragma warning disable 0649
+        [Preserve]
         public int eventid;
+
+        [Preserve]
         public string datetime;
 #pragma warning restore
 

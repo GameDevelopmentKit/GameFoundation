@@ -1,12 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Prng
 {
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/**
 	 * Random generation based on the digest with counter. Calling AddSeedMaterial will
 	 * always increase the entropy of the hash.
@@ -42,8 +40,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Prng
 		{
 			lock (this)
 			{
-				DigestUpdate(inSeed);
-				DigestUpdate(seed);
+				if (!Arrays.IsNullOrEmpty(inSeed)) this.DigestUpdate(inSeed);
+				this.DigestUpdate(this.seed);
 				DigestDoFinal(seed);
 			}
 		}

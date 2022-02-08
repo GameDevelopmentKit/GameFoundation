@@ -1,11 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class DerBoolean
         : Asn1Object
     {
@@ -27,7 +26,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return (DerBoolean) obj;
             }
 
-            throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj));
         }
 
         /**
@@ -83,11 +82,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             get { return value != 0; }
         }
 
-        internal override void Encode(
-            DerOutputStream derOut)
+        internal override int EncodedLength(bool withID) { return Asn1OutputStream.GetLengthOfEncodingDL(withID, 1); }
+
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
         {
             // TODO Should we make sure the byte value is one of '0' or '0xff' here?
-            derOut.WriteEncoded(Asn1Tags.Boolean, new byte[]{ value });
+            asn1Out.WriteEncodingDL(withID, Asn1Tags.Boolean, this.value);
         }
 
         protected override bool Asn1Equals(

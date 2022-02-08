@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Field;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Field;
+
     /**
      * ASN.1 def for Elliptic-Curve ECParameters structure. See
      * X9.62, for further details.
@@ -37,7 +36,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9
             Asn1Sequence seq)
         {
             if (!(seq[0] is DerInteger)
-                || !((DerInteger)seq[0]).Value.Equals(BigInteger.One))
+                || !((DerInteger)seq[0]).HasValue(1))
             {
                 throw new ArgumentException("bad version in X9ECParameters");
             }

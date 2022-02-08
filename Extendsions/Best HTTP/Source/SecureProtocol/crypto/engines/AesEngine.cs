@@ -1,14 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
     * an implementation of the AES (Rijndael), from FIPS-197.
     * <p>
@@ -428,7 +426,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 
         private int ROUNDS;
         private uint[][] WorkingKey;
-        private uint C0, C1, C2, C3;
         private bool forEncryption;
 
         private byte[] s;
@@ -458,7 +455,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 
             if (keyParameter == null)
                 throw new ArgumentException("invalid parameter passed to AES init - "
-                    + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(parameters));
+                    + Platform.GetTypeName(parameters));
 
             WorkingKey = GenerateWorkingKey(keyParameter.GetKey(), forEncryption);
 
@@ -481,11 +478,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
             return BLOCK_SIZE;
         }
 
-        public virtual int ProcessBlock(
-            byte[]	input,
-            int		inOff,
-            byte[]	output,
-            int		outOff)
+        public virtual int ProcessBlock(byte[] input, int inOff, byte[] output, int outOff)
         {
             if (WorkingKey == null)
                 throw new InvalidOperationException("AES engine not initialised");
@@ -493,18 +486,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
             Check.DataLength(input, inOff, 16, "input buffer too short");
             Check.OutputLength(output, outOff, 16, "output buffer too short");
 
-            UnPackBlock(input, inOff);
-
             if (forEncryption)
             {
-                EncryptBlock(WorkingKey);
+                this.EncryptBlock(input, inOff, output, outOff, this.WorkingKey);
             }
             else
             {
-                DecryptBlock(WorkingKey);
+                this.DecryptBlock(input, inOff, output, outOff, this.WorkingKey);
             }
-
-            PackBlock(output, outOff);
 
             return BLOCK_SIZE;
         }
@@ -513,35 +502,20 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
         {
         }
 
-        private void UnPackBlock(
-            byte[]	bytes,
-            int		off)
+        private void EncryptBlock(byte[] input, int inOff, byte[] output, int outOff, uint[][] KW)
         {
-            C0 = Pack.LE_To_UInt32(bytes, off);
-            C1 = Pack.LE_To_UInt32(bytes, off + 4);
-            C2 = Pack.LE_To_UInt32(bytes, off + 8);
-            C3 = Pack.LE_To_UInt32(bytes, off + 12);
-        }
+            var C0 = Pack.LE_To_UInt32(input, inOff + 0);
+            var C1 = Pack.LE_To_UInt32(input, inOff + 4);
+            var C2 = Pack.LE_To_UInt32(input, inOff + 8);
+            var C3 = Pack.LE_To_UInt32(input, inOff + 12);
 
-        private void PackBlock(
-            byte[]	bytes,
-            int		off)
-        {
-            Pack.UInt32_To_LE(C0, bytes, off);
-            Pack.UInt32_To_LE(C1, bytes, off + 4);
-            Pack.UInt32_To_LE(C2, bytes, off + 8);
-            Pack.UInt32_To_LE(C3, bytes, off + 12);
-        }
-
-        private void EncryptBlock(uint[][] KW)
-        {
             uint[] kw = KW[0];
-            uint t0 = this.C0 ^ kw[0];
-            uint t1 = this.C1 ^ kw[1];
-            uint t2 = this.C2 ^ kw[2];
+            var    t0 = C0 ^ kw[0];
+            var    t1 = C1 ^ kw[1];
+            var    t2 = C2 ^ kw[2];
 
-            uint r0, r1, r2, r3 = this.C3 ^ kw[3];
-            int r = 1;
+            uint r0, r1, r2, r3 = C3 ^ kw[3];
+            int  r              = 1;
             while (r < ROUNDS - 1)
             {
                 kw = KW[r++];
@@ -565,21 +539,31 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
             // the final round's table is a simple function of S so we don't use a whole other four tables for it
 
             kw = KW[r];
-            this.C0 = (uint)S[r0 & 255] ^ (((uint)S[(r1 >> 8) & 255]) << 8) ^ (((uint)s[(r2 >> 16) & 255]) << 16) ^ (((uint)s[(r3 >> 24) & 255]) << 24) ^ kw[0];
-            this.C1 = (uint)s[r1 & 255] ^ (((uint)S[(r2 >> 8) & 255]) << 8) ^ (((uint)S[(r3 >> 16) & 255]) << 16) ^ (((uint)s[(r0 >> 24) & 255]) << 24) ^ kw[1];
-            this.C2 = (uint)s[r2 & 255] ^ (((uint)S[(r3 >> 8) & 255]) << 8) ^ (((uint)S[(r0 >> 16) & 255]) << 16) ^ (((uint)S[(r1 >> 24) & 255]) << 24) ^ kw[2];
-            this.C3 = (uint)s[r3 & 255] ^ (((uint)s[(r0 >> 8) & 255]) << 8) ^ (((uint)s[(r1 >> 16) & 255]) << 16) ^ (((uint)S[(r2 >> 24) & 255]) << 24) ^ kw[3];
+            C0 = S[r0 & 255] ^ ((uint)S[(r1 >> 8) & 255] << 8) ^ ((uint)this.s[(r2 >> 16) & 255] << 16) ^ ((uint)this.s[(r3 >> 24) & 255] << 24) ^ kw[0];
+            C1 = this.s[r1 & 255] ^ ((uint)S[(r2 >> 8) & 255] << 8) ^ ((uint)S[(r3 >> 16) & 255] << 16) ^ ((uint)this.s[(r0 >> 24) & 255] << 24) ^ kw[1];
+            C2 = this.s[r2 & 255] ^ ((uint)S[(r3 >> 8) & 255] << 8) ^ ((uint)S[(r0 >> 16) & 255] << 16) ^ ((uint)S[(r1 >> 24) & 255] << 24) ^ kw[2];
+            C3 = this.s[r3 & 255] ^ ((uint)this.s[(r0 >> 8) & 255] << 8) ^ ((uint)this.s[(r1 >> 16) & 255] << 16) ^ ((uint)S[(r2 >> 24) & 255] << 24) ^ kw[3];
+
+            Pack.UInt32_To_LE(C0, output, outOff + 0);
+            Pack.UInt32_To_LE(C1, output, outOff + 4);
+            Pack.UInt32_To_LE(C2, output, outOff + 8);
+            Pack.UInt32_To_LE(C3, output, outOff + 12);
         }
 
-        private void DecryptBlock(uint[][] KW)
+        private void DecryptBlock(byte[] input, int inOff, byte[] output, int outOff, uint[][] KW)
         {
-            uint[] kw = KW[ROUNDS];
-            uint t0 = this.C0 ^ kw[0];
-            uint t1 = this.C1 ^ kw[1];
-            uint t2 = this.C2 ^ kw[2];
+            var C0 = Pack.LE_To_UInt32(input, inOff + 0);
+            var C1 = Pack.LE_To_UInt32(input, inOff + 4);
+            var C2 = Pack.LE_To_UInt32(input, inOff + 8);
+            var C3 = Pack.LE_To_UInt32(input, inOff + 12);
 
-            uint r0, r1, r2, r3 = this.C3 ^ kw[3];
-            int r = ROUNDS - 1;
+            uint[] kw = KW[ROUNDS];
+            var    t0 = C0 ^ kw[0];
+            var    t1 = C1 ^ kw[1];
+            var    t2 = C2 ^ kw[2];
+
+            uint r0, r1, r2, r3 = C3 ^ kw[3];
+            int  r              = ROUNDS - 1;
             while (r > 1)
             {
                 kw = KW[r--];
@@ -603,10 +587,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
             // the final round's table is a simple function of Si so we don't use a whole other four tables for it
 
             kw = KW[0];
-            this.C0 = (uint)Si[r0 & 255] ^ (((uint)s[(r3 >> 8) & 255]) << 8) ^ (((uint)s[(r2 >> 16) & 255]) << 16) ^ (((uint)Si[(r1 >> 24) & 255]) << 24) ^ kw[0];
-            this.C1 = (uint)s[r1 & 255] ^ (((uint)s[(r0 >> 8) & 255]) << 8) ^ (((uint)Si[(r3 >> 16) & 255]) << 16) ^ (((uint)s[(r2 >> 24) & 255]) << 24) ^ kw[1];
-            this.C2 = (uint)s[r2 & 255] ^ (((uint)Si[(r1 >> 8) & 255]) << 8) ^ (((uint)Si[(r0 >> 16) & 255]) << 16) ^ (((uint)s[(r3 >> 24) & 255]) << 24) ^ kw[2];
-            this.C3 = (uint)Si[r3 & 255] ^ (((uint)s[(r2 >> 8) & 255]) << 8) ^ (((uint)s[(r1 >> 16) & 255]) << 16) ^ (((uint)s[(r0 >> 24) & 255]) << 24) ^ kw[3];
+            C0 = Si[r0 & 255] ^ ((uint)this.s[(r3 >> 8) & 255] << 8) ^ ((uint)this.s[(r2 >> 16) & 255] << 16) ^ ((uint)Si[(r1 >> 24) & 255] << 24) ^ kw[0];
+            C1 = this.s[r1 & 255] ^ ((uint)this.s[(r0 >> 8) & 255] << 8) ^ ((uint)Si[(r3 >> 16) & 255] << 16) ^ ((uint)this.s[(r2 >> 24) & 255] << 24) ^ kw[1];
+            C2 = this.s[r2 & 255] ^ ((uint)Si[(r1 >> 8) & 255] << 8) ^ ((uint)Si[(r0 >> 16) & 255] << 16) ^ ((uint)this.s[(r3 >> 24) & 255] << 24) ^ kw[2];
+            C3 = Si[r3 & 255] ^ ((uint)this.s[(r2 >> 8) & 255] << 8) ^ ((uint)this.s[(r1 >> 16) & 255] << 16) ^ ((uint)this.s[(r0 >> 24) & 255] << 24) ^ kw[3];
+
+            Pack.UInt32_To_LE(C0, output, outOff + 0);
+            Pack.UInt32_To_LE(C1, output, outOff + 4);
+            Pack.UInt32_To_LE(C2, output, outOff + 8);
+            Pack.UInt32_To_LE(C3, output, outOff + 12);
         }
     }
 }

@@ -1,24 +1,23 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.PlatformSupport.Memory;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes
 {
+    using System;
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.PlatformSupport.Memory;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /// <summary>
     /// Implements the Galois/Counter mode (GCM) detailed in
     /// NIST Special Publication 800-38D.
     /// </summary>
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.NullChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.ArrayBoundsChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.DivideByZeroChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppEagerStaticClassConstructionAttribute]
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     public sealed class GcmBlockCipher
         : IAeadBlockCipher
     {
@@ -52,11 +51,21 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes
         private ulong       atLength;
         private ulong       atLengthPre;
 
-        public GcmBlockCipher(IBlockCipher	c)
+        public GcmBlockCipher(
+            IBlockCipher c)
+            : this(c, null)
+        {
+        }
+
+        public GcmBlockCipher(
+            IBlockCipher c,
+            IGcmMultiplier m)
         {
             if (c.GetBlockSize() != BlockSize)
                 throw new ArgumentException("cipher required with a block size of " + BlockSize + ".");
 
+            if (m != null)
+                throw new NotImplementedException("IGcmMultiplier");
             this.cipher = c;
         }
 
@@ -800,7 +809,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes
         {
             for (int pos = 0; pos < len; pos += BlockSize)
             {
-                int num = System.Math.Min(len - pos, BlockSize);
+                int num = Math.Min(len - pos, BlockSize);
                 gHASHPartial(Y, b, pos, num);
             }
         }

@@ -1,16 +1,14 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.Collections;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class DtlsServerProtocol
         :   DtlsProtocol
     {
@@ -85,8 +83,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         internal virtual DtlsTransport ServerHandshake(ServerHandshakeState state, DtlsRecordLayer recordLayer)
         {
             SecurityParameters securityParameters = state.serverContext.SecurityParameters;
-            DtlsReliableHandshake handshake = new DtlsReliableHandshake(state.serverContext, recordLayer);
-
+            var handshake = new DtlsReliableHandshake(state.serverContext, recordLayer,
+                state.server.GetHandshakeTimeoutMillis());
             DtlsReliableHandshake.Message clientMessage = handshake.ReceiveMessage();
 
             // NOTE: DTLSRecordLayer requires any DTLS version, we don't otherwise constrain this
@@ -698,24 +696,24 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
         protected internal class ServerHandshakeState
         {
-            internal TlsServer server = null;
-            internal TlsServerContextImpl serverContext = null;
-            internal TlsSession tlsSession = null;
-            internal SessionParameters sessionParameters = null;
-            internal SessionParameters.Builder sessionParametersBuilder = null;
-            internal int[] offeredCipherSuites = null;
-            internal byte[] offeredCompressionMethods = null;
-            internal IDictionary clientExtensions = null;
-            internal IDictionary serverExtensions = null;
-            internal bool resumedSession = false;
-            internal bool secure_renegotiation = false;
-            internal bool allowCertificateStatus = false;
-            internal bool expectSessionTicket = false;
-            internal TlsKeyExchange keyExchange = null;
-            internal TlsCredentials serverCredentials = null;
-            internal CertificateRequest certificateRequest = null;
-            internal short clientCertificateType = -1;
-            internal Certificate clientCertificate = null;
+            internal TlsServer                 server                    = null;
+            internal TlsServerContextImpl      serverContext             = null;
+            internal TlsSession                tlsSession                = null;
+            internal SessionParameters         sessionParameters         = null;
+            internal SessionParameters.Builder sessionParametersBuilder  = null;
+            internal int[]                     offeredCipherSuites       = null;
+            internal byte[]                    offeredCompressionMethods = null;
+            internal IDictionary               clientExtensions          = null;
+            internal IDictionary               serverExtensions          = null;
+            internal bool                      resumedSession            = false;
+            internal bool                      secure_renegotiation      = false;
+            internal bool                      allowCertificateStatus    = false;
+            internal bool                      expectSessionTicket       = false;
+            internal TlsKeyExchange            keyExchange               = null;
+            internal TlsCredentials            serverCredentials         = null;
+            internal CertificateRequest        certificateRequest        = null;
+            internal short                     clientCertificateType     = -1;
+            internal Certificate               clientCertificate         = null;
         }
     }
 }

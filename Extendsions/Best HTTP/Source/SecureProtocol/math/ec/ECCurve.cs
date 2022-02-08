@@ -1,17 +1,16 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Abc;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Endo;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Field;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
 {
+    using System;
+    using System.Collections;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Abc;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Endo;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Field;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /// <remarks>Base class for an elliptic curve.</remarks>
     public abstract class ECCurve
     {
@@ -100,6 +99,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
         public abstract int FieldSize { get; }
         public abstract ECFieldElement FromBigInteger(BigInteger x);
         public abstract bool IsValidFieldElement(BigInteger x);
+
+        public abstract ECFieldElement RandomFieldElement(SecureRandom r);
+
+        public abstract ECFieldElement RandomFieldElementMult(SecureRandom r);
 
         public virtual Config Configure()
         {
@@ -201,7 +204,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
                 table = point.m_preCompTable;
                 if (null == table)
                 {
-                    point.m_preCompTable = table = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable(4);
+                    point.m_preCompTable = table = Platform.CreateHashtable(4);
                 }
             }
 
@@ -275,8 +278,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
 
             switch (this.CoordinateSystem)
             {
-                case ECCurve.COORD_AFFINE:
-                case ECCurve.COORD_LAMBDA_AFFINE:
+                case COORD_AFFINE:
+                case COORD_LAMBDA_AFFINE:
                 {
                     if (iso != null)
                         throw new ArgumentException("not valid for affine coordinates", "iso");
@@ -431,18 +434,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
         }
 
         /**
-         * Sets the default <code>ECMultiplier</code>, unless already set. 
+         * Sets the default <code>ECMultiplier</code>, unless already set.
+         *
+         * We avoid locking for performance reasons, so there is no uniqueness guarantee.
          */
         public virtual ECMultiplier GetMultiplier()
         {
-            lock (this)
-            {
-                if (this.m_multiplier == null)
-                {
-                    this.m_multiplier = CreateDefaultMultiplier();
-                }
-                return this.m_multiplier;
-            }
+            if (this.m_multiplier == null) this.m_multiplier = this.CreateDefaultMultiplier();
+            return this.m_multiplier;
         }
 
         /**
@@ -600,6 +599,30 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
             return x != null && x.SignValue >= 0 && x.CompareTo(Field.Characteristic) < 0;
         }
 
+        public override ECFieldElement RandomFieldElement(SecureRandom r)
+        {
+            /*
+             * NOTE: BigInteger comparisons in the rejection sampling are not constant-time, so we
+             * use the product of two independent elements to mitigate side-channels.
+             */
+            var p   = this.Field.Characteristic;
+            var fe1 = this.FromBigInteger(ImplRandomFieldElement(r, p));
+            var fe2 = this.FromBigInteger(ImplRandomFieldElement(r, p));
+            return fe1.Multiply(fe2);
+        }
+
+        public override ECFieldElement RandomFieldElementMult(SecureRandom r)
+        {
+            /*
+             * NOTE: BigInteger comparisons in the rejection sampling are not constant-time, so we
+             * use the product of two independent elements to mitigate side-channels.
+             */
+            var p   = this.Field.Characteristic;
+            var fe1 = this.FromBigInteger(ImplRandomFieldElementMult(r, p));
+            var fe2 = this.FromBigInteger(ImplRandomFieldElementMult(r, p));
+            return fe1.Multiply(fe2);
+        }
+
         protected override ECPoint DecompressPoint(int yTilde, BigInteger X1)
         {
             ECFieldElement x = FromBigInteger(X1);
@@ -619,6 +642,28 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
             }
 
             return CreateRawPoint(x, y, true);
+        }
+
+        private static BigInteger ImplRandomFieldElement(SecureRandom r, BigInteger p)
+        {
+            BigInteger x;
+            do
+            {
+                x = BigIntegers.CreateRandomBigInteger(p.BitLength, r);
+            } while (x.CompareTo(p) >= 0);
+
+            return x;
+        }
+
+        private static BigInteger ImplRandomFieldElementMult(SecureRandom r, BigInteger p)
+        {
+            BigInteger x;
+            do
+            {
+                x = BigIntegers.CreateRandomBigInteger(p.BitLength, r);
+            } while (x.SignValue <= 0 || x.CompareTo(p) >= 0);
+
+            return x;
         }
     }
 
@@ -795,11 +840,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
         {
         }
 
-        public override bool IsValidFieldElement(BigInteger x)
-        {
-            return x != null && x.SignValue >= 0 && x.BitLength <= FieldSize;
-        }
-
 
         public override ECPoint CreatePoint(BigInteger x, BigInteger y, bool withCompression)
         {
@@ -829,6 +869,26 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
             }
 
             return CreateRawPoint(X, Y, withCompression);
+        }
+
+        public override bool IsValidFieldElement(BigInteger x) { return x != null && x.SignValue >= 0 && x.BitLength <= this.FieldSize; }
+
+        public override ECFieldElement RandomFieldElement(SecureRandom r)
+        {
+            var m = this.FieldSize;
+            return this.FromBigInteger(BigIntegers.CreateRandomBigInteger(m, r));
+        }
+
+        public override ECFieldElement RandomFieldElementMult(SecureRandom r)
+        {
+            /*
+             * NOTE: BigInteger comparisons in the rejection sampling are not constant-time, so we
+             * use the product of two independent elements to mitigate side-channels.
+             */
+            var m   = this.FieldSize;
+            var fe1 = this.FromBigInteger(ImplRandomFieldElementMult(r, m));
+            var fe2 = this.FromBigInteger(ImplRandomFieldElementMult(r, m));
+            return fe1.Multiply(fe2);
         }
 
         protected override ECPoint DecompressPoint(int yTilde, BigInteger X1)
@@ -959,6 +1019,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC
             {
                 return m_order != null && m_cofactor != null && m_b.IsOne && (m_a.IsZero || m_a.IsOne);
             }
+        }
+
+        private static BigInteger ImplRandomFieldElementMult(SecureRandom r, int m)
+        {
+            BigInteger x;
+            do
+            {
+                x = BigIntegers.CreateRandomBigInteger(m, r);
+            } while (x.SignValue <= 0);
+
+            return x;
         }
     }
 

@@ -92,9 +92,7 @@ namespace BestHTTP.PlatformSupport.Memory
                         sb.AppendFormat(", {0:X2}", this.Data[this.Offset + i]);
                 }
                 else
-                {
                     sb.Append("...");
-                }
             }
 
             sb.Append("]]");
@@ -102,7 +100,7 @@ namespace BestHTTP.PlatformSupport.Memory
         }
     }
 
-    [Il2CppEagerStaticClassConstruction]
+    [Il2CppEagerStaticClassConstructionAttribute]
     public struct PooledBuffer : IDisposable
     {
         public byte[] Data;
@@ -119,7 +117,7 @@ namespace BestHTTP.PlatformSupport.Memory
     /// <summary>
     /// Private data struct that contains the size <-> byte arrays mapping. 
     /// </summary>
-    [Il2CppEagerStaticClassConstruction]
+    [Il2CppEagerStaticClassConstructionAttribute]
     struct BufferStore
     {
         /// <summary>
@@ -153,7 +151,7 @@ namespace BestHTTP.PlatformSupport.Memory
         }
     }
 
-    [Il2CppEagerStaticClassConstruction]
+    [Il2CppEagerStaticClassConstructionAttribute]
     struct BufferDesc
     {
         public static readonly BufferDesc Empty = new BufferDesc(null);
@@ -217,7 +215,7 @@ namespace BestHTTP.PlatformSupport.Memory
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [Il2CppEagerStaticClassConstruction]
+    [Il2CppEagerStaticClassConstructionAttribute]
     public static class BufferPool
     {
         public static readonly byte[] NoData = new byte[0];
@@ -285,10 +283,10 @@ namespace BestHTTP.PlatformSupport.Memory
         private static DateTime lastMaintenance = DateTime.MinValue;
 
         // Statistics
-        private static long PoolSize = 0;
-        private static long GetBuffers = 0;
-        private static long ReleaseBuffers = 0;
-        private readonly static StringBuilder statiscticsBuilder = new StringBuilder();
+        private static          long          PoolSize           = 0;
+        private static          long          GetBuffers         = 0;
+        private static          long          ReleaseBuffers     = 0;
+        private static readonly StringBuilder statiscticsBuilder = new();
 
         private readonly static ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
@@ -324,7 +322,7 @@ namespace BestHTTP.PlatformSupport.Memory
             {
                 lock (getStackStats)
                 {
-                    string stack = ProcessStackTrace(Environment.StackTrace);
+                    var stack = ProcessStackTrace(Environment.StackTrace);
                     int value;
                     if (!getStackStats.TryGetValue(stack, out value))
                         getStackStats.Add(stack, 1);
@@ -379,7 +377,7 @@ namespace BestHTTP.PlatformSupport.Memory
             {
                 lock (releaseStackStats)
                 {
-                    string stack = ProcessStackTrace(Environment.StackTrace);
+                    var stack = ProcessStackTrace(Environment.StackTrace);
                     int value;
                     if (!releaseStackStats.TryGetValue(stack, out value))
                         releaseStackStats.Add(stack, 1);
@@ -422,7 +420,7 @@ namespace BestHTTP.PlatformSupport.Memory
                 return buffer;
             }
 
-            byte[] newBuf = Get(newSize, canBeLarger);
+            var newBuf = Get(newSize, canBeLarger);
             if (buffer != null)
             {
                 if (!clear)
@@ -621,7 +619,7 @@ namespace BestHTTP.PlatformSupport.Memory
 
                         BufferDesc lastFree = store.buffers[store.buffers.Count - 1];
                         store.buffers.RemoveAt(store.buffers.Count - 1);
-
+                        
                         return lastFree;
                     }
                 }

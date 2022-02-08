@@ -1,15 +1,14 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
 {
+    using System;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
+
     public sealed class X448PrivateKeyParameters
         : AsymmetricKeyParameter
     {
@@ -22,6 +21,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
             : base(true)
         {
             X448.GeneratePrivateKey(random, data);
+        }
+
+        public X448PrivateKeyParameters(byte[] buf)
+            : this(Validate(buf), 0)
+        {
         }
 
         public X448PrivateKeyParameters(byte[] buf, int off)
@@ -60,6 +64,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
             publicKey.Encode(encoded, 0);
             if (!X448.CalculateAgreement(data, 0, encoded, 0, buf, off))
                 throw new InvalidOperationException("X448 agreement failed");
+        }
+
+        private static byte[] Validate(byte[] buf)
+        {
+            if (buf.Length != KeySize)
+                throw new ArgumentException("must have length " + KeySize, "buf");
+
+            return buf;
         }
     }
 }

@@ -57,21 +57,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw
             return true;
         }
 
-        public static ulong[] FromBigInteger64(BigInteger x)
-        {
-            if (x.SignValue < 0 || x.BitLength > 576)
-                throw new ArgumentException();
-
-            ulong[] z = Create64();
-            int i = 0;
-            while (x.SignValue != 0)
-            {
-                z[i++] = (ulong)x.LongValue;
-                x = x.ShiftRight(64);
-            }
-            return z;
-        }
-
         public static bool IsOne64(ulong[] x)
         {
             if (x[0] != 1UL)

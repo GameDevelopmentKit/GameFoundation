@@ -33,13 +33,15 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-
 namespace BestHTTP.PlatformSupport.TcpClient.General
 {
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Runtime.InteropServices;
+    using System.Threading;
+
     // This is a little modified TcpClient class from the Mono src tree.
     public class TcpClient : IDisposable
     {
@@ -335,7 +337,7 @@ namespace BestHTTP.PlatformSupport.TcpClient.General
                 if (ConnectTimeout > TimeSpan.Zero)
                 {
                     // Third version, works in WebPlayer
-                    System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent(false);
+                    ManualResetEvent mre = new ManualResetEvent(false);
                     IAsyncResult result = client.BeginConnect(remoteEP, (res) => mre.Set(), null);
                     active = mre.WaitOne(ConnectTimeout);
                     if (active)
@@ -409,7 +411,7 @@ namespace BestHTTP.PlatformSupport.TcpClient.General
             if (ConnectTimeout > TimeSpan.Zero)
             {
                 // https://forum.unity3d.com/threads/best-http-released.200006/page-37#post-3150972
-                System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent(false);
+                ManualResetEvent mre = new ManualResetEvent(false);
                 IAsyncResult result = Dns.BeginGetHostAddresses(hostname, (res) => mre.Set(), null);
                 bool success = mre.WaitOne(ConnectTimeout);
                 if (success)
@@ -504,7 +506,7 @@ namespace BestHTTP.PlatformSupport.TcpClient.General
                     catch{ }
 #endif
 
-                    HTTPManager.Logger.Information("TcpClient", string.Format("Connected to {0}:{1}", address.ToString(), port.ToString()));
+                    HTTPManager.Logger.Information("TcpClient", string.Format("Connected to {0}:{1}", address, port.ToString()), request.Context);
 
                     break;
                 }
@@ -606,7 +608,7 @@ namespace BestHTTP.PlatformSupport.TcpClient.General
 #if UNITY_WINDOWS || UNITY_EDITOR
         public void SetKeepAlive(bool on, uint keepAliveTime, uint keepAliveInterval)
         {
-            int size = System.Runtime.InteropServices.Marshal.SizeOf(new uint());
+            int size = Marshal.SizeOf(new uint());
 
             var inOptionValues = new byte[size * 3];
 
@@ -616,12 +618,12 @@ namespace BestHTTP.PlatformSupport.TcpClient.General
 
             //client.IOControl(IOControlCode.KeepAliveValues, inOptionValues, null);
             int dwBytesRet = 0;
-            WSAIoctl(client.Handle, /*SIO_KEEPALIVE_VALS*/ System.Net.Sockets.IOControlCode.KeepAliveValues, inOptionValues, inOptionValues.Length, /*NULL*/IntPtr.Zero, 0, ref dwBytesRet, /*NULL*/IntPtr.Zero, /*NULL*/IntPtr.Zero);
+            WSAIoctl(client.Handle, /*SIO_KEEPALIVE_VALS*/ IOControlCode.KeepAliveValues, inOptionValues, inOptionValues.Length, /*NULL*/IntPtr.Zero, 0, ref dwBytesRet, /*NULL*/IntPtr.Zero, /*NULL*/IntPtr.Zero);
         }
 
-        [System.Runtime.InteropServices.DllImport("Ws2_32.dll")]
+        [DllImport("Ws2_32.dll")]
         public static extern int WSAIoctl(
-            /* Socket, Mode */               IntPtr s, System.Net.Sockets.IOControlCode dwIoControlCode,
+            /* Socket, Mode */               IntPtr s, IOControlCode dwIoControlCode,
             /* Optional Or IntPtr.Zero, 0 */ byte[] lpvInBuffer, int cbInBuffer,
             /* Optional Or IntPtr.Zero, 0 */ IntPtr lpvOutBuffer, int cbOutBuffer,
             /* reference to receive Size */  ref int lpcbBytesReturned,

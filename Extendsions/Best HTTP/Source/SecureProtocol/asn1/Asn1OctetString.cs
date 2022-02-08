@@ -1,17 +1,17 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
-    public abstract class Asn1OctetString
+	using System;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+
+	public abstract class Asn1OctetString
         : Asn1Object, Asn1OctetStringParser
     {
+	    internal static readonly byte[] EmptyOctets = new byte[0];
+
         internal byte[] str;
 
 		/**
@@ -43,19 +43,35 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
          * @param obj the object we want converted.
          * @exception ArgumentException if the object cannot be converted.
          */
-		public static Asn1OctetString GetInstance(object obj)
-		{
-			if (obj == null || obj is Asn1OctetString)
-			{
-				return (Asn1OctetString)obj;
-			}
+        public static Asn1OctetString GetInstance(object obj)
+        {
+	        if (obj == null || obj is Asn1OctetString) return (Asn1OctetString)obj;
 
-			// TODO: this needs to be deleted in V2
-			if (obj is Asn1TaggedObject)
-				return GetInstance(((Asn1TaggedObject)obj).GetObject());
+            if (obj is byte[])
+            {
+	            try
+	            {
+		            return GetInstance(FromByteArray((byte[])obj));
+	            }
+	            catch (IOException e)
+	            {
+		            throw new ArgumentException("failed to construct OCTET STRING from byte[]: " + e.Message);
+	            }
+            }
+            // TODO: this needs to be deleted in V2
+            else if (obj is Asn1TaggedObject)
+            {
+	            return GetInstance(((Asn1TaggedObject)obj).GetObject());
+            }
+            else if (obj is Asn1Encodable)
+            {
+	            var primitive = ((Asn1Encodable)obj).ToAsn1Object();
 
-			throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
-		}
+	            if (primitive is Asn1OctetString) return (Asn1OctetString)primitive;
+            }
+
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj));
+        }
 
         /**
          * @param string the octets making up the octet string.

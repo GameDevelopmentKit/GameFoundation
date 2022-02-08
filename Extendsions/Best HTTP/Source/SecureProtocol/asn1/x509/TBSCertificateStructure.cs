@@ -1,13 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 {
-    /**
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	/**
      * The TbsCertificate object.
      * <pre>
      * TbsCertificate ::= Sequence {
@@ -84,15 +82,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
             bool isV1 = false;
             bool isV2 = false;
 
-            if (version.Value.Equals(BigInteger.Zero))
+            if (this.version.HasValue(0))
             {
                 isV1 = true;
             }
-            else if (version.Value.Equals(BigInteger.One))
+            else if (this.version.HasValue(1))
             {
                 isV2 = true;
             }
-            else if (!version.Value.Equals(BigInteger.Two))
+            else if (!this.version.HasValue(2))
             {
                 throw new ArgumentException("version number not recognised");
             }
@@ -215,7 +213,38 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 
 		public override Asn1Object ToAsn1Object()
         {
-            return seq;
+	        var property = Platform.GetEnvironmentVariable("BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Allow_Non-DER_TBSCert");
+	        if (null == property || Platform.EqualsIgnoreCase("true", property))
+		        return this.seq;
+
+	        var v = new Asn1EncodableVector();
+
+	        // DEFAULT Zero
+	        if (!this.version.HasValue(0)) v.Add(new DerTaggedObject(true, 0, this.version));
+
+	        v.Add(this.serialNumber, this.signature, this.issuer);
+
+	        //
+	        // before and after dates
+	        //
+	        v.Add(new DerSequence(this.startDate, this.endDate));
+
+	        if (this.subject != null)
+		        v.Add(this.subject);
+	        else
+		        v.Add(DerSequence.Empty);
+
+	        v.Add(this.subjectPublicKeyInfo);
+
+	        // Note: implicit tag
+	        v.AddOptionalTagged(false, 1, this.issuerUniqueID);
+
+	        // Note: implicit tag
+	        v.AddOptionalTagged(false, 2, this.subjectUniqueID);
+
+	        v.AddOptionalTagged(true, 3, this.extensions);
+
+	        return new DerSequence(v);
         }
     }
 }

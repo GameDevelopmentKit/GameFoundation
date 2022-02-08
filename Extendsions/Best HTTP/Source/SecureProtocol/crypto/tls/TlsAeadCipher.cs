@@ -130,7 +130,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         /// <exception cref="IOException"></exception>
         public /*virtual */BufferSegment EncodePlaintext(long seqNo, byte type, byte[] plaintext, int offset, int len)
         {
-            // nonce is passed to AeadParameters and used a lot of places
             byte[] nonce = new byte[encryptImplicitNonce.Length + record_iv_length];
 
             switch (nonceMode)

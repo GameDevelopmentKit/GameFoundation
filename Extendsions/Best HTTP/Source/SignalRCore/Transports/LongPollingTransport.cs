@@ -304,7 +304,7 @@ namespace BestHTTP.SignalRCore.Transports
                                 int idx = Array.IndexOf<byte>(resp.Data, (byte)JsonProtocol.Separator, 0);
                                 if (idx > 0)
                                 {
-                                    base.HandleHandshakeResponse(Encoding.UTF8.GetString(resp.Data, 0, idx));
+                                    this.HandleHandshakeResponse(Encoding.UTF8.GetString(resp.Data, 0, idx));
                                     offset = idx + 1;
 
                                     if (this.State == TransportStates.Connected)

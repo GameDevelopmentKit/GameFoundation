@@ -1,17 +1,16 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class BerOctetString
         : DerOctetString, IEnumerable
     {
-        private static readonly int DefaultChunkSize = 1000;
+        private const int DefaultSegmentLimit = 1000;
 
         public static BerOctetString FromSequence(Asn1Sequence seq)
         {
@@ -19,37 +18,55 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             Asn1OctetString[] v = new Asn1OctetString[count];
             for (int i = 0; i < count; ++i)
             {
-                v[i] = Asn1OctetString.GetInstance(seq[i]);
+                v[i] = GetInstance(seq[i]);
             }
             return new BerOctetString(v);
         }
 
-        private static byte[] ToBytes(Asn1OctetString[] octs)
+        internal static byte[] FlattenOctetStrings(Asn1OctetString[] octetStrings)
         {
-            MemoryStream bOut = new MemoryStream();
-            foreach (Asn1OctetString o in octs)
+            var count = octetStrings.Length;
+            switch (count)
             {
-                byte[] octets = o.GetOctets();
-                bOut.Write(octets, 0, octets.Length);
+                case 0:
+                    return EmptyOctets;
+                case 1:
+                    return octetStrings[0].str;
+                default:
+                {
+                    var totalOctets                             = 0;
+                    for (var i = 0; i < count; ++i) totalOctets += octetStrings[i].str.Length;
+
+                    var str = new byte[totalOctets];
+                    var pos = 0;
+                    for (var i = 0; i < count; ++i)
+                    {
+                        var octets = octetStrings[i].str;
+                        Array.Copy(octets, 0, str, pos, octets.Length);
+                        pos += octets.Length;
+                    }
+
+                    Debug.Assert(pos == totalOctets);
+                    return str;
+                }
             }
-            return bOut.ToArray();
         }
 
         private static Asn1OctetString[] ToOctetStringArray(IEnumerable e)
         {
-            IList list = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(e);
+            IList list = Platform.CreateArrayList(e);
 
             int count = list.Count;
             Asn1OctetString[] v = new Asn1OctetString[count];
             for (int i = 0; i < count; ++i)
             {
-                v[i] = Asn1OctetString.GetInstance(list[i]);
+                v[i] = GetInstance(list[i]);
             }
             return v;
         }
 
-        private readonly int chunkSize;
-        private readonly Asn1OctetString[] octs;
+        private readonly int               segmentLimit;
+        private readonly Asn1OctetString[] elements;
 
 
         public BerOctetString(IEnumerable e)
@@ -58,30 +75,30 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
         }
 
         public BerOctetString(byte[] str)
-			: this(str, DefaultChunkSize)
+            : this(str, DefaultSegmentLimit)
 		{
 		}
 
-        public BerOctetString(Asn1OctetString[] octs)
-            : this(octs, DefaultChunkSize)
+        public BerOctetString(Asn1OctetString[] elements)
+            : this(elements, DefaultSegmentLimit)
         {
         }
 
-        public BerOctetString(byte[] str, int chunkSize)
-            : this(str, null, chunkSize)
+        public BerOctetString(byte[] str, int segmentLimit)
+            : this(str, null, segmentLimit)
         {
         }
 
-        public BerOctetString(Asn1OctetString[] octs, int chunkSize)
-            : this(ToBytes(octs), octs, chunkSize)
+        public BerOctetString(Asn1OctetString[] elements, int segmentLimit)
+            : this(FlattenOctetStrings(elements), elements, segmentLimit)
         {
         }
 
-        private BerOctetString(byte[] str, Asn1OctetString[] octs, int chunkSize)
-            : base(str)
+        private BerOctetString(byte[] octets, Asn1OctetString[] elements, int segmentLimit)
+            : base(octets)
         {
-            this.octs = octs;
-            this.chunkSize = chunkSize;
+            this.elements     = elements;
+            this.segmentLimit = segmentLimit;
         }
 
         /**
@@ -89,12 +106,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
          */
 		public IEnumerator GetEnumerator()
 		{
-			if (octs == null)
-			{
-				return GenerateOcts().GetEnumerator();
-			}
+            if (this.elements == null)
+                return new ChunkEnumerator(this.str, this.segmentLimit);
 
-			return octs.GetEnumerator();
+            return this.elements.GetEnumerator();
 		}
 
 
@@ -103,45 +118,116 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			return GetEnumerator();
 		}
 
-		private IList GenerateOcts()
+        private bool IsConstructed => null != this.elements || this.str.Length > this.segmentLimit;
+
+        internal override int EncodedLength(bool withID)
         {
-            IList vec = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
-            for (int i = 0; i < str.Length; i += chunkSize)
-            { 
-				int end = System.Math.Min(str.Length, i + chunkSize);
+            throw Platform.CreateNotImplementedException("BerOctetString.EncodedLength");
 
-                byte[] nStr = new byte[end - i]; 
+            // TODO This depends on knowing it's not DER
+            //if (!IsConstructed)
+            //    return EncodedLength(withID, str.Length);
 
-                Array.Copy(str, i, nStr, 0, nStr.Length);
+            //int totalLength = withID ? 4 : 3;
 
-                vec.Add(new DerOctetString(nStr));
-             } 
-             return vec; 
+            //if (null != elements)
+            //{
+            //    for (int i = 0; i < elements.Length; ++i)
+            //    {
+            //        totalLength += elements[i].EncodedLength(true);
+            //    }
+            //}
+            //else
+            //{
+            //    int fullSegments = str.Length / segmentLimit;
+            //    totalLength += fullSegments * EncodedLength(true, segmentLimit);
+
+            //    int lastSegmentLength = str.Length - (fullSegments * segmentLimit);
+            //    if (lastSegmentLength > 0)
+            //    {
+            //        totalLength += EncodedLength(true, lastSegmentLength);
+            //    }
+            //}
+
+            //return totalLength;
         }
 
-        internal override void Encode(
-            DerOutputStream derOut)
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
         {
-            if (derOut is Asn1OutputStream || derOut is BerOutputStream)
+            if (!asn1Out.IsBer || !this.IsConstructed)
             {
-                derOut.WriteByte(Asn1Tags.Constructed | Asn1Tags.OctetString);
+                base.Encode(asn1Out, withID);
+                return;
+            }
 
-                derOut.WriteByte(0x80);
+            asn1Out.WriteIdentifier(withID, Asn1Tags.Constructed | Asn1Tags.OctetString);
+            asn1Out.WriteByte(0x80);
 
-                //
-                // write out the octet array
-                //
-                foreach (Asn1OctetString oct in this)
-                {
-                    derOut.WriteObject(oct);
-                }
-
-				derOut.WriteByte(0x00);
-                derOut.WriteByte(0x00);
+            if (null != this.elements)
+            {
+                asn1Out.WritePrimitives(this.elements);
             }
             else
             {
-                base.Encode(derOut);
+                var pos = 0;
+                while (pos < this.str.Length)
+                {
+                    var segmentLength = Math.Min(this.str.Length - pos, this.segmentLimit);
+                    Encode(asn1Out, true, this.str, pos, segmentLength);
+                    pos += segmentLength;
+                }
+            }
+
+            asn1Out.WriteByte(0x00);
+            asn1Out.WriteByte(0x00);
+        }
+
+        private class ChunkEnumerator
+            : IEnumerator
+        {
+            private readonly byte[] octets;
+            private readonly int    segmentLimit;
+
+            private DerOctetString currentSegment;
+            private int            nextSegmentPos;
+
+            internal ChunkEnumerator(byte[] octets, int segmentLimit)
+            {
+                this.octets       = octets;
+                this.segmentLimit = segmentLimit;
+            }
+
+            public object Current
+            {
+                get
+                {
+                    if (null == this.currentSegment)
+                        throw new InvalidOperationException();
+
+                    return this.currentSegment;
+                }
+            }
+
+            public bool MoveNext()
+            {
+                if (this.nextSegmentPos >= this.octets.Length)
+                {
+                    this.currentSegment = null;
+                    return false;
+                }
+
+                var length  = Math.Min(this.octets.Length - this.nextSegmentPos, this.segmentLimit);
+                var segment = new byte[length];
+                Array.Copy(this.octets, this.nextSegmentPos, segment, 0, length);
+                this.currentSegment =  new DerOctetString(segment);
+                this.nextSegmentPos += length;
+                return true;
+            }
+
+            public void Reset()
+            {
+                this.currentSegment = null;
+                this.nextSegmentPos = 0;
             }
         }
     }

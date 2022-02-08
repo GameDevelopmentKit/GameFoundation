@@ -1,14 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
      * this does your basic RSA algorithm with blinding
      */
@@ -134,7 +133,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
                     BigInteger blindedInput = r.ModPow(e, m).Multiply(input).Mod(m);
                     BigInteger blindedResult = core.ProcessBlock(blindedInput);
 
-                    BigInteger rInv = r.ModInverse(m);
+                    var rInv = BigIntegers.ModOddInverse(m, r);
                     result = blindedResult.Multiply(rInv).Mod(m);
 
                     // defence against Arjen Lenstra�s CRT attack

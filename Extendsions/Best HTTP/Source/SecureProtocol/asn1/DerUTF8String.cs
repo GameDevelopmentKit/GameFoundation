@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using System.Text;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
      * Der UTF8String object.
      */
@@ -28,7 +27,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return (DerUtf8String)obj;
             }
 
-            throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj));
         }
 
         /**
@@ -91,10 +90,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			return this.str.Equals(other.str);
         }
 
-		internal override void Encode(
-			DerOutputStream derOut)
+        internal override int EncodedLength(bool withID)
         {
-            derOut.WriteEncoded(Asn1Tags.Utf8String, Encoding.UTF8.GetBytes(str));
+            return Asn1OutputStream.GetLengthOfEncodingDL(withID, Encoding.UTF8.GetByteCount(this.str));
+        }
+
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+        {
+            asn1Out.WriteEncodingDL(withID, Asn1Tags.Utf8String, Encoding.UTF8.GetBytes(this.str));
         }
     }
 }

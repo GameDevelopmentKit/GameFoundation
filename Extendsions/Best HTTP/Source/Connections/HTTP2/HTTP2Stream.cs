@@ -1,19 +1,19 @@
 #if (!UNITY_WEBGL || UNITY_EDITOR) && !BESTHTTP_DISABLE_ALTERNATE_SSL && !BESTHTTP_DISABLE_HTTP2
 
-using System;
-using System.Collections.Generic;
-using BestHTTP.Core;
-using BestHTTP.PlatformSupport.Memory;
-using BestHTTP.Logger;
-
 #if !BESTHTTP_DISABLE_CACHING
 using BestHTTP.Caching;
 #endif
 
-using BestHTTP.Timings;
-
 namespace BestHTTP.Connections.HTTP2
 {
+    using System;
+    using System.Collections.Generic;
+    using BestHTTP.Core;
+    using BestHTTP.Logger;
+    using BestHTTP.PlatformSupport.Memory;
+    using BestHTTP.PlatformSupport.Threading;
+    using BestHTTP.Timings;
+
     // https://httpwg.org/specs/rfc7540.html#StreamStates
     //
     //                                      Idle
@@ -231,8 +231,7 @@ namespace BestHTTP.Connections.HTTP2
                 RequestEventHelper.EnqueueRequestEvent(new RequestEventInfo(this.AssignedRequest, RequestEvents.Resend));
             }
 
-            // After receiving a RST_STREAM on a stream, the receiver MUST NOT send additional frames for that stream, with the exception of PRIORITY.
-            this.outgoing.Clear();
+            this.Removed();
         }
 
         private void ProcessIncomingFrames(List<HTTP2FrameHeaderAndPayload> outgoingFrames)
@@ -312,7 +311,7 @@ namespace BestHTTP.Connections.HTTP2
                                 if (this.isStreamedDownload)
                                     this.response.FinishProcessData();
 
-                                PlatformSupport.Threading.ThreadedRunner.RunShortLiving<HTTP2Stream, FramesAsStreamView>(FinishRequest, this, this.dataView);
+                                ThreadedRunner.RunShortLiving<HTTP2Stream, FramesAsStreamView>(FinishRequest, this, this.dataView);
 
                                 this.dataView = null;
 
@@ -373,7 +372,7 @@ namespace BestHTTP.Connections.HTTP2
                             HTTPManager.Logger.Information("HTTP2Stream", string.Format("[{0}] All data arrived, data length: {1:N0}", this.Id, this.downloaded), this.Context, this.AssignedRequest.Context, this.parent.Context);
 
                             // create a short living thread to process the downloaded data:
-                            PlatformSupport.Threading.ThreadedRunner.RunShortLiving<HTTP2Stream, FramesAsStreamView>(FinishRequest, this, this.dataView);
+                            ThreadedRunner.RunShortLiving<HTTP2Stream, FramesAsStreamView>(FinishRequest, this, this.dataView);
 
                             this.dataView = null;
 
@@ -393,7 +392,7 @@ namespace BestHTTP.Connections.HTTP2
                     case HTTP2FrameTypes.WINDOW_UPDATE:
                         HTTP2WindowUpdateFrame windowUpdateFrame = HTTP2FrameHelper.ReadWindowUpdateFrame(frame);
 
-                        if (HTTPManager.Logger.Level == Logger.Loglevels.All)
+                        if (HTTPManager.Logger.Level == Loglevels.All)
                             HTTPManager.Logger.Information("HTTP2Stream", string.Format("[{0}] Received Window Update: {1:N0}, new remoteWindow: {2:N0}, initial remote window: {3:N0}, total data sent: {4:N0}", this.Id, windowUpdateFrame.WindowSizeIncrement, this.remoteWindow + windowUpdateFrame.WindowSizeIncrement, this.settings.RemoteSettings[HTTP2Settings.INITIAL_WINDOW_SIZE], this.sentData), this.Context, this.AssignedRequest.Context, this.parent.Context);
 
                         this.remoteWindow += windowUpdateFrame.WindowSizeIncrement;
@@ -424,7 +423,7 @@ namespace BestHTTP.Connections.HTTP2
 
             if (windowUpdate > 0)
             {
-                if (HTTPManager.Logger.Level <= Logger.Loglevels.All)
+                if (HTTPManager.Logger.Level <= Loglevels.All)
                     HTTPManager.Logger.Information("HTTP2Stream", string.Format("[{0}] Sending window update: {1:N0}, current window: {2:N0}, initial window size: {3:N0}", this.Id, windowUpdate, this.localWindow, this.settings.MySettings[HTTP2Settings.INITIAL_WINDOW_SIZE]), this.Context, this.AssignedRequest.Context, this.parent.Context);
 
                 this.localWindow += windowUpdate;
@@ -621,7 +620,12 @@ namespace BestHTTP.Connections.HTTP2
                 this.uploadStreamInfo = new HTTPRequest.UploadStreamInfo();
             }
 
+            // After receiving a RST_STREAM on a stream, the receiver MUST NOT send additional frames for that stream, with the exception of PRIORITY.
             this.outgoing.Clear();
+
+            // https://github.com/Benedicht/BestHTTP-Issues/issues/77
+            // Unsubscribe from OnSettingChangedEvent to remove reference to this instance.
+            this.settings.RemoteSettings.OnSettingChangedEvent -= this.OnRemoteSettingChanged;
 
             HTTPManager.Logger.Information("HTTP2Stream", "Stream removed: " + this.Id.ToString(), this.Context, this.AssignedRequest.Context, this.parent.Context);
         }

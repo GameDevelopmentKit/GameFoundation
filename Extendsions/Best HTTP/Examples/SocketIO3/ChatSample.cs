@@ -1,40 +1,44 @@
-using System;
-using System.Collections.Generic;
-
-using BestHTTP.Examples.Helpers;
-using BestHTTP.SocketIO3;
-using BestHTTP.SocketIO3.Events;
-
-using UnityEngine;
-using UnityEngine.UI;
-
 namespace BestHTTP.Examples.SocketIO3
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using BestHTTP.Examples.Helpers;
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.SocketIO3;
+    using BestHTTP.SocketIO3.Events;
+    using UnityEngine;
+    using UnityEngine.UI;
+
 #pragma warning disable 0649
+    [Preserve]
     class LoginData
     {
-        public int numUsers;
+        [Preserve] public int numUsers;
     }
 
+    [Preserve]
     sealed class NewMessageData
     {
-        public string username;
-        public string message;
+        [Preserve] public string username;
+        [Preserve] public string message;
     }
 
+    [Preserve]
     sealed class UserJoinedData : LoginData
     {
-        public string username;
+        [Preserve] public string username;
     }
 
+    [Preserve]
     sealed class TypingData
     {
-        public string username;
+        [Preserve] public string username;
     }
 
 #pragma warning restore
 
-    public sealed class ChatSample : BestHTTP.Examples.Helpers.SampleBase
+    public sealed class ChatSample : SampleBase
     {
         private readonly TimeSpan TYPING_TIMER_LENGTH = TimeSpan.FromMilliseconds(700);
 
@@ -289,7 +293,7 @@ namespace BestHTTP.Examples.SocketIO3
         {
             if (this.typingUsers.Count > 0)
             {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder(this.typingUsers[0], this.typingUsers.Count + 1);
+                StringBuilder sb = new StringBuilder(this.typingUsers[0], this.typingUsers.Count + 1);
 
                 for (int i = 1; i < this.typingUsers.Count; ++i)
                     sb.AppendFormat(", {0}", this.typingUsers[i]);

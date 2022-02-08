@@ -1,21 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 {
-    /// <summary>
+	using System;
+	using BestHTTP.PlatformSupport.IL2CPP;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	/// <summary>
     /// Implementation of Daniel J. Bernstein's Salsa20 stream cipher, Snuffle 2005
     /// </summary>
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.NullChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.ArrayBoundsChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.DivideByZeroChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppEagerStaticClassConstructionAttribute]
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     public class Salsa20Engine
 		: IStreamCipher
 	{
@@ -164,7 +163,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 			}
 		}
 
-        public unsafe virtual void ProcessBytes(
+		public virtual void ProcessBytes(
 			byte[]	inBytes, 
 			int		inOff, 
 			int		len, 
@@ -180,11 +179,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
             if (LimitExceeded((uint)len))
 				throw new MaxBytesExceededException("2^70 byte limit per IV would be exceeded; Change IV");
 
-            fixed (byte* pinBytes = inBytes, poutBytes = outBytes, pkeyStream = keyStream)
-            {
-                int ulongLen = len / sizeof(ulong);
-
-                for (int i = 0; i < ulongLen; i++)
+            for (var i = 0; i < len; i++)
                 {
                     if (index == 0)
                     {
@@ -192,31 +187,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
                         AdvanceCounter();
                     }
 
-                    ulong* pin = (ulong*)pinBytes;
-                    ulong* pout = (ulong*)poutBytes;
-                    ulong* pkey = (ulong*)pkeyStream;
-
-                    pout[i + outOff] = pkey[index] ^ pin[i + inOff];
-                    index = (index + 1) & ((64 / sizeof(ulong)) - 1);
-                    //poutBytes[i + outOff] = (byte)(pkeyStream[index] ^ pinBytes[i + inOff]);
-                    //index = (index + 1) & 63;
-                }
-
-                int remainingOffset = ulongLen * sizeof(ulong);
-                index = (index * sizeof(ulong)) & 63;
-                for (int i = remainingOffset; i < len; i++)
-                {
-                    if (index == 0)
-                    {
-                        GenerateKeyStream(keyStream);
-                        AdvanceCounter();
-                    }
-
-                    poutBytes[i + outOff] = (byte)(pkeyStream[index] ^ pinBytes[i + inOff]);
-                    index = (index + 1) & 63;
+                    outBytes[i + outOff] = (byte)(this.keyStream[this.index] ^ inBytes[i + inOff]);
+                    index                = (index + 1) & 63;
                 }
             }
-		}
 
         public virtual void Reset()
 		{
@@ -252,173 +226,92 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
             Pack.LE_To_UInt32(ivBytes, 0, engineState, 6, 2);
         }
 
-        protected unsafe virtual void GenerateKeyStream(byte[] output)
+		protected virtual void GenerateKeyStream(byte[] output)
 		{
 			SalsaCore(rounds, engineState, x);
+			Pack.UInt32_To_LE(this.x, output, 0);
+		}
 
-            fixed (uint* ns = x)
-            fixed (byte* bs = output)
+		internal static void SalsaCore(int rounds, uint[] input, uint[] x)
             {
-                int off = 0;
-                uint* bsuint = (uint*)bs;
-                for (int i = 0; i < 4; ++i)
-                    bsuint[i] = ns[i];
-            }
-        }
+	            if (input.Length != 16)
+		            throw new ArgumentException();
+	            if (x.Length != 16)
+		            throw new ArgumentException();
+	            if (rounds % 2 != 0)
+		            throw new ArgumentException("Number of rounds must be even");
 
-		internal unsafe static void SalsaCore(int rounds, uint[] input, uint[] x)
-		{
-            fixed (uint* pinput = input, px = x)
-            {
-                uint x00 = pinput[0];
-                uint x01 = pinput[1];
-                uint x02 = pinput[2];
-                uint x03 = pinput[3];
-                uint x04 = pinput[4];
-                uint x05 = pinput[5];
-                uint x06 = pinput[6];
-                uint x07 = pinput[7];
-                uint x08 = pinput[8];
-                uint x09 = pinput[9];
-                uint x10 = pinput[10];
-                uint x11 = pinput[11];
-                uint x12 = pinput[12];
-                uint x13 = pinput[13];
-                uint x14 = pinput[14];
-                uint x15 = pinput[15];
+	            var x00 = input[0];
+	            var x01 = input[1];
+	            var x02 = input[2];
+	            var x03 = input[3];
+	            var x04 = input[4];
+	            var x05 = input[5];
+	            var x06 = input[6];
+	            var x07 = input[7];
+	            var x08 = input[8];
+	            var x09 = input[9];
+	            var x10 = input[10];
+	            var x11 = input[11];
+	            var x12 = input[12];
+	            var x13 = input[13];
+	            var x14 = input[14];
+	            var x15 = input[15];
 
                 for (int i = rounds; i > 0; i -= 2)
                 {
-                    // R(x, y) => (tempX << y) | (tempX >> (32 - y))
-                    uint tempX = (x00 + x12);
-                    x04 ^= (tempX << 7) | (tempX >> (32 - 7));
+	                x04 ^= Integers.RotateLeft(x00 + x12, 7);
+	                x08 ^= Integers.RotateLeft(x04 + x00, 9);
+	                x12 ^= Integers.RotateLeft(x08 + x04, 13);
+	                x00 ^= Integers.RotateLeft(x12 + x08, 18);
+	                x09 ^= Integers.RotateLeft(x05 + x01, 7);
+	                x13 ^= Integers.RotateLeft(x09 + x05, 9);
+	                x01 ^= Integers.RotateLeft(x13 + x09, 13);
+	                x05 ^= Integers.RotateLeft(x01 + x13, 18);
+	                x14 ^= Integers.RotateLeft(x10 + x06, 7);
+	                x02 ^= Integers.RotateLeft(x14 + x10, 9);
+	                x06 ^= Integers.RotateLeft(x02 + x14, 13);
+	                x10 ^= Integers.RotateLeft(x06 + x02, 18);
+	                x03 ^= Integers.RotateLeft(x15 + x11, 7);
+	                x07 ^= Integers.RotateLeft(x03 + x15, 9);
+	                x11 ^= Integers.RotateLeft(x07 + x03, 13);
+	                x15 ^= Integers.RotateLeft(x11 + x07, 18);
 
-                    tempX = (x04 + x00);
-                    x08 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = (x08 + x04);
-                    x12 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = (x12 + x08);
-                    x00 ^= (tempX << 18) | (tempX >> (32 - 18));
-
-                    tempX = (x05 + x01);
-                    x09 ^= (tempX << 7) | (tempX >> (32 - 7));
-
-                    tempX = (x09 + x05);
-                    x13 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = (x13 + x09);
-                    x01 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = (x01 + x13);
-                    x05 ^= (tempX << 18) | (tempX >> (32 - 18));
-
-                    tempX = (x10 + x06);
-                    x14 ^= (tempX << 7) | (tempX >> (32 - 7));
-
-                    tempX = (x14 + x10);
-                    x02 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = (x02 + x14);
-                    x06 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = (x06 + x02);
-                    x10 ^= (tempX << 18) | (tempX >> (32 - 18));
-
-                    tempX = (x15 + x11);
-                    x03 ^= (tempX << 7) | (tempX >> (32 - 7));
-
-                    tempX = (x03 + x15);
-                    x07 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = (x07 + x03);
-                    x11 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = (x11 + x07);
-                    x15 ^= (tempX << 18) | (tempX >> (32 - 18));
-
-
-                    tempX = (x00 + x03);
-                    x01 ^= (tempX << 7) | (tempX >> (32 - 7));
-
-                    tempX = (x01 + x00);
-                    x02 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = (x02 + x01);
-                    x03 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = (x03 + x02);
-                    x00 ^= (tempX << 18) | (tempX >> (32 - 18));
-
-                    tempX = (x05 + x04);
-                    x06 ^= (tempX << 7) | (tempX >> (32 - 7));
-
-                    tempX = (x06 + x05);
-                    x07 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = (x07 + x06);
-                    x04 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = (x04 + x07);
-                    x05 ^= (tempX << 18) | (tempX >> (32 - 18));
-
-                    tempX = x10 + x09;
-                    x11 ^= (tempX << 7) | (tempX >> (32 - 7));
-
-                    tempX = x11 + x10;
-                    x08 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = x11 + x10;
-                    x09 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = x09 + x08;
-                    x10 ^= (tempX << 18) | (tempX >> (32 - 18));
-
-                    tempX = x15 + x14;
-                    x12 ^= (tempX << 7) | (tempX >> (32 - 7));
-
-                    tempX = x12 + x15;
-                    x13 ^= (tempX << 9) | (tempX >> (32 - 9));
-
-                    tempX = x13 + x12;
-                    x14 ^= (tempX << 13) | (tempX >> (32 - 13));
-
-                    tempX = x14 + x13;
-                    x15 ^= (tempX << 18) | (tempX >> (32 - 18));
+	                x01 ^= Integers.RotateLeft(x00 + x03, 7);
+	                x02 ^= Integers.RotateLeft(x01 + x00, 9);
+	                x03 ^= Integers.RotateLeft(x02 + x01, 13);
+	                x00 ^= Integers.RotateLeft(x03 + x02, 18);
+	                x06 ^= Integers.RotateLeft(x05 + x04, 7);
+	                x07 ^= Integers.RotateLeft(x06 + x05, 9);
+	                x04 ^= Integers.RotateLeft(x07 + x06, 13);
+	                x05 ^= Integers.RotateLeft(x04 + x07, 18);
+	                x11 ^= Integers.RotateLeft(x10 + x09, 7);
+	                x08 ^= Integers.RotateLeft(x11 + x10, 9);
+	                x09 ^= Integers.RotateLeft(x08 + x11, 13);
+	                x10 ^= Integers.RotateLeft(x09 + x08, 18);
+	                x12 ^= Integers.RotateLeft(x15 + x14, 7);
+	                x13 ^= Integers.RotateLeft(x12 + x15, 9);
+	                x14 ^= Integers.RotateLeft(x13 + x12, 13);
+	                x15 ^= Integers.RotateLeft(x14 + x13, 18);
                 }
 
-                px[0] = x00 + pinput[0];
-                px[1] = x01 + pinput[1];
-                px[2] = x02 + pinput[2];
-                px[3] = x03 + pinput[3];
-                px[4] = x04 + pinput[4];
-                px[5] = x05 + pinput[5];
-                px[6] = x06 + pinput[6];
-                px[7] = x07 + pinput[7];
-                px[8] = x08 + pinput[8];
-                px[9] = x09 + pinput[9];
-                px[10] = x10 + pinput[10];
-                px[11] = x11 + pinput[11];
-                px[12] = x12 + pinput[12];
-                px[13] = x13 + pinput[13];
-                px[14] = x14 + pinput[14];
-                px[15] = x15 + pinput[15];
+                x[0]  = x00 + input[0];
+                x[1]  = x01 + input[1];
+                x[2]  = x02 + input[2];
+                x[3]  = x03 + input[3];
+                x[4]  = x04 + input[4];
+                x[5]  = x05 + input[5];
+                x[6]  = x06 + input[6];
+                x[7]  = x07 + input[7];
+                x[8]  = x08 + input[8];
+                x[9]  = x09 + input[9];
+                x[10] = x10 + input[10];
+                x[11] = x11 + input[11];
+                x[12] = x12 + input[12];
+                x[13] = x13 + input[13];
+                x[14] = x14 + input[14];
+                x[15] = x15 + input[15];
             }
-		}
-
-		/**
-		 * Rotate left
-		 *
-		 * @param   x   value to rotate
-		 * @param   y   amount to rotate x
-		 *
-		 * @return  rotated x
-		 */
-		//internal static uint R(uint x, int y)
-		//{
-		//	return (x << y) | (x >> (32 - y));
-		//}
 
 		private void ResetLimitCounter()
 		{

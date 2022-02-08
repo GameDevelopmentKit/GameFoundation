@@ -2,6 +2,8 @@
 #pragma warning disable
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class BerSet
         : DerSet
     {
@@ -46,25 +48,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
         {
         }
 
-        internal override void Encode(DerOutputStream derOut)
+        internal override int EncodedLength(bool withID)
         {
-            if (derOut is Asn1OutputStream || derOut is BerOutputStream)
-            {
-                derOut.WriteByte(Asn1Tags.Set | Asn1Tags.Constructed);
-                derOut.WriteByte(0x80);
+            throw Platform.CreateNotImplementedException("BerSet.EncodedLength");
+        }
 
-                foreach (Asn1Encodable o in this)
-				{
-                    derOut.WriteObject(o);
-                }
-
-                derOut.WriteByte(0x00);
-                derOut.WriteByte(0x00);
-            }
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+        {
+            if (asn1Out.IsBer)
+                asn1Out.WriteEncodingIL(withID, Asn1Tags.Constructed | Asn1Tags.Set, this.elements);
             else
-            {
-                base.Encode(derOut);
-            }
+                base.Encode(asn1Out, withID);
         }
     }
 }

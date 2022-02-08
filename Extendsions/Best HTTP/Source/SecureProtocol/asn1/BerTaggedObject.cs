@@ -1,12 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+	using System.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/**
 	 * BER TaggedObject - in ASN.1 notation this is any object preceded by
 	 * a [n] where n is some number - these are assumed to follow the construction
@@ -49,13 +47,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 		{
 		}
 
-		internal override void Encode(
-			DerOutputStream derOut)
+		internal override int EncodedLength(bool withID) { throw Platform.CreateNotImplementedException("BerTaggedObject.EncodedLength"); }
+
+		internal override void Encode(Asn1OutputStream asn1Out, bool withID)
 		{
-			if (derOut is Asn1OutputStream || derOut is BerOutputStream)
+			if (asn1Out.IsBer)
 			{
-				derOut.WriteTag((byte)(Asn1Tags.Constructed | Asn1Tags.Tagged), tagNo);
-				derOut.WriteByte(0x80);
+				if (withID) asn1Out.WriteIdentifier(true, Asn1Tags.Constructed | Asn1Tags.ContextSpecific, this.tagNo);
+
+				asn1Out.WriteByte(0x80);
 
 				if (!IsEmpty())
 				{
@@ -84,26 +84,26 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 						}
 						else
 						{
-							throw BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateNotImplementedException(BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
+							throw Platform.CreateNotImplementedException(Platform.GetTypeName(obj));
 						}
 
 						foreach (Asn1Encodable o in eObj)
 						{
-							derOut.WriteObject(o);
+							asn1Out.WritePrimitive(o.ToAsn1Object(), true);
 						}
 					}
 					else
 					{
-						derOut.WriteObject(obj);
+						asn1Out.WritePrimitive(this.obj.ToAsn1Object(), true);
 					}
 				}
 
-				derOut.WriteByte(0x00);
-				derOut.WriteByte(0x00);
+				asn1Out.WriteByte(0x00);
+				asn1Out.WriteByte(0x00);
 			}
 			else
 			{
-				base.Encode(derOut);
+				base.Encode(asn1Out, withID);
 			}
 		}
 	}

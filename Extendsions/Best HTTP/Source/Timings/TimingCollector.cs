@@ -36,12 +36,11 @@ namespace BestHTTP.Timings
                     prevEventAt = this.Events[this.Events.Count - 1].When;
                 duration = when - prevEventAt;
             }
-
             this.Events.Add(new TimingEvent(name, when, duration));
         }
 
         /// <summary>
-        ///     Add an event. Duration is calculated from the previous event or start of the collector.
+        /// Add an event. Duration is calculated from the previous event or start of the collector.
         /// </summary>
         public void Add(string name)
         {

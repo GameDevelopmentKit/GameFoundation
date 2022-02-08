@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw
 {
+    using System;
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+
     internal abstract class Nat
     {
         private const ulong M = 0xFFFFFFFFUL;
@@ -280,6 +279,36 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw
             //}
         }
 
+        public static int Compare(int len, uint[] x, uint[] y)
+        {
+            for (var i = len - 1; i >= 0; --i)
+            {
+                var x_i = x[i];
+                var y_i = y[i];
+                if (x_i < y_i)
+                    return -1;
+                if (x_i > y_i)
+                    return 1;
+            }
+
+            return 0;
+        }
+
+        public static int Compare(int len, uint[] x, int xOff, uint[] y, int yOff)
+        {
+            for (var i = len - 1; i >= 0; --i)
+            {
+                var x_i = x[xOff + i];
+                var y_i = y[yOff + i];
+                if (x_i < y_i)
+                    return -1;
+                if (x_i > y_i)
+                    return 1;
+            }
+
+            return 0;
+        }
+
         public static void Copy(int len, uint[] x, uint[] z)
         {
             Array.Copy(x, 0, z, 0, len);
@@ -421,34 +450,92 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw
             return true;
         }
 
+        public static uint EqualTo(int len, uint[] x, uint y)
+        {
+            var d                           = x[0] ^ y;
+            for (var i = 1; i < len; ++i) d |= x[i];
+            d = (d >> 1) | (d & 1);
+            return (uint)(((int)d - 1) >> 31);
+        }
+
+        public static uint EqualTo(int len, uint[] x, int xOff, uint y)
+        {
+            var d                           = x[xOff] ^ y;
+            for (var i = 1; i < len; ++i) d |= x[xOff + i];
+            d = (d >> 1) | (d & 1);
+            return (uint)(((int)d - 1) >> 31);
+        }
+
+        public static uint EqualTo(int len, uint[] x, uint[] y)
+        {
+            uint d                          = 0;
+            for (var i = 0; i < len; ++i) d |= x[i] ^ y[i];
+            d = (d >> 1) | (d & 1);
+            return (uint)(((int)d - 1) >> 31);
+        }
+
+        public static uint EqualTo(int len, uint[] x, int xOff, uint[] y, int yOff)
+        {
+            uint d                          = 0;
+            for (var i = 0; i < len; ++i) d |= x[xOff + i] ^ y[yOff + i];
+            d = (d >> 1) | (d & 1);
+            return (uint)(((int)d - 1) >> 31);
+        }
+
+        public static uint EqualToZero(int len, uint[] x)
+        {
+            uint d                          = 0;
+            for (var i = 0; i < len; ++i) d |= x[i];
+            d = (d >> 1) | (d & 1);
+            return (uint)(((int)d - 1) >> 31);
+        }
+
+        public static uint EqualToZero(int len, uint[] x, int xOff)
+        {
+            uint d                          = 0;
+            for (var i = 0; i < len; ++i) d |= x[xOff + i];
+            d = (d >> 1) | (d & 1);
+            return (uint)(((int)d - 1) >> 31);
+        }
+
         public static uint[] FromBigInteger(int bits, BigInteger x)
         {
+            if (bits < 1)
+                throw new ArgumentException();
             if (x.SignValue < 0 || x.BitLength > bits)
                 throw new ArgumentException();
 
             int len = (bits + 31) >> 5;
+            Debug.Assert(len > 0);
             uint[] z = Create(len);
-            int i = 0;
-            while (x.SignValue != 0)
+
+            // NOTE: Use a fixed number of loop iterations
+            z[0] = (uint)x.IntValue;
+            for (var i = 1; i < len; ++i)
             {
-                z[i++] = (uint)x.IntValue;
-                x = x.ShiftRight(32);
+                x    = x.ShiftRight(32);
+                z[i] = (uint)x.IntValue;
             }
             return z;
         }
 
         public static ulong[] FromBigInteger64(int bits, BigInteger x)
         {
+            if (bits < 1)
+                throw new ArgumentException();
             if (x.SignValue < 0 || x.BitLength > bits)
                 throw new ArgumentException();
 
             int len = (bits + 63) >> 6;
+            Debug.Assert(len > 0);
             ulong[] z = Create64(len);
-            int i = 0;
-            while (x.SignValue != 0)
+
+            // NOTE: Use a fixed number of loop iterations
+            z[0] = (ulong)x.LongValue;
+            for (var i = 1; i < len; ++i)
             {
-                z[i++] = (ulong)x.LongValue;
-                x = x.ShiftRight(64);
+                x    = x.ShiftRight(64);
+                z[i] = (ulong)x.LongValue;
             }
             return z;
         }
@@ -570,6 +657,32 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw
                 }
             }
             return true;
+        }
+
+        public static int LessThan(int len, uint[] x, uint[] y)
+        {
+            long c = 0;
+            for (var i = 0; i < len; ++i)
+            {
+                c +=  (long)x[i] - y[i];
+                c >>= 32;
+            }
+
+            Debug.Assert(c == 0L || c == -1L);
+            return (int)c;
+        }
+
+        public static int LessThan(int len, uint[] x, int xOff, uint[] y, int yOff)
+        {
+            long c = 0;
+            for (var i = 0; i < len; ++i)
+            {
+                c +=  (long)x[xOff + i] - y[yOff + i];
+                c >>= 32;
+            }
+
+            Debug.Assert(c == 0L || c == -1L);
+            return (int)c;
         }
 
         public static void Mul(int len, uint[] x, uint[] y, uint[] zz)
@@ -1279,6 +1392,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw
             {
                 z[i] = 0;
             }
+        }
+
+        public static void Zero64(int len, ulong[] z)
+        {
+            for (var i = 0; i < len; ++i) z[i] = 0UL;
         }
     }
 }

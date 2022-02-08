@@ -187,6 +187,9 @@ namespace BestHTTP.Core
 
         public static void EnqueueRequestEvent(RequestEventInfo @event)
         {
+            if (HTTPManager.Logger.Level == Loglevels.All)
+                HTTPManager.Logger.Information("RequestEventHelper", "Enqueue request event: " + @event, @event.SourceRequest.Context);
+
             requestEventQueue.Enqueue(@event);
         }
 
@@ -396,7 +399,7 @@ namespace BestHTTP.Core
                         {
                             HTTPManager.Logger.Information("RequestEventHelper", "IsCachedEntityExpiresInTheFuture check returned true! CurrentUri: " + source.CurrentUri.ToString(), source.Context);
 
-                            ThreadedRunner.RunShortLiving<HTTPRequest>((req) =>
+                            ThreadedRunner.RunShortLiving(req =>
                             {
                                 // Disable any other cache activity.
                                 req.DisableCache = true;

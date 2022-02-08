@@ -9,8 +9,8 @@ namespace BestHTTP.Extensions
     /// </summary>
     public sealed class StreamList : Stream
     {
-        private Stream[] Streams;
-        private int CurrentIdx;
+        private readonly Stream[] Streams;
+        private          int      CurrentIdx;
 
         public StreamList(params Stream[] streams)
         {

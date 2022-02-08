@@ -1,16 +1,25 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.IO;
+
     public interface TlsPeer
     {
         void NotifyCloseHandle(TlsCloseable closehandle);
 
         /// <exception cref="IOException"/>
         void Cancel();
+
+        /// <summary>
+        ///     Specify the timeout, in milliseconds, to use for the complete handshake process.
+        /// </summary>
+        /// <remarks>
+        ///     Negative values are not allowed. A timeout of zero means an infinite timeout (i.e. the
+        ///     handshake will never time out). NOTE: Currently only respected by DTLS protocols.
+        /// </remarks>
+        int GetHandshakeTimeoutMillis();
 
         /// <summary>
         /// This implementation supports RFC 7627 and will always negotiate the extended_master_secret

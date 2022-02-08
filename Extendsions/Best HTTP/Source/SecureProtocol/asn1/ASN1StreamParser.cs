@@ -1,10 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+	using System;
+	using System.IO;
+
 	public class Asn1StreamParser
 	{
 		private readonly Stream _in;
@@ -12,31 +12,32 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 
         private readonly byte[][] tmpBuffers;
 
-        public Asn1StreamParser(
-			Stream inStream)
-			: this(inStream, Asn1InputStream.FindLimit(inStream))
+        public Asn1StreamParser(Stream input)
+	        : this(input, Asn1InputStream.FindLimit(input))
 		{
 		}
 
-		public Asn1StreamParser(
-			Stream	inStream,
-			int		limit)
-		{
-			if (!inStream.CanRead)
-				throw new ArgumentException("Expected stream to be readable", "inStream");
-
-			this._in = inStream;
-			this._limit = limit;
-            this.tmpBuffers = new byte[16][];
+        public Asn1StreamParser(byte[] encoding)
+	        : this(new MemoryStream(encoding, false), encoding.Length)
+        {
         }
 
-		public Asn1StreamParser(
-			byte[] encoding)
-			: this(new MemoryStream(encoding, false), encoding.Length)
-		{
-		}
+        public Asn1StreamParser(Stream input, int limit)
+	        : this(input, limit, new byte[16][])
+        {
+        }
 
-		internal IAsn1Convertible ReadIndef(int tagValue)
+        internal Asn1StreamParser(Stream input, int limit, byte[][] tmpBuffers)
+        {
+	        if (!input.CanRead)
+		        throw new ArgumentException("Expected stream to be readable", "input");
+
+	        this._in        = input;
+	        this._limit     = limit;
+	        this.tmpBuffers = tmpBuffers;
+        }
+
+        internal IAsn1Convertible ReadIndef(int tagValue)
 		{
 			// Note: INDEF => CONSTRUCTED
 
@@ -144,16 +145,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 				if (!isConstructed)
 					throw new IOException("indefinite-length primitive encoding encountered");
 
-				IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in, _limit);
-				Asn1StreamParser sp = new Asn1StreamParser(indIn, _limit);
+				var indIn = new IndefiniteLengthInputStream(this._in, this._limit);
+				var sp    = new Asn1StreamParser(indIn, this._limit, this.tmpBuffers);
 
-				if ((tag & Asn1Tags.Application) != 0)
+				var tagClass = tag & Asn1Tags.Private;
+				if (0 != tagClass)
 				{
-					return new BerApplicationSpecificParser(tagNo, sp);
-				}
+					if ((tag & Asn1Tags.Application) != 0)
+						return new BerApplicationSpecificParser(tagNo, sp);
 
-				if ((tag & Asn1Tags.Tagged) != 0)
-				{
 					return new BerTaggedObjectParser(true, tagNo, sp);
 				}
 
@@ -163,51 +163,53 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			{
 				DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(_in, length, _limit);
 
-				if ((tag & Asn1Tags.Application) != 0)
+				var tagClass = tag & Asn1Tags.Private;
+				if (0 != tagClass)
 				{
-					return new DerApplicationSpecific(isConstructed, tagNo, defIn.ToArray());
+					if ((tag & Asn1Tags.Application) != 0)
+						return new DerApplicationSpecific(isConstructed, tagNo, defIn.ToArray());
+
+					return new BerTaggedObjectParser(isConstructed, tagNo,
+						new Asn1StreamParser(defIn, defIn.Remaining, this.tmpBuffers));
 				}
 
-				if ((tag & Asn1Tags.Tagged) != 0)
+				if (!isConstructed)
 				{
-					return new BerTaggedObjectParser(isConstructed, tagNo, new Asn1StreamParser(defIn));
-				}
-
-				if (isConstructed)
-				{
-					// TODO There are other tags that may be constructed (e.g. BitString)
+					// Some primitive encodings can be handled by parsers too...
 					switch (tagNo)
 					{
 						case Asn1Tags.OctetString:
-							//
-							// yes, people actually do this...
-							//
-							return new BerOctetStringParser(new Asn1StreamParser(defIn));
-						case Asn1Tags.Sequence:
-							return new DerSequenceParser(new Asn1StreamParser(defIn));
-						case Asn1Tags.Set:
-							return new DerSetParser(new Asn1StreamParser(defIn));
-						case Asn1Tags.External:
-							return new DerExternalParser(new Asn1StreamParser(defIn));
-						default:
-                            throw new IOException("unknown tag " + tagNo + " encountered");
-                    }
+							return new DerOctetStringParser(defIn);
+					}
+
+					try
+					{
+						return Asn1InputStream.CreatePrimitiveDerObject(tagNo, defIn, this.tmpBuffers);
+					}
+					catch (ArgumentException e)
+					{
+						throw new Asn1Exception("corrupted stream detected", e);
+					}
 				}
 
-				// Some primitive encodings can be handled by parsers too...
+				var sp = new Asn1StreamParser(defIn, defIn.Remaining, this.tmpBuffers);
+
+				// TODO There are other tags that may be constructed (e.g. BitString)
 				switch (tagNo)
 				{
 					case Asn1Tags.OctetString:
-						return new DerOctetStringParser(defIn);
-				}
-
-				try
-				{
-					return Asn1InputStream.CreatePrimitiveDerObject(tagNo, defIn, tmpBuffers);
-				}
-				catch (ArgumentException e)
-				{
-					throw new Asn1Exception("corrupted stream detected", e);
+						//
+						// yes, people actually do this...
+						//
+						return new BerOctetStringParser(sp);
+					case Asn1Tags.Sequence:
+						return new DerSequenceParser(sp);
+					case Asn1Tags.Set:
+						return new DerSetParser(sp);
+					case Asn1Tags.External:
+						return new DerExternalParser(sp);
+					default:
+						throw new IOException("unknown tag " + tagNo + " encountered");
 				}
 			}
 		}

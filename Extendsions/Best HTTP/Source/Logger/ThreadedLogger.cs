@@ -1,13 +1,17 @@
-using System;
-using System.Collections.Concurrent;
-using System.Text;
-
 namespace BestHTTP.Logger
 {
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.NullChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.ArrayBoundsChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.DivideByZeroChecks, false)]
-    public sealed class ThreadedLogger : BestHTTP.Logger.ILogger, IDisposable
+    using System;
+    using System.Collections.Concurrent;
+    using System.Text;
+    using System.Threading;
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.PlatformSupport.Threading;
+    using UnityEngine;
+
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    public sealed class ThreadedLogger : ILogger, IDisposable
     {
         public Loglevels Level { get; set; }
         public ILogOutput Output { get { return this._output; }
@@ -23,23 +27,24 @@ namespace BestHTTP.Logger
         }
         private ILogOutput _output;
 
-        private StringBuilder sb = new StringBuilder(40);
+        public int InitialStringBufferCapacity = 256;
 
 #if !UNITY_WEBGL || UNITY_EDITOR
-
         public TimeSpan ExitThreadAfterInactivity = TimeSpan.FromMinutes(1);
 
         private ConcurrentQueue<LogJob> jobs = new ConcurrentQueue<LogJob>();
-        private System.Threading.AutoResetEvent newJobEvent = new System.Threading.AutoResetEvent(false);
+        private AutoResetEvent newJobEvent = new AutoResetEvent(false);
 
-        private int threadCreated;
+        private volatile int threadCreated;
 
-        private bool isDisposed;
+        private volatile bool isDisposed;
 #endif
+
+        private readonly StringBuilder sb = new(0);
 
         public ThreadedLogger()
         {
-            this.Level = UnityEngine.Debug.isDebugBuild ? Loglevels.Warning : Loglevels.Error;
+            this.Level = Debug.isDebugBuild ? Loglevels.Warning : Loglevels.Error;
             this.Output = new UnityOutput();
         }
 
@@ -68,6 +73,8 @@ namespace BestHTTP.Logger
             if (this.Level > level)
                 return;
 
+            this.sb.EnsureCapacity(this.InitialStringBufferCapacity);
+
 #if !UNITY_WEBGL || UNITY_EDITOR
             if (this.isDisposed)
                 return;
@@ -80,14 +87,18 @@ namespace BestHTTP.Logger
                 msg = msg,
                 ex = ex,
                 time = DateTime.Now,
-                threadId = System.Threading.Thread.CurrentThread.ManagedThreadId,
-                stackTrace = System.Environment.StackTrace,
+                threadId = Thread.CurrentThread.ManagedThreadId,
+                stackTrace = Environment.StackTrace,
                 context1 = context1 != null ? context1.Clone() : null,
                 context2 = context2 != null ? context2.Clone() : null,
                 context3 = context3 != null ? context3.Clone() : null
             };
 
 #if !UNITY_WEBGL || UNITY_EDITOR
+            // Start the consumer thread before enqueuing to get up and running sooner
+            if (Interlocked.CompareExchange(ref this.threadCreated, 1, 0) == 0)
+                ThreadedRunner.RunLongLiving(this.ThreadFunc);
+
             this.jobs.Enqueue(job);
             try
             {
@@ -104,8 +115,10 @@ namespace BestHTTP.Logger
                 return;
             }
 
-            if (System.Threading.Interlocked.CompareExchange(ref this.threadCreated, 1, 0) == 0)
-                BestHTTP.PlatformSupport.Threading.ThreadedRunner.RunLongLiving(ThreadFunc);
+            // newJobEvent might timed out between the previous threadCreated check and newJobEvent.Set() calls closing the thread.
+            // So, here we check threadCreated again and create a new thread if needed.
+            if (Interlocked.CompareExchange(ref this.threadCreated, 1, 0) == 0)
+                ThreadedRunner.RunLongLiving(ThreadFunc);
 #else
             this.Output.Write(job.level, job.ToJson(sb));
 #endif
@@ -114,13 +127,20 @@ namespace BestHTTP.Logger
 #if !UNITY_WEBGL || UNITY_EDITOR
         private void ThreadFunc()
         {
-            System.Threading.Thread.CurrentThread.Name = "BestHTTP.Logger";
+            Thread.CurrentThread.Name = "BestHTTP.Logger";
             try
             {
                 do
                 {
+                    // Waiting for a new log-job timed out
                     if (!this.newJobEvent.WaitOne(this.ExitThreadAfterInactivity))
+                    {
+                        // clear StringBuilder's inner cache and exit the thread
+                        this.sb.Length   = 0;
+                        this.sb.Capacity = 0;
+                        Interlocked.Exchange(ref this.threadCreated, 0);
                         return;
+                    }
 
                     LogJob job;
                     while (this.jobs.TryDequeue(out job))
@@ -134,6 +154,8 @@ namespace BestHTTP.Logger
                     }
 
                 } while (!HTTPManager.IsQuitting);
+
+                Interlocked.Exchange(ref this.threadCreated, 0);
 
                 // When HTTPManager.IsQuitting is true, there is still logging that will create a new thread after the last one quit
                 //  and always writing a new entry about the exiting thread would be too much overhead.
@@ -150,10 +172,9 @@ namespace BestHTTP.Logger
                 //
                 //this.Output.WriteVerbose(lastLog.ToJson(sb));
             }
-            catch { }
-            finally
+            catch
             {
-                System.Threading.Interlocked.Exchange(ref this.threadCreated, 0);
+                Interlocked.Exchange(ref this.threadCreated, 0);
             }
         }
 
@@ -181,7 +202,7 @@ namespace BestHTTP.Logger
         }
     }
 
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppEagerStaticClassConstructionAttribute]
+    [Il2CppEagerStaticClassConstruction]
     struct LogJob
     {
         private static string[] LevelStrings = new string[] { "Verbose", "Information", "Warning", "Error", "Exception" };
@@ -198,7 +219,7 @@ namespace BestHTTP.Logger
         public LoggingContext context2;
         public LoggingContext context3;
 
-        private string WrapInColor(string str, string color)
+        private static string WrapInColor(string str, string color)
         {
 #if UNITY_EDITOR
             return string.Format("<b><color={1}>{0}</color></b>", str, color);

@@ -1,30 +1,34 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-using System.Text;
-
-using BestHTTP.PlatformSupport.Memory;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
+#if !PORTABLE || NETFX_CORE || DOTNET
+using System.Net.Sockets;
+#endif
 
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.Collections;
+    using System.IO;
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.PlatformSupport.Memory;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
+
     /// <remarks>Some helper functions for MicroTLS.</remarks>
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.NullChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.ArrayBoundsChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.DivideByZeroChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppEagerStaticClassConstructionAttribute]
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     public abstract class TlsUtilities
     {
         public static readonly byte[] EmptyBytes = new byte[0];
@@ -629,7 +633,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
         public static IList GetAllSignatureAlgorithms()
         {
-            IList v = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(4);
+            IList v = Platform.CreateArrayList(4);
             v.Add(SignatureAlgorithm.anonymous);
             v.Add(SignatureAlgorithm.rsa);
             v.Add(SignatureAlgorithm.dsa);
@@ -664,7 +668,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             byte[] signatureAlgorithms = new byte[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.dsa,
                 SignatureAlgorithm.ecdsa };
 
-            IList result = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+            IList result = Platform.CreateArrayList();
             for (int i = 0; i < signatureAlgorithms.Length; ++i)
             {
                 for (int j = 0; j < hashAlgorithms.Length; ++j)
@@ -808,7 +812,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             if (length < 2 || (length & 1) != 0)
                 throw new TlsFatalAlert(AlertDescription.decode_error);
             int count = length / 2;
-            IList supportedSignatureAlgorithms = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(count);
+            IList supportedSignatureAlgorithms = Platform.CreateArrayList(count);
             for (int i = 0; i < count; ++i)
             {
                 SignatureAndHashAlgorithm entry = SignatureAndHashAlgorithm.Parse(input);
@@ -919,7 +923,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                 mac.BlockUpdate(a, 0, a.Length);
                 mac.BlockUpdate(seed, 0, seed.Length);
                 mac.DoFinal(buf2, 0);
-                Array.Copy(buf2, 0, output, (size * i), System.Math.Min(size, output.Length - (size * i)));
+                Array.Copy(buf2, 0, output, (size * i), Math.Min(size, output.Length - (size * i)));
             }
         }
 
@@ -953,10 +957,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             // https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format
             string SSLKEYLOGFILE = Environment.GetEnvironmentVariable("SSLKEYLOGFILE", EnvironmentVariableTarget.User);
             if (!string.IsNullOrEmpty(SSLKEYLOGFILE))
-                using (var writer = new StreamWriter(System.IO.File.Open(SSLKEYLOGFILE, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)))
+                using (var writer = new StreamWriter(File.Open(SSLKEYLOGFILE, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)))
                     writer.Write(string.Format("# Generated by BestHTTP\r\nCLIENT_RANDOM {0} {1}",
-                        BouncyCastle.Utilities.Encoders.Hex.ToHexString(securityParameters.ClientRandom),
-                        BouncyCastle.Utilities.Encoders.Hex.ToHexString(master_secret))); 
+                        Hex.ToHexString(securityParameters.ClientRandom),
+                        Hex.ToHexString(master_secret))); 
 #endif
 
             return PRF(context, master_secret, ExporterLabel.key_expansion, seed, size);
@@ -1292,7 +1296,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
         private static IList VectorOfOne(object obj)
         {
-            IList v = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(1);
+            IList v = Platform.CreateArrayList(1);
             v.Add(obj);
             return v;
         }
@@ -2370,7 +2374,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             if (sigHashAlgs == null)
                 return GetAllSignatureAlgorithms();
 
-            IList v = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(4);
+            IList v = Platform.CreateArrayList(4);
             v.Add(SignatureAlgorithm.anonymous);
             foreach (SignatureAndHashAlgorithm sigHashAlg in sigHashAlgs)
             {
@@ -2385,6 +2389,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             }
             return v;
         }
+
+#if !PORTABLE || NETFX_CORE || DOTNET
+        public static bool IsTimeout(SocketException e)
+        {
+#if NET_1_1
+            return 10060 == e.ErrorCode;
+#else
+            return SocketError.TimedOut == e.SocketErrorCode;
+#endif
+        }
+#endif
     }
 }
 #pragma warning restore

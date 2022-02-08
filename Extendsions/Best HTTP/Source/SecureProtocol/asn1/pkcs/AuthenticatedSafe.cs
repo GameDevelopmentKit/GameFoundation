@@ -1,9 +1,5 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 {
     public class AuthenticatedSafe
@@ -26,9 +22,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
         private readonly ContentInfo[] info;
         private readonly bool isBer;
 
-
-		public AuthenticatedSafe(
-            Asn1Sequence seq)
+        private AuthenticatedSafe(Asn1Sequence seq)
         {
             info = new ContentInfo[seq.Count];
 

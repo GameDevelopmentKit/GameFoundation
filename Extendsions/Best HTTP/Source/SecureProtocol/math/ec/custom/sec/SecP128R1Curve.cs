@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
 {
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+
     internal class SecP128R1Curve
         : AbstractFpCurve
     {
@@ -93,6 +92,20 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
             }
 
             return new SecP128R1LookupTable(this, table, len);
+        }
+
+        public override ECFieldElement RandomFieldElement(SecureRandom r)
+        {
+            var x = Nat128.Create();
+            SecP128R1Field.Random(r, x);
+            return new SecP128R1FieldElement(x);
+        }
+
+        public override ECFieldElement RandomFieldElementMult(SecureRandom r)
+        {
+            var x = Nat128.Create();
+            SecP128R1Field.RandomMult(r, x);
+            return new SecP128R1FieldElement(x);
         }
 
         private class SecP128R1LookupTable

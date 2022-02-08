@@ -1,14 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
      * The Digital Signature Algorithm - as described in "Handbook of Applied
      * Cryptography", pages 452 - 453.
@@ -106,7 +105,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 
             BigInteger r = parameters.G.ModPow(k, parameters.P).Mod(q);
 
-            k = k.ModInverse(q).Multiply(m.Add(x.Multiply(r)));
+            k = BigIntegers.ModOddInverse(q, k).Multiply(m.Add(x.Multiply(r)));
 
             BigInteger s = k.Mod(q);
 
@@ -134,7 +133,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
                 return false;
             }
 
-            BigInteger w = s.ModInverse(q);
+            var w = BigIntegers.ModOddInverseVar(q, s);
 
             BigInteger u1 = m.Multiply(w).Mod(q);
             BigInteger u2 = r.Multiply(w).Mod(q);
@@ -150,7 +149,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 
         protected virtual BigInteger CalculateE(BigInteger n, byte[] message)
         {
-            int length = System.Math.Min(message.Length, n.BitLength / 8);
+            int length = Math.Min(message.Length, n.BitLength / 8);
 
             return new BigInteger(1, message, 0, length);
         }

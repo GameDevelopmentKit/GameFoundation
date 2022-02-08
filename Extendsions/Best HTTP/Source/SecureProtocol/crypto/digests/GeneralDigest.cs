@@ -105,11 +105,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
                     pxBuf[xBufOff++] = pinput[inOff + i++];
             }
 
-            //int len = length - i;
-            //Array.Copy(input, inOff + i, xBuf, xBufOff, len);
-            //xBufOff += len;
-            //i += len;
-
             byteCount += length;
         }
 

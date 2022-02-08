@@ -1,12 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm
 {
+    using System.Collections;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class Tables1kGcmExponentiator
         : IGcmExponentiator
     {
@@ -16,24 +14,24 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm
 
         public void Init(byte[] x)
         {
-            uint[] y = GcmUtilities.AsUints(x);
-            if (lookupPowX2 != null && Arrays.AreEqual(y, (uint[])lookupPowX2[0]))
+            var y = GcmUtilities.AsUlongs(x);
+            if (this.lookupPowX2 != null && Arrays.AreEqual(y, (ulong[])this.lookupPowX2[0]))
                 return;
 
-            lookupPowX2 = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(8);
+            lookupPowX2 = Platform.CreateArrayList(8);
             lookupPowX2.Add(y);
         }
 
         public void ExponentiateX(long pow, byte[] output)
         {
-            uint[] y = GcmUtilities.OneAsUints();
+            var y   = GcmUtilities.OneAsUlongs();
             int bit = 0;
             while (pow > 0)
             {
                 if ((pow & 1L) != 0)
                 {
                     EnsureAvailable(bit);
-                    GcmUtilities.Multiply(y, (uint[])lookupPowX2[bit]);
+                    GcmUtilities.Multiply(y, (ulong[])this.lookupPowX2[bit]);
                 }
                 ++bit;
                 pow >>= 1;
@@ -47,11 +45,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm
             int count = lookupPowX2.Count;
             if (count <= bit)
             {
-                uint[] tmp = (uint[])lookupPowX2[count - 1];
+                var tmp = (ulong[])this.lookupPowX2[count - 1];
                 do
                 {
                     tmp = Arrays.Clone(tmp);
-                    GcmUtilities.Multiply(tmp, tmp);
+                    GcmUtilities.Square(tmp, tmp);
                     lookupPowX2.Add(tmp);
                 }
                 while (++count <= bit);

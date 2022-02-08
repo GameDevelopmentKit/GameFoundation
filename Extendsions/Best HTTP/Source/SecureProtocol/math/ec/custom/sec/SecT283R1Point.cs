@@ -1,9 +1,9 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
 {
+    using System;
+
     internal class SecT283R1Point
         : AbstractF2mPoint
     {
@@ -184,7 +184,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
             ECFieldElement X1 = this.RawXCoord;
             if (X1.IsZero)
             {
-                // A point with X == 0 is it's own Additive inverse
+                // A point with X == 0 is its own additive inverse
                 return curve.Infinity;
             }
 
@@ -220,7 +220,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
             ECFieldElement X1 = this.RawXCoord;
             if (X1.IsZero)
             {
-                // A point with X == 0 is it's own Additive inverse
+                // A point with X == 0 is its own additive inverse
                 return b;
             }
 

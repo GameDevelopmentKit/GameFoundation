@@ -1,23 +1,27 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.Diagnostics;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.IO;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 {
+	using System;
+	using System.Collections;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+	using Attribute = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.Attribute;
+	using AttributeTable = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.AttributeTable;
+	using IssuerAndSerialNumber = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.IssuerAndSerialNumber;
+	using SignerInfo = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.SignerInfo;
+	using Time = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.Time;
+
 	/**
 	* an expanded SignerInfo block from a CMS Signed message
 	*/
@@ -26,21 +30,23 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		private static readonly CmsSignedHelper Helper = CmsSignedHelper.Instance;
 
 		private SignerID			sid;
-		private SignerInfo			info;
-		private AlgorithmIdentifier	digestAlgorithm;
-		private AlgorithmIdentifier	encryptionAlgorithm;
-		private readonly Asn1Set	signedAttributeSet;
-		private readonly Asn1Set	unsignedAttributeSet;
-		private CmsProcessable		content;
-		private byte[]				signature;
-		private DerObjectIdentifier	contentType;
-		private IDigestCalculator	digestCalculator;
-		private byte[]				resultDigest;
+
+		private          CmsProcessable      content;
+		private          byte[]              signature;
+		private          DerObjectIdentifier contentType;
+		private readonly byte[]              calculatedDigest;
+		private          byte[]              resultDigest;
 
 		// Derived
-		private Asn1.Cms.AttributeTable	signedAttributeTable;
-		private Asn1.Cms.AttributeTable	unsignedAttributeTable;
+		private AttributeTable	signedAttributeTable;
+		private AttributeTable	unsignedAttributeTable;
 		private readonly bool isCounterSignature;
+
+		protected          SignerInfo          info;
+		protected          AlgorithmIdentifier digestAlgorithm;
+		protected          AlgorithmIdentifier encryptionAlgorithm;
+		protected readonly Asn1Set             signedAttributeSet;
+		protected readonly Asn1Set             unsignedAttributeSet;
 
 		internal SignerInformation(
 			SignerInfo			info,
@@ -65,8 +71,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 				}
 				else
 				{
-					Asn1.Cms.IssuerAndSerialNumber iAnds =
-						Asn1.Cms.IssuerAndSerialNumber.GetInstance(s.ID);
+					IssuerAndSerialNumber iAnds =
+						IssuerAndSerialNumber.GetInstance(s.ID);
 
 					sid.Issuer = iAnds.Name;
 					sid.SerialNumber = iAnds.SerialNumber.Value;
@@ -77,37 +83,38 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 				throw new ArgumentException("invalid sid in SignerInfo");
 			}
 
-			this.digestAlgorithm = info.DigestAlgorithm;
-			this.signedAttributeSet = info.AuthenticatedAttributes;
+			this.digestAlgorithm      = info.DigestAlgorithm;
+			this.signedAttributeSet   = info.AuthenticatedAttributes;
 			this.unsignedAttributeSet = info.UnauthenticatedAttributes;
-			this.encryptionAlgorithm = info.DigestEncryptionAlgorithm;
-			this.signature = info.EncryptedDigest.GetOctets();
+			this.encryptionAlgorithm  = info.DigestEncryptionAlgorithm;
+			this.signature            = (byte[])info.EncryptedDigest.GetOctets().Clone();
 
-			this.content = content;
-			this.digestCalculator = digestCalculator;
+			this.content          = content;
+			this.calculatedDigest = digestCalculator != null ? digestCalculator.GetDigest() : null;
 		}
 
         /**
          * Protected constructor. In some cases clients have their own idea about how to encode
          * the signed attributes and calculate the signature. This constructor is to allow developers
-         * to deal with that by extending off the class and overridng methods like getSignedAttributes().
+         * to deal with that by extending off the class and overriding e.g. SignedAttributes property.
          *
          * @param baseInfo the SignerInformation to base this one on.
          */
         protected SignerInformation(SignerInformation baseInfo)
         {
-            this.info = baseInfo.info;
-            this.contentType = baseInfo.contentType;
-            this.isCounterSignature = baseInfo.IsCounterSignature;
-            this.sid = baseInfo.SignerID;
-            this.digestAlgorithm = info.DigestAlgorithm;
-            this.signedAttributeSet = info.AuthenticatedAttributes;
+            this.info                 = baseInfo.info;
+            this.content              = baseInfo.content;
+            this.contentType          = baseInfo.contentType;
+            this.isCounterSignature   = baseInfo.IsCounterSignature;
+            this.sid                  = baseInfo.sid;
+            this.digestAlgorithm      = this.info.DigestAlgorithm;
+            this.signedAttributeSet   = info.AuthenticatedAttributes;
             this.unsignedAttributeSet = info.UnauthenticatedAttributes;
-            this.encryptionAlgorithm = info.DigestEncryptionAlgorithm;
-            this.signature = info.EncryptedDigest.GetOctets();
-            this.content = baseInfo.content;
-            this.resultDigest = baseInfo.resultDigest;
-            this.signedAttributeTable = baseInfo.signedAttributeTable;
+            this.encryptionAlgorithm  = info.DigestEncryptionAlgorithm;
+            this.signature            = (byte[])this.info.EncryptedDigest.GetOctets().Clone();
+
+            this.calculatedDigest       = baseInfo.calculatedDigest;
+            this.signedAttributeTable   = baseInfo.signedAttributeTable;
             this.unsignedAttributeTable = baseInfo.unsignedAttributeTable;
         }
 
@@ -204,13 +211,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		* return a table of the signed attributes - indexed by
 		* the OID of the attribute.
 		*/
-		public Asn1.Cms.AttributeTable SignedAttributes
+		public AttributeTable SignedAttributes
 		{
 			get
 			{
 				if (signedAttributeSet != null && signedAttributeTable == null)
 				{
-					signedAttributeTable = new Asn1.Cms.AttributeTable(signedAttributeSet);
+					signedAttributeTable = new AttributeTable(signedAttributeSet);
 				}
 				return signedAttributeTable;
 			}
@@ -220,13 +227,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		* return a table of the unsigned attributes indexed by
 		* the OID of the attribute.
 		*/
-		public Asn1.Cms.AttributeTable UnsignedAttributes
+		public AttributeTable UnsignedAttributes
 		{
 			get
 			{
 				if (unsignedAttributeSet != null && unsignedAttributeTable == null)
 				{
-					unsignedAttributeTable = new Asn1.Cms.AttributeTable(unsignedAttributeSet);
+					unsignedAttributeTable = new AttributeTable(unsignedAttributeSet);
 				}
 				return unsignedAttributeTable;
 			}
@@ -253,13 +260,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			NOT be a signed attribute, an authenticated attribute, an
 			unauthenticated attribute, or an unprotected attribute.
 			*/
-			Asn1.Cms.AttributeTable unsignedAttributeTable = UnsignedAttributes;
+			AttributeTable unsignedAttributeTable = UnsignedAttributes;
 			if (unsignedAttributeTable == null)
 			{
-                return new SignerInformationStore(BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(0));
+                return new SignerInformationStore(Platform.CreateArrayList(0));
 			}
 
-            IList counterSignatures = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+            IList counterSignatures = Platform.CreateArrayList();
 
 			/*
 			The UnsignedAttributes syntax is defined as a SET OF Attributes.  The
@@ -268,7 +275,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			*/
 			Asn1EncodableVector allCSAttrs = unsignedAttributeTable.GetAll(CmsAttributes.CounterSignature);
 
-			foreach (Asn1.Cms.Attribute counterSignatureAttribute in allCSAttrs)
+			foreach (Attribute counterSignatureAttribute in allCSAttrs)
 			{
 				/*
 				A countersignature attribute can have multiple attribute values.  The
@@ -312,7 +319,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		* return the DER encoding of the signed attributes.
 		* @throws IOException if an encoding error occurs.
 		*/
-		public byte[] GetEncodedSignedAttributes()
+		public virtual byte[] GetEncodedSignedAttributes()
 		{
 			return signedAttributeSet == null
 				?	null
@@ -322,14 +329,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		private bool DoVerify(
 			AsymmetricKeyParameter	key)
 		{
-			string digestName = Helper.GetDigestAlgName(this.DigestAlgOid);
-			IDigest digest = Helper.GetDigestInstance(digestName);
+			var           sigAlgOid  = this.encryptionAlgorithm.Algorithm;
+			Asn1Encodable sigParams  = this.encryptionAlgorithm.Parameters;
+			var           digestName = Helper.GetDigestAlgName(this.EncryptionAlgOid);
 
-            DerObjectIdentifier sigAlgOid = this.encryptionAlgorithm.Algorithm;
-			Asn1Encodable sigParams = this.encryptionAlgorithm.Parameters;
+			if (digestName.Equals(sigAlgOid.Id)) digestName = Helper.GetDigestAlgName(this.DigestAlgOid);
+
+			var     digest = Helper.GetDigestInstance(digestName);
 			ISigner sig;
 
-			if (sigAlgOid.Equals(Asn1.Pkcs.PkcsObjectIdentifiers.IdRsassaPss))
+			if (sigAlgOid.Equals(PkcsObjectIdentifiers.IdRsassaPss))
 			{
 				// RFC 4056 2.2
 				// When the id-RSASSA-PSS algorithm identifier is used for a signature,
@@ -342,24 +351,28 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 					// TODO Provide abstract configuration mechanism
 					// (via alternate SignerUtilities.GetSigner method taking ASN.1 params)
 
-					Asn1.Pkcs.RsassaPssParameters pss = Asn1.Pkcs.RsassaPssParameters.GetInstance(
+					RsassaPssParameters pss = RsassaPssParameters.GetInstance(
 						sigParams.ToAsn1Object());
 
                     if (!pss.HashAlgorithm.Algorithm.Equals(this.digestAlgorithm.Algorithm))
 						throw new CmsException("RSASSA-PSS signature parameters specified incorrect hash algorithm");
-                    if (!pss.MaskGenAlgorithm.Algorithm.Equals(Asn1.Pkcs.PkcsObjectIdentifiers.IdMgf1))
+                    if (!pss.MaskGenAlgorithm.Algorithm.Equals(PkcsObjectIdentifiers.IdMgf1))
 						throw new CmsException("RSASSA-PSS signature parameters specified unknown MGF");
 
                     IDigest pssDigest = DigestUtilities.GetDigest(pss.HashAlgorithm.Algorithm);
                     int saltLength = pss.SaltLength.IntValueExact;
-                    byte trailerField = (byte)pss.TrailerField.IntValueExact;
 
-					// RFC 4055 3.1
-					// The value MUST be 1, which represents the trailer field with hexadecimal value 0xBC
-					if (trailerField != 1)
+                    // RFC 4055 3.1
+                    // The value MUST be 1, which represents the trailer field with hexadecimal value 0xBC
+                    if (!RsassaPssParameters.DefaultTrailerField.Equals(pss.TrailerField))
 						throw new CmsException("RSASSA-PSS signature parameters must have trailerField of 1");
 
-					sig = new PssSigner(new RsaBlindedEngine(), pssDigest, saltLength);
+                    IAsymmetricBlockCipher rsa = new RsaBlindedEngine();
+
+                    if (this.signedAttributeSet == null && this.calculatedDigest != null)
+	                    sig = PssSigner.CreateRawSigner(rsa, pssDigest, pssDigest, saltLength, PssSigner.TrailerImplicit);
+                    else
+	                    sig = new PssSigner(rsa, pssDigest, saltLength);
 				}
 				catch (Exception e)
 				{
@@ -369,10 +382,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			else
 			{
 				// TODO Probably too strong a check at the moment
-//				if (sigParams != null)
-//					throw new CmsException("unrecognised signature parameters provided");
+				//				if (sigParams != null)
+				//					throw new CmsException("unrecognised signature parameters provided");
 
-                string signatureName = digestName + "with" + Helper.GetEncryptionAlgName(this.EncryptionAlgOid);
+				var signatureName = digestName + "with" + Helper.GetEncryptionAlgName(this.EncryptionAlgOid);
 
                 sig = Helper.GetSignatureInstance(signatureName);
 
@@ -382,9 +395,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 
 			try
 			{
-				if (digestCalculator != null)
+				if (this.calculatedDigest != null)
 				{
-					resultDigest = digestCalculator.GetDigest();
+					this.resultDigest = this.calculatedDigest;
 				}
 				else
 				{
@@ -455,17 +468,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 
 			// RFC 3852 11.4 Validate countersignature attribute(s)
 			{
-            	Asn1.Cms.AttributeTable signedAttrTable = this.SignedAttributes;
+            	AttributeTable signedAttrTable = this.SignedAttributes;
             	if (signedAttrTable != null
                 	&& signedAttrTable.GetAll(CmsAttributes.CounterSignature).Count > 0)
             	{
                 	throw new CmsException("A countersignature attribute MUST NOT be a signed attribute");
             	}
 
-            	Asn1.Cms.AttributeTable unsignedAttrTable = this.UnsignedAttributes;
+            	AttributeTable unsignedAttrTable = this.UnsignedAttributes;
             	if (unsignedAttrTable != null)
             	{
-					foreach (Asn1.Cms.Attribute csAttr in unsignedAttrTable.GetAll(CmsAttributes.CounterSignature))
+					foreach (Attribute csAttr in unsignedAttrTable.GetAll(CmsAttributes.CounterSignature))
 	                {
                     	if (csAttr.AttrValues.Count < 1)
 	                        throw new CmsException("A countersignature attribute MUST contain at least one AttributeValue");
@@ -481,10 +494,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 
 				if (signedAttributeSet == null)
 				{
-					if (digestCalculator != null)
+					if (this.calculatedDigest != null)
 					{
-						// need to decrypt signature and check message bytes
-						return VerifyDigest(resultDigest, key, this.GetSignature());
+						if (sig is PssSigner)
+							sig.BlockUpdate(this.resultDigest, 0, this.resultDigest.Length);
+						else
+							// need to decrypt signature and check message bytes
+							return this.VerifyDigest(this.resultDigest, key, this.GetSignature());
 					}
 					else if (content != null)
 					{
@@ -634,7 +650,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		public bool Verify(
 			X509Certificate cert)
 		{
-			Asn1.Cms.Time signingTime = GetSigningTime();
+			Time signingTime = GetSigningTime();
 			if (signingTime != null)
 			{
 				cert.CheckValidity(signingTime.Date);
@@ -657,7 +673,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			DerObjectIdentifier attrOID, string printableName)
 		{
 
-			Asn1.Cms.AttributeTable unsignedAttrTable = this.UnsignedAttributes;
+			AttributeTable unsignedAttrTable = this.UnsignedAttributes;
 			if (unsignedAttrTable != null
 				&& unsignedAttrTable.GetAll(attrOID).Count > 0)
 			{
@@ -665,7 +681,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 					+ " attribute MUST NOT be an unsigned attribute");
 			}
 
-			Asn1.Cms.AttributeTable signedAttrTable = this.SignedAttributes;
+			AttributeTable signedAttrTable = this.SignedAttributes;
 			if (signedAttrTable == null)
 			{
 				return null;
@@ -677,7 +693,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 				case 0:
 					return null;
 				case 1:
-					Asn1.Cms.Attribute t = (Asn1.Cms.Attribute) v[0];
+					Attribute t = (Attribute) v[0];
 					Asn1Set attrValues = t.AttrValues;
 
 					if (attrValues.Count != 1)
@@ -691,7 +707,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			}
 		}
 
-		private Asn1.Cms.Time GetSigningTime()
+		private Time GetSigningTime()
 		{
 			Asn1Object validSigningTime = GetSingleValuedSignedAttribute(
 				CmsAttributes.SigningTime, "signing-time");
@@ -701,7 +717,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 
 			try
 			{
-				return Asn1.Cms.Time.GetInstance(validSigningTime);
+				return Time.GetInstance(validSigningTime);
 			}
 			catch (ArgumentException)
 			{
@@ -720,7 +736,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		*/
 		public static SignerInformation ReplaceUnsignedAttributes(
 			SignerInformation		signerInformation,
-			Asn1.Cms.AttributeTable	unsignedAttributes)
+			AttributeTable	unsignedAttributes)
 		{
 			SignerInfo sInfo = signerInformation.info;
 			Asn1Set unsignedAttr = null;
@@ -758,7 +774,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			// TODO Perform checks from RFC 3852 11.4
 
 			SignerInfo sInfo = signerInformation.info;
-			Asn1.Cms.AttributeTable unsignedAttr = signerInformation.UnsignedAttributes;
+			AttributeTable unsignedAttr = signerInformation.UnsignedAttributes;
 			Asn1EncodableVector v;
 
 			if (unsignedAttr != null)
@@ -777,7 +793,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 				sigs.Add(sigInf.ToSignerInfo());
 			}
 
-			v.Add(new Asn1.Cms.Attribute(CmsAttributes.CounterSignature, new DerSet(sigs)));
+			v.Add(new Attribute(CmsAttributes.CounterSignature, new DerSet(sigs)));
 
 			return new SignerInformation(
 				new SignerInfo(

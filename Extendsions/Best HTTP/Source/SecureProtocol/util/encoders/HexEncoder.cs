@@ -1,10 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
 {
+    using System;
+    using System.IO;
+
     public class HexEncoder
         : IEncoder
     {
@@ -41,26 +41,45 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
             InitialiseDecodingTable();
         }
 
+        public int Encode(byte[] inBuf, int inOff, int inLen, byte[] outBuf, int outOff)
+        {
+            var inPos  = inOff;
+            var inEnd  = inOff + inLen;
+            var outPos = outOff;
+
+            while (inPos < inEnd)
+            {
+                uint b = inBuf[inPos++];
+
+                outBuf[outPos++] = this.encodingTable[b >> 4];
+                outBuf[outPos++] = this.encodingTable[b & 0xF];
+            }
+
+            return outPos - outOff;
+        }
+
         /**
         * encode the input data producing a Hex output stream.
         *
         * @return the number of bytes produced.
         */
-        public int Encode(
-            byte[]	data,
-            int		off,
-            int		length,
-            Stream	outStream)
+        public int Encode(byte[] buf, int off, int len, Stream outStream)
         {
-            for (int i = off; i < (off + length); i++)
-            {
-                int v = data[i];
+            if (len < 0)
+                return 0;
 
-                outStream.WriteByte(encodingTable[v >> 4]);
-                outStream.WriteByte(encodingTable[v & 0xf]);
+            var tmp       = new byte[72];
+            var remaining = len;
+            while (remaining > 0)
+            {
+                var inLen  = Math.Min(36, remaining);
+                var outLen = this.Encode(buf, off, inLen, tmp, 0);
+                outStream.Write(tmp, 0, outLen);
+                off       += inLen;
+                remaining -= inLen;
             }
 
-            return length * 2;
+            return len * 2;
         }
 
         private static bool Ignore(char c)
@@ -81,15 +100,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
             Stream	outStream)
         {
             byte b1, b2;
-            int outLen = 0;
-            int end = off + length;
+            int  outLen = 0;
+            var  buf    = new byte[36];
+            var  bufOff = 0;
+            int  end    = off + length;
 
             while (end > off)
             {
                 if (!Ignore((char)data[end - 1]))
-                {
                     break;
-                }
 
                 end--;
             }
@@ -114,10 +133,18 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
                 if ((b1 | b2) >= 0x80)
                     throw new IOException("invalid characters encountered in Hex data");
 
-                outStream.WriteByte((byte)((b1 << 4) | b2));
+                buf[bufOff++] = (byte)((b1 << 4) | b2);
+
+                if (bufOff == buf.Length)
+                {
+                    outStream.Write(buf, 0, bufOff);
+                    bufOff = 0;
+                }
 
                 outLen++;
             }
+
+            if (bufOff > 0) outStream.Write(buf, 0, bufOff);
 
             return outLen;
         }
@@ -132,17 +159,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
             string	data,
             Stream	outStream)
         {
-            byte    b1, b2;
-            int     length = 0;
-
-            int     end = data.Length;
+            byte b1, b2;
+            var  length = 0;
+            var  buf    = new byte[36];
+            var  bufOff = 0;
+            var  end    = data.Length;
 
             while (end > 0)
             {
                 if (!Ignore(data[end - 1]))
-                {
                     break;
-                }
 
                 end--;
             }
@@ -167,10 +193,18 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
                 if ((b1 | b2) >= 0x80)
                     throw new IOException("invalid characters encountered in Hex data");
 
-                outStream.WriteByte((byte)((b1 << 4) | b2));
+                buf[bufOff++] = (byte)((b1 << 4) | b2);
+
+                if (bufOff == buf.Length)
+                {
+                    outStream.Write(buf, 0, bufOff);
+                    bufOff = 0;
+                }
 
                 length++;
             }
+
+            if (bufOff > 0) outStream.Write(buf, 0, bufOff);
 
             return length;
         }

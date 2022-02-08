@@ -1,9 +1,9 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+	using System.IO;
+
 	public class DerSetGenerator
 		: DerGenerator
 	{
@@ -23,11 +23,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 		{
 		}
 
-		public override void AddObject(
-			Asn1Encodable obj)
+		public override void AddObject(Asn1Encodable obj)
 		{
-			new DerOutputStream(_bOut).WriteObject(obj);
+			obj.EncodeTo(this._bOut, Asn1Encodable.Der);
 		}
+
+		public override void AddObject(Asn1Object obj) { obj.EncodeTo(this._bOut, Asn1Encodable.Der); }
 
 		public override Stream GetRawOutputStream()
 		{

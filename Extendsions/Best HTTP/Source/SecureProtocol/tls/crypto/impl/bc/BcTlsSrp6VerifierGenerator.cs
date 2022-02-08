@@ -1,0 +1,19 @@
+#if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
+#pragma warning disable
+namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tls.Crypto.Impl.BC
+{
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Agreement.Srp;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+
+    internal sealed class BcTlsSrp6VerifierGenerator
+        : TlsSrp6VerifierGenerator
+    {
+        private readonly Srp6VerifierGenerator m_srp6VerifierGenerator;
+
+        internal BcTlsSrp6VerifierGenerator(Srp6VerifierGenerator srp6VerifierGenerator) { this.m_srp6VerifierGenerator = srp6VerifierGenerator; }
+
+        public BigInteger GenerateVerifier(byte[] salt, byte[] identity, byte[] password) { return this.m_srp6VerifierGenerator.GenerateVerifier(salt, identity, password); }
+    }
+}
+#pragma warning restore
+#endif

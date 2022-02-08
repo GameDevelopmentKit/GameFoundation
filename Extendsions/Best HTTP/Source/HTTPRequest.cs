@@ -712,7 +712,7 @@ namespace BestHTTP
         /// </summary>
         public void AddField(string fieldName, string value)
         {
-            AddField(fieldName, value, Encoding.UTF8);
+            this.AddField(fieldName, value, Encoding.UTF8);
         }
 
         /// <summary>

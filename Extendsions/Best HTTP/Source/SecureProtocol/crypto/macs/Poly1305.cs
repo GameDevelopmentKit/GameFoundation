@@ -1,13 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs
 {
+    using System;
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
 
     /// <summary>
     /// Poly1305 message authentication code, designed by D. J. Bernstein.
@@ -22,10 +20,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs
     /// by Andrew M (@floodyberry).
     /// </remarks>
     /// <seealso cref="BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators.Poly1305KeyGenerator"/>
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.NullChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.ArrayBoundsChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.DivideByZeroChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppEagerStaticClassConstructionAttribute]
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     public sealed class Poly1305 : IMac
     {
         private const int BlockSize = 16;
@@ -172,75 +170,26 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs
             BlockUpdate(singleByte, 0, 1);
         }
 
-        public unsafe void BlockUpdate(byte[] input, int inOff, int len)
-        {
-            fixed (byte* pinput = input, pcurrentBlock = currentBlock)
+        public void BlockUpdate(byte[] input, int inOff, int len)
             {
                 int copied = 0;
                 while (len > copied)
                 {
                     if (currentBlockOffset == BlockSize)
                     {
-                        if (currentBlockOffset < BlockSize)
-                        {
-                            pcurrentBlock[currentBlockOffset] = 1;
-                            for (int i = currentBlockOffset + 1; i < BlockSize; i++)
-                                pcurrentBlock[i] = 0;
-                        }
-
-
-                        ulong t0 = (uint)pcurrentBlock[0] | (uint)pcurrentBlock[1] << 8 | (uint)pcurrentBlock[2] << 16 | (uint)pcurrentBlock[3] << 24;
-                        ulong t1 = (uint)pcurrentBlock[4] | (uint)pcurrentBlock[5] << 8 | (uint)pcurrentBlock[6] << 16 | (uint)pcurrentBlock[7] << 24;
-                        ulong t2 = (uint)pcurrentBlock[8] | (uint)pcurrentBlock[9] << 8 | (uint)pcurrentBlock[10] << 16 | (uint)pcurrentBlock[11] << 24;
-                        ulong t3 = (uint)pcurrentBlock[12] | (uint)pcurrentBlock[13] << 8 | (uint)pcurrentBlock[14] << 16 | (uint)pcurrentBlock[15] << 24;
-
-                        h0 += (uint)(t0 & 0x3ffffffU);
-                        h1 += (uint)((((t1 << 32) | t0) >> 26) & 0x3ffffff);
-                        h2 += (uint)((((t2 << 32) | t1) >> 20) & 0x3ffffff);
-                        h3 += (uint)((((t3 << 32) | t2) >> 14) & 0x3ffffff);
-                        h4 += (uint)(t3 >> 8);
-
-                        if (currentBlockOffset == BlockSize)
-                        {
-                            h4 += (1 << 24);
-                        }
-
-                        // mul32x32_64(i1, i2) => (((ulong)h4) * s0)
-                        ulong tp0 = (((ulong)h0) * r0) + (((ulong)h1) * s4) + (((ulong)h2) * s3) + (((ulong)h3) * s2) + (((ulong)h4) * s1);
-                        ulong tp1 = (((ulong)h0) * r1) + (((ulong)h1) * r0) + (((ulong)h2) * s4) + (((ulong)h3) * s3) + (((ulong)h4) * s2);
-                        ulong tp2 = (((ulong)h0) * r2) + (((ulong)h1) * r1) + (((ulong)h2) * r0) + (((ulong)h3) * s4) + (((ulong)h4) * s3);
-                        ulong tp3 = (((ulong)h0) * r3) + (((ulong)h1) * r2) + (((ulong)h2) * r1) + (((ulong)h3) * r0) + (((ulong)h4) * s4);
-                        ulong tp4 = (((ulong)h0) * r4) + (((ulong)h1) * r3) + (((ulong)h2) * r2) + (((ulong)h3) * r1) + (((ulong)h4) * r0);
-
-                        h0 = (uint)tp0 & 0x3ffffff; tp1 += (tp0 >> 26);
-                        h1 = (uint)tp1 & 0x3ffffff; tp2 += (tp1 >> 26);
-                        h2 = (uint)tp2 & 0x3ffffff; tp3 += (tp2 >> 26);
-                        h3 = (uint)tp3 & 0x3ffffff; tp4 += (tp3 >> 26);
-                        h4 = (uint)tp4 & 0x3ffffff;
-                        h0 += (uint)(tp4 >> 26) * 5;
-                        h1 += (h0 >> 26); h0 &= 0x3ffffff;
-
+                        this.ProcessBlock();
                         currentBlockOffset = 0;
                     }
 
-                    int toCopy = System.Math.Min((len - copied), BlockSize - currentBlockOffset);
-                    //Array.Copy(input, copied + inOff, currentBlock, currentBlockOffset, toCopy);
-                    for (int i = 0; i < toCopy; i++)
-                        pcurrentBlock[currentBlockOffset + i] = input[copied + inOff + i];
-
+                    int toCopy = Math.Min((len - copied), BlockSize - currentBlockOffset);
+                    Array.Copy(input, copied + inOff, this.currentBlock, this.currentBlockOffset, toCopy);
                     copied += toCopy;
                     currentBlockOffset += toCopy;
                 }
             }
-        }
 
-        public int DoFinal(byte[] output, int outOff)
-        {
-            Check.DataLength(output, outOff, BlockSize, "Output buffer is too short.");
-
-            if (currentBlockOffset > 0)
+        private void ProcessBlock()
             {
-                // Process padded block
                 if (currentBlockOffset < BlockSize)
                 {
                     currentBlock[currentBlockOffset] = 1;
@@ -250,11 +199,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs
                     }
                 }
 
-
-                ulong t0 = (uint)currentBlock[0] | (uint)currentBlock[1] << 8 | (uint)currentBlock[2] << 16 | (uint)currentBlock[3] << 24;
-                ulong t1 = (uint)currentBlock[4] | (uint)currentBlock[5] << 8 | (uint)currentBlock[6] << 16 | (uint)currentBlock[7] << 24;
-                ulong t2 = (uint)currentBlock[8] | (uint)currentBlock[9] << 8 | (uint)currentBlock[10] << 16 | (uint)currentBlock[11] << 24;
-                ulong t3 = (uint)currentBlock[12] | (uint)currentBlock[13] << 8 | (uint)currentBlock[14] << 16 | (uint)currentBlock[15] << 24;
+                ulong t0 = Pack.LE_To_UInt32(this.currentBlock, 0);
+                ulong t1 = Pack.LE_To_UInt32(this.currentBlock, 4);
+                ulong t2 = Pack.LE_To_UInt32(this.currentBlock, 8);
+                ulong t3 = Pack.LE_To_UInt32(this.currentBlock, 12);
 
                 h0 += (uint)(t0 & 0x3ffffffU);
                 h1 += (uint)((((t1 << 32) | t0) >> 26) & 0x3ffffff);
@@ -267,12 +215,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs
                     h4 += (1 << 24);
                 }
 
-                // mul32x32_64(i1, i2) => (((ulong)h4) * s0)
-                ulong tp0 = (((ulong)h0) * r0) + (((ulong)h1) * s4) + (((ulong)h2) * s3) + (((ulong)h3) * s2) + (((ulong)h4) * s1);
-                ulong tp1 = (((ulong)h0) * r1) + (((ulong)h1) * r0) + (((ulong)h2) * s4) + (((ulong)h3) * s3) + (((ulong)h4) * s2);
-                ulong tp2 = (((ulong)h0) * r2) + (((ulong)h1) * r1) + (((ulong)h2) * r0) + (((ulong)h3) * s4) + (((ulong)h4) * s3);
-                ulong tp3 = (((ulong)h0) * r3) + (((ulong)h1) * r2) + (((ulong)h2) * r1) + (((ulong)h3) * r0) + (((ulong)h4) * s4);
-                ulong tp4 = (((ulong)h0) * r4) + (((ulong)h1) * r3) + (((ulong)h2) * r2) + (((ulong)h3) * r1) + (((ulong)h4) * r0);
+                var tp0 = mul32x32_64(this.h0, this.r0) + mul32x32_64(this.h1, this.s4) + mul32x32_64(this.h2, this.s3) + mul32x32_64(this.h3, this.s2) + mul32x32_64(this.h4, this.s1);
+                var tp1 = mul32x32_64(this.h0, this.r1) + mul32x32_64(this.h1, this.r0) + mul32x32_64(this.h2, this.s4) + mul32x32_64(this.h3, this.s3) + mul32x32_64(this.h4, this.s2);
+                var tp2 = mul32x32_64(this.h0, this.r2) + mul32x32_64(this.h1, this.r1) + mul32x32_64(this.h2, this.r0) + mul32x32_64(this.h3, this.s4) + mul32x32_64(this.h4, this.s3);
+                var tp3 = mul32x32_64(this.h0, this.r3) + mul32x32_64(this.h1, this.r2) + mul32x32_64(this.h2, this.r1) + mul32x32_64(this.h3, this.r0) + mul32x32_64(this.h4, this.s4);
+                var tp4 = mul32x32_64(this.h0, this.r4) + mul32x32_64(this.h1, this.r3) + mul32x32_64(this.h2, this.r2) + mul32x32_64(this.h3, this.r1) + mul32x32_64(this.h4, this.r0);
 
                 h0 = (uint)tp0 & 0x3ffffff; tp1 += (tp0 >> 26);
                 h1 = (uint)tp1 & 0x3ffffff; tp2 += (tp1 >> 26);
@@ -282,6 +229,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs
                 h0 += (uint)(tp4 >> 26) * 5;
                 h1 += (h0 >> 26); h0 &= 0x3ffffff;
             }
+
+        public int DoFinal(byte[] output, int outOff)
+        {
+            Check.DataLength(output, outOff, BlockSize, "Output buffer is too short.");
+
+            if (this.currentBlockOffset > 0)
+                // Process padded block
+                this.ProcessBlock();
 
             h1 += (h0 >> 26); h0 &= 0x3ffffff;
             h2 += (h1 >> 26); h1 &= 0x3ffffff;

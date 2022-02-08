@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Djb
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     internal class Curve25519FieldElement
         : AbstractFpFieldElement
     {
@@ -98,7 +97,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Djb
         {
             //return Multiply(b.Invert());
             uint[] z = Nat256.Create();
-            Mod.Invert(Curve25519Field.P, ((Curve25519FieldElement)b).x, z);
+            Curve25519Field.Inv(((Curve25519FieldElement)b).x, z);
             Curve25519Field.Multiply(z, x, z);
             return new Curve25519FieldElement(z);
         }
@@ -121,7 +120,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Djb
         {
             //return new Curve25519FieldElement(ToBigInteger().ModInverse(Q));
             uint[] z = Nat256.Create();
-            Mod.Invert(Curve25519Field.P, x, z);
+            Curve25519Field.Inv(this.x, z);
             return new Curve25519FieldElement(z);
         }
 

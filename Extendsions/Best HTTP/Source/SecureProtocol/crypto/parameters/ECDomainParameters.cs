@@ -1,13 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class ECDomainParameters
     {
         private readonly ECCurve     curve;
@@ -17,6 +17,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
         private readonly BigInteger h;
 
         private BigInteger hInv;
+
+        public ECDomainParameters(X9ECParameters x9)
+            : this(x9.Curve, x9.G, x9.N, x9.H, x9.GetSeed())
+        {
+        }
 
         public ECDomainParameters(
             ECCurve     curve,
@@ -85,7 +90,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
                 {
                     if (hInv == null)
                     {
-                        hInv = h.ModInverse(n);
+                        this.hInv = BigIntegers.ModOddInverseVar(this.n, this.h);
                     }
                     return hInv;
                 }

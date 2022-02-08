@@ -1,17 +1,15 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
      * GOST R 34.10-2001 Signature Algorithm
      */
@@ -147,7 +145,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
                 return false;
             }
 
-            BigInteger v = e.ModInverse(n);
+            var v = BigIntegers.ModOddInverseVar(n, e);
 
             BigInteger z1 = s.Multiply(v).Mod(n);
             BigInteger z2 = (n.Subtract(r)).Multiply(v).Mod(n);

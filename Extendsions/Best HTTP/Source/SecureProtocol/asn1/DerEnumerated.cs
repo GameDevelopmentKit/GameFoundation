@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class DerEnumerated
         : Asn1Object
     {
@@ -26,7 +25,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return (DerEnumerated)obj;
             }
 
-            throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj));
         }
 
         /**
@@ -95,6 +94,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             get { return new BigInteger(bytes); }
         }
 
+        public bool HasValue(int x)
+        {
+            return this.bytes.Length - this.start <= 4
+                   && DerInteger.IntValue(this.bytes, this.start, DerInteger.SignExtSigned) == x;
+        }
+
         public bool HasValue(BigInteger x)
         {
             return null != x
@@ -115,9 +120,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             }
         }
 
-        internal override void Encode(DerOutputStream derOut)
+        internal override int EncodedLength(bool withID)
         {
-            derOut.WriteEncoded(Asn1Tags.Enumerated, bytes);
+            return Asn1OutputStream.GetLengthOfEncodingDL(withID, this.bytes.Length);
+        }
+
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+        {
+            asn1Out.WriteEncodingDL(withID, Asn1Tags.Enumerated, this.bytes);
         }
 
         protected override bool Asn1Equals(Asn1Object asn1Object)
@@ -153,11 +163,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 cache[value] = possibleMatch = new DerEnumerated(enc);
             }
             return possibleMatch;
-        }
-
-        public override string ToString()
-        {
-            return this.Value.ToString();
         }
     }
 }

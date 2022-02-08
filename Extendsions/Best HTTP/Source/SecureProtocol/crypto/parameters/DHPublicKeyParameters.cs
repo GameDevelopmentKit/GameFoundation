@@ -1,12 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class DHPublicKeyParameters
 		: DHKeyParameters
     {
@@ -15,18 +16,33 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
             if (y == null)
                 throw new ArgumentNullException("y");
 
+            var p = dhParams.P;
+
             // TLS check
-            if (y.CompareTo(BigInteger.Two) < 0 || y.CompareTo(dhParams.P.Subtract(BigInteger.Two)) > 0)
+            if (y.CompareTo(BigInteger.Two) < 0 || y.CompareTo(p.Subtract(BigInteger.Two)) > 0)
                 throw new ArgumentException("invalid DH public key", "y");
 
-            // we can't validate without Q.
-            if (dhParams.Q != null
-                && !y.ModPow(dhParams.Q, dhParams.P).Equals(BigInteger.One))
+            var q = dhParams.Q;
+
+            // We can't validate without Q.
+            if (q == null)
+                return y;
+
+            if (p.TestBit(0)
+                && p.BitLength - 1 == q.BitLength
+                && p.ShiftRight(1).Equals(q))
             {
-                throw new ArgumentException("y value does not appear to be in correct group", "y");
+                // Safe prime case
+                if (1 == Legendre(y, p))
+                    return y;
+            }
+            else
+            {
+                if (BigInteger.One.Equals(y.ModPow(q, p)))
+                    return y;
             }
 
-            return y;
+            throw new ArgumentException("value does not appear to be in correct group", "y");
         }
 
         private readonly BigInteger y;
@@ -76,6 +92,73 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
 		public override int GetHashCode()
         {
             return y.GetHashCode() ^ base.GetHashCode();
+        }
+
+        private static int Legendre(BigInteger a, BigInteger b)
+        {
+            //int r = 0, bits = b.IntValue;
+
+            //for (;;)
+            //{
+            //    int lowestSetBit = a.GetLowestSetBit();
+            //    a = a.ShiftRight(lowestSetBit);
+            //    r ^= (bits ^ (bits >> 1)) & (lowestSetBit << 1);
+
+            //    int cmp = a.CompareTo(b);
+            //    if (cmp == 0)
+            //        break;
+
+            //    if (cmp < 0)
+            //    {
+            //        BigInteger t = a; a = b; b = t;
+
+            //        int oldBits = bits;
+            //        bits = b.IntValue;
+            //        r ^= oldBits & bits;
+            //    }
+
+            //    a = a.Subtract(b);
+            //}
+
+            //return BigInteger.One.Equals(b) ? (1 - (r & 2)) : 0;
+
+            var bitLength = b.BitLength;
+            var A         = Nat.FromBigInteger(bitLength, a);
+            var B         = Nat.FromBigInteger(bitLength, b);
+
+            var r = 0;
+
+            var len = B.Length;
+            for (;;)
+            {
+                while (A[0] == 0) Nat.ShiftDownWord(len, A, 0);
+
+                var shift = Integers.NumberOfTrailingZeros((int)A[0]);
+                if (shift > 0)
+                {
+                    Nat.ShiftDownBits(len, A, shift, 0);
+                    var bits = (int)B[0];
+                    r ^= (bits ^ (bits >> 1)) & (shift << 1);
+                }
+
+                var cmp = Nat.Compare(len, A, B);
+                if (cmp == 0)
+                    break;
+
+                if (cmp < 0)
+                {
+                    r ^= (int)(A[0] & B[0]);
+                    var t = A;
+                    A = B;
+                    B = t;
+                }
+
+                while (A[len - 1] == 0) len = len - 1;
+
+                Nat.Sub(len, A, B, A);
+            }
+
+            return Nat.IsOne(len, B) ? 1 - (r & 2) : 0;
         }
     }
 }

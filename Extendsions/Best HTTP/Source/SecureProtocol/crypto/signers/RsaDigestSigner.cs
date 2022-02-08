@@ -1,25 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 {
+    using System;
+    using System.Collections;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class RsaDigestSigner
         : ISigner
     {
@@ -28,7 +23,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
         private readonly IDigest digest;
         private bool forSigning;
 
-        private static readonly IDictionary oidMap = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        private static readonly IDictionary oidMap = Platform.CreateHashtable();
 
         /// <summary>
         /// Load oid table.
@@ -39,11 +34,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
             oidMap["RIPEMD160"] = TeleTrusTObjectIdentifiers.RipeMD160;
             oidMap["RIPEMD256"] = TeleTrusTObjectIdentifiers.RipeMD256;
 
-            oidMap["SHA-1"] = X509ObjectIdentifiers.IdSha1;
-            oidMap["SHA-224"] = NistObjectIdentifiers.IdSha224;
-            oidMap["SHA-256"] = NistObjectIdentifiers.IdSha256;
-            oidMap["SHA-384"] = NistObjectIdentifiers.IdSha384;
-            oidMap["SHA-512"] = NistObjectIdentifiers.IdSha512;
+            oidMap["SHA-1"]       = X509ObjectIdentifiers.IdSha1;
+            oidMap["SHA-224"]     = NistObjectIdentifiers.IdSha224;
+            oidMap["SHA-256"]     = NistObjectIdentifiers.IdSha256;
+            oidMap["SHA-384"]     = NistObjectIdentifiers.IdSha384;
+            oidMap["SHA-512"]     = NistObjectIdentifiers.IdSha512;
+            oidMap["SHA-512/224"] = NistObjectIdentifiers.IdSha512_224;
+            oidMap["SHA-512/256"] = NistObjectIdentifiers.IdSha512_256;
+            oidMap["SHA3-224"]    = NistObjectIdentifiers.IdSha3_224;
+            oidMap["SHA3-256"]    = NistObjectIdentifiers.IdSha3_256;
+            oidMap["SHA3-384"]    = NistObjectIdentifiers.IdSha3_384;
+            oidMap["SHA3-512"]    = NistObjectIdentifiers.IdSha3_512;
 
             oidMap["MD2"] = PkcsObjectIdentifiers.MD2;
             oidMap["MD4"] = PkcsObjectIdentifiers.MD4;

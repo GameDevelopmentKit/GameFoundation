@@ -139,7 +139,7 @@ namespace BestHTTP.SignalRCore.Encoders
         public BufferSegment EncodeMessage(Message message)
         {
             var memBuffer = BufferPool.Get(256, true);
-            var stream = new BufferPoolMemoryStream(memBuffer, 0, memBuffer.Length, true, true, false, true);
+            var stream    = new BufferPoolMemoryStream(memBuffer, 0, memBuffer.Length, true, true, false, true);
 
             // Write 5 bytes for placeholder for length prefix
             stream.WriteByte(0);
@@ -527,9 +527,7 @@ namespace BestHTTP.SignalRCore.Encoders
                         args[i] = reader.ReadValue(subscription.callbacks[0].ParamTypes[i]);
                 }
                 else
-                {
                     args = null;
-                }
 
                 reader.NextToken();
             }
@@ -676,8 +674,8 @@ namespace BestHTTP.SignalRCore.Encoders
                 }
 
                 var secondsSinceBclEpoch = dateTime.Ticks / TimeSpan.TicksPerSecond;
-                var seconds = secondsSinceBclEpoch - BclSecondsAtUnixEpoch;
-                var nanoseconds = (dateTime.Ticks % TimeSpan.TicksPerSecond) * NanosecondsPerTick;
+                var seconds              = secondsSinceBclEpoch - BclSecondsAtUnixEpoch;
+                var nanoseconds          = dateTime.Ticks % TimeSpan.TicksPerSecond * NanosecondsPerTick;
 
                 if ((seconds >> 34) == 0)
                 {

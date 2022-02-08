@@ -1,25 +1,25 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Extension;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 {
+	using System;
+	using System.Collections;
+	using System.IO;
+	using System.Text;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Extension;
+
 	/**
 	 * The following extensions are listed in RFC 2459 as relevant to CRLs
 	 *
@@ -33,16 +33,47 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 		: X509ExtensionBase
 		// TODO Add interface Crl?
 	{
+		private class CachedEncoding
+		{
+			private readonly CrlException exception;
+
+			internal CachedEncoding(byte[] encoding, CrlException exception)
+			{
+				this.Encoding  = encoding;
+				this.exception = exception;
+			}
+
+			internal byte[] Encoding { get; }
+
+			internal byte[] GetEncoded()
+			{
+				if (null != this.exception)
+					throw this.exception;
+
+				if (null == this.Encoding)
+					throw new CrlException();
+
+				return this.Encoding;
+			}
+		}
+
 		private readonly CertificateList c;
-		private readonly string sigAlgName;
-		private readonly byte[] sigAlgParams;
-		private readonly bool isIndirect;
+		private readonly string          sigAlgName;
+		private readonly byte[]          sigAlgParams;
+		private readonly bool            isIndirect;
+
+		private readonly object         cacheLock = new();
+		private          CachedEncoding cachedEncoding;
 
         private volatile bool hashValueSet;
         private volatile int hashValue;
 
-		public X509Crl(
-			CertificateList c)
+        public X509Crl(byte[] encoding)
+	        : this(CertificateList.GetInstance(encoding))
+        {
+        }
+
+        public X509Crl(CertificateList c)
 		{
 			this.c = c;
 
@@ -61,23 +92,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 			}
 		}
 
-		protected override X509Extensions GetX509Extensions()
+        public virtual CertificateList CertificateList => this.c;
+
+        protected override X509Extensions GetX509Extensions()
 		{
 			return c.Version >= 2
 				?	c.TbsCertList.Extensions
 				:	null;
-		}
-
-		public virtual byte[] GetEncoded()
-		{
-			try
-			{
-				return c.GetDerEncoded();
-			}
-			catch (Exception e)
-			{
-				throw new CrlException(e.ToString());
-			}
 		}
 
 		public virtual void Verify(
@@ -114,7 +135,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 
             streamCalculator.Stream.Write(b, 0, b.Length);
 
-            BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Dispose(streamCalculator.Stream);
+            Platform.Dispose(streamCalculator.Stream);
 
             if (!((IVerifier)streamCalculator.GetResult()).IsVerified(this.GetSignature()))
             {
@@ -228,6 +249,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 			return Arrays.Clone(sigAlgParams);
 		}
 
+		/// <summary>
+		///     Return the DER encoding of this CRL.
+		/// </summary>
+		/// <returns>A byte array containing the DER encoding of this CRL.</returns>
+		/// <exception cref="CrlException">If there is an error encoding the CRL.</exception>
+		public virtual byte[] GetEncoded() { return Arrays.Clone(this.GetCachedEncoding().GetEncoded()); }
+
 		public override bool Equals(object other)
 		{
             if (this == other)
@@ -242,23 +270,29 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
                 if (this.hashValue != that.hashValue)
                     return false;
             }
-            else if (!this.c.Signature.Equals(that.c.Signature))
+            else if (null == this.cachedEncoding || null == that.cachedEncoding)
             {
-                return false;
+	            var signature = this.c.Signature;
+	            if (null != signature && !signature.Equals(that.c.Signature))
+		            return false;
             }
 
-            return this.c.Equals(that.c);
+            var thisEncoding = this.GetCachedEncoding().Encoding;
+            var thatEncoding = that.GetCachedEncoding().Encoding;
 
-            // NB: May prefer this implementation of Equals if more than one CRL implementation in play
-			//return Arrays.AreEqual(this.GetEncoded(), that.GetEncoded());
+            return null != thisEncoding
+                   && null != thatEncoding
+                   && Arrays.AreEqual(thisEncoding, thatEncoding);
 		}
 
         public override int GetHashCode()
         {
             if (!hashValueSet)
             {
-                hashValue = this.c.GetHashCode();
-                hashValueSet = true;
+	            var thisEncoding = this.GetCachedEncoding().Encoding;
+
+	            this.hashValue = Arrays.GetHashCode(thisEncoding);
+                hashValueSet   = true;
             }
 
             return hashValue;
@@ -272,7 +306,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 		public override string ToString()
 		{
 			StringBuilder buf = new StringBuilder();
-			string nl = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.NewLine;
+			string nl = Platform.NewLine;
 
 			buf.Append("              Version: ").Append(this.Version).Append(nl);
 			buf.Append("             IssuerDN: ").Append(this.IssuerDN).Append(nl);
@@ -287,7 +321,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 
 			for (int i = 20; i < sig.Length; i += 20)
 			{
-				int count = System.Math.Min(20, sig.Length - i);
+				int count = Math.Min(20, sig.Length - i);
 				buf.Append("                       ");
 				buf.Append(Hex.ToHexString(sig, i, count)).Append(nl);
 			}
@@ -395,15 +429,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 
 			if (certs != null)
 			{
-//				BigInteger serial = ((X509Certificate)cert).SerialNumber;
 				BigInteger serial = cert.SerialNumber;
 
 				for (int i = 0; i < certs.Length; i++)
 				{
-					if (certs[i].UserCertificate.Value.Equals(serial))
-					{
+					if (certs[i].UserCertificate.HasValue(serial))
 						return true;
-					}
 				}
 			}
 
@@ -433,6 +464,35 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 				}
 
 				return isIndirect;
+			}
+		}
+
+		private CachedEncoding GetCachedEncoding()
+		{
+			lock (this.cacheLock)
+			{
+				if (null != this.cachedEncoding)
+					return this.cachedEncoding;
+			}
+
+			byte[]       encoding  = null;
+			CrlException exception = null;
+			try
+			{
+				encoding = this.c.GetEncoded(Asn1Encodable.Der);
+			}
+			catch (IOException e)
+			{
+				exception = new CrlException("Failed to DER-encode CRL", e);
+			}
+
+			var temp = new CachedEncoding(encoding, exception);
+
+			lock (this.cacheLock)
+			{
+				if (null == this.cachedEncoding) this.cachedEncoding = temp;
+
+				return this.cachedEncoding;
 			}
 		}
 	}

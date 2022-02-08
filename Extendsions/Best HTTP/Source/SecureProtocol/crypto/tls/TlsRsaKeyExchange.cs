@@ -1,19 +1,15 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.Collections;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
+
     /// <summary>(D)TLS and SSLv3 RSA key exchange.</summary>
     public class TlsRsaKeyExchange
         :   AbstractTlsKeyExchange
@@ -49,7 +45,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         public override void ProcessServerCertificate(Certificate serverCertificate)
         {
             if (serverCertificate.IsEmpty)
-                throw new TlsFatalAlert(AlertDescription.bad_certificate);
+                throw new TlsFatalAlert(AlertDescription.decode_error);
 
             X509CertificateStructure x509Cert = serverCertificate.GetCertificateAt(0);
 

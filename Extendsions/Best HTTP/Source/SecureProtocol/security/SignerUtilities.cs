@@ -1,30 +1,27 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Bsi;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Eac;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.EdEC;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.GM;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
 {
+    using System;
+    using System.Collections;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Bsi;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Eac;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.EdEC;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.GM;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /// <summary>
     ///  Signer Utility class contains methods that can not be specifically grouped into other classes.
     /// </summary>
@@ -34,8 +31,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
         {
         }
 
-        internal static readonly IDictionary algorithms = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-        internal static readonly IDictionary oids = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        internal static readonly IDictionary algorithms = Platform.CreateHashtable();
+        internal static readonly IDictionary oids = Platform.CreateHashtable();
 
         static SignerUtilities()
         {
@@ -54,61 +51,101 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             algorithms[PkcsObjectIdentifiers.MD5WithRsaEncryption.Id] = "MD5withRSA";
             algorithms[OiwObjectIdentifiers.MD5WithRsa.Id] = "MD5withRSA";
 
-            algorithms["SHA1WITHRSA"] = "SHA-1withRSA";
-            algorithms["SHA1WITHRSAENCRYPTION"] = "SHA-1withRSA";
-            algorithms["SHA-1WITHRSA"] = "SHA-1withRSA";
+            algorithms["SHA1WITHRSA"]                                  = "SHA-1withRSA";
+            algorithms["SHA-1WITHRSA"]                                 = "SHA-1withRSA";
+            algorithms["SHA1WITHRSAENCRYPTION"]                        = "SHA-1withRSA";
+            algorithms["SHA-1WITHRSAENCRYPTION"]                       = "SHA-1withRSA";
             algorithms[PkcsObjectIdentifiers.Sha1WithRsaEncryption.Id] = "SHA-1withRSA";
-            algorithms[OiwObjectIdentifiers.Sha1WithRsa.Id] = "SHA-1withRSA";
+            algorithms[OiwObjectIdentifiers.Sha1WithRsa.Id]            = "SHA-1withRSA";
 
-            algorithms["SHA224WITHRSA"] = "SHA-224withRSA";
-            algorithms["SHA224WITHRSAENCRYPTION"] = "SHA-224withRSA";
+            algorithms["SHA224WITHRSA"]                                  = "SHA-224withRSA";
+            algorithms["SHA-224WITHRSA"]                                 = "SHA-224withRSA";
+            algorithms["SHA224WITHRSAENCRYPTION"]                        = "SHA-224withRSA";
+            algorithms["SHA-224WITHRSAENCRYPTION"]                       = "SHA-224withRSA";
             algorithms[PkcsObjectIdentifiers.Sha224WithRsaEncryption.Id] = "SHA-224withRSA";
-            algorithms["SHA-224WITHRSA"] = "SHA-224withRSA";
 
-            algorithms["SHA256WITHRSA"] = "SHA-256withRSA";
-            algorithms["SHA256WITHRSAENCRYPTION"] = "SHA-256withRSA";
+            algorithms["SHA256WITHRSA"]                                  = "SHA-256withRSA";
+            algorithms["SHA-256WITHRSA"]                                 = "SHA-256withRSA";
+            algorithms["SHA256WITHRSAENCRYPTION"]                        = "SHA-256withRSA";
+            algorithms["SHA-256WITHRSAENCRYPTION"]                       = "SHA-256withRSA";
             algorithms[PkcsObjectIdentifiers.Sha256WithRsaEncryption.Id] = "SHA-256withRSA";
-            algorithms["SHA-256WITHRSA"] = "SHA-256withRSA";
 
-            algorithms["SHA384WITHRSA"] = "SHA-384withRSA";
-            algorithms["SHA384WITHRSAENCRYPTION"] = "SHA-384withRSA";
+            algorithms["SHA384WITHRSA"]                                  = "SHA-384withRSA";
+            algorithms["SHA-384WITHRSA"]                                 = "SHA-384withRSA";
+            algorithms["SHA384WITHRSAENCRYPTION"]                        = "SHA-384withRSA";
+            algorithms["SHA-384WITHRSAENCRYPTION"]                       = "SHA-384withRSA";
             algorithms[PkcsObjectIdentifiers.Sha384WithRsaEncryption.Id] = "SHA-384withRSA";
-            algorithms["SHA-384WITHRSA"] = "SHA-384withRSA";
 
-            algorithms["SHA512WITHRSA"] = "SHA-512withRSA";
-            algorithms["SHA512WITHRSAENCRYPTION"] = "SHA-512withRSA";
+            algorithms["SHA512WITHRSA"]                                  = "SHA-512withRSA";
+            algorithms["SHA-512WITHRSA"]                                 = "SHA-512withRSA";
+            algorithms["SHA512WITHRSAENCRYPTION"]                        = "SHA-512withRSA";
+            algorithms["SHA-512WITHRSAENCRYPTION"]                       = "SHA-512withRSA";
             algorithms[PkcsObjectIdentifiers.Sha512WithRsaEncryption.Id] = "SHA-512withRSA";
-            algorithms["SHA-512WITHRSA"] = "SHA-512withRSA";
+
+            algorithms["SHA512(224)WITHRSA"]                                 = "SHA-512(224)withRSA";
+            algorithms["SHA-512(224)WITHRSA"]                                = "SHA-512(224)withRSA";
+            algorithms["SHA512(224)WITHRSAENCRYPTION"]                       = "SHA-512(224)withRSA";
+            algorithms["SHA-512(224)WITHRSAENCRYPTION"]                      = "SHA-512(224)withRSA";
+            algorithms[PkcsObjectIdentifiers.Sha512_224WithRSAEncryption.Id] = "SHA-512(224)withRSA";
+
+            algorithms["SHA512(256)WITHRSA"]                                 = "SHA-512(256)withRSA";
+            algorithms["SHA-512(256)WITHRSA"]                                = "SHA-512(256)withRSA";
+            algorithms["SHA512(256)WITHRSAENCRYPTION"]                       = "SHA-512(256)withRSA";
+            algorithms["SHA-512(256)WITHRSAENCRYPTION"]                      = "SHA-512(256)withRSA";
+            algorithms[PkcsObjectIdentifiers.Sha512_256WithRSAEncryption.Id] = "SHA-512(256)withRSA";
+
+            algorithms["SHA3-224WITHRSA"]                                     = "SHA3-224withRSA";
+            algorithms["SHA3-224WITHRSAENCRYPTION"]                           = "SHA3-224withRSA";
+            algorithms[NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_224.Id] = "SHA3-224withRSA";
+            algorithms["SHA3-256WITHRSA"]                                     = "SHA3-256withRSA";
+            algorithms["SHA3-256WITHRSAENCRYPTION"]                           = "SHA3-256withRSA";
+            algorithms[NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_256.Id] = "SHA3-256withRSA";
+            algorithms["SHA3-384WITHRSA"]                                     = "SHA3-384withRSA";
+            algorithms["SHA3-384WITHRSAENCRYPTION"]                           = "SHA3-384withRSA";
+            algorithms[NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_384.Id] = "SHA3-384withRSA";
+            algorithms["SHA3-512WITHRSA"]                                     = "SHA3-512withRSA";
+            algorithms["SHA3-512WITHRSAENCRYPTION"]                           = "SHA3-512withRSA";
+            algorithms[NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_512.Id] = "SHA3-512withRSA";
 
             algorithms["PSSWITHRSA"] = "PSSwithRSA";
             algorithms["RSASSA-PSS"] = "PSSwithRSA";
             algorithms[PkcsObjectIdentifiers.IdRsassaPss.Id] = "PSSwithRSA";
             algorithms["RSAPSS"] = "PSSwithRSA";
 
-            algorithms["SHA1WITHRSAANDMGF1"] = "SHA-1withRSAandMGF1";
+            algorithms["SHA1WITHRSAANDMGF1"]  = "SHA-1withRSAandMGF1";
             algorithms["SHA-1WITHRSAANDMGF1"] = "SHA-1withRSAandMGF1";
-            algorithms["SHA1WITHRSA/PSS"] = "SHA-1withRSAandMGF1";
-            algorithms["SHA-1WITHRSA/PSS"] = "SHA-1withRSAandMGF1";
+            algorithms["SHA1WITHRSA/PSS"]     = "SHA-1withRSAandMGF1";
+            algorithms["SHA-1WITHRSA/PSS"]    = "SHA-1withRSAandMGF1";
+            algorithms["SHA1WITHRSASSA-PSS"]  = "SHA-1withRSAandMGF1";
+            algorithms["SHA-1WITHRSASSA-PSS"] = "SHA-1withRSAandMGF1";
 
-            algorithms["SHA224WITHRSAANDMGF1"] = "SHA-224withRSAandMGF1";
+            algorithms["SHA224WITHRSAANDMGF1"]  = "SHA-224withRSAandMGF1";
             algorithms["SHA-224WITHRSAANDMGF1"] = "SHA-224withRSAandMGF1";
-            algorithms["SHA224WITHRSA/PSS"] = "SHA-224withRSAandMGF1";
-            algorithms["SHA-224WITHRSA/PSS"] = "SHA-224withRSAandMGF1";
+            algorithms["SHA224WITHRSA/PSS"]     = "SHA-224withRSAandMGF1";
+            algorithms["SHA-224WITHRSA/PSS"]    = "SHA-224withRSAandMGF1";
+            algorithms["SHA224WITHRSASSA-PSS"]  = "SHA-224withRSAandMGF1";
+            algorithms["SHA-224WITHRSASSA-PSS"] = "SHA-224withRSAandMGF1";
 
-            algorithms["SHA256WITHRSAANDMGF1"] = "SHA-256withRSAandMGF1";
+            algorithms["SHA256WITHRSAANDMGF1"]  = "SHA-256withRSAandMGF1";
             algorithms["SHA-256WITHRSAANDMGF1"] = "SHA-256withRSAandMGF1";
-            algorithms["SHA256WITHRSA/PSS"] = "SHA-256withRSAandMGF1";
-            algorithms["SHA-256WITHRSA/PSS"] = "SHA-256withRSAandMGF1";
+            algorithms["SHA256WITHRSA/PSS"]     = "SHA-256withRSAandMGF1";
+            algorithms["SHA-256WITHRSA/PSS"]    = "SHA-256withRSAandMGF1";
+            algorithms["SHA256WITHRSASSA-PSS"]  = "SHA-256withRSAandMGF1";
+            algorithms["SHA-256WITHRSASSA-PSS"] = "SHA-256withRSAandMGF1";
 
-            algorithms["SHA384WITHRSAANDMGF1"] = "SHA-384withRSAandMGF1";
+            algorithms["SHA384WITHRSAANDMGF1"]  = "SHA-384withRSAandMGF1";
             algorithms["SHA-384WITHRSAANDMGF1"] = "SHA-384withRSAandMGF1";
-            algorithms["SHA384WITHRSA/PSS"] = "SHA-384withRSAandMGF1";
-            algorithms["SHA-384WITHRSA/PSS"] = "SHA-384withRSAandMGF1";
+            algorithms["SHA384WITHRSA/PSS"]     = "SHA-384withRSAandMGF1";
+            algorithms["SHA-384WITHRSA/PSS"]    = "SHA-384withRSAandMGF1";
+            algorithms["SHA384WITHRSASSA-PSS"]  = "SHA-384withRSAandMGF1";
+            algorithms["SHA-384WITHRSASSA-PSS"] = "SHA-384withRSAandMGF1";
 
-            algorithms["SHA512WITHRSAANDMGF1"] = "SHA-512withRSAandMGF1";
+            algorithms["SHA512WITHRSAANDMGF1"]  = "SHA-512withRSAandMGF1";
             algorithms["SHA-512WITHRSAANDMGF1"] = "SHA-512withRSAandMGF1";
-            algorithms["SHA512WITHRSA/PSS"] = "SHA-512withRSAandMGF1";
-            algorithms["SHA-512WITHRSA/PSS"] = "SHA-512withRSAandMGF1";
+            algorithms["SHA512WITHRSA/PSS"]     = "SHA-512withRSAandMGF1";
+            algorithms["SHA-512WITHRSA/PSS"]    = "SHA-512withRSAandMGF1";
+            algorithms["SHA512WITHRSASSA-PSS"]  = "SHA-512withRSAandMGF1";
+            algorithms["SHA-512WITHRSASSA-PSS"] = "SHA-512withRSAandMGF1";
 
             algorithms["RIPEMD128WITHRSA"] = "RIPEMD128withRSA";
             algorithms["RIPEMD128WITHRSAENCRYPTION"] = "RIPEMD128withRSA";
@@ -356,11 +393,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             oids["MD4withRSA"] = PkcsObjectIdentifiers.MD4WithRsaEncryption;
             oids["MD5withRSA"] = PkcsObjectIdentifiers.MD5WithRsaEncryption;
 
-            oids["SHA-1withRSA"] = PkcsObjectIdentifiers.Sha1WithRsaEncryption;
-            oids["SHA-224withRSA"] = PkcsObjectIdentifiers.Sha224WithRsaEncryption;
-            oids["SHA-256withRSA"] = PkcsObjectIdentifiers.Sha256WithRsaEncryption;
-            oids["SHA-384withRSA"] = PkcsObjectIdentifiers.Sha384WithRsaEncryption;
-            oids["SHA-512withRSA"] = PkcsObjectIdentifiers.Sha512WithRsaEncryption;
+            oids["SHA-1withRSA"]        = PkcsObjectIdentifiers.Sha1WithRsaEncryption;
+            oids["SHA-224withRSA"]      = PkcsObjectIdentifiers.Sha224WithRsaEncryption;
+            oids["SHA-256withRSA"]      = PkcsObjectIdentifiers.Sha256WithRsaEncryption;
+            oids["SHA-384withRSA"]      = PkcsObjectIdentifiers.Sha384WithRsaEncryption;
+            oids["SHA-512withRSA"]      = PkcsObjectIdentifiers.Sha512WithRsaEncryption;
+            oids["SHA-512(224)withRSA"] = PkcsObjectIdentifiers.Sha512_224WithRSAEncryption;
+            oids["SHA-512(256)withRSA"] = PkcsObjectIdentifiers.Sha512_256WithRSAEncryption;
+            oids["SHA3-224withRSA"]     = NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_224;
+            oids["SHA3-256withRSA"]     = NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_256;
+            oids["SHA3-384withRSA"]     = NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_384;
+            oids["SHA3-512withRSA"]     = NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_512;
 
             oids["PSSwithRSA"] = PkcsObjectIdentifiers.IdRsassaPss;
             oids["SHA-1withRSAandMGF1"] = PkcsObjectIdentifiers.IdRsassaPss;
@@ -417,7 +460,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             if (mechanism == null)
                 throw new ArgumentNullException("mechanism");
 
-            mechanism = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(mechanism);
+            mechanism = Platform.ToUpperInvariant(mechanism);
             string aliased = (string) algorithms[mechanism];
 
             if (aliased != null)
@@ -443,7 +486,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             if (algorithm == null)
                 throw new ArgumentNullException("algorithm");
 
-            algorithm = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithm);
+            algorithm = Platform.ToUpperInvariant(algorithm);
 
             string mechanism = (string) algorithms[algorithm];
 
@@ -457,7 +500,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
                 return GetPssX509Parameters("SHA-1");
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withRSAandMGF1"))
+            if (Platform.EndsWith(mechanism, "withRSAandMGF1"))
             {
                 string digestName = mechanism.Substring(0, mechanism.Length - "withRSAandMGF1".Length);
                 return GetPssX509Parameters(digestName);
@@ -493,14 +536,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             if (algorithm == null)
                 throw new ArgumentNullException("algorithm");
 
-            algorithm = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithm);
+            algorithm = Platform.ToUpperInvariant(algorithm);
 
             string mechanism = (string) algorithms[algorithm];
 
             if (mechanism == null)
                 mechanism = algorithm;
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.StartsWith(mechanism, "Ed"))
+            if (Platform.StartsWith(mechanism, "Ed"))
             {
                 if (mechanism.Equals("Ed25519"))
                 {
@@ -537,51 +580,51 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             {
                 // TODO The Sha1Digest here is a default. In JCE version, the actual digest
                 // to be used can be overridden by subsequent parameter settings.
-                return (new PssSigner(new RsaBlindedEngine(), new Sha1Digest()));
+                return new PssSigner(new RsaBlindedEngine(), new Sha1Digest());
             }
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withRSA"))
+            if (Platform.EndsWith(mechanism, "withRSA"))
             {
                 string digestName = mechanism.Substring(0, mechanism.LastIndexOf("with"));
                 IDigest digest = DigestUtilities.GetDigest(digestName);
                 return new RsaDigestSigner(digest);
             }
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withRSAandMGF1"))
+            if (Platform.EndsWith(mechanism, "withRSAandMGF1"))
             {
                 string digestName = mechanism.Substring(0, mechanism.LastIndexOf("with"));
                 IDigest digest = DigestUtilities.GetDigest(digestName);
                 return new PssSigner(new RsaBlindedEngine(), digest);
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withDSA"))
+            if (Platform.EndsWith(mechanism, "withDSA"))
             {
                 string digestName = mechanism.Substring(0, mechanism.LastIndexOf("with"));
                 IDigest digest = DigestUtilities.GetDigest(digestName);
                 return new DsaDigestSigner(new DsaSigner(), digest);
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withECDSA"))
+            if (Platform.EndsWith(mechanism, "withECDSA"))
             {
                 string digestName = mechanism.Substring(0, mechanism.LastIndexOf("with"));
                 IDigest digest = DigestUtilities.GetDigest(digestName);
                 return new DsaDigestSigner(new ECDsaSigner(), digest);
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withCVC-ECDSA")
-                || BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withPLAIN-ECDSA"))
+            if (Platform.EndsWith(mechanism, "withCVC-ECDSA")
+                || Platform.EndsWith(mechanism, "withPLAIN-ECDSA"))
             {
                 string digestName = mechanism.Substring(0, mechanism.LastIndexOf("with"));
                 IDigest digest = DigestUtilities.GetDigest(digestName);
                 return new DsaDigestSigner(new ECDsaSigner(), digest, PlainDsaEncoding.Instance);
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withECNR"))
+            if (Platform.EndsWith(mechanism, "withECNR"))
             {
                 string digestName = mechanism.Substring(0, mechanism.LastIndexOf("with"));
                 IDigest digest = DigestUtilities.GetDigest(digestName);
                 return new DsaDigestSigner(new ECNRSigner(), digest);
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "withSM2"))
+            if (Platform.EndsWith(mechanism, "withSM2"))
             {
                 string digestName = mechanism.Substring(0, mechanism.LastIndexOf("with"));
                 IDigest digest = DigestUtilities.GetDigest(digestName);
@@ -610,10 +653,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
                 return new Iso9796d2Signer(new RsaBlindedEngine(), new RipeMD160Digest(), true);
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(mechanism, "/X9.31"))
+            if (Platform.EndsWith(mechanism, "/X9.31"))
             {
                 string x931 = mechanism.Substring(0, mechanism.Length - "/X9.31".Length);
-                int withPos = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.IndexOf(x931, "WITH");
+                int withPos = Platform.IndexOf(x931, "WITH");
                 if (withPos > 0)
                 {
                     int endPos = withPos + "WITH".Length;
@@ -646,7 +689,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
 
         public static ISigner InitSigner(string algorithm, bool forSigning, AsymmetricKeyParameter privateKey, SecureRandom random)
         {
-            ISigner signer = SignerUtilities.GetSigner(algorithm);
+            ISigner signer = GetSigner(algorithm);
             signer.Init(forSigning, ParameterUtilities.WithRandom(privateKey, random));
             return signer;
         }

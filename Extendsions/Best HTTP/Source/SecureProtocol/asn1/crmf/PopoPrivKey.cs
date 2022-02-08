@@ -1,11 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Crmf
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+
     public class PopoPrivKey
         : Asn1Encodable, IAsn1Choice
     {
@@ -46,7 +45,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Crmf
 
         public static PopoPrivKey GetInstance(Asn1TaggedObject tagged, bool isExplicit)
         {
-            return new PopoPrivKey(Asn1TaggedObject.GetInstance(tagged.GetObject()));
+            return new PopoPrivKey(Asn1TaggedObject.GetInstance(tagged, true));
         }
 
         public PopoPrivKey(SubsequentMessage msg)

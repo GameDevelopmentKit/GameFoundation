@@ -1,8 +1,8 @@
 #if !BESTHTTP_DISABLE_WEBSOCKET
 
 #if !UNITY_WEBGL || UNITY_EDITOR
-    using BestHTTP.WebSocket.Frames;
-    using BestHTTP.WebSocket.Extensions;
+using BestHTTP.WebSocket.Frames;
+using BestHTTP.WebSocket.Extensions;
 #endif
 
 namespace BestHTTP.WebSocket
@@ -114,12 +114,12 @@ namespace BestHTTP.WebSocket
 #endif
 
         /// <summary>
-        ///     Logging context of this websocket instance.
+        /// Logging context of this websocket instance.
         /// </summary>
         public LoggingContext Context { get; private set; }
 
         /// <summary>
-        ///     The underlying, real implementation.
+        /// The underlying, real implementation.
         /// </summary>
         private WebSocketBaseImplementation implementation;
 
@@ -131,11 +131,13 @@ namespace BestHTTP.WebSocket
             :this(uri, string.Empty, string.Empty)
         {
 #if (!UNITY_WEBGL || UNITY_EDITOR) && !BESTHTTP_DISABLE_GZIP
-            this.Extensions = new IExtension[] { new PerMessageCompression(/*compression level: */           CompressionLevel.Default,
+            this.Extensions = new IExtension[]
+            {
+                new PerMessageCompression( /*compression level: */ CompressionLevel.Default,
                                                                            /*clientNoContextTakeover: */     false,
                                                                            /*serverNoContextTakeover: */     false,
-                                                                           /*clientMaxWindowBits: */         ZlibConstants.WindowBitsMax,
-                                                                           /*desiredServerMaxWindowBits: */  ZlibConstants.WindowBitsMax,
+                                                                           /*clientMaxWindowBits: */ ZlibConstants.WindowBitsMax,
+                                                                           /*desiredServerMaxWindowBits: */ ZlibConstants.WindowBitsMax,
                                                                            /*minDatalengthToCompress: */     PerMessageCompression.MinDataLengthToCompressDefault) };
 #endif
         }
@@ -145,11 +147,13 @@ namespace BestHTTP.WebSocket
             :this(uri, origin, protocol, null)
         {
 #if !BESTHTTP_DISABLE_GZIP
-            this.Extensions = new IExtension[] { new PerMessageCompression(/*compression level: */           CompressionLevel.Default,
+            this.Extensions = new IExtension[]
+            {
+                new PerMessageCompression( /*compression level: */ CompressionLevel.Default,
                                                                            /*clientNoContextTakeover: */     false,
                                                                            /*serverNoContextTakeover: */     false,
-                                                                           /*clientMaxWindowBits: */         ZlibConstants.WindowBitsMax,
-                                                                           /*desiredServerMaxWindowBits: */  ZlibConstants.WindowBitsMax,
+                                                                           /*clientMaxWindowBits: */ ZlibConstants.WindowBitsMax,
+                                                                           /*desiredServerMaxWindowBits: */ ZlibConstants.WindowBitsMax,
                                                                            /*minDatalengthToCompress: */     PerMessageCompression.MinDataLengthToCompressDefault) };
 #endif
         }
@@ -185,7 +189,7 @@ namespace BestHTTP.WebSocket
 #endif
                 )).Find(c => {
                     var httpConnection = c as HTTPConnection;
-                    var http2Handler = httpConnection?.requestHandler as HTTP2Handler;
+                    var http2Handler   = httpConnection?.requestHandler as HTTP2Handler;
 
                     return http2Handler != null && http2Handler.settings.RemoteSettings[HTTP2Settings.ENABLE_CONNECT_PROTOCOL] != 0;
                 });
@@ -195,7 +199,7 @@ namespace BestHTTP.WebSocket
                     HTTPManager.Logger.Information("WebSocket", "Connection with enabled Connect Protocol found!", this.Context);
 
                     var httpConnection = con as HTTPConnection;
-                    var http2Handler = httpConnection?.requestHandler as HTTP2Handler;
+                    var http2Handler   = httpConnection?.requestHandler as HTTP2Handler;
 
                     this.implementation = new OverHTTP2(this, http2Handler, uri, origin, protocol);
                 }

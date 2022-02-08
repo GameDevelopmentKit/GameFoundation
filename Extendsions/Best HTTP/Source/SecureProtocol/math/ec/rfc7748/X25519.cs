@@ -1,18 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 {
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public abstract class X25519
     {
         public const int PointSize = 32;
         public const int ScalarSize = 32;
+
+        private class F : X25519Field
+        {
+        }
 
         private const int C_A = 486662;
         private const int C_A24 = (C_A + 2)/4;
@@ -63,17 +65,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 
         private static void PointDouble(int[] x, int[] z)
         {
-            int[] A = X25519Field.Create();
-            int[] B = X25519Field.Create();
+            var a = X25519Field.Create();
+            var b = X25519Field.Create();
 
-            X25519Field.Apm(x, z, A, B);
-            X25519Field.Sqr(A, A);
-            X25519Field.Sqr(B, B);
-            X25519Field.Mul(A, B, x);
-            X25519Field.Sub(A, B, A);
-            X25519Field.Mul(A, C_A24, z);
-            X25519Field.Add(z, B, z);
-            X25519Field.Mul(z, A, z);
+            X25519Field.Apm(x, z, a, b);
+            X25519Field.Sqr(a, a);
+            X25519Field.Sqr(b, b);
+            X25519Field.Mul(a, b, x);
+            X25519Field.Sub(a, b, a);
+            X25519Field.Mul(a, C_A24, z);
+            X25519Field.Add(z, b, z);
+            X25519Field.Mul(z, a, z);
         }
 
         public static void Precompute()
@@ -85,14 +87,18 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
         {
             uint[] n = new uint[8];     DecodeScalar(k, kOff, n);
 
-            int[] x1 = X25519Field.Create();        X25519Field.Decode(u, uOff, x1);
-            int[] x2 = X25519Field.Create();        X25519Field.Copy(x1, 0, x2, 0);
-            int[] z2 = X25519Field.Create();        z2[0] = 1;
-            int[] x3 = X25519Field.Create();        x3[0] = 1;
-            int[] z3 = X25519Field.Create();
+            var x1 = X25519Field.Create();
+            X25519Field.Decode(u, uOff, x1);
+            var x2 = X25519Field.Create();
+            X25519Field.Copy(x1, 0, x2, 0);
+            var z2 = X25519Field.Create();
+            z2[0] = 1;
+            var x3 = X25519Field.Create();
+            x3[0] = 1;
+            var z3 = X25519Field.Create();
 
-            int[] t1 = X25519Field.Create();
-            int[] t2 = X25519Field.Create();
+            var t1 = X25519Field.Create();
+            var t2 = X25519Field.Create();
 
             Debug.Assert(n[7] >> 30 == 1U);
 
@@ -144,8 +150,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 
         public static void ScalarMultBase(byte[] k, int kOff, byte[] r, int rOff)
         {
-            int[] y = X25519Field.Create();
-            int[] z = X25519Field.Create();
+            var y = X25519Field.Create();
+            var z = X25519Field.Create();
 
             Ed25519.ScalarMultBaseYZ(k, kOff, y, z);
 

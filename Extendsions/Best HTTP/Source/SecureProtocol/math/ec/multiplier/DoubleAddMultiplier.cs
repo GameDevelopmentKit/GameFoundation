@@ -2,6 +2,7 @@
 #pragma warning disable
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier
 {
+
     public class DoubleAddMultiplier
         : AbstractECMultiplier
     {

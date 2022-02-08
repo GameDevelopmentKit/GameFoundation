@@ -1,10 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.IO;
+
     public abstract class AbstractTlsPeer
         :   TlsPeer
     {
@@ -24,6 +24,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         {
             this.mCloseHandle = closeHandle;
         }
+
+        public virtual int GetHandshakeTimeoutMillis() { return 0; }
 
         public virtual bool RequiresExtendedMasterSecret()
         {

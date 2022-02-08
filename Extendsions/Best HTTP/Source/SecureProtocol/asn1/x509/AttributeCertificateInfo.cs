@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 {
-    public class AttributeCertificateInfo
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	public class AttributeCertificateInfo
         : Asn1Encodable
     {
         internal readonly DerInteger			version;
@@ -39,26 +38,37 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
                 return new AttributeCertificateInfo((Asn1Sequence) obj);
             }
 
-            throw new ArgumentException("unknown object in factory: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+            throw new ArgumentException("unknown object in factory: " + Platform.GetTypeName(obj), "obj");
 		}
 
 		private AttributeCertificateInfo(
             Asn1Sequence seq)
         {
-			if (seq.Count < 7 || seq.Count > 9)
+	        if (seq.Count < 6 || seq.Count > 9)
 			{
 				throw new ArgumentException("Bad sequence size: " + seq.Count);
 			}
 
-			this.version = DerInteger.GetInstance(seq[0]);
-            this.holder = Holder.GetInstance(seq[1]);
-            this.issuer = AttCertIssuer.GetInstance(seq[2]);
-            this.signature = AlgorithmIdentifier.GetInstance(seq[3]);
-            this.serialNumber = DerInteger.GetInstance(seq[4]);
-            this.attrCertValidityPeriod = AttCertValidityPeriod.GetInstance(seq[5]);
-            this.attributes = Asn1Sequence.GetInstance(seq[6]);
+	        int start;
+	        if (seq[0] is DerInteger) // in version 1 certs version is DEFAULT  v1(0)
+	        {
+		        this.version = DerInteger.GetInstance(seq[0]);
+		        start        = 1;
+	        }
+	        else
+	        {
+		        this.version = new DerInteger(0);
+		        start        = 0;
+	        }
 
-			for (int i = 7; i < seq.Count; i++)
+	        this.holder                 = Holder.GetInstance(seq[start]);
+	        this.issuer                 = AttCertIssuer.GetInstance(seq[start + 1]);
+	        this.signature              = AlgorithmIdentifier.GetInstance(seq[start + 2]);
+	        this.serialNumber           = DerInteger.GetInstance(seq[start + 3]);
+	        this.attrCertValidityPeriod = AttCertValidityPeriod.GetInstance(seq[start + 4]);
+	        this.attributes             = Asn1Sequence.GetInstance(seq[start + 5]);
+
+	        for (var i = start + 6; i < seq.Count; i++)
             {
                 Asn1Encodable obj = (Asn1Encodable) seq[i];
 
@@ -138,9 +148,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
          */
         public override Asn1Object ToAsn1Object()
         {
-            Asn1EncodableVector v = new Asn1EncodableVector(version, holder, issuer, signature, serialNumber,
-                attrCertValidityPeriod, attributes);
+	        var v = new Asn1EncodableVector(9);
+
+	        if (!this.version.HasValue(0)) v.Add(this.version);
+
+	        v.Add(this.holder, this.issuer, this.signature, this.serialNumber, this.attrCertValidityPeriod, this.attributes);
             v.AddOptional(issuerUniqueID, extensions);
+
             return new DerSequence(v);
         }
     }

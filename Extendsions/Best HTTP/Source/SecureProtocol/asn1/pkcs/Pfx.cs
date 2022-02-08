@@ -1,12 +1,9 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 {
+    using System;
+
     /**
      * the infamous Pfx from Pkcs12
      */
@@ -25,12 +22,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
         private readonly ContentInfo contentInfo;
         private readonly MacData macData;
 
-
-		public Pfx(
-            Asn1Sequence seq)
+        private Pfx(Asn1Sequence seq)
         {
             DerInteger version = DerInteger.GetInstance(seq[0]);
-            if (version.IntValueExact != 3)
+            if (!version.HasValue(3))
                 throw new ArgumentException("wrong version for PFX PDU");
 
             this.contentInfo = ContentInfo.GetInstance(seq[1]);

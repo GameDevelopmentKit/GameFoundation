@@ -1,24 +1,21 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.Globalization;
-
-using BestHTTP.PlatformSupport.Memory;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Iana;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Misc;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Rosstandart;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Paddings;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
 {
+    using System.Collections;
+    using BestHTTP.PlatformSupport.Memory;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Iana;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Misc;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Rosstandart;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Paddings;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /// <remarks>
     ///  Utility class for creating HMac object from their names/Oids
     /// </remarks>
@@ -28,7 +25,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
         {
         }
 
-        private static readonly IDictionary algorithms = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        private static readonly IDictionary algorithms = Platform.CreateHashtable();
         //private static readonly IDictionary oids = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
 
         static MacUtilities()
@@ -120,7 +117,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
         public static IMac GetMac(
             string algorithm)
         {
-            string upper = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithm);
+            string upper = Platform.ToUpperInvariant(algorithm);
 
             string mechanism = (string) algorithms[upper];
 
@@ -129,15 +126,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
                 mechanism = upper;
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.StartsWith(mechanism, "PBEWITH"))
+            if (Platform.StartsWith(mechanism, "PBEWITH"))
             {
                 mechanism = mechanism.Substring("PBEWITH".Length);
             }
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.StartsWith(mechanism, "HMAC"))
+            if (Platform.StartsWith(mechanism, "HMAC"))
             {
                 string digestName;
-                if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.StartsWith(mechanism, "HMAC-") || BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.StartsWith(mechanism, "HMAC/"))
+                if (Platform.StartsWith(mechanism, "HMAC-") || Platform.StartsWith(mechanism, "HMAC/"))
                 {
                     digestName = mechanism.Substring(5);
                 }
@@ -245,6 +242,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             DerObjectIdentifier oid)
         {
             return (string) algorithms[oid.Id];
+        }
+
+        public static byte[] CalculateMac(string algorithm, ICipherParameters cp, byte[] input)
+        {
+            var mac = GetMac(algorithm);
+            mac.Init(cp);
+            mac.BlockUpdate(input, 0, input.Length);
+            return DoFinal(mac);
         }
 
         public static byte[] DoFinal(IMac mac)

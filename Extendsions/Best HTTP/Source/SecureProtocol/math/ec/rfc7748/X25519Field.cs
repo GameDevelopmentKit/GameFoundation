@@ -1,10 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 {
+    using System;
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+
     public abstract class X25519Field
     {
         public const int Size = 10;
@@ -13,6 +14,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
         private const int M25 = 0x01FFFFFF;
         private const int M26 = 0x03FFFFFF;
 
+        private static readonly uint[] P32 =
+        {
+            0xFFFFFFEDU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
+            0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x7FFFFFFFU
+        };
         private static readonly int[] RootNegOne = { 0x020EA0B0, 0x0386C9D2, 0x00478C4E, 0x0035697F, 0x005E8630,
             0x01FBD7A7, 0x0340264F, 0x01F0B2B4, 0x00027E0E, 0x00570649 };
 
@@ -45,6 +51,17 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
                 zm[i] = xi - yi;
             }
         }
+
+        public static int AreEqual(int[] x, int[] y)
+        {
+            var d                            = 0;
+            for (var i = 0; i < Size; ++i) d |= x[i] ^ y[i];
+            d |= d >> 16;
+            d &= 0xFFFF;
+            return (d - 1) >> 31;
+        }
+
+        public static bool AreEqualVar(int[] x, int[] y) { return 0 != AreEqual(x, y); }
 
         public static void Carry(int[] z)
         {
@@ -130,11 +147,30 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
             }
         }
 
+        [CLSCompliantAttribute(false)]
+        public static void Decode(uint[] x, int xOff, int[] z)
+        {
+            Decode128(x, xOff, z, 0);
+            Decode128(x, xOff + 4, z, 5);
+            z[9] &= M24;
+        }
+
         public static void Decode(byte[] x, int xOff, int[] z)
         {
             Decode128(x, xOff, z, 0);
             Decode128(x, xOff + 16, z, 5);
             z[9] &= M24;
+        }
+
+        private static void Decode128(uint[] x, int xOff, int[] z, int zOff)
+        {
+            uint t0 = x[xOff + 0], t1 = x[xOff + 1], t2 = x[xOff + 2], t3 = x[xOff + 3];
+
+            z[zOff + 0] = (int)t0 & M26;
+            z[zOff + 1] = (int)((t1 << 6) | (t0 >> 26)) & M26;
+            z[zOff + 2] = (int)((t2 << 12) | (t1 >> 20)) & M25;
+            z[zOff + 3] = (int)((t3 << 19) | (t2 >> 13)) & M26;
+            z[zOff + 4] = (int)(t3 >> 7);
         }
 
         private static void Decode128(byte[] bs, int off, int[] z, int zOff)
@@ -160,10 +196,31 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
             return n;
         }
 
+        [CLSCompliantAttribute(false)]
+        public static void Encode(int[] x, uint[] z, int zOff)
+        {
+            Encode128(x, 0, z, zOff);
+            Encode128(x, 5, z, zOff + 4);
+        }
+
         public static void Encode(int[] x, byte[] z, int zOff)
         {
             Encode128(x, 0, z, zOff);
             Encode128(x, 5, z, zOff + 16);
+        }
+
+        private static void Encode128(int[] x, int xOff, uint[] z, int zOff)
+        {
+            uint x0 = (uint)x[xOff + 0],
+                x1  = (uint)x[xOff + 1],
+                x2  = (uint)x[xOff + 2],
+                x3  = (uint)x[xOff + 3],
+                x4  = (uint)x[xOff + 4];
+
+            z[zOff + 0] = x0 | (x1 << 26);
+            z[zOff + 1] = (x1 >> 6) | (x2 << 20);
+            z[zOff + 2] = (x2 >> 12) | (x3 << 13);
+            z[zOff + 3] = (x3 >> 19) | (x4 << 7);
         }
 
         private static void Encode128(int[] x, int xOff, byte[] bs, int off)
@@ -187,15 +244,50 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 
         public static void Inv(int[] x, int[] z)
         {
-            // z = x^(p-2) = x^7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEB
-            // (250 1s) (1 0s) (1 1s) (1 0s) (2 1s)
-            // Addition chain: [1] [2] 3 5 10 15 25 50 75 125 [250]
+            //int[] x2 = Create();
+            //int[] t = Create();
+            //PowPm5d8(x, x2, t);
+            //Sqr(t, 3, t);
+            //Mul(t, x2, z);
 
-            int[] x2 = Create();
             int[] t = Create();
-            PowPm5d8(x, x2, t);
-            Sqr(t, 3, t);
-            Mul(t, x2, z);
+            var   u = new uint[8];
+
+            Copy(x, 0, t, 0);
+            Normalize(t);
+            Encode(t, u, 0);
+
+            Mod.ModOddInverse(P32, u, u);
+
+            Decode(u, 0, z);
+        }
+
+        public static void InvVar(int[] x, int[] z)
+        {
+            var t = Create();
+            var u = new uint[8];
+
+            Copy(x, 0, t, 0);
+            Normalize(t);
+            Encode(t, u, 0);
+
+            Mod.ModOddInverseVar(P32, u, u);
+
+            Decode(u, 0, z);
+        }
+
+        public static int IsOne(int[] x)
+        {
+            var d                            = x[0] ^ 1;
+            for (var i = 1; i < Size; ++i) d |= x[i];
+            d |= d >> 16;
+            d &= 0xFFFF;
+            return (d - 1) >> 31;
+        }
+
+        public static bool IsOneVar(int[] x)
+        {
+            return 0 != IsOne(x);
         }
 
         public static int IsZero(int[] x)

@@ -1,32 +1,27 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.IO;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 {
+	using System;
+	using System.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
+
 	internal class X509Utilities
 	{
         private static readonly Asn1Null derNull = DerNull.Instance;
 
-        private static readonly IDictionary algorithms = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-		private static readonly IDictionary exParams = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        private static readonly IDictionary algorithms = Platform.CreateHashtable();
+		private static readonly IDictionary exParams = Platform.CreateHashtable();
 		private static readonly ISet        noParams = new HashSet();
 
 		static X509Utilities()
@@ -36,15 +31,41 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 			algorithms.Add("MD5WITHRSAENCRYPTION", PkcsObjectIdentifiers.MD5WithRsaEncryption);
 			algorithms.Add("MD5WITHRSA", PkcsObjectIdentifiers.MD5WithRsaEncryption);
 			algorithms.Add("SHA1WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha1WithRsaEncryption);
+			algorithms.Add("SHA-1WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha1WithRsaEncryption);
 			algorithms.Add("SHA1WITHRSA", PkcsObjectIdentifiers.Sha1WithRsaEncryption);
+			algorithms.Add("SHA-1WITHRSA", PkcsObjectIdentifiers.Sha1WithRsaEncryption);
 			algorithms.Add("SHA224WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha224WithRsaEncryption);
+			algorithms.Add("SHA-224WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha224WithRsaEncryption);
 			algorithms.Add("SHA224WITHRSA", PkcsObjectIdentifiers.Sha224WithRsaEncryption);
+			algorithms.Add("SHA-224WITHRSA", PkcsObjectIdentifiers.Sha224WithRsaEncryption);
 			algorithms.Add("SHA256WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha256WithRsaEncryption);
+			algorithms.Add("SHA-256WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha256WithRsaEncryption);
 			algorithms.Add("SHA256WITHRSA", PkcsObjectIdentifiers.Sha256WithRsaEncryption);
+			algorithms.Add("SHA-256WITHRSA", PkcsObjectIdentifiers.Sha256WithRsaEncryption);
 			algorithms.Add("SHA384WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha384WithRsaEncryption);
+			algorithms.Add("SHA-384WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha384WithRsaEncryption);
 			algorithms.Add("SHA384WITHRSA", PkcsObjectIdentifiers.Sha384WithRsaEncryption);
+			algorithms.Add("SHA-384WITHRSA", PkcsObjectIdentifiers.Sha384WithRsaEncryption);
 			algorithms.Add("SHA512WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha512WithRsaEncryption);
+			algorithms.Add("SHA-512WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha512WithRsaEncryption);
 			algorithms.Add("SHA512WITHRSA", PkcsObjectIdentifiers.Sha512WithRsaEncryption);
+			algorithms.Add("SHA-512WITHRSA", PkcsObjectIdentifiers.Sha512WithRsaEncryption);
+			algorithms.Add("SHA512(224)WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha512_224WithRSAEncryption);
+			algorithms.Add("SHA-512(224)WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha512_224WithRSAEncryption);
+			algorithms.Add("SHA512(224)WITHRSA", PkcsObjectIdentifiers.Sha512_224WithRSAEncryption);
+			algorithms.Add("SHA-512(224)WITHRSA", PkcsObjectIdentifiers.Sha512_224WithRSAEncryption);
+			algorithms.Add("SHA512(256)WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha512_256WithRSAEncryption);
+			algorithms.Add("SHA-512(256)WITHRSAENCRYPTION", PkcsObjectIdentifiers.Sha512_256WithRSAEncryption);
+			algorithms.Add("SHA512(256)WITHRSA", PkcsObjectIdentifiers.Sha512_256WithRSAEncryption);
+			algorithms.Add("SHA-512(256)WITHRSA", PkcsObjectIdentifiers.Sha512_256WithRSAEncryption);
+			algorithms.Add("SHA3-224WITHRSAENCRYPTION", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_224);
+			algorithms.Add("SHA3-256WITHRSAENCRYPTION", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_256);
+			algorithms.Add("SHA3-384WITHRSAENCRYPTION", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_384);
+			algorithms.Add("SHA3-512WITHRSAENCRYPTION", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_512);
+			algorithms.Add("SHA3-224WITHRSA", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_224);
+			algorithms.Add("SHA3-256WITHRSA", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_256);
+			algorithms.Add("SHA3-384WITHRSA", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_384);
+			algorithms.Add("SHA3-512WITHRSA", NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_512);
 			algorithms.Add("SHA1WITHRSAANDMGF1", PkcsObjectIdentifiers.IdRsassaPss);
 			algorithms.Add("SHA224WITHRSAANDMGF1", PkcsObjectIdentifiers.IdRsassaPss);
 			algorithms.Add("SHA256WITHRSAANDMGF1", PkcsObjectIdentifiers.IdRsassaPss);
@@ -99,19 +120,19 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 			//
 			// explicit params
 			//
-			AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OiwObjectIdentifiers.IdSha1, DerNull.Instance);
+			var sha1AlgId = new AlgorithmIdentifier(OiwObjectIdentifiers.IdSha1, DerNull.Instance);
 			exParams.Add("SHA1WITHRSAANDMGF1", CreatePssParams(sha1AlgId, 20));
 
-			AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha224, DerNull.Instance);
+			var sha224AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha224, DerNull.Instance);
 			exParams.Add("SHA224WITHRSAANDMGF1", CreatePssParams(sha224AlgId, 28));
 
-			AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha256, DerNull.Instance);
+			var sha256AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha256, DerNull.Instance);
 			exParams.Add("SHA256WITHRSAANDMGF1", CreatePssParams(sha256AlgId, 32));
 
-			AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha384, DerNull.Instance);
+			var sha384AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha384, DerNull.Instance);
 			exParams.Add("SHA384WITHRSAANDMGF1", CreatePssParams(sha384AlgId, 48));
 
-			AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha512, DerNull.Instance);
+			var sha512AlgId = new AlgorithmIdentifier(NistObjectIdentifiers.IdSha512, DerNull.Instance);
 			exParams.Add("SHA512WITHRSAANDMGF1", CreatePssParams(sha512AlgId, 64));
 		}
 
@@ -122,67 +143,48 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
         private static string GetDigestAlgName(
             DerObjectIdentifier digestAlgOID)
         {
-            if (PkcsObjectIdentifiers.MD5.Equals(digestAlgOID))
-            {
-                return "MD5";
-            }
-            else if (OiwObjectIdentifiers.IdSha1.Equals(digestAlgOID))
-            {
-                return "SHA1";
-            }
-            else if (NistObjectIdentifiers.IdSha224.Equals(digestAlgOID))
-            {
-                return "SHA224";
-            }
-            else if (NistObjectIdentifiers.IdSha256.Equals(digestAlgOID))
-            {
-                return "SHA256";
-            }
-            else if (NistObjectIdentifiers.IdSha384.Equals(digestAlgOID))
-            {
-                return "SHA384";
-            }
-            else if (NistObjectIdentifiers.IdSha512.Equals(digestAlgOID))
-            {
-                return "SHA512";
-            }
-            else if (TeleTrusTObjectIdentifiers.RipeMD128.Equals(digestAlgOID))
-            {
-                return "RIPEMD128";
-            }
-            else if (TeleTrusTObjectIdentifiers.RipeMD160.Equals(digestAlgOID))
-            {
-                return "RIPEMD160";
-            }
-            else if (TeleTrusTObjectIdentifiers.RipeMD256.Equals(digestAlgOID))
-            {
-                return "RIPEMD256";
-            }
-            else if (CryptoProObjectIdentifiers.GostR3411.Equals(digestAlgOID))
-            {
-                return "GOST3411";
-            }
-            else
-            {
-                return digestAlgOID.Id;
-            }
+	        if (PkcsObjectIdentifiers.MD5.Equals(digestAlgOID)) return "MD5";
+
+	        if (OiwObjectIdentifiers.IdSha1.Equals(digestAlgOID)) return "SHA1";
+
+	        if (NistObjectIdentifiers.IdSha224.Equals(digestAlgOID)) return "SHA224";
+
+	        if (NistObjectIdentifiers.IdSha256.Equals(digestAlgOID)) return "SHA256";
+
+	        if (NistObjectIdentifiers.IdSha384.Equals(digestAlgOID)) return "SHA384";
+
+	        if (NistObjectIdentifiers.IdSha512.Equals(digestAlgOID))
+		        return "SHA512";
+	        if (NistObjectIdentifiers.IdSha512_224.Equals(digestAlgOID))
+		        return "SHA512(224)";
+	        if (NistObjectIdentifiers.IdSha512_256.Equals(digestAlgOID))
+		        return "SHA512(256)";
+	        if (TeleTrusTObjectIdentifiers.RipeMD128.Equals(digestAlgOID))
+		        return "RIPEMD128";
+	        if (TeleTrusTObjectIdentifiers.RipeMD160.Equals(digestAlgOID))
+		        return "RIPEMD160";
+	        if (TeleTrusTObjectIdentifiers.RipeMD256.Equals(digestAlgOID))
+		        return "RIPEMD256";
+	        if (CryptoProObjectIdentifiers.GostR3411.Equals(digestAlgOID))
+		        return "GOST3411";
+	        return digestAlgOID.Id;
         }
 
         internal static string GetSignatureName(AlgorithmIdentifier sigAlgId)
         {
-            Asn1Encodable parameters = sigAlgId.Parameters;
+            var parameters = sigAlgId.Parameters;
 
             if (parameters != null && !derNull.Equals(parameters))
             {
                 if (sigAlgId.Algorithm.Equals(PkcsObjectIdentifiers.IdRsassaPss))
                 {
-                    RsassaPssParameters rsaParams = RsassaPssParameters.GetInstance(parameters);
+                    var rsaParams = RsassaPssParameters.GetInstance(parameters);
 
                     return GetDigestAlgName(rsaParams.HashAlgorithm.Algorithm) + "withRSAandMGF1";
                 }
                 if (sigAlgId.Algorithm.Equals(X9ObjectIdentifiers.ECDsaWithSha2))
                 {
-                    Asn1Sequence ecDsaParams = Asn1Sequence.GetInstance(parameters);
+                    var ecDsaParams = Asn1Sequence.GetInstance(parameters);
 
                     return GetDigestAlgName((DerObjectIdentifier)ecDsaParams[0]) + "withECDSA";
                 }
@@ -205,12 +207,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 		internal static DerObjectIdentifier GetAlgorithmOid(
 			string algorithmName)
 		{
-			algorithmName = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithmName);
+			algorithmName = Platform.ToUpperInvariant(algorithmName);
 
-			if (algorithms.Contains(algorithmName))
-			{
-				return (DerObjectIdentifier) algorithms[algorithmName];
-			}
+			if (algorithms.Contains(algorithmName)) return (DerObjectIdentifier) algorithms[algorithmName];
 
 			return new DerObjectIdentifier(algorithmName);
 		}
@@ -219,17 +218,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 			DerObjectIdentifier sigOid,
 			string				algorithmName)
 		{
-			if (noParams.Contains(sigOid))
-			{
-				return new AlgorithmIdentifier(sigOid);
-			}
+			if (noParams.Contains(sigOid)) return new AlgorithmIdentifier(sigOid);
 
-			algorithmName = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithmName);
+			algorithmName = Platform.ToUpperInvariant(algorithmName);
 
-			if (exParams.Contains(algorithmName))
-			{
-				return new AlgorithmIdentifier(sigOid, (Asn1Encodable) exParams[algorithmName]);
-			}
+			if (exParams.Contains(algorithmName)) return new AlgorithmIdentifier(sigOid, (Asn1Encodable) exParams[algorithmName]);
 
 			return new AlgorithmIdentifier(sigOid, DerNull.Instance);
 		}
@@ -279,7 +272,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
             if (!privateKey.IsPrivate)
                 throw new ArgumentException("Key for signing must be private", "privateKey");
 
-			DerObjectIdentifier sigOid = X509Utilities.GetAlgorithmOid(algorithm);
+			var sigOid = X509Utilities.GetAlgorithmOid(algorithm);
 
             this.algorithm = algorithm;
             this.privateKey = privateKey;
@@ -287,14 +280,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 			this.algID = X509Utilities.GetSigAlgID(sigOid, algorithm);
 		}
 
-		public Object AlgorithmDetails
-		{
-			get { return this.algID; }
-		}
+		public object AlgorithmDetails => this.algID;
 
-        public IStreamCalculator CreateCalculator()
+		public IStreamCalculator CreateCalculator()
         {
-            ISigner signer = SignerUtilities.InitSigner(algorithm, true, privateKey, random);
+            var signer = SignerUtilities.InitSigner(this.algorithm, true, this.privateKey, this.random);
 
             return new DefaultSignatureCalculator(signer);
         }
@@ -302,11 +292,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
         /// <summary>
         /// Allows enumeration of the signature names supported by the verifier provider.
         /// </summary>
-        public static IEnumerable SignatureAlgNames
-        {
-            get { return X509Utilities.GetAlgNames(); }
-        }
-    }
+        public static IEnumerable SignatureAlgNames => X509Utilities.GetAlgNames();
+	}
 
     /// <summary>
     /// Verifier class for signature verification in ASN.1 based profiles that use an AlgorithmIdentifier to preserve
@@ -332,7 +319,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
             if (publicKey.IsPrivate)
                 throw new ArgumentException("Key for verifying must be public", "publicKey");
 
-			DerObjectIdentifier sigOid = X509Utilities.GetAlgorithmOid(algorithm);
+			var sigOid = X509Utilities.GetAlgorithmOid(algorithm);
 
             this.publicKey = publicKey;
 			this.algID = X509Utilities.GetSigAlgID(sigOid, algorithm);
@@ -344,15 +331,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 			this.algID = algorithm;
 		}
 
-		public Object AlgorithmDetails
-		{
-			get { return this.algID; }
-		}
+		public object AlgorithmDetails => this.algID;
 
-        public IStreamCalculator CreateCalculator()
+		public IStreamCalculator CreateCalculator()
         {       
            
-            ISigner verifier = SignerUtilities.InitSigner(X509Utilities.GetSignatureName(algID), false, publicKey, null);
+            var verifier = SignerUtilities.InitSigner(X509Utilities.GetSignatureName(this.algID), false, this.publicKey, null);
 
             return new DefaultVerifierCalculator(verifier);
         }
@@ -374,18 +358,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators
 			this.publicKey = publicKey;
 		}
 
-		public IVerifierFactory CreateVerifierFactory(Object algorithmDetails)
+		public IVerifierFactory CreateVerifierFactory(object algorithmDetails)
 		{
-            return new Asn1VerifierFactory((AlgorithmIdentifier)algorithmDetails, publicKey);
+            return new Asn1VerifierFactory((AlgorithmIdentifier)algorithmDetails, this.publicKey);
 		}
 
 		/// <summary>
 		/// Allows enumeration of the signature names supported by the verifier provider.
 		/// </summary>
-		public IEnumerable SignatureAlgNames
-		{
-			get { return X509Utilities.GetAlgNames(); }
-		}
+		public IEnumerable SignatureAlgNames => X509Utilities.GetAlgNames();
 	}
 }
 

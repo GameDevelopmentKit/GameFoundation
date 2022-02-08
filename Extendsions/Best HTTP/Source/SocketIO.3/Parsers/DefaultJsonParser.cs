@@ -229,7 +229,7 @@ namespace BestHTTP.SocketIO3.Parsers
                     eventName = IncomingPacket.GenerateAcknowledgementNameFromId(packet.Id);
                     subscription = socket.GetSubscription(eventName);
 
-                    args = ReadParameters(socket, subscription, JsonMapper.ToObject<List<object>>(payload), 0);
+                    args = this.ReadParameters(socket, subscription, JsonMapper.ToObject<List<object>>(payload), 0);
                     
                     break;
 
@@ -371,7 +371,7 @@ namespace BestHTTP.SocketIO3.Parsers
                     else if (type == typeof(SocketManager))
                         args[i] = socket.Manager;
                     else {
-                        JsonReader jr = new JsonReader(reader);
+                        var jr = new JsonReader(reader);
                         args[i] = JsonMapper.ToObject(desc.ParamTypes[i], jr);
                         reader.Read();
                     }
@@ -484,7 +484,7 @@ namespace BestHTTP.SocketIO3.Parsers
                     {
                         if (nspAdded) builder.Append(',');
 
-                        builder.Append(JsonMapper.ToJson(args[0]));
+                        this.builder.Append(JsonMapper.ToJson(args[0]));
                     }
                     break;
 
@@ -498,7 +498,7 @@ namespace BestHTTP.SocketIO3.Parsers
                     {
                         if (nspAdded) builder.Append(',');
 
-                        builder.Append(JsonMapper.ToJson(args[0]));
+                        this.builder.Append(JsonMapper.ToJson(args[0]));
                     }
                     break;
 

@@ -1,15 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 {
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+
     internal interface ISignerInfoGenerator
     {
         SignerInfo Generate(DerObjectIdentifier contentType, AlgorithmIdentifier digestAlgorithm,
@@ -60,6 +58,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
         {
             this.certificate = certificate;
         }
+
+        public SignerInfoGeneratorBuilder NewBuilder()
+        {
+            var builder = new SignerInfoGeneratorBuilder();
+            builder.WithSignedAttributeGenerator(this.signedGen);
+            builder.WithUnsignedAttributeGenerator(this.unsignedGen);
+            builder.SetDirectSignature(this.isDirectSignature);
+            return builder;
+        }
+
     }
 
     public class SignerInfoGeneratorBuilder
@@ -71,6 +79,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
         public SignerInfoGeneratorBuilder()
         {
         }
+    
 
         /**
          * If the passed in flag is true, the signer signature will be based on the data, not

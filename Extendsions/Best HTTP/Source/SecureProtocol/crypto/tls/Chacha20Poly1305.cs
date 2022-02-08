@@ -1,26 +1,25 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.PlatformSupport.Memory;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.IO;
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.PlatformSupport.Memory;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Macs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
      * draft-ietf-tls-chacha20-poly1305-04
      */
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.NullChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.ArrayBoundsChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.DivideByZeroChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppEagerStaticClassConstructionAttribute]
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     public sealed class Chacha20Poly1305
         :   TlsCipher
     {
@@ -165,7 +164,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
         protected /*virtual */BufferSegment CalculateRecordMac(KeyParameter macKey, BufferSegment additionalData, byte[] buf, int off, int len)
         {
-            Poly1305 mac = new Poly1305();
+            IMac mac = new Poly1305();
             mac.Init(macKey);
 
             UpdateRecordMacText(mac, additionalData);
@@ -176,13 +175,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             return MacUtilities.DoFinalOptimized(mac);
         }
 
-        protected /*virtual */void UpdateRecordMacLength(Poly1305 mac, int len)
+        protected /*virtual */ void UpdateRecordMacLength(IMac mac, int len)
         {
             byte[] longLen = Pack.UInt64_To_LE((ulong)len);
             mac.BlockUpdate(longLen, 0, longLen.Length);
         }
 
-        protected /*virtual */void UpdateRecordMacText(Poly1305 mac, BufferSegment buf)
+        protected /*virtual */ void UpdateRecordMacText(IMac mac, BufferSegment buf)
         {
             mac.BlockUpdate(buf.Data, buf.Offset, buf.Count);
 

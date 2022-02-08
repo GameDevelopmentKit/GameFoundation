@@ -1,7 +1,5 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
 {
 	/**
@@ -20,19 +18,21 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
 	*/
 	public class AuthEnvelopedDataParser
 	{
-		private Asn1SequenceParser	seq;
-		private DerInteger			version;
-		private IAsn1Convertible	nextObject;
-		private bool				originatorInfoCalled;
+		private Asn1SequenceParser seq;
+		private DerInteger         version;
+		private IAsn1Convertible   nextObject;
+		private bool               originatorInfoCalled;
+		private bool               isData;
 
 		public AuthEnvelopedDataParser(
 			Asn1SequenceParser	seq)
 		{
 			this.seq = seq;
 
-			// TODO
 			// "It MUST be set to 0."
 			this.version = (DerInteger)seq.ReadObject();
+			if (!this.version.HasValue(0))
+				throw new Asn1ParsingException("AuthEnvelopedData version number must be 0");
 		}
 
 		public DerInteger Version
@@ -87,7 +87,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
 			{
 				Asn1SequenceParser o = (Asn1SequenceParser) nextObject;
 				nextObject = null;
-				return new EncryptedContentInfoParser(o);
+				var encryptedContentInfoParser = new EncryptedContentInfoParser(o);
+				this.isData = CmsObjectIdentifiers.Data.Equals(encryptedContentInfoParser.ContentType);
+				return encryptedContentInfoParser;
 			}
 
 			return null;
@@ -107,9 +109,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
 				return (Asn1SetParser)((Asn1TaggedObjectParser)o).GetObjectParser(Asn1Tags.Set, false);
 			}
 
-			// TODO
 			// "The authAttrs MUST be present if the content type carried in
 			// EncryptedContentInfo is not id-data."
+			if (!this.isData)
+				throw new Asn1ParsingException("authAttrs must be present with non-data content");
 
 			return null;
 		}

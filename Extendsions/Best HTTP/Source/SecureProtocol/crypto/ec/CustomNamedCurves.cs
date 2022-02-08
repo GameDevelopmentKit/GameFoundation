@@ -43,11 +43,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.EC
             return c.Configure().SetEndomorphism(new GlvTypeBEndomorphism(c, p)).Create();
         }
 
-        private static BigInteger FromHex(string hex)
-        {
-            return new BigInteger(1, Hex.DecodeStrict(hex));
-        }
-
         /*
          * curve25519
          */

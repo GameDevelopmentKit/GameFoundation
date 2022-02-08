@@ -1,15 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 {
+    using System;
+    using System.Collections;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
+
     /**
      *  RFC 5958
      *
@@ -152,6 +150,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
                 }
             }
         }
+
+        public virtual DerInteger Version => this.version;
 
         public virtual Asn1Set Attributes
         {

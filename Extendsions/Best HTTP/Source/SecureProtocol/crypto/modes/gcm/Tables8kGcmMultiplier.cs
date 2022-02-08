@@ -1,27 +1,26 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm
 {
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.NullChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.ArrayBoundsChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppSetOption(BestHTTP.PlatformSupport.IL2CPP.Option.DivideByZeroChecks, false)]
-    [BestHTTP.PlatformSupport.IL2CPP.Il2CppEagerStaticClassConstructionAttribute]
+    using BestHTTP.PlatformSupport.IL2CPP;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     public sealed class Tables8kGcmMultiplier
         : IGcmMultiplier
     {
-        private byte[] H;
-        private uint[][][] M;
+        private byte[]    H;
+        private ulong[][] T;
 
         public void Init(byte[] H)
         {
-            if (M == null)
+            if (this.T == null)
             {
-                M = new uint[32][][];
+                this.T = new ulong[32][];
             }
             else if (Arrays.AreEqual(this.H, H))
             {
@@ -30,104 +29,59 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm
 
             this.H = Arrays.Clone(H);
 
-            M[0] = new uint[16][];
-            M[1] = new uint[16][];
-            M[0][0] = new uint[4];
-            M[1][0] = new uint[4];
-            M[1][8] = GcmUtilities.AsUints(H);
-
-            for (int j = 4; j >= 1; j >>= 1)
+            for (var i = 0; i < 32; ++i)
             {
-                uint[] tmp = (uint[])M[1][j + j].Clone();
-                GcmUtilities.MultiplyP(tmp);
-                M[1][j] = tmp;
+                var t = this.T[i] = new ulong[32];
+
+                // t[0] = 0
+
+                if (i == 0)
+            {
+                // t[1] = H.p^3
+                GcmUtilities.AsUlongs(this.H, t, 2);
+                GcmUtilities.MultiplyP3(t, 2, t, 2);
             }
-
-            {
-                uint[] tmp = (uint[])M[1][1].Clone();
-                GcmUtilities.MultiplyP(tmp);
-                M[0][8] = tmp;
-            }
-
-            for (int j = 4; j >= 1; j >>= 1)
-            {
-                uint[] tmp = (uint[])M[0][j + j].Clone();
-                GcmUtilities.MultiplyP(tmp);
-                M[0][j] = tmp;
-            }
-
-            for (int i = 0; ; )
-            {
-                for (int j = 2; j < 16; j += j)
+                else
                 {
-                    for (int k = 1; k < j; ++k)
-                    {
-                        uint[] tmp = (uint[])M[i][j].Clone();
-                        GcmUtilities.Xor(tmp, M[i][k]);
-                        M[i][j + k] = tmp;
-                    }
+                    // t[1] = T[i-1][1].p^4
+                    GcmUtilities.MultiplyP4(this.T[i - 1], 2, t, 2);
                 }
 
-                if (++i == 32) return;
-
-                if (i > 1)
+                for (var n = 2; n < 16; n += 2)
                 {
-                    M[i] = new uint[16][];
-                    M[i][0] = new uint[4];
-                    for (int j = 8; j > 0; j >>= 1)
-                    {
-                        uint[] tmp = (uint[])M[i - 2][j].Clone();
-                        GcmUtilities.MultiplyP8(tmp);
-                        M[i][j] = tmp;
-                    }
+                    // t[2.n] = t[n].p^-1
+                    GcmUtilities.DivideP(t, n, t, n << 1);
+
+                    // t[2.n + 1] = t[2.n] + t[1]
+                    GcmUtilities.Xor(t, n << 1, t, 2, t, (n + 1) << 1);
                 }
             }
         }
         uint[] z = new uint[4];
 
-        public unsafe void MultiplyH(byte[] x)
+        public void MultiplyH(byte[] x)
         {
-            fixed (byte* px = x)
-                fixed (uint* pz = z)
-            {
-                ulong* pulongZ = (ulong*)pz;
-                pulongZ[0] = 0;
-                pulongZ[1] = 0;
+            //ulong[] z = new ulong[2];
+            //for (int i = 15; i >= 0; --i)
+            //{
+            //    GcmUtilities.Xor(z, 0, T[i + i + 1], (x[i] & 0x0F) << 1);
+            //    GcmUtilities.Xor(z, 0, T[i + i], (x[i] & 0xF0) >> 3);
+            //}
+            //Pack.UInt64_To_BE(z, x, 0);
+
+            ulong z0 = 0, z1 = 0;
 
                 for (int i = 15; i >= 0; --i)
                 {
-                    uint[] m = M[i + i][px[i] & 0x0f];
-                    fixed (uint* pm = m)
-                    {
-                        ulong* pulongm = (ulong*)pm;
-                        
-                        pulongZ[0] ^= pulongm[0];
-                        pulongZ[1] ^= pulongm[1];
-                    }
+                    ulong[] tu   = this.T[i + i + 1],  tv   = this.T[i + i];
+                    int     uPos = (x[i] & 0x0F) << 1, vPos = (x[i] & 0xF0) >> 3;
 
-                    m = M[i + i + 1][(px[i] & 0xf0) >> 4];
-                    fixed (uint* pm = m)
-                    {
-                        ulong* pulongm = (ulong*)pm;
-
-                        pulongZ[0] ^= pulongm[0];
-                        pulongZ[1] ^= pulongm[1];
-                    }
+                    z0 ^= tu[uPos + 0] ^ tv[vPos + 0];
+                    z1 ^= tu[uPos + 1] ^ tv[vPos + 1];
                 }
 
-                int off = 0;
-
-                for (int i = 0; i < 4; ++i)
-                {
-                    uint n = pz[i];
-                    px[off] =     (byte)(n >> 24);
-                    px[off + 1] = (byte)(n >> 16);
-                    px[off + 2] = (byte)(n >> 8);
-                    px[off + 3] = (byte)(n);
-                    
-                    off += 4;
-                }
-            }
+                Pack.UInt64_To_BE(z0, x, 0);
+                Pack.UInt64_To_BE(z1, x, 8);
         }
     }
 }

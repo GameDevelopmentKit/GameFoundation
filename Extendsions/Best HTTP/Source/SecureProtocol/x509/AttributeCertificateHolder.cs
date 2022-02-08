@@ -1,19 +1,17 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 {
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
+
 	/// <remarks>
 	/// The Holder object.
 	/// <pre>
@@ -329,22 +327,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.X509
 		}
 
 		public bool Match(
-//			Certificate cert)
 			X509Certificate x509Cert)
 		{
-//			if (!(cert is X509Certificate))
-//			{
-//				return false;
-//			}
-//
-//			X509Certificate x509Cert = (X509Certificate)cert;
-
 			try
 			{
 				if (holder.BaseCertificateID != null)
 				{
-					return holder.BaseCertificateID.Serial.Value.Equals(x509Cert.SerialNumber)
-						&& MatchesDN(PrincipalUtilities.GetIssuerX509Principal(x509Cert), holder.BaseCertificateID.Issuer);
+					return this.holder.BaseCertificateID.Serial.HasValue(x509Cert.SerialNumber)
+					       && MatchesDN(PrincipalUtilities.GetIssuerX509Principal(x509Cert), holder.BaseCertificateID.Issuer);
 				}
 
 				if (holder.EntityName != null)

@@ -1,30 +1,30 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Kisa;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Misc;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ntt;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
 {
+    using System;
+    using System.Collections;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Kisa;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Misc;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nsri;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ntt;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public sealed class ParameterUtilities
     {
         private ParameterUtilities()
         {
         }
 
-        private static readonly IDictionary algorithms = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-        private static readonly IDictionary basicIVSizes = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        private static readonly IDictionary algorithms = Platform.CreateHashtable();
+        private static readonly IDictionary basicIVSizes = Platform.CreateHashtable();
 
         static ParameterUtilities()
         {
@@ -33,24 +33,58 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             AddAlgorithm("AES128",
                 "2.16.840.1.101.3.4.2",
                 NistObjectIdentifiers.IdAes128Cbc,
+                NistObjectIdentifiers.IdAes128Ccm,
                 NistObjectIdentifiers.IdAes128Cfb,
                 NistObjectIdentifiers.IdAes128Ecb,
+                NistObjectIdentifiers.IdAes128Gcm,
                 NistObjectIdentifiers.IdAes128Ofb,
                 NistObjectIdentifiers.IdAes128Wrap);
             AddAlgorithm("AES192",
                 "2.16.840.1.101.3.4.22",
                 NistObjectIdentifiers.IdAes192Cbc,
+                NistObjectIdentifiers.IdAes192Ccm,
                 NistObjectIdentifiers.IdAes192Cfb,
                 NistObjectIdentifiers.IdAes192Ecb,
+                NistObjectIdentifiers.IdAes192Gcm,
                 NistObjectIdentifiers.IdAes192Ofb,
                 NistObjectIdentifiers.IdAes192Wrap);
             AddAlgorithm("AES256",
                 "2.16.840.1.101.3.4.42",
                 NistObjectIdentifiers.IdAes256Cbc,
+                NistObjectIdentifiers.IdAes256Ccm,
                 NistObjectIdentifiers.IdAes256Cfb,
                 NistObjectIdentifiers.IdAes256Ecb,
+                NistObjectIdentifiers.IdAes256Gcm,
                 NistObjectIdentifiers.IdAes256Ofb,
                 NistObjectIdentifiers.IdAes256Wrap);
+            AddAlgorithm("ARIA");
+            AddAlgorithm("ARIA128",
+                NsriObjectIdentifiers.id_aria128_cbc,
+                NsriObjectIdentifiers.id_aria128_ccm,
+                NsriObjectIdentifiers.id_aria128_cfb,
+                NsriObjectIdentifiers.id_aria128_ctr,
+                NsriObjectIdentifiers.id_aria128_ecb,
+                NsriObjectIdentifiers.id_aria128_gcm,
+                NsriObjectIdentifiers.id_aria128_ocb2,
+                NsriObjectIdentifiers.id_aria128_ofb);
+            AddAlgorithm("ARIA192",
+                NsriObjectIdentifiers.id_aria192_cbc,
+                NsriObjectIdentifiers.id_aria192_ccm,
+                NsriObjectIdentifiers.id_aria192_cfb,
+                NsriObjectIdentifiers.id_aria192_ctr,
+                NsriObjectIdentifiers.id_aria192_ecb,
+                NsriObjectIdentifiers.id_aria192_gcm,
+                NsriObjectIdentifiers.id_aria192_ocb2,
+                NsriObjectIdentifiers.id_aria192_ofb);
+            AddAlgorithm("ARIA256",
+                NsriObjectIdentifiers.id_aria256_cbc,
+                NsriObjectIdentifiers.id_aria256_ccm,
+                NsriObjectIdentifiers.id_aria256_cfb,
+                NsriObjectIdentifiers.id_aria256_ctr,
+                NsriObjectIdentifiers.id_aria256_ecb,
+                NsriObjectIdentifiers.id_aria256_gcm,
+                NsriObjectIdentifiers.id_aria256_ocb2,
+                NsriObjectIdentifiers.id_aria256_ofb);
             AddAlgorithm("BLOWFISH",
                 "1.3.6.1.4.1.3029.1.2");
             AddAlgorithm("CAMELLIA",
@@ -123,9 +157,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
 
             AddBasicIVSizeEntries(8, "BLOWFISH", "CHACHA", "DES", "DESEDE", "DESEDE3", "SALSA20");
             AddBasicIVSizeEntries(12, "CHACHA7539");
-            AddBasicIVSizeEntries(16, "AES", "AES128", "AES192", "AES256",
-                "CAMELLIA", "CAMELLIA128", "CAMELLIA192", "CAMELLIA256",
-                "NOEKEON", "SEED", "SM4");
+            AddBasicIVSizeEntries(16, "AES", "AES128", "AES192", "AES256", "ARIA", "ARIA128", "ARIA192", "ARIA256",
+                "CAMELLIA", "CAMELLIA128", "CAMELLIA192", "CAMELLIA256", "NOEKEON", "SEED", "SM4");
 
             // TODO These algorithms support an IV
             // but JCE doesn't seem to provide an AlgorithmParametersGenerator for them
@@ -155,7 +188,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
         public static string GetCanonicalAlgorithmName(
             string algorithm)
         {
-            return (string) algorithms[BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithm)];
+            return (string) algorithms[Platform.ToUpperInvariant(algorithm)];
         }
 
         public static KeyParameter CreateKeyParameter(

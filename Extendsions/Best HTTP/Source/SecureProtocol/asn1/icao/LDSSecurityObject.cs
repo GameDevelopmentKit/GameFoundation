@@ -1,14 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Icao
 {
+	using System;
+	using System.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+
 	/**
 	 * The LDSSecurityObject object (V1.8).
 	 * <pre>
@@ -64,7 +62,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Icao
 			e.MoveNext();
 			Asn1Sequence datagroupHashSeq = Asn1Sequence.GetInstance(e.Current);
 
-			if (version.Value.Equals(BigInteger.One))
+			if (this.version.HasValue(1))
 			{
 				e.MoveNext();
 				versionInfo = LdsVersionInfo.GetInstance(e.Current);

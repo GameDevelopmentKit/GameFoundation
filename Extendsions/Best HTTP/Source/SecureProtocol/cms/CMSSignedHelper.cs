@@ -1,31 +1,27 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Eac;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Iana;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Misc;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 {
-    internal class CmsSignedHelper
+	using System;
+	using System.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Eac;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.TeleTrust;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
+
+	internal class CmsSignedHelper
     {
         internal static readonly CmsSignedHelper Instance = new CmsSignedHelper();
 
@@ -35,12 +31,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
         private static readonly string EncryptionECDsaWithSha384 = X9ObjectIdentifiers.ECDsaWithSha384.Id;
         private static readonly string EncryptionECDsaWithSha512 = X9ObjectIdentifiers.ECDsaWithSha512.Id;
 
-        private static readonly IDictionary encryptionAlgs = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-        private static readonly IDictionary digestAlgs = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
-        private static readonly IDictionary digestAliases = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        private static readonly IDictionary encryptionAlgs = Platform.CreateHashtable();
+        private static readonly IDictionary digestAlgs = Platform.CreateHashtable();
+        private static readonly IDictionary digestAliases = Platform.CreateHashtable();
 
         private static readonly ISet noParams = new HashSet();
-        private static readonly IDictionary ecAlgorithms = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        private static readonly IDictionary ecAlgorithms = Platform.CreateHashtable();
 
         private static void AddEntries(DerObjectIdentifier oid, string digest, string encryption)
 		{
@@ -68,6 +64,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			AddEntries(PkcsObjectIdentifiers.Sha256WithRsaEncryption, "SHA256", "RSA");
 			AddEntries(PkcsObjectIdentifiers.Sha384WithRsaEncryption, "SHA384", "RSA");
 			AddEntries(PkcsObjectIdentifiers.Sha512WithRsaEncryption, "SHA512", "RSA");
+			AddEntries(PkcsObjectIdentifiers.Sha512_224WithRSAEncryption, "SHA512(224)", "RSA");
+			AddEntries(PkcsObjectIdentifiers.Sha512_256WithRSAEncryption, "SHA512(256)", "RSA");
+			AddEntries(NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_224, "SHA3-224", "RSA");
+			AddEntries(NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_256, "SHA3-256", "RSA");
+			AddEntries(NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_384, "SHA3-384", "RSA");
+			AddEntries(NistObjectIdentifiers.IdRsassaPkcs1V15WithSha3_512, "SHA3-512", "RSA");
 			AddEntries(X9ObjectIdentifiers.ECDsaWithSha1, "SHA1", "ECDSA");
 			AddEntries(X9ObjectIdentifiers.ECDsaWithSha224, "SHA224", "ECDSA");
 			AddEntries(X9ObjectIdentifiers.ECDsaWithSha256, "SHA256", "ECDSA");
@@ -102,6 +104,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			digestAlgs.Add(NistObjectIdentifiers.IdSha256.Id, "SHA256");
 			digestAlgs.Add(NistObjectIdentifiers.IdSha384.Id, "SHA384");
 			digestAlgs.Add(NistObjectIdentifiers.IdSha512.Id, "SHA512");
+			digestAlgs.Add(NistObjectIdentifiers.IdSha512_224.Id, "SHA512(224)");
+			digestAlgs.Add(NistObjectIdentifiers.IdSha512_256.Id, "SHA512(256)");
+			digestAlgs.Add(NistObjectIdentifiers.IdSha3_224.Id, "SHA3-224");
+			digestAlgs.Add(NistObjectIdentifiers.IdSha3_256.Id, "SHA3-256");
+			digestAlgs.Add(NistObjectIdentifiers.IdSha3_384.Id, "SHA3-384");
+			digestAlgs.Add(NistObjectIdentifiers.IdSha3_512.Id, "SHA3-512");
 			digestAlgs.Add(TeleTrusTObjectIdentifiers.RipeMD128.Id, "RIPEMD128");
 			digestAlgs.Add(TeleTrusTObjectIdentifiers.RipeMD160.Id, "RIPEMD160");
 			digestAlgs.Add(TeleTrusTObjectIdentifiers.RipeMD256.Id, "RIPEMD256");
@@ -128,6 +136,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
             ecAlgorithms.Add(CmsSignedGenerator.DigestSha384, EncryptionECDsaWithSha384);
             ecAlgorithms.Add(CmsSignedGenerator.DigestSha512, EncryptionECDsaWithSha512);
     }
+
 
 		/**
         * Return the digest algorithm using one of the standard JCA string
@@ -214,7 +223,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			string	type,
 			Asn1Set	certSet)
 		{
-			IList certs = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+			IList certs = Platform.CreateArrayList();
 
 			if (certSet != null)
 			{
@@ -259,7 +268,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			string	type,
 			Asn1Set	certSet)
 		{
-			IList certs = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+			IList certs = Platform.CreateArrayList();
 
 			if (certSet != null)
 			{
@@ -282,7 +291,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			string	type,
 			Asn1Set	crlSet)
 		{
-			IList crls = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+			IList crls = Platform.CreateArrayList();
 
 			if (crlSet != null)
 			{
@@ -423,6 +432,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
             }
 
             return encOID;
+        }
+
+        public IX509Store GetCertificates(Asn1Set certificates)
+        {
+	        var certList = Platform.CreateArrayList();
+	        if (certificates != null)
+		        foreach (Asn1Encodable enc in certificates)
+			        certList.Add(X509CertificateStructure.GetInstance(enc));
+	        return new X509CollectionStore(certList);
         }
     }
 }

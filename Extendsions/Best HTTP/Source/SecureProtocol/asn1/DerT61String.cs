@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
-    /**
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	/**
      * Der T61String (also the teletex string) - 8-bit characters
      */
     public class DerT61String
@@ -27,7 +26,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return (DerT61String)obj;
             }
 
-            throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj));
         }
 
         /**
@@ -79,10 +78,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             return str;
         }
 
-        internal override void Encode(
-            DerOutputStream derOut)
+		internal override int EncodedLength(bool withID)
         {
-            derOut.WriteEncoded(Asn1Tags.T61String, GetOctets());
+	        return Asn1OutputStream.GetLengthOfEncodingDL(withID, this.str.Length);
+        }
+
+		internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+		{
+			asn1Out.WriteEncodingDL(withID, Asn1Tags.T61String, this.GetOctets());
         }
 
         public byte[] GetOctets()

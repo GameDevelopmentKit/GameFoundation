@@ -1,11 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 {
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+
 	/**
 	 * Class for containing a restriction object subtrees in NameConstraints. See
 	 * RFC 3280.
@@ -175,7 +174,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 		{
 			Asn1EncodableVector v = new Asn1EncodableVector(baseName);
 
-			if (minimum != null && minimum.Value.SignValue != 0)
+			if (this.minimum != null && !this.minimum.HasValue(0))
 			{
 				v.Add(new DerTaggedObject(false, 0, minimum));
 			}

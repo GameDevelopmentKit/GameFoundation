@@ -1,23 +1,22 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.IO;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 {
-    /**
+	using System.Collections;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+	using AttributeTable = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.AttributeTable;
+
+	/**
      * general class for generating a pkcs7-signature message.
      * <p>
      * A simple example of usage.
@@ -40,7 +39,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
     {
 		private static readonly CmsSignedHelper Helper = CmsSignedHelper.Instance;
 
-		private readonly IList signerInfs = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+		private readonly IList signerInfs = Platform.CreateArrayList();
 
 		private class SignerInf
         {
@@ -52,7 +51,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			private readonly string						encOID;
 			private readonly CmsAttributeTableGenerator	sAttr;
 			private readonly CmsAttributeTableGenerator	unsAttr;
-			private readonly Asn1.Cms.AttributeTable	baseSignedTable;
+			private readonly AttributeTable	baseSignedTable;
 
 			internal SignerInf(
                 CmsSignedGenerator			outer,
@@ -62,7 +61,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 	            string						encOID,
 	            CmsAttributeTableGenerator	sAttr,
 	            CmsAttributeTableGenerator	unsAttr,
-	            Asn1.Cms.AttributeTable		baseSignedTable)
+	            AttributeTable		baseSignedTable)
 	        {
                 string digestName = Helper.GetDigestAlgName(digestOID);
 
@@ -84,7 +83,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
                 SignerIdentifier signerIdentifier,
                 CmsAttributeTableGenerator sAttr,
                 CmsAttributeTableGenerator unsAttr,
-                Asn1.Cms.AttributeTable baseSignedTable)
+                AttributeTable baseSignedTable)
             {
                 this.outer = outer;
                 this.sigCalc = sigCalc;
@@ -151,7 +150,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 					IDictionary parameters = outer.GetBaseParameters(contentType, digAlgId, hash);
 
 //					Asn1.Cms.AttributeTable signed = sAttr.GetAttributes(Collections.unmodifiableMap(parameters));
-					Asn1.Cms.AttributeTable signed = sAttr.GetAttributes(parameters);
+					AttributeTable signed = sAttr.GetAttributes(parameters);
 
                     if (contentType == null) //counter signature
                     {
@@ -159,7 +158,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
                         {
                             IDictionary tmpSigned = signed.ToDictionary();
                             tmpSigned.Remove(CmsAttributes.ContentType);
-                            signed = new Asn1.Cms.AttributeTable(tmpSigned);
+                            signed = new AttributeTable(tmpSigned);
                         }
                     }
 
@@ -168,7 +167,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 					signedAttr = outer.GetAttributeSet(signed);
 
 					// sig must be composed from the DER encoding.
-					new DerOutputStream(sigStr).WriteObject(signedAttr);
+					signedAttr.EncodeTo(sigStr, Asn1Encodable.Der);
 				}
                 else if (content != null)
                 {
@@ -176,7 +175,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 					content.Write(sigStr);
                 }
 
-                BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Dispose(sigStr);
+                Platform.Dispose(sigStr);
                 byte[] sigBytes = ((IBlockResult)calculator.GetResult()).Collect();
 
 				Asn1Set unsignedAttr = null;
@@ -186,7 +185,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 					baseParameters[CmsAttributeTableParameter.Signature] = sigBytes.Clone();
 
 //					Asn1.Cms.AttributeTable unsigned = unsAttr.GetAttributes(Collections.unmodifiableMap(baseParameters));
-					Asn1.Cms.AttributeTable unsigned = unsAttr.GetAttributes(baseParameters);
+					AttributeTable unsigned = unsAttr.GetAttributes(baseParameters);
 
 					// TODO Validate proposed unsigned attributes
 
@@ -289,8 +288,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
             AsymmetricKeyParameter	privateKey,
             X509Certificate			cert,
             string					digestOID,
-            Asn1.Cms.AttributeTable	signedAttr,
-            Asn1.Cms.AttributeTable	unsignedAttr)
+            AttributeTable	signedAttr,
+            AttributeTable	unsignedAttr)
         {
 			AddSigner(privateKey, cert, Helper.GetEncOid(privateKey, digestOID), digestOID,
 				signedAttr, unsignedAttr);
@@ -311,8 +310,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			X509Certificate			cert,
 			string					encryptionOID,
 			string					digestOID,
-			Asn1.Cms.AttributeTable	signedAttr,
-			Asn1.Cms.AttributeTable	unsignedAttr)
+			AttributeTable	signedAttr,
+			AttributeTable	unsignedAttr)
 		{
 			doAddSigner(privateKey, GetSignerIdentifier(cert), encryptionOID, digestOID,
 				new DefaultSignedAttributeTableGenerator(signedAttr),
@@ -333,8 +332,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			AsymmetricKeyParameter	privateKey,
 			byte[]					subjectKeyID,
 			string					digestOID,
-			Asn1.Cms.AttributeTable	signedAttr,
-			Asn1.Cms.AttributeTable	unsignedAttr)
+			AttributeTable	signedAttr,
+			AttributeTable	unsignedAttr)
 		{
 			AddSigner(privateKey, subjectKeyID, Helper.GetEncOid(privateKey, digestOID), digestOID,
 				signedAttr, unsignedAttr); 
@@ -355,8 +354,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			byte[]					subjectKeyID,
 			string					encryptionOID,
 			string					digestOID,
-			Asn1.Cms.AttributeTable	signedAttr,
-			Asn1.Cms.AttributeTable	unsignedAttr)
+			AttributeTable	signedAttr,
+			AttributeTable	unsignedAttr)
 		{
 			doAddSigner(privateKey, GetSignerIdentifier(subjectKeyID), encryptionOID, digestOID,
 				new DefaultSignedAttributeTableGenerator(signedAttr),
@@ -435,7 +434,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			string                      digestOID,
 			CmsAttributeTableGenerator  signedAttrGen,
 			CmsAttributeTableGenerator  unsignedAttrGen,
-			Asn1.Cms.AttributeTable		baseSignedTable)
+			AttributeTable		baseSignedTable)
 		{
 			signerInfs.Add(new SignerInf(this, privateKey, signerIdentifier, digestOID, encryptionOID,
 				signedAttrGen, unsignedAttrGen, baseSignedTable));

@@ -1,14 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 {
+	using System;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+
 	/**
 	 * Utility class for reencoding PKCS#12 files to definite length.
 	 */
@@ -24,7 +23,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 		public static byte[] ConvertToDefiniteLength(
 			byte[] berPkcs12File)
 		{
-			Pfx pfx = new Pfx(Asn1Sequence.GetInstance(Asn1Object.FromByteArray(berPkcs12File)));
+			var pfx = Pfx.GetInstance(berPkcs12File);
 
 			return pfx.GetEncoded(Asn1Encodable.Der);
 		}
@@ -42,7 +41,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs
 			byte[]	berPkcs12File,
 			char[]	passwd)
 		{
-			Pfx pfx = new Pfx(Asn1Sequence.GetInstance(Asn1Object.FromByteArray(berPkcs12File)));
+			var pfx = Pfx.GetInstance(berPkcs12File);
 
 			ContentInfo info = pfx.AuthSafe;
 

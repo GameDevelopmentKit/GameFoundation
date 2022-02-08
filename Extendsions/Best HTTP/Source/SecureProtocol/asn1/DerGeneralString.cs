@@ -1,13 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
-    public class DerGeneralString
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	public class DerGeneralString
         : DerStringBase
     {
         private readonly string str;
@@ -21,7 +19,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             }
 
 			throw new ArgumentException("illegal object in GetInstance: "
-                    + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
+                    + Platform.GetTypeName(obj));
         }
 
         public static DerGeneralString GetInstance(
@@ -63,10 +61,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             return Strings.ToAsciiByteArray(str);
         }
 
-		internal override void Encode(
-			DerOutputStream derOut)
+		internal override int EncodedLength(bool withID)
         {
-            derOut.WriteEncoded(Asn1Tags.GeneralString, GetOctets());
+	        return Asn1OutputStream.GetLengthOfEncodingDL(withID, this.str.Length);
+        }
+
+		internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+		{
+			asn1Out.WriteEncodingDL(withID, Asn1Tags.GeneralString, this.GetOctets());
         }
 
 		protected override bool Asn1Equals(

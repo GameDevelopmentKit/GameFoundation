@@ -1,36 +1,35 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Modes.Gcm
 {
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class BasicGcmExponentiator
         : IGcmExponentiator
     {
-        private uint[] x;
+        private ulong[] x;
 
         public void Init(byte[] x)
         {
-            this.x = GcmUtilities.AsUints(x);
+            this.x = GcmUtilities.AsUlongs(x);
         }
 
         public void ExponentiateX(long pow, byte[] output)
         {
             // Initial value is little-endian 1
-            uint[] y = GcmUtilities.OneAsUints();
+            var y = GcmUtilities.OneAsUlongs();
 
             if (pow > 0)
             {
-                uint[] powX = Arrays.Clone(x);
+                var powX = Arrays.Clone(this.x);
                 do
                 {
                     if ((pow & 1L) != 0)
                     {
                         GcmUtilities.Multiply(y, powX);
                     }
-                    GcmUtilities.Multiply(powX, powX);
+
+                    GcmUtilities.Square(powX, powX);
                     pow >>= 1;
                 }
                 while (pow > 0);

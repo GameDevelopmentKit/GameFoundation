@@ -1,24 +1,24 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Kisa;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ntt;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 {
+	using System;
+	using System.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Kisa;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ntt;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+
 	/**
 	* General class for generating a CMS enveloped-data message.
 	*
@@ -101,7 +101,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		public static readonly string ECDHSha1Kdf		= X9ObjectIdentifiers.DHSinglePassStdDHSha1KdfScheme.Id;
 		public static readonly string ECMqvSha1Kdf		= X9ObjectIdentifiers.MqvSinglePassSha1KdfScheme.Id;
 
-		internal readonly IList recipientInfoGenerators = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+		internal readonly IList recipientInfoGenerators = Platform.CreateArrayList();
 		internal readonly SecureRandom rand;
 
         internal CmsAttributeTableGenerator unprotectedAttributeGenerator = null;
@@ -134,10 +134,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		public void AddKeyTransRecipient(
 			X509Certificate cert)
 		{
-			KeyTransRecipientInfoGenerator ktrig = new KeyTransRecipientInfoGenerator();
-			ktrig.RecipientCert = cert;
-
-			recipientInfoGenerators.Add(ktrig);
+			var recipientTbsCert = CmsUtilities.GetTbsCertificateStructure(cert);
+			var info             = recipientTbsCert.SubjectPublicKeyInfo;
+			this.AddRecipientInfoGenerator(new KeyTransRecipientInfoGenerator(cert, new Asn1KeyWrapper(info.AlgorithmID.Algorithm, info.AlgorithmID.Parameters, cert)));
 		}
 
 		/**
@@ -151,11 +150,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			AsymmetricKeyParameter	pubKey,
 			byte[]					subKeyId)
 		{
-			KeyTransRecipientInfoGenerator ktrig = new KeyTransRecipientInfoGenerator();
-			ktrig.RecipientPublicKey = pubKey;
-			ktrig.SubjectKeyIdentifier = new DerOctetString(subKeyId);
-
-			recipientInfoGenerators.Add(ktrig);
+			var info = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(pubKey);
+			this.AddRecipientInfoGenerator(new KeyTransRecipientInfoGenerator(subKeyId, new Asn1KeyWrapper(info.AlgorithmID.Algorithm, info.AlgorithmID.Parameters, pubKey)));
 		}
 
 		/**
@@ -221,7 +217,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			X509Certificate			recipientCert,
 			string					cekWrapAlgorithm)
 		{
-            IList recipientCerts = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList(1);
+            IList recipientCerts = Platform.CreateArrayList(1);
 			recipientCerts.Add(recipientCert);
 
 			AddKeyAgreementRecipients(agreementAlgorithm, senderPrivateKey, senderPublicKey,

@@ -1,18 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public abstract class ECKeyParameters
         : AsymmetricKeyParameter
     {
@@ -106,7 +101,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
 
         internal static string VerifyAlgorithmName(string algorithm)
         {
-            string upper = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.ToUpperInvariant(algorithm);
+            string upper = Platform.ToUpperInvariant(algorithm);
             if (Array.IndexOf(algorithms, algorithm, 0, algorithms.Length) < 0)
                 throw new ArgumentException("unrecognised algorithm: " + algorithm, "algorithm");
             return upper;
@@ -118,21 +113,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters
             if (publicKeyParamSet == null)
                 throw new ArgumentNullException("publicKeyParamSet");
 
-            ECDomainParameters p = ECGost3410NamedCurves.GetByOid(publicKeyParamSet);
+            var x9 = ECKeyPairGenerator.FindECCurveByOid(publicKeyParamSet);
 
-            if (p == null)
-            {
-                X9ECParameters x9 = ECKeyPairGenerator.FindECCurveByOid(publicKeyParamSet);
+            if (x9 == null)
+                throw new ArgumentException("OID is not a valid public key parameter set", "publicKeyParamSet");
 
-                if (x9 == null)
-                {
-                    throw new ArgumentException("OID is not a valid public key parameter set", "publicKeyParamSet");
-                }
-
-                p = new ECDomainParameters(x9.Curve, x9.G, x9.N, x9.H, x9.GetSeed());
-            }
-
-            return p;
+            return new ECDomainParameters(x9);
         }
     }
 }

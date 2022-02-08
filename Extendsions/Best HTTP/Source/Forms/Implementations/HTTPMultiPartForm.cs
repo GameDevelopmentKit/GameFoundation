@@ -55,7 +55,6 @@ namespace BestHTTP.Forms
                     if (!string.IsNullOrEmpty(field.MimeType))
                         ms.WriteLine("Content-Type: " + field.MimeType);
 
-                    ms.WriteLine("Content-Length: " + field.Payload.Length.ToString());
                     ms.WriteLine();
 
                     // Write the actual data to the MemoryStream

@@ -1,19 +1,14 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 {
+	using System.Collections;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
+
 	/**
 	* general class for handling a pkcs7-signature message.
 	*
@@ -152,6 +147,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			get { return signedData.Version.IntValueExact; }
 		}
 
+		internal IX509Store GetCertificates() { return Helper.GetCertificates(this.signedData.Certificates); }
+
 		/**
 		* return the collection of signers that are associated with the
 		* signatures for the message.
@@ -160,7 +157,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		{
 			if (signerInfoStore == null)
 			{
-                IList signerInfos = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
+                IList signerInfos = Platform.CreateArrayList();
 				Asn1Set s = signedData.SignerInfos;
 
 				foreach (object obj in s)
@@ -218,10 +215,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		public IX509Store GetCertificates(
 			string type)
 		{
-			if (certificateStore == null)
-			{
-				certificateStore = Helper.CreateCertificateStore(type, signedData.Certificates);
-			}
+			if (certificateStore == null) this.certificateStore = Helper.CreateCertificateStore(type, this.signedData.Certificates);
 
 			return certificateStore;
 		}
@@ -373,7 +367,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 			IX509Store		x509AttrCerts)
 		{
 			if (x509AttrCerts != null)
-				throw BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateNotImplementedException("Currently can't replace attribute certificates");
+				throw Platform.CreateNotImplementedException("Currently can't replace attribute certificates");
 
 			//
 			// copy

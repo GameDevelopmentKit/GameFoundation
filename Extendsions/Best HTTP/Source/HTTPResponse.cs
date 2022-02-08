@@ -1,5 +1,5 @@
 #if !NETFX_CORE || UNITY_EDITOR
-    using System.Net.Sockets;
+using System.Net.Sockets;
 #endif
 
 namespace BestHTTP
@@ -27,7 +27,7 @@ namespace BestHTTP
         using BestHTTP.Cookies;
     #endif
 
-        /// <summary>
+    /// <summary>
     ///
     /// </summary>
     public class HTTPResponse : IDisposable
@@ -680,7 +680,7 @@ namespace BestHTTP
                 GetFirstHeaderValue("content-encoding");
                 bool gzipped = !string.IsNullOrEmpty(encoding) && encoding == "gzip";
 
-                GZipDecompressor decompressor = gzipped ? new GZipDecompressor(256) : null;
+                var decompressor = gzipped ? new GZipDecompressor(256) : null;
 
                 while (chunkLength != 0)
                 {
@@ -794,8 +794,8 @@ namespace BestHTTP
                 IsFromCache ? null :
 #endif
                 GetFirstHeaderValue("content-encoding");
-            bool gzipped = !string.IsNullOrEmpty(encoding) && encoding == "gzip";
-            GZipDecompressor decompressor = gzipped ? new GZipDecompressor(256) : null;
+            bool gzipped      = !string.IsNullOrEmpty(encoding) && encoding == "gzip";
+            var  decompressor = gzipped ? new GZipDecompressor(256) : null;
 
             if (!baseRequest.UseStreaming && contentLength > 2147483646)
             {
@@ -899,8 +899,8 @@ namespace BestHTTP
                 IsFromCache ? null :
 #endif
                 GetFirstHeaderValue("content-encoding");
-            bool gzipped = !string.IsNullOrEmpty(encoding) && encoding == "gzip";
-            GZipDecompressor decompressor = gzipped ? new GZipDecompressor(256) : null;
+            bool gzipped      = !string.IsNullOrEmpty(encoding) && encoding == "gzip";
+            var  decompressor = gzipped ? new GZipDecompressor(256) : null;
 
             using (var output = new BufferPoolMemoryStream())
             {
@@ -1021,8 +1021,12 @@ namespace BestHTTP
                 switch (encoding[0])
                 {
 #if !UNITY_WEBGL || UNITY_EDITOR
-                    case "gzip": decoderStream = new GZipStream(streamToDecode, CompressionMode.Decompress); break;
-                    case "deflate": decoderStream = new DeflateStream(streamToDecode, CompressionMode.Decompress); break;
+                    case "gzip":
+                        decoderStream = new GZipStream(streamToDecode, CompressionMode.Decompress);
+                        break;
+                    case "deflate":
+                        decoderStream = new DeflateStream(streamToDecode, CompressionMode.Decompress);
+                        break;
 #endif
                     //identity, utf-8, etc.
                     default:
@@ -1195,7 +1199,7 @@ namespace BestHTTP
 
         void VerboseLogging(string str)
         {
-          if (HTTPManager.Logger.Level == Loglevels.All)
+            if (HTTPManager.Logger.Level == Loglevels.All)
             HTTPManager.Logger.Verbose("HTTPResponse", str, this.Context, this.baseRequest.Context);
         }
 

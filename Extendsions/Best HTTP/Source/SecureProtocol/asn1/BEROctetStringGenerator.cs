@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+	using System;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
+
 	public class BerOctetStringGenerator
 		: BerGenerator
 	{
@@ -47,19 +46,19 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 		private class BufferedBerOctetStream
 			: BaseOutputStream
 		{
-			private byte[] _buf;
-			private int    _off;
+			private          byte[]                  _buf;
+			private          int                     _off;
 			private readonly BerOctetStringGenerator _gen;
-			private readonly DerOutputStream _derOut;
+			private readonly Asn1OutputStream        _derOut;
 
 			internal BufferedBerOctetStream(
 				BerOctetStringGenerator	gen,
 				byte[]					buf)
 			{
-				_gen = gen;
-				_buf = buf;
-				_off = 0;
-				_derOut = new DerOutputStream(_gen.Out);
+				_gen         = gen;
+				_buf         = buf;
+				_off         = 0;
+				this._derOut = Asn1OutputStream.Create(this._gen.Out, Asn1Encodable.Der);
 			}
 
 			public override void WriteByte(
@@ -69,39 +68,39 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 
 				if (_off == _buf.Length)
 				{
-					DerOctetString.Encode(_derOut, _buf, 0, _off);
+					DerOctetString.Encode(this._derOut, true, this._buf, 0, this._off);
 					_off = 0;
 				}
 			}
 
-			public override void Write(
-				byte[] buf,
-				int    offset,
-				int    len)
+			public override void Write(byte[] b, int off, int len)
 			{
-				while (len > 0)
+				var bufLen    = this._buf.Length;
+				var available = bufLen - this._off;
+				if (len < available)
 				{
-					int numToCopy = System.Math.Min(len, _buf.Length - _off);
-
-					if (numToCopy == _buf.Length)
-					{
-						DerOctetString.Encode(_derOut, buf, offset, numToCopy);
-					}
-					else
-					{
-						Array.Copy(buf, offset, _buf, _off, numToCopy);
-
-						_off += numToCopy;
-						if (_off < _buf.Length)
-							break;
-
-						DerOctetString.Encode(_derOut, _buf, 0, _off);
-						_off = 0;
-					}
-
-					offset += numToCopy;
-					len -= numToCopy;
+					Array.Copy(b, off, this._buf, this._off, len);
+					this._off += len;
+					return;
 				}
+
+				var count = 0;
+				if (this._off > 0)
+				{
+					Array.Copy(b, off, this._buf, this._off, available);
+					count += available;
+					DerOctetString.Encode(this._derOut, true, this._buf, 0, bufLen);
+				}
+
+				int remaining;
+				while ((remaining = len - count) >= bufLen)
+				{
+					DerOctetString.Encode(this._derOut, true, b, off + count, bufLen);
+					count += bufLen;
+				}
+
+				Array.Copy(b, off + count, this._buf, 0, remaining);
+				this._off = remaining;
 			}
 
 #if PORTABLE || NETFX_CORE
@@ -111,8 +110,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 {
 				    if (_off != 0)
 				    {
-					    DerOctetString.Encode(_derOut, _buf, 0, _off);
+					    DerOctetString.Encode(_derOut, true, _buf, 0, _off);
 				    }
+
+                    _derOut.FlushInternal();
 
 				    _gen.WriteBerEnd();
                 }
@@ -123,10 +124,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			{
 				if (_off != 0)
 				{
-					DerOctetString.Encode(_derOut, _buf, 0, _off);
+					DerOctetString.Encode(this._derOut, true, this._buf, 0, this._off);
 				}
 
-				_gen.WriteBerEnd();
+				this._derOut.FlushInternal();
+
+				this._gen.WriteBerEnd();
 				base.Close();
 			}
 #endif

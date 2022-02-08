@@ -1,14 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 {
-    /**
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	/**
     * A class that provides Blowfish key encryption operations,
     * such as encoding data and generating keys.
     * All the algorithms herein are from Applied Cryptography
@@ -332,7 +331,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
             ICipherParameters  parameters)
         {
             if (!(parameters is KeyParameter))
-				throw new ArgumentException("invalid parameter passed to Blowfish init - " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(parameters));
+				throw new ArgumentException("invalid parameter passed to Blowfish init - " + Platform.GetTypeName(parameters));
 
 			this.encrypting = forEncryption;
 			this.workingKey = ((KeyParameter)parameters).GetKey();
@@ -423,7 +422,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 
         private void SetKey(byte[] key)
         {
-            /*
+	        if (key.Length < 4 || key.Length > 56) throw new ArgumentException("key length must be in range 32 to 448 bits");
+
+			/*
             * - comments are from _Applied Crypto_, Schneier, p338
             * please be careful comparing the two, AC numbers the
             * arrays from 1, the enclosed code from 0.

@@ -1,28 +1,25 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.EdEC;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Rosstandart;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Sec;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
 {
+    using System;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.CryptoPro;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.EdEC;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Rosstandart;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Sec;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X9;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Pkcs;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public sealed class PrivateKeyFactory
     {
         private PrivateKeyFactory()
@@ -137,7 +134,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
                 Gost3410PublicKeyAlgParameters gostParams = Gost3410PublicKeyAlgParameters.GetInstance(
                     algID.Parameters.ToAsn1Object());
 
-                ECDomainParameters ecP = ECGost3410NamedCurves.GetByOid(gostParams.PublicKeyParamSet);
+                var ecP = ECGost3410NamedCurves.GetByOidX9(gostParams.PublicKeyParamSet);
 
                 if (ecP == null)
                     throw new ArgumentException("Unrecognized curve OID for GostR3410x2001 private key");
@@ -176,31 +173,30 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             }
             else if (algOid.Equals(EdECObjectIdentifiers.id_X25519))
             {
-                return new X25519PrivateKeyParameters(GetRawKey(keyInfo, X25519PrivateKeyParameters.KeySize), 0);
+                return new X25519PrivateKeyParameters(GetRawKey(keyInfo));
             }
             else if (algOid.Equals(EdECObjectIdentifiers.id_X448))
             {
-                return new X448PrivateKeyParameters(GetRawKey(keyInfo, X448PrivateKeyParameters.KeySize), 0);
+                return new X448PrivateKeyParameters(GetRawKey(keyInfo));
             }
             else if (algOid.Equals(EdECObjectIdentifiers.id_Ed25519))
             {
-                return new Ed25519PrivateKeyParameters(GetRawKey(keyInfo, Ed25519PrivateKeyParameters.KeySize), 0);
+                return new Ed25519PrivateKeyParameters(GetRawKey(keyInfo));
             }
             else if (algOid.Equals(EdECObjectIdentifiers.id_Ed448))
             {
-                return new Ed448PrivateKeyParameters(GetRawKey(keyInfo, Ed448PrivateKeyParameters.KeySize), 0);
+                return new Ed448PrivateKeyParameters(GetRawKey(keyInfo));
             }
             else if (algOid.Equals(RosstandartObjectIdentifiers.id_tc26_gost_3410_12_512)
                      || algOid.Equals(RosstandartObjectIdentifiers.id_tc26_gost_3410_12_256))
             {
                 Gost3410PublicKeyAlgParameters gostParams = Gost3410PublicKeyAlgParameters.GetInstance(keyInfo.PrivateKeyAlgorithm.Parameters);
-                ECGost3410Parameters ecSpec = null;
-                BigInteger d = null;
-                Asn1Object p = keyInfo.PrivateKeyAlgorithm.Parameters.ToAsn1Object();
+                ECGost3410Parameters           ecSpec;
+                BigInteger                     d;
+                Asn1Object                     p = keyInfo.PrivateKeyAlgorithm.Parameters.ToAsn1Object();
                 if (p is Asn1Sequence && (Asn1Sequence.GetInstance(p).Count == 2 || Asn1Sequence.GetInstance(p).Count == 3))
                 {
-
-                    ECDomainParameters ecP = ECGost3410NamedCurves.GetByOid(gostParams.PublicKeyParamSet);
+                    var ecP = ECGost3410NamedCurves.GetByOidX9(gostParams.PublicKeyParamSet);
 
                     ecSpec = new ECGost3410Parameters(
                         new ECNamedDomainParameters(
@@ -237,29 +233,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
                     {
                         DerObjectIdentifier oid = DerObjectIdentifier.GetInstance(parameters.Parameters);
                         X9ECParameters ecP = ECNamedCurveTable.GetByOid(oid);
-                        if (ecP == null)
-                        {
-                            ECDomainParameters gParam = ECGost3410NamedCurves.GetByOid(oid);
-                            ecSpec = new ECGost3410Parameters(new ECNamedDomainParameters(
-                                    oid,
-                                    gParam.Curve,
-                                    gParam.G,
-                                    gParam.N,
-                                    gParam.H,
-                                    gParam.GetSeed()), gostParams.PublicKeyParamSet, gostParams.DigestParamSet,
-                                gostParams.EncryptionParamSet);
-                        }
-                        else
-                        {
-                            ecSpec = new ECGost3410Parameters(new ECNamedDomainParameters(
-                                    oid,
-                                    ecP.Curve,
-                                    ecP.G,
-                                    ecP.N,
-                                    ecP.H,
-                                    ecP.GetSeed()), gostParams.PublicKeyParamSet, gostParams.DigestParamSet,
-                                gostParams.EncryptionParamSet);
-                        }
+
+                        ecSpec = new ECGost3410Parameters(new ECNamedDomainParameters(oid, ecP),
+                            gostParams.PublicKeyParamSet, gostParams.DigestParamSet,
+                            gostParams.EncryptionParamSet);
                     }
                     else if (parameters.IsImplicitlyCA)
                     {
@@ -268,15 +245,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
                     else
                     {
                         X9ECParameters ecP = X9ECParameters.GetInstance(parameters.Parameters);
-                        ecSpec = new ECGost3410Parameters(new ECNamedDomainParameters(
-                                algOid,
-                                ecP.Curve,
-                                ecP.G,
-                                ecP.N,
-                                ecP.H,
-                                ecP.GetSeed()),
-                            gostParams.PublicKeyParamSet,
-                            gostParams.DigestParamSet,
+                        ecSpec = new ECGost3410Parameters(new ECNamedDomainParameters(algOid, ecP),
+                            gostParams.PublicKeyParamSet, gostParams.DigestParamSet,
                             gostParams.EncryptionParamSet);
                     }
 
@@ -308,13 +278,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Security
             }
         }
 
-        private static byte[] GetRawKey(PrivateKeyInfo keyInfo, int expectedSize)
+        private static byte[] GetRawKey(PrivateKeyInfo keyInfo)
         {
-            byte[] result = Asn1OctetString.GetInstance(keyInfo.ParsePrivateKey()).GetOctets();
-            if (expectedSize != result.Length)
-                throw new SecurityUtilityException("private key encoding has incorrect length");
-
-            return result;
+            return Asn1OctetString.GetInstance(keyInfo.ParsePrivateKey()).GetOctets();
         }
 
         public static AsymmetricKeyParameter DecryptKey(

@@ -88,7 +88,7 @@ namespace BestHTTP.Connections.HTTP2
             }
         }
 
-        bool isPrepared;
+        bool                     isPrepared;
         private GZipDecompressor decompressor;
         
         internal void ProcessData(byte[] payload, int payloadLength)

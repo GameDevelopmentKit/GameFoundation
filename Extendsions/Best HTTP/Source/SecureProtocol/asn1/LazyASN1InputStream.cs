@@ -1,37 +1,50 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
-	public class LazyAsn1InputStream
-		: Asn1InputStream
-	{
-		public LazyAsn1InputStream(
-			byte[] input)
-			: base(input)
-		{
-		}
+    using System.IO;
 
-		public LazyAsn1InputStream(
-			Stream inputStream)
-			: base(inputStream)
-		{
-		}
+    public class LazyAsn1InputStream
+        : Asn1InputStream
+    {
+        public LazyAsn1InputStream(
+            byte[] input)
+            : base(input)
+        {
+        }
 
-		internal override DerSequence CreateDerSequence(
-			DefiniteLengthInputStream dIn)
-		{
-			return new LazyDerSequence(dIn.ToArray());
-		}
+        public LazyAsn1InputStream(
+            Stream inputStream)
+            : base(inputStream)
+        {
+        }
 
-		internal override DerSet CreateDerSet(
-			DefiniteLengthInputStream dIn)
-		{
-			return new LazyDerSet(dIn.ToArray());
-		}
-	}
+        internal LazyAsn1InputStream(Stream input, int limit, byte[][] tmpBuffers)
+            : base(input, limit, tmpBuffers)
+        {
+        }
+
+        internal override DerSequence CreateDerSequence(
+            DefiniteLengthInputStream dIn)
+        {
+            return new LazyDerSequence(dIn.ToArray());
+        }
+
+        internal override DerSet CreateDerSet(
+            DefiniteLengthInputStream dIn)
+        {
+            return new LazyDerSet(dIn.ToArray());
+        }
+
+        internal override Asn1EncodableVector ReadVector(DefiniteLengthInputStream defIn)
+        {
+            var remaining = defIn.Remaining;
+            if (remaining < 1)
+                return new Asn1EncodableVector(0);
+
+            return new LazyAsn1InputStream(defIn, remaining, this.tmpBuffers).ReadVector();
+        }
+    }
 }
 #pragma warning restore
 #endif

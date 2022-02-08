@@ -1,33 +1,40 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.Collections;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
+
     internal class DtlsReliableHandshake
     {
         private const int MaxReceiveAhead = 16;
         private const int MessageHeaderLength = 12;
 
+        private const int InitialResendMillis = 1000;
+        private const int MaxResendMillis     = 60000;
+
         private readonly DtlsRecordLayer mRecordLayer;
+        private readonly Timeout         mHandshakeTimeout;
 
         private TlsHandshakeHash mHandshakeHash;
 
-        private IDictionary mCurrentInboundFlight = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable();
+        private IDictionary mCurrentInboundFlight = Platform.CreateHashtable();
         private IDictionary mPreviousInboundFlight = null;
-        private IList mOutboundFlight = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateArrayList();
-        private bool mSending = true;
+        private IList mOutboundFlight = Platform.CreateArrayList();
+
+        private int     mResendMillis = -1;
+        private Timeout mResendTimeout;
 
         private int mMessageSeq = 0, mNextReceiveSeq = 0;
 
-        internal DtlsReliableHandshake(TlsContext context, DtlsRecordLayer transport)
+        internal DtlsReliableHandshake(TlsContext context, DtlsRecordLayer transport, int timeoutMillis)
         {
-            this.mRecordLayer = transport;
-            this.mHandshakeHash = new DeferredHash();
+            this.mRecordLayer      = transport;
+            this.mHandshakeTimeout = Timeout.ForWaitMillis(timeoutMillis); 
+            this.mHandshakeHash    = new DeferredHash();
             this.mHandshakeHash.Init(context);
         }
 
@@ -52,10 +59,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         {
             TlsUtilities.CheckUint24(body.Length);
 
-            if (!mSending)
+            if (this.mResendTimeout != null)
             {
                 CheckInboundFlight();
-                mSending = true;
+
+                this.mResendMillis  = -1;
+                this.mResendTimeout = null;
+
                 mOutboundFlight.Clear();
             }
 
@@ -78,21 +88,18 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
         internal Message ReceiveMessage()
         {
-            if (mSending)
+            var currentTimeMillis = DateTimeUtilities.CurrentUnixMs();
+
+            if (this.mResendTimeout == null)
             {
-                mSending = false;
-                PrepareInboundFlight(BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.CreateHashtable());
+                this.mResendMillis  = InitialResendMillis;
+                this.mResendTimeout = new Timeout(this.mResendMillis, currentTimeMillis);
+
+                PrepareInboundFlight(Platform.CreateHashtable());
             }
 
             byte[] buf = null;
 
-            // TODO Check the conditions under which we should reset this
-            int readTimeoutMillis = 1000;
-
-            for (;;)
-            {
-                try
-                {
                     for (;;)
                     {
                         if (mRecordLayer.IsClosed)
@@ -102,37 +109,33 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                         if (pending != null)
                             return pending;
 
-                        int receiveLimit = mRecordLayer.GetReceiveLimit();
+                        var handshakeMillis = Timeout.GetWaitMillis(this.mHandshakeTimeout, currentTimeMillis);
+                        if (handshakeMillis < 0)
+                            throw new TlsFatalAlert(AlertDescription.handshake_failure);
+
+                        var waitMillis                      = Math.Max(1, Timeout.GetWaitMillis(this.mResendTimeout, currentTimeMillis));
+                        if (handshakeMillis > 0) waitMillis = Math.Min(waitMillis, handshakeMillis);
+
+                int receiveLimit = mRecordLayer.GetReceiveLimit();
                         if (buf == null || buf.Length < receiveLimit)
                         {
                             buf = new byte[receiveLimit];
                         }
 
-                        int received = mRecordLayer.Receive(buf, 0, receiveLimit, readTimeoutMillis);
+                        var received = this.mRecordLayer.Receive(buf, 0, receiveLimit, waitMillis);
                         if (received < 0)
-                            break;
+                            this.ResendOutboundFlight();
+                        else
+                            this.ProcessRecord(MaxReceiveAhead, this.mRecordLayer.ReadEpoch, buf, 0, received);
 
-                        bool resentOutbound = ProcessRecord(MaxReceiveAhead, mRecordLayer.ReadEpoch, buf, 0, received);
-                        if (resentOutbound)
-                        {
-                            readTimeoutMillis = BackOff(readTimeoutMillis);
-                        }
-                    }
-                }
-                catch (IOException)
-                {
-                    // NOTE: Assume this is a timeout for the moment
-                }
-
-                ResendOutboundFlight();
-                readTimeoutMillis = BackOff(readTimeoutMillis);
+                        currentTimeMillis = DateTimeUtilities.CurrentUnixMs();
             }
         }
 
         internal void Finish()
         {
             DtlsHandshakeRetransmit retransmit = null;
-            if (!mSending)
+            if (this.mResendTimeout != null)
             {
                 CheckInboundFlight();
             }
@@ -166,7 +169,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
              * TODO[DTLS] implementations SHOULD back off handshake packet size during the
              * retransmit backoff.
              */
-            return System.Math.Min(timeoutMillis * 2, 60000);
+            return Math.Min(timeoutMillis * 2, MaxResendMillis);
         }
 
         /**
@@ -205,7 +208,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             mCurrentInboundFlight = nextFlight;
         }
 
-        private bool ProcessRecord(int windowSize, int epoch, byte[] buf, int off, int len)
+        private void ProcessRecord(int windowSize, int epoch, byte[] buf, int off, int len)
         {
             bool checkPreviousFlight = false;
 
@@ -275,13 +278,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                 len -= message_length;
             }
 
-            bool result = checkPreviousFlight && CheckAll(mPreviousInboundFlight);
-            if (result)
+            if (checkPreviousFlight && CheckAll(this.mPreviousInboundFlight))
             {
                 ResendOutboundFlight();
                 ResetAll(mPreviousInboundFlight);
             }
-            return result;
         }
 
         private void ResendOutboundFlight()
@@ -291,6 +292,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             {
                 WriteMessage((Message)mOutboundFlight[i]);
             }
+
+            this.mResendMillis  = this.BackOff(this.mResendMillis);
+            this.mResendTimeout = new Timeout(this.mResendMillis);
         }
 
         private Message UpdateHandshakeMessagesDigest(Message message)
@@ -328,7 +332,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             int fragment_offset = 0;
             do
             {
-                int fragment_length = System.Math.Min(length - fragment_offset, fragmentLimit);
+                int fragment_length = Math.Min(length - fragment_offset, fragmentLimit);
                 WriteHandshakeFragment(message, fragment_offset, fragment_length);
                 fragment_offset += fragment_length;
             }
@@ -416,7 +420,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 #endif
 
                 recordLayer.Send(buf, 0, bufLen);
-                BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Dispose(this);
+                Platform.Dispose(this);
             }
         }
 

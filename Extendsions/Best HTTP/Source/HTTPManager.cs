@@ -86,7 +86,7 @@ namespace BestHTTP
         /// <summary>
         /// HTTP/2 settings
         /// </summary>
-        public static HTTP2PluginSettings HTTP2Settings = new HTTP2PluginSettings();
+        public static HTTP2PluginSettings HTTP2Settings = new();
 #endif
 
 #region Global Options
@@ -203,6 +203,7 @@ namespace BestHTTP
 
             set { logger = value; }
         }
+
         private static ILogger logger;
 
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
@@ -226,7 +227,7 @@ namespace BestHTTP
             }
 
             return new LegacyTlsClient(request.CurrentUri,
-                         request.CustomCertificateVerifyer == null ? new AlwaysValidVerifyer() : request.CustomCertificateVerifyer,
+                request.CustomCertificateVerifyer == null ? new AlwaysValidVerifyer() : request.CustomCertificateVerifyer,
                          request.CustomClientCredentialsProvider,
                          hostNames,
                          protocols);
@@ -276,12 +277,14 @@ namespace BestHTTP
         /// <summary>
         /// User-agent string that will be sent with each requests.
         /// </summary>
-        public static string UserAgent = "BestHTTP/2 v2.5.3";
+        public static string UserAgent = "BestHTTP/2 v2.5.4";
 
         /// <summary>
         /// It's true if the application is quitting and the plugin is shutting down itself.
         /// </summary>
-        public static bool IsQuitting { get; private set; }
+        public static bool IsQuitting { get => _isQuitting; private set => _isQuitting = value; }
+
+        private static volatile bool _isQuitting;
 #endregion
 
 #region Manager variables
@@ -348,7 +351,7 @@ namespace BestHTTP
             if (HTTPCacheService.IsCachedEntityExpiresInTheFuture(request))
             {
                 DateTime started = DateTime.Now;
-                ThreadedRunner.RunShortLiving<HTTPRequest>((req) =>
+                ThreadedRunner.RunShortLiving(req =>
                 {
                     if (ConnectionHelper.TryLoadAllFromCache("HTTPManager", req, req.Context))
                     {
@@ -400,6 +403,7 @@ namespace BestHTTP
 #endif
         }
 
+#if UNITY_EDITOR
 #if UNITY_2019_3_OR_NEWER
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
@@ -408,6 +412,7 @@ namespace BestHTTP
             IsSetupCalled = false;
             Logger.Information("HTTPManager", "Reset called!");
         }
+#endif
 
 #endregion
 

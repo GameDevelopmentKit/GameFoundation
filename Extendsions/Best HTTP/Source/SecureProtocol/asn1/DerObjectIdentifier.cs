@@ -1,21 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using System.IO;
+    using System.Text;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class DerObjectIdentifier
         : Asn1Object
     {
-        private readonly string identifier;
+        public static DerObjectIdentifier FromContents(byte[] contents) { return CreatePrimitive(contents, true); }
 
-        private byte[] body = null;
+        private readonly string identifier;
+        private          byte[] contents;
 
         /**
          * return an Oid from the passed in object
@@ -36,9 +35,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             }
 
             if (obj is byte[])
-                return FromOctetString((byte[])obj);
+                return (DerObjectIdentifier)FromByteArray((byte[])obj);
 
-            throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj), "obj");
         }
 
         /**
@@ -61,7 +60,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return GetInstance(o);
             }
 
-            return FromOctetString(Asn1OctetString.GetInstance(o).GetOctets());
+            return FromContents(Asn1OctetString.GetInstance(o).GetOctets());
         }
 
         public DerObjectIdentifier(
@@ -102,13 +101,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
         public virtual bool On(DerObjectIdentifier stem)
         {
             string id = Id, stemId = stem.Id;
-            return id.Length > stemId.Length && id[stemId.Length] == '.' && BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.StartsWith(id, stemId);
+            return id.Length > stemId.Length && id[stemId.Length] == '.' && Platform.StartsWith(id, stemId);
         }
 
-        internal DerObjectIdentifier(byte[] bytes)
+        internal DerObjectIdentifier(byte[] contents, bool clone)
         {
-            this.identifier = MakeOidStringFromBytes(bytes);
-            this.body = Arrays.Clone(bytes);
+            this.identifier = MakeOidStringFromBytes(contents);
+            this.contents   = clone ? Arrays.Clone(contents) : contents;
         }
 
         private void WriteField(
@@ -180,25 +179,29 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             }
         }
 
-        internal byte[] GetBody()
+        private byte[] GetContents()
         {
             lock (this)
             {
-                if (body == null)
+                if (this.contents == null)
                 {
                     MemoryStream bOut = new MemoryStream();
                     DoOutput(bOut);
-                    body = bOut.ToArray();
+                    this.contents = bOut.ToArray();
                 }
-            }
 
-            return body;
+                return this.contents;
+            }
         }
 
-        internal override void Encode(
-            DerOutputStream derOut)
+        internal override int EncodedLength(bool withID)
         {
-            derOut.WriteEncoded(Asn1Tags.ObjectIdentifier, GetBody());
+            return Asn1OutputStream.GetLengthOfEncodingDL(withID, this.GetContents().Length);
+        }
+
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+        {
+            asn1Out.WriteEncodingDL(withID, Asn1Tags.ObjectIdentifier, this.GetContents());
         }
 
         protected override int Asn1GetHashCode()
@@ -346,20 +349,20 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 
         private static readonly DerObjectIdentifier[] cache = new DerObjectIdentifier[1024];
 
-        internal static DerObjectIdentifier FromOctetString(byte[] enc)
+        internal static DerObjectIdentifier CreatePrimitive(byte[] contents, bool clone)
         {
-            int hashCode = Arrays.GetHashCode(enc);
-            int first = hashCode & 1023;
+            var hashCode = Arrays.GetHashCode(contents);
+            int first    = hashCode & 1023;
 
             lock (cache)
             {
                 DerObjectIdentifier entry = cache[first];
-                if (entry != null && Arrays.AreEqual(enc, entry.GetBody()))
+                if (entry != null && Arrays.AreEqual(contents, entry.GetContents()))
                 {
                     return entry;
                 }
 
-                return cache[first] = new DerObjectIdentifier(enc);
+                return cache[first] = new DerObjectIdentifier(contents, clone);
             }
         }
     }

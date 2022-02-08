@@ -1,14 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.Collections;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class DtlsClientProtocol
         :   DtlsProtocol
     {
@@ -84,7 +83,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         internal virtual DtlsTransport ClientHandshake(ClientHandshakeState state, DtlsRecordLayer recordLayer)
         {
             SecurityParameters securityParameters = state.clientContext.SecurityParameters;
-            DtlsReliableHandshake handshake = new DtlsReliableHandshake(state.clientContext, recordLayer);
+            var handshake = new DtlsReliableHandshake(state.clientContext, recordLayer,
+                state.client.GetHandshakeTimeoutMillis());
 
             byte[] clientHelloBody = GenerateClientHello(state, state.client);
 
@@ -842,24 +842,24 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
         protected internal class ClientHandshakeState
         {
-            internal TlsClient client = null;
-            internal TlsClientContextImpl clientContext = null;
-            internal TlsSession tlsSession = null;
-            internal SessionParameters sessionParameters = null;
+            internal TlsClient                 client                   = null;
+            internal TlsClientContextImpl      clientContext            = null;
+            internal TlsSession                tlsSession               = null;
+            internal SessionParameters         sessionParameters        = null;
             internal SessionParameters.Builder sessionParametersBuilder = null;
-            internal int[] offeredCipherSuites = null;
-            internal IDictionary clientExtensions = null;
-            internal IDictionary serverExtensions = null;
-            internal byte[] selectedSessionID = null;
-            internal bool resumedSession = false;
-            internal bool secure_renegotiation = false;
-            internal bool allowCertificateStatus = false;
-            internal bool expectSessionTicket = false;
-            internal TlsKeyExchange keyExchange = null;
-            internal TlsAuthentication authentication = null;
-            internal CertificateStatus certificateStatus = null;
-            internal CertificateRequest certificateRequest = null;
-            internal TlsCredentials clientCredentials = null;
+            internal int[]                     offeredCipherSuites      = null;
+            internal IDictionary               clientExtensions         = null;
+            internal IDictionary               serverExtensions         = null;
+            internal byte[]                    selectedSessionID        = null;
+            internal bool                      resumedSession           = false;
+            internal bool                      secure_renegotiation     = false;
+            internal bool                      allowCertificateStatus   = false;
+            internal bool                      expectSessionTicket      = false;
+            internal TlsKeyExchange            keyExchange              = null;
+            internal TlsAuthentication         authentication           = null;
+            internal CertificateStatus         certificateStatus        = null;
+            internal CertificateRequest        certificateRequest       = null;
+            internal TlsCredentials            clientCredentials        = null;
         }
     }
 }

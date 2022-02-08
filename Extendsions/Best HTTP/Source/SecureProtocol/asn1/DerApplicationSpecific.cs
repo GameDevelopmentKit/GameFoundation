@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
-    /**
+	using System;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
+	/**
      * Base class for an application specific object
      */
     public class DerApplicationSpecific
@@ -165,16 +164,20 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			return FromByteArray(tmp);
 		}
 
-		internal override void Encode(
-			DerOutputStream derOut)
+		internal override int EncodedLength(bool withID)
         {
-			int classBits = Asn1Tags.Application;
+	        return Asn1OutputStream.GetLengthOfEncodingDL(withID, this.tag, this.octets.Length);
+        }
+
+		internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+		{
+			var flags = Asn1Tags.Application;
 			if (isConstructed)
 			{
-				classBits |= Asn1Tags.Constructed; 
+				flags |= Asn1Tags.Constructed; 
 			}
 
-			derOut.WriteEncoded(classBits, tag, octets);
+			asn1Out.WriteEncodingDL(withID, flags, this.tag, this.octets);
 		}
 
 		protected override bool Asn1Equals(

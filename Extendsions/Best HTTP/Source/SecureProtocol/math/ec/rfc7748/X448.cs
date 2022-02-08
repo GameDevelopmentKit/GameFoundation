@@ -1,18 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 {
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public abstract class X448
     {
         public const int PointSize = 56;
         public const int ScalarSize = 56;
+
+        private class F : X448Field
+        {
+        }
 
         private const uint C_A = 156326;
         private const uint C_A24 = (C_A + 2)/4;
@@ -62,19 +64,19 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 
         private static void PointDouble(uint[] x, uint[] z)
         {
-            uint[] A = X448Field.Create();
-            uint[] B = X448Field.Create();
+            var a = X448Field.Create();
+            var b = X448Field.Create();
 
-            //X448Field.Apm(x, z, A, B);
-            X448Field.Add(x, z, A);
-            X448Field.Sub(x, z, B);
-            X448Field.Sqr(A, A);
-            X448Field.Sqr(B, B);
-            X448Field.Mul(A, B, x);
-            X448Field.Sub(A, B, A);
-            X448Field.Mul(A, C_A24, z);
-            X448Field.Add(z, B, z);
-            X448Field.Mul(z, A, z);
+            //F.Apm(x, z, a, b);
+            X448Field.Add(x, z, a);
+            X448Field.Sub(x, z, b);
+            X448Field.Sqr(a, a);
+            X448Field.Sqr(b, b);
+            X448Field.Mul(a, b, x);
+            X448Field.Sub(a, b, a);
+            X448Field.Mul(a, C_A24, z);
+            X448Field.Add(z, b, z);
+            X448Field.Mul(z, a, z);
         }
 
         public static void Precompute()
@@ -86,24 +88,28 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
         {
             uint[] n = new uint[14];    DecodeScalar(k, kOff, n);
 
-            uint[] x1 = X448Field.Create();     X448Field.Decode(u, uOff, x1);
-            uint[] x2 = X448Field.Create();     X448Field.Copy(x1, 0, x2, 0);
-            uint[] z2 = X448Field.Create();     z2[0] = 1;
-            uint[] x3 = X448Field.Create();     x3[0] = 1;
-            uint[] z3 = X448Field.Create();
+            var x1 = X448Field.Create();
+            X448Field.Decode(u, uOff, x1);
+            var x2 = X448Field.Create();
+            X448Field.Copy(x1, 0, x2, 0);
+            var z2 = X448Field.Create();
+            z2[0] = 1;
+            var x3 = X448Field.Create();
+            x3[0] = 1;
+            var z3 = X448Field.Create();
 
-            uint[] t1 = X448Field.Create();
-            uint[] t2 = X448Field.Create();
+            var t1 = X448Field.Create();
+            var t2 = X448Field.Create();
 
             Debug.Assert(n[13] >> 31 == 1U);
 
             int bit = 447, swap = 1;
             do
             {
-                //X448Field.Apm(x3, z3, t1, x3);
+                //F.Apm(x3, z3, t1, x3);
                 X448Field.Add(x3, z3, t1);
                 X448Field.Sub(x3, z3, x3);
-                //X448Field.Apm(x2, z2, z3, x2);
+                //F.Apm(x2, z2, z3, x2);
                 X448Field.Add(x2, z2, z3);
                 X448Field.Sub(x2, z2, x2);
 
@@ -118,7 +124,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
                 X448Field.Mul(z2, t2, z2);
                 X448Field.Mul(x2, z3, x2);
 
-                //X448Field.Apm(t1, x3, x3, z3);
+                //F.Apm(t1, x3, x3, z3);
                 X448Field.Sub(t1, x3, z3);
                 X448Field.Add(t1, x3, x3);
                 X448Field.Sqr(x3, x3);
@@ -152,8 +158,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748
 
         public static void ScalarMultBase(byte[] k, int kOff, byte[] r, int rOff)
         {
-            uint[] x = X448Field.Create();
-            uint[] y = X448Field.Create();
+            var x = X448Field.Create();
+            var y = X448Field.Create();
 
             Ed448.ScalarMultBaseXY(k, kOff, x, y);
 

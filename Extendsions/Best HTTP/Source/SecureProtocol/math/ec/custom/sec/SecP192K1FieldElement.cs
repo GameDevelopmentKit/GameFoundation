@@ -1,14 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+
     internal class SecP192K1FieldElement
         : AbstractFpFieldElement
     {
@@ -97,7 +95,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
         {
             //return Multiply(b.Invert());
             uint[] z = Nat192.Create();
-            Mod.Invert(SecP192K1Field.P, ((SecP192K1FieldElement)b).x, z);
+            SecP192K1Field.Inv(((SecP192K1FieldElement)b).x, z);
             SecP192K1Field.Multiply(z, x, z);
             return new SecP192K1FieldElement(z);
         }
@@ -120,7 +118,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
         {
             //return new SecP192K1FieldElement(ToBigInteger().ModInverse(Q));
             uint[] z = Nat192.Create();
-            Mod.Invert(SecP192K1Field.P, x, z);
+            SecP192K1Field.Inv(this.x, z);
             return new SecP192K1FieldElement(z);
         }
 
@@ -134,7 +132,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
              * Raise this element to the exponent 2^190 - 2^30 - 2^10 - 2^6 - 2^5 - 2^4 - 2^1
              * 
              * Breaking up the exponent's binary representation into "repunits", we get:
-             * { 159 1s } { 1 0s } { 19 1s } { 1 0s } { 3 1s } { 3 0s} { 3 1s } { 1 0s }
+             * { 159 1s } { 1 0s } { 19 1s } { 1 0s } { 3 1s } { 3 0s } { 3 1s } { 1 0s }
              * 
              * Therefore we need an addition chain containing 3, 19, 159 (the lengths of the repunits)
              * We use: 1, 2, [3], 6, 8, 16, [19], 35, 70, 140, [159]

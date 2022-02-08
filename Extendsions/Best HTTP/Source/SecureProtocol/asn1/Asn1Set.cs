@@ -1,20 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.Diagnostics;
-using System.IO;
 
 #if PORTABLE || NETFX_CORE
 using System.Collections.Generic;
 using System.Linq;
 #endif
 
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
+
     abstract public class Asn1Set
         : Asn1Object, IEnumerable
     {
@@ -36,13 +36,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             }
             else if (obj is Asn1SetParser)
             {
-                return Asn1Set.GetInstance(((Asn1SetParser)obj).ToAsn1Object());
+                return GetInstance(((Asn1SetParser)obj).ToAsn1Object());
             }
             else if (obj is byte[])
             {
                 try
                 {
-                    return Asn1Set.GetInstance(FromByteArray((byte[])obj));
+                    return GetInstance(FromByteArray((byte[])obj));
                 }
                 catch (IOException e)
                 {
@@ -59,7 +59,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 }
             }
 
-            throw new ArgumentException("Unknown object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+            throw new ArgumentException("Unknown object in GetInstance: " + Platform.GetTypeName(obj), "obj");
         }
 
         /**
@@ -125,7 +125,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return new DerSet(v, false);
             }
 
-            throw new ArgumentException("Unknown object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+            throw new ArgumentException("Unknown object in GetInstance: " + Platform.GetTypeName(obj), "obj");
         }
 
         protected internal Asn1Set()
@@ -281,7 +281,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             byte[][] keys = new byte[count][];
             for (int i = 0; i < count; ++i)
             {
-                keys[i] = elements[i].GetEncoded(Asn1Encodable.Der);
+                keys[i] = this.elements[i].GetEncoded(Der);
             }
             Array.Sort(keys, elements, new DerComparer());
 #endif
@@ -326,7 +326,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 if (a0 != b0)
                     return a0 < b0 ? -1 : 1;
 
-                int len = System.Math.Min(a.Length, b.Length);
+                int len = Math.Min(a.Length, b.Length);
                 for (int i = 1; i < len; ++i)
                 {
                     byte ai = a[i], bi = b[i];

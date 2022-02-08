@@ -1,13 +1,16 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.PlatformSupport.Memory;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
+#if !PORTABLE || NETFX_CORE || DOTNET
+using System.Net.Sockets;
+#endif
 
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 {
+    using System;
+    using System.IO;
+    using BestHTTP.PlatformSupport.Memory;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
+
     internal class DtlsRecordLayer
         :   DatagramTransport
     {
@@ -15,6 +18,21 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         private const int MAX_FRAGMENT_LENGTH = 1 << 14;
         private const long TCP_MSL = 1000L * 60 * 2;
         private const long RETRANSMIT_TIMEOUT = TCP_MSL * 2;
+
+        private static void SendDatagram(DatagramTransport sender, byte[] buf, int off, int len)
+        {
+            //try
+            //{
+            //    sender.Send(buf, off, len);
+            //}
+            //catch (InterruptedIOException e)
+            //{
+            //    e.bytesTransferred = 0;
+            //    throw e;
+            //}
+
+            sender.Send(buf, off, len);
+        }
 
         private readonly DatagramTransport mTransport;
         private readonly TlsContext mContext;
@@ -30,9 +48,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
         private DtlsEpoch mCurrentEpoch, mPendingEpoch;
         private DtlsEpoch mReadEpoch, mWriteEpoch;
 
-        private DtlsHandshakeRetransmit mRetransmit = null;
-        private DtlsEpoch mRetransmitEpoch = null;
-        private long mRetransmitExpiry = 0;
+        private DtlsHandshakeRetransmit mRetransmit      = null;
+        private DtlsEpoch               mRetransmitEpoch = null;
+        private Timeout                 mRetransmitTimeout;
 
         internal DtlsRecordLayer(DatagramTransport transport, TlsContext context, TlsPeer peer, byte contentType)
         {
@@ -101,9 +119,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
             if (retransmit != null)
             {
-                this.mRetransmit = retransmit;
-                this.mRetransmitEpoch = mCurrentEpoch;
-                this.mRetransmitExpiry = DateTimeUtilities.CurrentUnixMs() + RETRANSMIT_TIMEOUT;
+                this.mRetransmit        = retransmit;
+                this.mRetransmitEpoch   = mCurrentEpoch;
+                this.mRetransmitTimeout = new Timeout(RETRANSMIT_TIMEOUT);
             }
 
             this.mInHandshake = false;
@@ -125,54 +143,200 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
         public virtual int GetReceiveLimit()
         {
-            return System.Math.Min(this.mPlaintextLimit,
+            return Math.Min(this.mPlaintextLimit,
                 mReadEpoch.Cipher.GetPlaintextLimit(mTransport.GetReceiveLimit() - RECORD_HEADER_LENGTH));
         }
 
         public virtual int GetSendLimit()
         {
-            return System.Math.Min(this.mPlaintextLimit,
+            return Math.Min(this.mPlaintextLimit,
                 mWriteEpoch.Cipher.GetPlaintextLimit(mTransport.GetSendLimit() - RECORD_HEADER_LENGTH));
         }
 
         public virtual int Receive(byte[] buf, int off, int len, int waitMillis)
         {
-            byte[] record = null;
+            var currentTimeMillis = DateTimeUtilities.CurrentUnixMs();
 
-            for (;;)
+            var    timeout = Timeout.ForWaitMillis(waitMillis, currentTimeMillis); 
+            byte[] record  = null;
+
+            while (waitMillis >= 0)
             {
-                int receiveLimit = System.Math.Min(len, GetReceiveLimit()) + RECORD_HEADER_LENGTH;
+                if (this.mRetransmitTimeout != null && this.mRetransmitTimeout.RemainingMillis(currentTimeMillis) < 1)
+                {
+                    this.mRetransmit        = null;
+                    this.mRetransmitEpoch   = null;
+                    this.mRetransmitTimeout = null;
+                }
+
+                int receiveLimit = Math.Min(len, GetReceiveLimit()) + RECORD_HEADER_LENGTH;
                 if (record == null || record.Length < receiveLimit)
                 {
                     record = new byte[receiveLimit];
                 }
 
+                var received  = this.ReceiveRecord(record, 0, receiveLimit, waitMillis);
+                var processed = this.ProcessRecord(received, record, buf, off);
+                if (processed >= 0) return processed;
+
+                currentTimeMillis = DateTimeUtilities.CurrentUnixMs();
+                waitMillis        = Timeout.GetWaitMillis(timeout, currentTimeMillis);
+            }
+
+            return -1;
+        }
+
+        /// <exception cref="IOException" />
+        public virtual void Send(byte[] buf, int off, int len)
+        {
+            var contentType = ContentType.application_data;
+
+            if (this.mInHandshake || this.mWriteEpoch == this.mRetransmitEpoch)
+            {
+                contentType = ContentType.handshake;
+
+                var handshakeType = TlsUtilities.ReadUint8(buf, off);
+                if (handshakeType == HandshakeType.finished)
+                {
+                    DtlsEpoch nextEpoch = null;
+                    if (this.mInHandshake)
+                        nextEpoch                                                 = this.mPendingEpoch;
+                    else if (this.mWriteEpoch == this.mRetransmitEpoch) nextEpoch = this.mCurrentEpoch;
+
+                    if (nextEpoch == null)
+                        // TODO
+                        throw new InvalidOperationException();
+
+                    // Implicitly send change_cipher_spec and change to pending cipher state
+
+                    // TODO Send change_cipher_spec and finished records in single datagram?
+                    byte[] data = { 1 };
+                    this.SendRecord(ContentType.change_cipher_spec, data, 0, data.Length);
+
+                    this.mWriteEpoch = nextEpoch;
+                }
+            }
+
+            this.SendRecord(contentType, buf, off, len);
+        }
+
+        public virtual void Close()
+        {
+            if (!this.mClosed)
+            {
+                if (this.mInHandshake) this.Warn(AlertDescription.user_canceled, "User canceled handshake");
+                this.CloseTransport();
+            }
+        }
+
+        internal virtual void Failed()
+        {
+            if (!this.mClosed)
+            {
+                this.mFailed = true;
+
+                this.CloseTransport();
+            }
+        }
+
+        internal virtual void Fail(byte alertDescription)
+        {
+            if (!this.mClosed)
+            {
                 try
                 {
-                    if (mRetransmit != null && DateTimeUtilities.CurrentUnixMs() > mRetransmitExpiry)
-                    {
-                        mRetransmit = null;
-                        mRetransmitEpoch = null;
-                    }
+                    this.RaiseAlert(AlertLevel.fatal, alertDescription, null, null);
+                }
+                catch (Exception)
+                {
+                    // Ignore
+                }
 
-                    int received = ReceiveRecord(record, 0, receiveLimit, waitMillis);
-                    if (received < 0)
-                    {
-                        return received;
-                    }
+                this.mFailed = true;
+
+                this.CloseTransport();
+            }
+        }
+
+        internal virtual void Warn(byte alertDescription, string message) { this.RaiseAlert(AlertLevel.warning, alertDescription, message, null); }
+
+        private void CloseTransport()
+        {
+            if (!this.mClosed)
+            {
+                /*
+                 * RFC 5246 7.2.1. Unless some other fatal alert has been transmitted, each party is
+                 * required to send a close_notify alert before closing the write side of the
+                 * connection. The other party MUST respond with a close_notify alert of its own and
+                 * close down the connection immediately, discarding any pending writes.
+                 */
+
+                try
+                {
+                    if (!this.mFailed) this.Warn(AlertDescription.close_notify, null);
+                    this.mTransport.Close();
+                }
+                catch (Exception)
+                {
+                    // Ignore
+                }
+
+                this.mClosed = true;
+            }
+        }
+
+        private void RaiseAlert(byte alertLevel, byte alertDescription, string message, Exception cause)
+        {
+            this.mPeer.NotifyAlertRaised(alertLevel, alertDescription, message, cause);
+
+            var error = new byte[2];
+            error[0] = alertLevel;
+            error[1] = alertDescription;
+
+            this.SendRecord(ContentType.alert, error, 0, 2);
+        }
+
+        private int ReceiveDatagram(byte[] buf, int off, int len, int waitMillis)
+        {
+            try
+            {
+                return this.mTransport.Receive(buf, off, len, waitMillis);
+            }
+            catch (TlsTimeoutException)
+            {
+                return -1;
+            }
+#if !PORTABLE || NETFX_CORE || DOTNET
+            catch (SocketException e)
+            {
+                if (TlsUtilities.IsTimeout(e))
+                    return -1;
+
+                throw e;
+            }
+#endif
+            //catch (InterruptedIOException e)
+            //{
+            //    e.bytesTransferred = 0;
+            //    throw e;
+            //}
+        }
+
+        private int ProcessRecord(int received, byte[] record, byte[] buf, int off)
+        {
+            // NOTE: received < 0 (timeout) is covered by this first case
                     if (received < RECORD_HEADER_LENGTH)
                     {
-                        continue;
+                        return -1;
                     }
                     int length = TlsUtilities.ReadUint16(record, 11);
                     if (received != (length + RECORD_HEADER_LENGTH))
                     {
-                        continue;
+                        return -1;
                     }
 
                     byte type = TlsUtilities.ReadUint8(record, 0);
 
-                    // TODO Support user-specified custom protocols?
                     switch (type)
                     {
                     case ContentType.alert:
@@ -182,8 +346,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                     case ContentType.heartbeat:
                         break;
                     default:
-                        // TODO Exception?
-                        continue;
+                        return -1;
                     }
 
                     int epoch = TlsUtilities.ReadUint16(record, 3);
@@ -201,24 +364,24 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
                     if (recordEpoch == null)
                     {
-                        continue;
+                        return -1;
                     }
 
                     long seq = TlsUtilities.ReadUint48(record, 5);
                     if (recordEpoch.ReplayWindow.ShouldDiscard(seq))
                     {
-                        continue;
+                        return -1;
                     }
 
                     ProtocolVersion version = TlsUtilities.ReadVersion(record, 1);
                     if (!version.IsDtls)
                     {
-                        continue;
+                        return -1;
                     }
 
                     if (mReadVersion != null && !mReadVersion.Equals(version))
                     {
-                        continue;
+                        return -1;
                     }
 
                     BufferSegment plaintext = recordEpoch.Cipher.DecodeCiphertext(
@@ -229,7 +392,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
 
                     if (plaintext.Count > this.mPlaintextLimit)
                     {
-                        continue;
+                        return -1;
                     }
 
                     if (mReadVersion == null)
@@ -261,7 +424,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                             }
                         }
 
-                        continue;
+                        return -1;
                     }
                     case ContentType.application_data:
                     {
@@ -269,7 +432,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                         {
                             // TODO Consider buffering application data for new epoch that arrives
                             // out-of-order with the Finished message
-                            continue;
+                            return -1;
                         }
                         break;
                     }
@@ -291,7 +454,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                             }
                         }
 
-                        continue;
+                        return -1;
                     }
                     case ContentType.handshake:
                     {
@@ -303,14 +466,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                             }
 
                             // TODO Consider support for HelloRequest
-                            continue;
+                            return -1;
                         }
                         break;
                     }
                     case ContentType.heartbeat:
                     {
                         // TODO[RFC 6520]
-                        continue;
+                        return -1;
                     }
                     }
 
@@ -320,146 +483,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                      */
                     if (!mInHandshake && mRetransmit != null)
                     {
-                        this.mRetransmit = null;
-                        this.mRetransmitEpoch = null;
+                        this.mRetransmit        = null;
+                        this.mRetransmitEpoch   = null;
+                        this.mRetransmitTimeout = null;
                     }
 
-                    Array.Copy(plaintext.Data, plaintext.Offset, buf, off, plaintext.Count);
-                    BufferPool.Release(plaintext);
+                    Array.Copy(plaintext.Data, 0, buf, off, plaintext.Count);
                     return plaintext.Count;
-                }
-                catch (IOException e)
-                {
-                    // NOTE: Assume this is a timeout for the moment
-                    throw e;
-                }
-            }
-        }
-
-        /// <exception cref="IOException"/>
-        public virtual void Send(byte[] buf, int off, int len)
-        {
-            byte contentType = ContentType.application_data;
-
-            if (this.mInHandshake || this.mWriteEpoch == this.mRetransmitEpoch)
-            {
-                contentType = ContentType.handshake;
-
-                byte handshakeType = TlsUtilities.ReadUint8(buf, off);
-                if (handshakeType == HandshakeType.finished)
-                {
-                    DtlsEpoch nextEpoch = null;
-                    if (this.mInHandshake)
-                    {
-                        nextEpoch = mPendingEpoch;
-                    }
-                    else if (this.mWriteEpoch == this.mRetransmitEpoch)
-                    {
-                        nextEpoch = mCurrentEpoch;
-                    }
-
-                    if (nextEpoch == null)
-                    {
-                        // TODO
-                        throw new InvalidOperationException();
-                    }
-
-                    // Implicitly send change_cipher_spec and change to pending cipher state
-
-                    // TODO Send change_cipher_spec and finished records in single datagram?
-                    byte[] data = new byte[]{ 1 };
-                    SendRecord(ContentType.change_cipher_spec, data, 0, data.Length);
-
-                    mWriteEpoch = nextEpoch;
-                }
-            }
-
-            SendRecord(contentType, buf, off, len);
-        }
-
-        public virtual void Close()
-        {
-            if (!mClosed)
-            {
-                if (mInHandshake)
-                {
-                    Warn(AlertDescription.user_canceled, "User canceled handshake");
-                }
-                CloseTransport();
-            }
-        }
-
-        internal virtual void Failed()
-        {
-            if (!mClosed)
-            {
-                mFailed = true;
-
-                CloseTransport();
-            }
-        }
-
-        internal virtual void Fail(byte alertDescription)
-        {
-            if (!mClosed)
-            {
-                try
-                {
-                    RaiseAlert(AlertLevel.fatal, alertDescription, null, null);
-                }
-                catch (Exception)
-                {
-                    // Ignore
-                }
-
-                mFailed = true;
-
-                CloseTransport();
-            }
-        }
-
-        internal virtual void Warn(byte alertDescription, string message)
-        {
-            RaiseAlert(AlertLevel.warning, alertDescription, message, null);
-        }
-
-        private void CloseTransport()
-        {
-            if (!mClosed)
-            {
-                /*
-                 * RFC 5246 7.2.1. Unless some other fatal alert has been transmitted, each party is
-                 * required to send a close_notify alert before closing the write side of the
-                 * connection. The other party MUST respond with a close_notify alert of its own and
-                 * close down the connection immediately, discarding any pending writes.
-                 */
-
-                try
-                {
-                    if (!mFailed)
-                    {
-                        Warn(AlertDescription.close_notify, null);
-                    }
-                    mTransport.Close();
-                }
-                catch (Exception)
-                {
-                    // Ignore
-                }
-
-                mClosed = true;
-            }
-        }
-
-        private void RaiseAlert(byte alertLevel, byte alertDescription, string message, Exception cause)
-        {
-            mPeer.NotifyAlertRaised(alertLevel, alertDescription, message, cause);
-
-            byte[] error = new byte[2];
-            error[0] = (byte)alertLevel;
-            error[1] = (byte)alertDescription;
-
-            SendRecord(ContentType.alert, error, 0, 2);
         }
 
         private int ReceiveRecord(byte[] buf, int off, int len, int waitMillis)
@@ -474,13 +504,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
                     length = TlsUtilities.ReadUint16(lengthBytes, 0);
                 }
 
-                int received = System.Math.Min(mRecordQueue.Available, RECORD_HEADER_LENGTH + length);
+                int received = Math.Min(mRecordQueue.Available, RECORD_HEADER_LENGTH + length);
                 mRecordQueue.RemoveData(buf, off, received, 0);
                 return received;
             }
 
             {
-                int received = mTransport.Receive(buf, off, len, waitMillis);
+                var received = this.ReceiveDatagram(buf, off, len, waitMillis);
                 if (received >= RECORD_HEADER_LENGTH)
                 {
                     int fragmentLength = TlsUtilities.ReadUint16(buf, off + 11);
@@ -528,7 +558,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Tls
             TlsUtilities.WriteUint16(ciphertext.Count, record, 11);
             Array.Copy(ciphertext.Data, ciphertext.Offset, record, RECORD_HEADER_LENGTH, ciphertext.Count);
 
-            mTransport.Send(record, 0, record.Length);
+            SendDatagram(this.mTransport, record, 0, record.Length);
 
             BufferPool.Release(ciphertext);
         }

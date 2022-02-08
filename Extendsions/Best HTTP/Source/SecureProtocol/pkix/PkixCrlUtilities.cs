@@ -1,14 +1,13 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkix
 {
+	using System;
+	using System.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
+
 	public class PkixCrlUtilities
 	{
 		public virtual ISet FindCrls(X509CrlStoreSelector crlselect, PkixParameters paramsPkix, DateTime currentDate)
@@ -37,21 +36,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Pkix
 			// based on RFC 5280 6.3.3
 			foreach (X509Crl crl in initialSet)
 			{
-				if (crl.NextUpdate.Value.CompareTo(validityDate) > 0)
+				var nextUpdate = crl.NextUpdate;
+
+				if (null == nextUpdate || nextUpdate.Value.CompareTo(validityDate) > 0)
 				{
 					X509Certificate cert = crlselect.CertificateChecking;
 
-					if (cert != null)
-					{
-						if (crl.ThisUpdate.CompareTo(cert.NotAfter) < 0)
-						{
-							finalSet.Add(crl);
-						}
-					}
-					else
-					{
-						finalSet.Add(crl);
-					}
+					if (null == cert || crl.ThisUpdate.CompareTo(cert.NotAfter) < 0) finalSet.Add(crl);
 				}
 			}
 

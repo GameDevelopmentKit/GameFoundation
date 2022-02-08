@@ -1,8 +1,8 @@
 #if !BESTHTTP_DISABLE_SIGNALR_CORE
-using System;
-
 namespace BestHTTP.SignalRCore.Messages
 {
+    using BestHTTP.PlatformSupport.IL2CPP;
+
     public enum MessageTypes : int
     {
         /// <summary>
@@ -46,18 +46,19 @@ namespace BestHTTP.SignalRCore.Messages
         Close = 7
     }
 
+    [Preserve]
     public struct Message
     {
-        public MessageTypes type;
-        public string invocationId;
-        public bool nonblocking;
-        public string target;
-        public object[] arguments;
-        public string[] streamIds;
-        public object item;
-        public object result;
-        public string error;
-        public bool allowReconnect;
+        [Preserve] public MessageTypes type;
+        [Preserve] public string       invocationId;
+        [Preserve] public bool         nonblocking;
+        [Preserve] public string       target;
+        [Preserve] public object[]     arguments;
+        [Preserve] public string[]     streamIds;
+        [Preserve] public object       item;
+        [Preserve] public object       result;
+        [Preserve] public string       error;
+        [Preserve] public bool         allowReconnect;
 
         public override string ToString()
         {

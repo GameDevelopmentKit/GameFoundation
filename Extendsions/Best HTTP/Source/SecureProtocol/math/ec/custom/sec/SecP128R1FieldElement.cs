@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+
     internal class SecP128R1FieldElement
         : AbstractFpFieldElement
     {
@@ -96,7 +95,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
         {
     //        return multiply(b.invert());
             uint[] z = Nat128.Create();
-            Mod.Invert(SecP128R1Field.P, ((SecP128R1FieldElement)b).x, z);
+            SecP128R1Field.Inv(((SecP128R1FieldElement)b).x, z);
             SecP128R1Field.Multiply(z, x, z);
             return new SecP128R1FieldElement(z);
         }
@@ -119,7 +118,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Sec
         {
     //        return new SecP128R1FieldElement(toBigInteger().modInverse(Q));
             uint[] z = Nat128.Create();
-            Mod.Invert(SecP128R1Field.P, x, z);
+            SecP128R1Field.Inv(this.x, z);
             return new SecP128R1FieldElement(z);
         }
 

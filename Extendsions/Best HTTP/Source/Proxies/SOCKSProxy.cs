@@ -259,7 +259,7 @@ namespace BestHTTP
                     buffer[count++] = isIPV4 ? (byte)SOCKSAddressTypes.IPV4 : (byte)SOCKSAddressTypes.IPv6;
 
                     var ipAddress = IPAddress.Parse(request.CurrentUri.Host);
-                    var ipBytes = ipAddress.GetAddressBytes();
+                    var ipBytes   = ipAddress.GetAddressBytes();
                     WriteBytes(buffer, ref count, ipBytes); // destination address
                 }
                 else

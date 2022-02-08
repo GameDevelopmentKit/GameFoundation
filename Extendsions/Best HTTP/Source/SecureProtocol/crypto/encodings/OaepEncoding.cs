@@ -1,14 +1,14 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
     * Optimal Asymmetric Encryption Padding (OAEP) - see PKCS 1 V 2.
     */
@@ -171,7 +171,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
             //
             // mask the message block.
             //
-            byte[] mask = maskGeneratorFunction1(seed, 0, seed.Length, block.Length - defHash.Length);
+            var mask = this.MaskGeneratorFunction(seed, 0, seed.Length, block.Length - this.defHash.Length);
 
             for (int i = defHash.Length; i != block.Length; i++)
             {
@@ -186,7 +186,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
             //
             // mask the seed.
             //
-            mask = maskGeneratorFunction1(
+            mask = this.MaskGeneratorFunction(
                 block, defHash.Length, block.Length - defHash.Length, defHash.Length);
 
             for (int i = 0; i != defHash.Length; i++)
@@ -229,7 +229,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
             //
             // unmask the seed.
             //
-            byte[] mask = maskGeneratorFunction1(
+            var mask = this.MaskGeneratorFunction(
                 block, defHash.Length, block.Length - defHash.Length, defHash.Length);
 
             for (int i = 0; i != defHash.Length; i++)
@@ -240,7 +240,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
             //
             // unmask the message block.
             //
-            mask = maskGeneratorFunction1(block, 0, defHash.Length, block.Length - defHash.Length);
+            mask = this.MaskGeneratorFunction(block, 0, this.defHash.Length, block.Length - this.defHash.Length);
 
             for (int i = defHash.Length; i != block.Length; i++)
             {
@@ -290,27 +290,33 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
             byte[] output = new byte[block.Length - start];
 
             Array.Copy(block, start, output, 0, output.Length);
+            Array.Clear(block, 0, block.Length);
 
             return output;
         }
 
-        /**
-        * int to octet string.
-        */
-        private void ItoOSP(
-            int		i,
-            byte[]	sp)
+        private byte[] MaskGeneratorFunction(
+            byte[] Z,
+            int zOff,
+            int zLen,
+            int length)
         {
-            sp[0] = (byte)((uint)i >> 24);
-            sp[1] = (byte)((uint)i >> 16);
-            sp[2] = (byte)((uint)i >> 8);
-            sp[3] = (byte)((uint)i >> 0);
+            if (this.mgf1Hash is IXof)
+            {
+                var mask = new byte[length];
+                this.mgf1Hash.BlockUpdate(Z, zOff, zLen);
+                ((IXof)this.mgf1Hash).DoFinal(mask, 0, mask.Length);
+
+                return mask;
+            }
+
+            return this.MaskGeneratorFunction1(Z, zOff, zLen, length);
         }
 
         /**
         * mask generator function, as described in PKCS1v2.
         */
-        private byte[] maskGeneratorFunction1(
+        private byte[] MaskGeneratorFunction1(
             byte[]	Z,
             int		zOff,
             int		zLen,
@@ -325,7 +331,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
 
             while (counter < (length / hashBuf.Length))
             {
-                ItoOSP(counter, C);
+                Pack.UInt32_To_BE((uint)counter, C);
 
                 mgf1Hash.BlockUpdate(Z, zOff, zLen);
                 mgf1Hash.BlockUpdate(C, 0, C.Length);
@@ -338,7 +344,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Encodings
 
             if ((counter * hashBuf.Length) < length)
             {
-                ItoOSP(counter, C);
+                Pack.UInt32_To_BE((uint)counter, C);
 
                 mgf1Hash.BlockUpdate(Z, zOff, zLen);
                 mgf1Hash.BlockUpdate(C, 0, C.Length);

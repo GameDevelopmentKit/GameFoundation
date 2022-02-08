@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
 {
+    using System;
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /// <summary>
     /// Implementation of SHAKE based on following KeccakNISTInterface.c from http://keccak.noekeon.org/
     /// </summary>
@@ -48,6 +47,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
             get { return "SHAKE" + fixedOutputLength; }
         }
 
+        public override int GetDigestSize() { return this.fixedOutputLength >> 2; }
+
         public override int DoFinal(byte[] output, int outOff)
         {
             return DoFinal(output, outOff, GetDigestSize());
@@ -55,11 +56,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
 
         public virtual int DoFinal(byte[] output, int outOff, int outLen)
         {
-            DoOutput(output, outOff, outLen);
+            var length = this.DoOutput(output, outOff, outLen);
 
             Reset();
 
-            return outLen;
+            return length;
         }
 
         public virtual int DoOutput(byte[] output, int outOff, int outLen)

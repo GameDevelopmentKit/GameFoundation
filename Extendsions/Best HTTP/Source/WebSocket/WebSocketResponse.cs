@@ -118,7 +118,7 @@ namespace BestHTTP.WebSocket
         /// <summary>
         /// A circular buffer to store the last N rtt times calculated by the pong messages.
         /// </summary>
-        private CircularBuffer<int> rtts = new CircularBuffer<int>(RTTBufferCapacity);
+        private readonly CircularBuffer<int> rtts = new(RTTBufferCapacity);
         
         #endregion
 
@@ -128,14 +128,14 @@ namespace BestHTTP.WebSocket
             base.IsClosedManually = true;
             this.ConnectionKey = new HostConnectionKey(this.baseRequest.CurrentUri.Host, HostDefinition.GetKeyForRequest(this.baseRequest));
 
-            closed               = false;
+            this.closed          = false;
             this.MaxFragmentSize = WebSocket.MaxFragmentSize;
         }
 
         internal void StartReceive()
         {
             if (IsUpgraded)
-                ThreadedRunner.RunLongLiving(ReceiveThreadFunc);
+                ThreadedRunner.RunLongLiving(this.ReceiveThreadFunc);
         }
 
         internal void CloseStream()
@@ -161,8 +161,8 @@ namespace BestHTTP.WebSocket
             if (message == null)
                 throw new ArgumentNullException("message must not be null!");
 
-            int count = Encoding.UTF8.GetByteCount(message);
-            byte[] data = BufferPool.Get(count, true);
+            var    count = Encoding.UTF8.GetByteCount(message);
+            byte[] data  = BufferPool.Get(count, true);
             Encoding.UTF8.GetBytes(message, 0, message.Length, data, 0);
 
             var frame = new WebSocketFrame(this.WebSocket, WebSocketFrameTypes.Text, data, 0, (ulong)count, true, true);
@@ -248,7 +248,7 @@ namespace BestHTTP.WebSocket
             {
                 HTTPManager.Logger.Information("WebSocketResponse", "Send - Creating thread", this.Context);
 
-                ThreadedRunner.RunLongLiving(SendThreadFunc);
+                ThreadedRunner.RunLongLiving(this.SendThreadFunc);
             }
 
             Interlocked.Add(ref this._bufferedAmount, frame.Data != null ? frame.DataLength : 0);

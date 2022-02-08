@@ -1,12 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/**
 	 * A Der encoded set object
 	 */
@@ -64,6 +62,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			}
 		}
 
+		internal override int EncodedLength(bool withID) { throw Platform.CreateNotImplementedException("DerSet.EncodedLength"); }
+
 		/*
 		 * A note on the implementation:
 		 * <p>
@@ -72,22 +72,31 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 		 * ASN.1 descriptions given. Rather than just outputing Set,
 		 * we also have to specify Constructed, and the objects length.
 		 */
-		internal override void Encode(DerOutputStream derOut)
+		internal override void Encode(Asn1OutputStream asn1Out, bool withID)
 		{
-			// TODO Intermediate buffer could be avoided if we could calculate expected length
-			MemoryStream bOut = new MemoryStream();
-			DerOutputStream dOut = new DerOutputStream(bOut);
-
-			foreach (Asn1Encodable obj in this)
+			if (this.Count < 1)
 			{
-				dOut.WriteObject(obj);
+				asn1Out.WriteEncodingDL(withID, Asn1Tags.Constructed | Asn1Tags.Set, Asn1OctetString.EmptyOctets);
+				return;
 			}
 
-            BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Dispose(dOut);
+			// TODO Intermediate buffer could be avoided if we could calculate expected length
+			var bOut = new MemoryStream();
+			var dOut = Asn1OutputStream.Create(bOut, Der);
+			dOut.WriteElements(this.elements);
+			dOut.Flush();
 
+#if PORTABLE || NETFX_CORE
             byte[] bytes = bOut.ToArray();
+            int length = bytes.Length;
+#else
+			var bytes  = bOut.GetBuffer();
+			var length = (int)bOut.Position;
+#endif
 
-			derOut.WriteEncoded(Asn1Tags.Set | Asn1Tags.Constructed, bytes);
+			asn1Out.WriteEncodingDL(withID, Asn1Tags.Constructed | Asn1Tags.Set, bytes, 0, length);
+
+			Platform.Dispose(dOut);
 		}
 	}
 }

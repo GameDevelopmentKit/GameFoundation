@@ -1,38 +1,28 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 {
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/**
 	* A Noekeon engine, using direct-key mode.
 	*/
 	public class NoekeonEngine
 		: IBlockCipher
 	{
-		private const int GenericSize = 16; // Block and key size, as well as the amount of rounds.
+		// Block and key size, as well as the amount of rounds.
+		private const int Size = 16;
 
-		private static readonly uint[] nullVector = 
+		private static readonly byte[] RoundConstants =
 		{
-			0x00, 0x00, 0x00, 0x00 // Used in decryption
+			0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e,
+			0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4
 		};
 
-		private static readonly uint[] roundConstants = 
-		{
-			0x80, 0x1b, 0x36, 0x6c,
-			0xd8, 0xab, 0x4d, 0x9a,
-			0x2f, 0x5e, 0xbc, 0x63,
-			0xc6, 0x97, 0x35, 0x6a,
-			0xd4
-		};
-
-		private uint[]	state = new uint[4], // a
-						subKeys = new uint[4], // k
-						decryptKeys = new uint[4];
+		private readonly uint[] k = new uint[4];
 
 		private bool _initialised, _forEncryption;
 
@@ -57,7 +47,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 
         public virtual int GetBlockSize()
 		{
-			return GenericSize;
+			return Size;
 		}
 
 		/**
@@ -68,20 +58,43 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 		* @exception ArgumentException if the params argument is
 		* inappropriate.
 		*/
-		public virtual void Init(
-			bool				forEncryption,
-			ICipherParameters	parameters)
+		public virtual void Init(bool forEncryption, ICipherParameters parameters)
 		{
 			if (!(parameters is KeyParameter))
 				throw new ArgumentException("Invalid parameters passed to Noekeon init - "
-                    + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(parameters), "parameters");
+                    + Platform.GetTypeName(parameters), "parameters");
 
-			_forEncryption = forEncryption;
-			_initialised = true;
+			KeyParameter p   = (KeyParameter) parameters;
+			var          key = p.GetKey();
+			if (key.Length != 16)
+				throw new ArgumentException("Key length not 128 bits.");
 
-			KeyParameter p = (KeyParameter) parameters;
+			Pack.BE_To_UInt32(key, 0, this.k, 0, 4);
 
-			setKey(p.GetKey());
+			if (!forEncryption)
+				// theta(k, new uint[]{ 0x00, 0x00, 0x00, 0x00 });
+			{
+				uint a0 = this.k[0], a1 = this.k[1], a2 = this.k[2], a3 = this.k[3];
+
+				var t02 = a0 ^ a2;
+				t02 ^= Integers.RotateLeft(t02, 8) ^ Integers.RotateLeft(t02, 24);
+
+				var t13 = a1 ^ a3;
+				t13 ^= Integers.RotateLeft(t13, 8) ^ Integers.RotateLeft(t13, 24);
+
+				a0 ^= t13;
+				a1 ^= t02;
+				a2 ^= t13;
+				a3 ^= t02;
+
+				k[0] = a0;
+				k[1] = a1;
+				k[2] = a2;
+				k[3] = a3;
+			}
+
+			this._forEncryption = forEncryption;
+			this._initialised   = true;
 		}
 
 		public virtual int ProcessBlock(
@@ -93,151 +106,158 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Engines
 			if (!_initialised)
 				throw new InvalidOperationException(AlgorithmName + " not initialised");
 
-            Check.DataLength(input, inOff, GenericSize, "input buffer too short");
-            Check.OutputLength(output, outOff, GenericSize, "output buffer too short");
+			Check.DataLength(input, inOff, Size, "input buffer too short");
+			Check.OutputLength(output, outOff, Size, "output buffer too short");
 
             return _forEncryption
-				?	encryptBlock(input, inOff, output, outOff)
-				:	decryptBlock(input, inOff, output, outOff);
+	            ? this.EncryptBlock(input, inOff, output, outOff)
+	            : this.DecryptBlock(input, inOff, output, outOff);
 		}
 
 		public virtual void Reset()
 		{
-			// TODO This should do something in case the encryption is aborted
 		}
 
-		/**
-		* Re-key the cipher.
-		*
-		* @param  key  the key to be used
-		*/
-		private void setKey(byte[] key)
+		private int EncryptBlock(byte[] input, int inOff, byte[] output, int outOff)
 		{
-			subKeys[0] = Pack.BE_To_UInt32(key, 0);
-			subKeys[1] = Pack.BE_To_UInt32(key, 4);
-			subKeys[2] = Pack.BE_To_UInt32(key, 8);
-			subKeys[3] = Pack.BE_To_UInt32(key, 12);
-		}
+			var a0 = Pack.BE_To_UInt32(input, inOff);
+			var a1 = Pack.BE_To_UInt32(input, inOff + 4);
+			var a2 = Pack.BE_To_UInt32(input, inOff + 8);
+			var a3 = Pack.BE_To_UInt32(input, inOff + 12);
 
-		private int encryptBlock(
-			byte[]	input,
-			int		inOff,
-			byte[]	output,
-			int		outOff)
-		{
-			state[0] = Pack.BE_To_UInt32(input, inOff);
-			state[1] = Pack.BE_To_UInt32(input, inOff+4);
-			state[2] = Pack.BE_To_UInt32(input, inOff+8);
-			state[3] = Pack.BE_To_UInt32(input, inOff+12);
+			uint k0 = this.k[0], k1 = this.k[1], k2 = this.k[2], k3 = this.k[3];
 
-			int i;
-			for (i = 0; i < GenericSize; i++)
+			var round = 0;
+			for (;;)
 			{
-				state[0] ^= roundConstants[i];
-				theta(state, subKeys);
-				pi1(state);
-				gamma(state);
-				pi2(state);            
+				a0 ^= RoundConstants[round];
+
+				// theta(a, k);
+				{
+					var t02 = a0 ^ a2;
+					t02 ^= Integers.RotateLeft(t02, 8) ^ Integers.RotateLeft(t02, 24);
+
+					a0 ^= k0;
+					a1 ^= k1;
+					a2 ^= k2;
+					a3 ^= k3;
+
+					var t13 = a1 ^ a3;
+					t13 ^= Integers.RotateLeft(t13, 8) ^ Integers.RotateLeft(t13, 24);
+
+					a0 ^= t13;
+					a1 ^= t02;
+					a2 ^= t13;
+					a3 ^= t02;
+				}
+
+				if (++round > Size)
+					break;
+
+				// pi1(a);
+				{
+					a1 = Integers.RotateLeft(a1, 1);
+					a2 = Integers.RotateLeft(a2, 5);
+					a3 = Integers.RotateLeft(a3, 2);
+				}
+
+				// gamma(a);
+				{
+					var t = a3;
+					a1 ^= a3 | a2;
+					a3 =  a0 ^ (a2 & ~a1);
+
+					a2 = t ^ ~a1 ^ a2 ^ a3;
+
+					a1 ^= a3 | a2;
+					a0 =  t ^ (a2 & a1);
+				}
+
+				// pi2(a);
+				{
+					a1 = Integers.RotateLeft(a1, 31);
+					a2 = Integers.RotateLeft(a2, 27);
+					a3 = Integers.RotateLeft(a3, 30);
+				}
 			}
 
-			state[0] ^= roundConstants[i];
-			theta(state, subKeys);
+			Pack.UInt32_To_BE(a0, output, outOff);
+			Pack.UInt32_To_BE(a1, output, outOff + 4);
+			Pack.UInt32_To_BE(a2, output, outOff + 8);
+			Pack.UInt32_To_BE(a3, output, outOff + 12);
 
-			Pack.UInt32_To_BE(state[0], output, outOff);
-			Pack.UInt32_To_BE(state[1], output, outOff+4);
-			Pack.UInt32_To_BE(state[2], output, outOff+8);
-			Pack.UInt32_To_BE(state[3], output, outOff+12);
-
-			return GenericSize;
+			return Size;
 		}
 
-		private int decryptBlock(
-			byte[]	input,
-			int		inOff,
-			byte[]	output,
-			int		outOff)
+		private int DecryptBlock(byte[] input, int inOff, byte[] output, int outOff)
 		{
-			state[0] = Pack.BE_To_UInt32(input, inOff);
-			state[1] = Pack.BE_To_UInt32(input, inOff+4);
-			state[2] = Pack.BE_To_UInt32(input, inOff+8);
-			state[3] = Pack.BE_To_UInt32(input, inOff+12);
+			var a0 = Pack.BE_To_UInt32(input, inOff);
+			var a1 = Pack.BE_To_UInt32(input, inOff + 4);
+			var a2 = Pack.BE_To_UInt32(input, inOff + 8);
+			var a3 = Pack.BE_To_UInt32(input, inOff + 12);
 
-			Array.Copy(subKeys, 0, decryptKeys, 0, subKeys.Length);
-			theta(decryptKeys, nullVector);
+			uint k0 = this.k[0], k1 = this.k[1], k2 = this.k[2], k3 = this.k[3];
 
-			int i;
-			for (i = GenericSize; i > 0; i--)
+			var round = Size;
+			for (;;)
 			{
-				theta(state, decryptKeys);
-				state[0] ^= roundConstants[i];
-				pi1(state);
-				gamma(state);
-				pi2(state);
+				// theta(a, k);
+				{
+					var t02 = a0 ^ a2;
+					t02 ^= Integers.RotateLeft(t02, 8) ^ Integers.RotateLeft(t02, 24);
+
+					a0 ^= k0;
+					a1 ^= k1;
+					a2 ^= k2;
+					a3 ^= k3;
+
+					var t13 = a1 ^ a3;
+					t13 ^= Integers.RotateLeft(t13, 8) ^ Integers.RotateLeft(t13, 24);
+
+					a0 ^= t13;
+					a1 ^= t02;
+					a2 ^= t13;
+					a3 ^= t02;
+				}
+
+				a0 ^= RoundConstants[round];
+
+				if (--round < 0)
+					break;
+
+				// pi1(a);
+				{
+					a1 = Integers.RotateLeft(a1, 1);
+					a2 = Integers.RotateLeft(a2, 5);
+					a3 = Integers.RotateLeft(a3, 2);
+				}
+
+				// gamma(a);
+				{
+					var t = a3;
+					a1 ^= a3 | a2;
+					a3 =  a0 ^ (a2 & ~a1);
+
+					a2 = t ^ ~a1 ^ a2 ^ a3;
+
+					a1 ^= a3 | a2;
+					a0 =  t ^ (a2 & a1);
+				}
+
+				// pi2(a);
+				{
+					a1 = Integers.RotateLeft(a1, 31);
+					a2 = Integers.RotateLeft(a2, 27);
+					a3 = Integers.RotateLeft(a3, 30);
+				}
 			}
 
-			theta(state, decryptKeys);
-			state[0] ^= roundConstants[i];
+			Pack.UInt32_To_BE(a0, output, outOff);
+			Pack.UInt32_To_BE(a1, output, outOff + 4);
+			Pack.UInt32_To_BE(a2, output, outOff + 8);
+			Pack.UInt32_To_BE(a3, output, outOff + 12);
 
-			Pack.UInt32_To_BE(state[0], output, outOff);
-			Pack.UInt32_To_BE(state[1], output, outOff+4);
-			Pack.UInt32_To_BE(state[2], output, outOff+8);
-			Pack.UInt32_To_BE(state[3], output, outOff+12);
-
-			return GenericSize;
-		}
-
-		private void gamma(uint[] a)
-		{
-			a[1] ^= ~a[3] & ~a[2];
-			a[0] ^= a[2] & a[1];
-
-			uint tmp = a[3];
-			a[3]  = a[0];
-			a[0]  = tmp;
-			a[2] ^= a[0]^a[1]^a[3];
-
-			a[1] ^= ~a[3] & ~a[2];
-			a[0] ^= a[2] & a[1];
-		}
-
-		private void theta(uint[] a, uint[] k)
-		{
-			uint tmp;
-			tmp   = a[0]^a[2]; 
-			tmp  ^= rotl(tmp,8)^rotl(tmp,24); 
-			a[1] ^= tmp; 
-			a[3] ^= tmp; 
-
-			for (int i = 0; i < 4; i++)
-			{
-				a[i] ^= k[i];
-			}
-
-			tmp   = a[1]^a[3]; 
-			tmp  ^= rotl(tmp,8)^rotl(tmp,24); 
-			a[0] ^= tmp; 
-			a[2] ^= tmp;
-		}
-
-		private void pi1(uint[] a)
-		{
-			a[1] = rotl(a[1], 1);
-			a[2] = rotl(a[2], 5);
-			a[3] = rotl(a[3], 2);
-		}
-
-		private void pi2(uint[] a)
-		{
-			a[1] = rotl(a[1], 31);
-			a[2] = rotl(a[2], 27);
-			a[3] = rotl(a[3], 30);
-		}
-
-		// Helpers
-
-		private uint rotl(uint x, int y)
-		{
-			return (x << y) | (x >> (32-y));
+			return Size;
 		}
 	}
 }

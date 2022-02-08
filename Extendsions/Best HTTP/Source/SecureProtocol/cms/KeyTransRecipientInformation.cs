@@ -1,20 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
 using Asn1Pkcs = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
 
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 {
-    /**
+	using System;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Operators;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+
+	/**
     * the KeyTransRecipientInformation class for a recipient who has been sent a secret
     * key encrypted using their public key that needs to be used to
     * extract the message.
@@ -44,7 +44,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
                 }
                 else
                 {
-                    IssuerAndSerialNumber iAnds = IssuerAndSerialNumber.GetInstance(r.ID);
+	                var iAnds = IssuerAndSerialNumber.GetInstance(r.ID);
 
 					rid.Issuer = iAnds.Name;
                     rid.SerialNumber = iAnds.SerialNumber.Value;
@@ -76,16 +76,25 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Cms
 		internal KeyParameter UnwrapKey(ICipherParameters key)
 		{
 			byte[] encryptedKey = info.EncryptedKey.GetOctets();
-            string keyExchangeAlgorithm = GetExchangeEncryptionAlgorithmName(keyEncAlg);
+
 
 			try
 			{
-				IWrapper keyWrapper = WrapperUtilities.GetWrapper(keyExchangeAlgorithm);
-				keyWrapper.Init(false, key);
+				if (this.keyEncAlg.Algorithm.Equals(Asn1Pkcs.PkcsObjectIdentifiers.IdRsaesOaep))
+				{
+					IKeyUnwrapper keyWrapper = new Asn1KeyUnwrapper(this.keyEncAlg.Algorithm, this.keyEncAlg.Parameters, key);
 
-				// FIXME Support for MAC algorithm parameters similar to cipher parameters
-				return ParameterUtilities.CreateKeyParameter(
-					GetContentAlgorithmName(), keyWrapper.Unwrap(encryptedKey, 0, encryptedKey.Length));
+					return ParameterUtilities.CreateKeyParameter(this.GetContentAlgorithmName(), keyWrapper.Unwrap(encryptedKey, 0, encryptedKey.Length).Collect());
+				}
+				else
+				{
+					var keyExchangeAlgorithm = this.GetExchangeEncryptionAlgorithmName(this.keyEncAlg);
+					var keyWrapper           = WrapperUtilities.GetWrapper(keyExchangeAlgorithm);
+					keyWrapper.Init(false, key);
+
+					// FIXME Support for MAC algorithm parameters similar to cipher parameters
+					return ParameterUtilities.CreateKeyParameter(this.GetContentAlgorithmName(), keyWrapper.Unwrap(encryptedKey, 0, encryptedKey.Length));
+				}
 			}
 			catch (SecurityUtilityException e)
 			{

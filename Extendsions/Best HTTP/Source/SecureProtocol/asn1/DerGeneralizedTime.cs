@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Globalization;
-using System.Text;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using System.Globalization;
+    using System.Text;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
      * Generalized time object.
      */
@@ -29,7 +28,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return (DerGeneralizedTime)obj;
             }
 
-            throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj), "obj");
         }
 
         /**
@@ -206,7 +205,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             string d = time;
             bool makeUniversal = false;
 
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(d, "Z"))
+            if (Platform.EndsWith(d, "Z"))
             {
                 if (HasFractionalSeconds)
                 {
@@ -225,7 +224,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 
                 if (HasFractionalSeconds)
                 {
-                    int fCount = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.IndexOf(d, "GMT") - 1 - d.IndexOf('.');
+                    int fCount = Platform.IndexOf(d, "GMT") - 1 - d.IndexOf('.');
                     formatStr = @"yyyyMMddHHmmss." + FString(fCount) + @"'GMT'zzz";
                 }
                 else
@@ -269,7 +268,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
              * NOTE: DateTime.Kind and DateTimeStyles.AssumeUniversal not available in .NET 1.1
              */
             DateTimeStyles style = DateTimeStyles.None;
-            if (BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EndsWith(format, "Z"))
+            if (Platform.EndsWith(format, "Z"))
             {
                 try
                 {
@@ -297,10 +296,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             return Strings.ToAsciiByteArray(time);
         }
 
-        internal override void Encode(
-            DerOutputStream derOut)
+        internal override int EncodedLength(bool withID)
         {
-            derOut.WriteEncoded(Asn1Tags.GeneralizedTime, GetOctets());
+            return Asn1OutputStream.GetLengthOfEncodingDL(withID, this.time.Length);
+        }
+
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+        {
+            asn1Out.WriteEncodingDL(withID, Asn1Tags.GeneralizedTime, this.GetOctets());
         }
 
         protected override bool Asn1Equals(

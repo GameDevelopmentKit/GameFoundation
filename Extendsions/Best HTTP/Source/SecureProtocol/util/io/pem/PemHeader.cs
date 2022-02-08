@@ -1,7 +1,5 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO.Pem
 {
 	public class PemHeader
@@ -40,8 +38,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO.Pem
 
 			PemHeader other = (PemHeader)obj;
 
-			return BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Equals(this.name, other.name)
-				&& BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.Equals(this.val, other.val);
+			return Equals(this.name, other.name)
+				&& Equals(this.val, other.val);
 		}
 
 		private int GetHashCode(string s)
@@ -53,6 +51,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO.Pem
 
 			return s.GetHashCode();
 		}
+
+		public override string ToString() { return this.name + ":" + this.val; }
 	}
 }
 #pragma warning restore

@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
-    class DefiniteLengthInputStream
+	using System;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.IO;
+
+	class DefiniteLengthInputStream
         : LimitedInputStream
     {
 		private static readonly byte[] EmptyBytes = new byte[0];
@@ -18,16 +17,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
         internal DefiniteLengthInputStream(Stream inStream, int length, int limit)
             : base(inStream, limit)
         {
-			if (length < 0)
-				throw new ArgumentException("negative lengths not allowed", "length");
+	        if (length <= 0)
+	        {
+		        if (length < 0)
+			        throw new ArgumentException("negative lengths not allowed", "length");
 
-			this._originalLength = length;
-			this._remaining = length;
+		        this.SetParentEofDetect(true);
+	        }
 
-			if (length == 0)
-			{
-				SetParentEofDetect(true);
-			}
+	        this._originalLength = length;
+			this._remaining      = length;
         }
 
         internal int Remaining
@@ -61,7 +60,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 			if (_remaining == 0)
 				return 0;
 
-			int toRead = System.Math.Min(len, _remaining);
+			int toRead = Math.Min(len, _remaining);
 			int numRead = _in.Read(buf, off, toRead);
 
 			if (numRead < 1)

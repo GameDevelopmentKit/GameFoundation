@@ -1,0 +1,132 @@
+#if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
+#pragma warning disable
+#if !PORTABLE || NETFX_CORE || DOTNET
+using System.Net.Sockets;
+#endif
+
+namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tls
+{
+    using System;
+    using System.IO;
+
+    public class DtlsTransport
+        : DatagramTransport
+    {
+        private readonly DtlsRecordLayer m_recordLayer;
+
+        internal DtlsTransport(DtlsRecordLayer recordLayer) { this.m_recordLayer = recordLayer; }
+
+        /// <exception cref="IOException" />
+        public virtual int GetReceiveLimit() { return this.m_recordLayer.GetReceiveLimit(); }
+
+        /// <exception cref="IOException" />
+        public virtual int GetSendLimit() { return this.m_recordLayer.GetSendLimit(); }
+
+        /// <exception cref="IOException" />
+        public virtual int Receive(byte[] buf, int off, int len, int waitMillis)
+        {
+            if (null == buf)
+                throw new ArgumentNullException("buf");
+            if (off < 0 || off >= buf.Length)
+                throw new ArgumentException("invalid offset: " + off, "off");
+            if (len < 0 || len > buf.Length - off)
+                throw new ArgumentException("invalid length: " + len, "len");
+            if (waitMillis < 0)
+                throw new ArgumentException("cannot be negative", "waitMillis");
+
+            try
+            {
+                return this.m_recordLayer.Receive(buf, off, len, waitMillis);
+            }
+            catch (TlsFatalAlert fatalAlert)
+            {
+                this.m_recordLayer.Fail(fatalAlert.AlertDescription);
+                throw fatalAlert;
+            }
+            catch (TlsTimeoutException e)
+            {
+                throw e;
+            }
+#if !PORTABLE || NETFX_CORE || DOTNET
+            catch (SocketException e)
+            {
+                if (TlsUtilities.IsTimeout(e))
+                    throw e;
+
+                this.m_recordLayer.Fail(AlertDescription.internal_error);
+                throw new TlsFatalAlert(AlertDescription.internal_error, e);
+            }
+#endif
+            // TODO[tls-port] Can we support interrupted IO on .NET?
+            //catch (InterruptedIOException e)
+            //{
+            //    throw e;
+            //}
+            catch (IOException e)
+            {
+                this.m_recordLayer.Fail(AlertDescription.internal_error);
+                throw e;
+            }
+            catch (Exception e)
+            {
+                this.m_recordLayer.Fail(AlertDescription.internal_error);
+                throw new TlsFatalAlert(AlertDescription.internal_error, e);
+            }
+        }
+
+        /// <exception cref="IOException" />
+        public virtual void Send(byte[] buf, int off, int len)
+        {
+            if (null == buf)
+                throw new ArgumentNullException("buf");
+            if (off < 0 || off >= buf.Length)
+                throw new ArgumentException("invalid offset: " + off, "off");
+            if (len < 0 || len > buf.Length - off)
+                throw new ArgumentException("invalid length: " + len, "len");
+
+            try
+            {
+                this.m_recordLayer.Send(buf, off, len);
+            }
+            catch (TlsFatalAlert fatalAlert)
+            {
+                this.m_recordLayer.Fail(fatalAlert.AlertDescription);
+                throw fatalAlert;
+            }
+            catch (TlsTimeoutException e)
+            {
+                throw e;
+            }
+#if !PORTABLE || NETFX_CORE || DOTNET
+            catch (SocketException e)
+            {
+                if (TlsUtilities.IsTimeout(e))
+                    throw e;
+
+                this.m_recordLayer.Fail(AlertDescription.internal_error);
+                throw new TlsFatalAlert(AlertDescription.internal_error, e);
+            }
+#endif
+            // TODO[tls-port] Can we support interrupted IO on .NET?
+            //catch (InterruptedIOException e)
+            //{
+            //    throw e;
+            //}
+            catch (IOException e)
+            {
+                this.m_recordLayer.Fail(AlertDescription.internal_error);
+                throw e;
+            }
+            catch (Exception e)
+            {
+                this.m_recordLayer.Fail(AlertDescription.internal_error);
+                throw new TlsFatalAlert(AlertDescription.internal_error, e);
+            }
+        }
+
+        /// <exception cref="IOException" />
+        public virtual void Close() { this.m_recordLayer.Close(); }
+    }
+}
+#pragma warning restore
+#endif

@@ -1,11 +1,9 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cmp
 {
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+
 	public class PkiHeaderBuilder
 	{
 		private DerInteger pvno;
@@ -66,8 +64,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cmp
 		{
             return SetRecipKID(kid == null ? null : new DerOctetString(kid));
 		}
-		
-		public virtual PkiHeaderBuilder SetRecipKID(DerOctetString kid)
+
+		public virtual PkiHeaderBuilder SetRecipKID(Asn1OctetString kid)
 		{
 			recipKID = kid;
 			return this;

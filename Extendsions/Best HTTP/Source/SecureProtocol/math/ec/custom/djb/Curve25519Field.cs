@@ -1,17 +1,20 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Djb
 {
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+
     internal class Curve25519Field
     {
-        // 2^255 - 2^4 - 2^1 - 1
-        internal static readonly uint[] P = new uint[]{ 0xFFFFFFED, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
-            0xFFFFFFFF, 0x7FFFFFFF };
+        // 2^255 - 19
+        internal static readonly uint[] P =
+        {
+            0xFFFFFFED, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+            0xFFFFFFFF, 0xFFFFFFFF, 0x7FFFFFFF
+        };
         private const uint P7 = 0x7FFFFFFF;
         private static readonly uint[] PExt = new uint[]{ 0x00000169, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000, 0xFFFFFFED, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
@@ -47,7 +50,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Djb
 
         public static uint[] FromBigInteger(BigInteger x)
         {
-            uint[] z = Nat256.FromBigInteger(x);
+            var z = Nat.FromBigInteger(256, x);
             while (Nat256.Gte(z, P))
             {
                 Nat256.SubFrom(P, z);
@@ -68,6 +71,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Djb
             }
         }
 
+        public static void Inv(uint[] x, uint[] z) { Mod.CheckedModOddInverse(P, x, z); }
+
+        public static int IsZero(uint[] x)
+        {
+            uint d                        = 0;
+            for (var i = 0; i < 8; ++i) d |= x[i];
+            d = (d >> 1) | (d & 1);
+            return ((int)d - 1) >> 31;
+        }
+
         public static void Multiply(uint[] x, uint[] y, uint[] z)
         {
             uint[] tt = Nat256.CreateExt();
@@ -86,14 +99,33 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Custom.Djb
 
         public static void Negate(uint[] x, uint[] z)
         {
-            if (Nat256.IsZero(x))
+            if (0 != IsZero(x))
             {
-                Nat256.Zero(z);
+                Nat256.Sub(P, P, z);
             }
             else
             {
                 Nat256.Sub(P, x, z);
             }
+        }
+
+        public static void Random(SecureRandom r, uint[] z)
+        {
+            var bb = new byte[8 * 4];
+            do
+            {
+                r.NextBytes(bb);
+                Pack.LE_To_UInt32(bb, 0, z, 0, 8);
+                z[7] &= P7;
+            } while (0 == Nat.LessThan(8, z, P));
+        }
+
+        public static void RandomMult(SecureRandom r, uint[] z)
+        {
+            do
+            {
+                Random(r, z);
+            } while (0 != IsZero(z));
         }
 
         public static void Reduce(uint[] xx, uint[] z)

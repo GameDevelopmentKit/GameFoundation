@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 {
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	public class RsaesOaepParameters
 		: Asn1Encodable
 	{
@@ -31,17 +30,22 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs
 				return new RsaesOaepParameters((Asn1Sequence)obj);
 			}
 
-			throw new ArgumentException("Unknown object in factory: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+			throw new ArgumentException("Unknown object in factory: " + Platform.GetTypeName(obj), "obj");
 		}
 
 		/**
 		 * The default version
 		 */
 		public RsaesOaepParameters()
+			: this(DefaultHashAlgorithm, DefaultMaskGenFunction, DefaultPSourceAlgorithm)
 		{
-			hashAlgorithm = DefaultHashAlgorithm;
-			maskGenAlgorithm = DefaultMaskGenFunction;
-			pSourceAlgorithm = DefaultPSourceAlgorithm;
+		}
+
+		public RsaesOaepParameters(
+			AlgorithmIdentifier hashAlgorithm,
+			AlgorithmIdentifier maskGenAlgorithm)
+			: this(hashAlgorithm, maskGenAlgorithm, DefaultPSourceAlgorithm)
+		{
 		}
 
 		public RsaesOaepParameters(

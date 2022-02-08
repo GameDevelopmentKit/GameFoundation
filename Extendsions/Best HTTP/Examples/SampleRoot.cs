@@ -1,18 +1,17 @@
-using System;
-using System.Collections.Generic;
-
-using UnityEngine;
-using UnityEngine.UI;
-
-using BestHTTP.Examples.Helpers;
-
 namespace BestHTTP.Examples
 {
+    using System;
+    using System.Collections.Generic;
+    using BestHTTP.Caching;
+    using BestHTTP.Examples.Helpers;
+    using BestHTTP.Logger;
+    using UnityEngine;
+    using UnityEngine.UI;
+
     public class SampleRoot : MonoBehaviour
     {
 #pragma warning disable 0649
-        [Header("Common Properties")]
-        public string BaseURL = "https://besthttpdemosite.azurewebsites.net";
+        [Header("Common Properties")] public string BaseURL = "https://besthttpwebgldemo.azurewebsites.net";
 
         [Header("References")]
 
@@ -44,7 +43,7 @@ namespace BestHTTP.Examples
 
             int logLevel = PlayerPrefs.GetInt("BestHTTP.HTTPManager.Logger.Level", (int)HTTPManager.Logger.Level);
             this._logLevelDropdown.value = logLevel;
-            HTTPManager.Logger.Level = (BestHTTP.Logger.Loglevels)logLevel;
+            HTTPManager.Logger.Level = (Loglevels)logLevel;
 
 #if (UNITY_WEBGL && !UNITY_EDITOR) || BESTHTTP_DISABLE_PROXY
             this._proxyLabel.gameObject.SetActive(false);
@@ -73,13 +72,13 @@ namespace BestHTTP.Examples
 
 #if !BESTHTTP_DISABLE_CACHING
             // Remove too old cache entries.
-            BestHTTP.Caching.HTTPCacheService.BeginMaintainence(new BestHTTP.Caching.HTTPCacheMaintananceParams(TimeSpan.FromDays(30), ulong.MaxValue));
+            HTTPCacheService.BeginMaintainence(new HTTPCacheMaintananceParams(TimeSpan.FromDays(30), ulong.MaxValue));
 #endif
         }
 
         public void OnLogLevelChanged(int idx)
         {
-            HTTPManager.Logger.Level = (BestHTTP.Logger.Loglevels)idx;
+            HTTPManager.Logger.Level = (Loglevels)idx;
             PlayerPrefs.SetInt("BestHTTP.HTTPManager.Logger.Level", idx);
         }
 

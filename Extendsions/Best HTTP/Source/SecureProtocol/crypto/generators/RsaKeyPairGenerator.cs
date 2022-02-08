@@ -1,15 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators
 {
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /**
      * an RSA key pair generator.
      */
@@ -127,9 +124,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Generators
                 //
                 // calculate the CRT factors
                 //
-                BigInteger dP = d.Remainder(pSub1);
-                BigInteger dQ = d.Remainder(qSub1);
-                BigInteger qInv = q.ModInverse(p);
+                BigInteger dP   = d.Remainder(pSub1);
+                BigInteger dQ   = d.Remainder(qSub1);
+                var        qInv = BigIntegers.ModOddInverse(p, q);
 
                 return new AsymmetricCipherKeyPair(
                     new RsaKeyParameters(false, n, e),

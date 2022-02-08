@@ -1,39 +1,31 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+	using System.IO;
+
 	public abstract class Asn1Encodable
 		: IAsn1Convertible
     {
 		public const string Der = "DER";
 		public const string Ber = "BER";
 
+		public virtual void EncodeTo(Stream output) { this.ToAsn1Object().EncodeTo(output); }
+
+		public virtual void EncodeTo(Stream output, string encoding) { this.ToAsn1Object().EncodeTo(output, encoding); }
+
 		public byte[] GetEncoded()
         {
             MemoryStream bOut = new MemoryStream();
-            Asn1OutputStream aOut = new Asn1OutputStream(bOut);
-
-			aOut.WriteObject(this);
-
-			return bOut.ToArray();
+            this.EncodeTo(bOut);
+            return bOut.ToArray();
         }
 
-		public byte[] GetEncoded(
-			string encoding)
+		public byte[] GetEncoded(string encoding)
 		{
-			if (encoding.Equals(Der))
-			{
-				MemoryStream bOut = new MemoryStream();
-				DerOutputStream dOut = new DerOutputStream(bOut);
-
-				dOut.WriteObject(this);
-
-				return bOut.ToArray();
-			}
-
-			return GetEncoded();
+			var bOut = new MemoryStream();
+			this.EncodeTo(bOut, encoding);
+			return bOut.ToArray();
 		}
 
 		/**

@@ -891,10 +891,10 @@ namespace BestHTTP.Caching
                 // So while there might be some problem with any file, we don't want to abort the whole for loop
                 try
                 {
-                    string filename = Path.GetFileName(cacheEntries[i]);
-                    UInt64 idx = 0;
-                    bool deleteFile = false;
-                    if (UInt64.TryParse(filename, NumberStyles.AllowHexSpecifier, null, out idx))
+                    var    filename   = Path.GetFileName(cacheEntries[i]);
+                    UInt64 idx        = 0;
+                    bool   deleteFile = false;
+                    if (ulong.TryParse(filename, NumberStyles.AllowHexSpecifier, null, out idx))
                     {
                         rwLock.EnterReadLock();
                         try

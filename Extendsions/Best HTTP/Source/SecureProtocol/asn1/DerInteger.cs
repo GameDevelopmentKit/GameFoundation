@@ -1,12 +1,11 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public class DerInteger
         : Asn1Object
     {
@@ -14,8 +13,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
 
         internal static bool AllowUnsafe()
         {
-            string allowUnsafeValue = BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetEnvironmentVariable(AllowUnsafeProperty);
-            return allowUnsafeValue != null && BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.EqualsIgnoreCase("true", allowUnsafeValue);
+            string allowUnsafeValue = Platform.GetEnvironmentVariable(AllowUnsafeProperty);
+            return allowUnsafeValue != null && Platform.EqualsIgnoreCase("true", allowUnsafeValue);
         }
 
         internal const int SignExtSigned = -1;
@@ -37,7 +36,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
                 return (DerInteger)obj;
             }
 
-            throw new ArgumentException("illegal object in GetInstance: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj));
+            throw new ArgumentException("illegal object in GetInstance: " + Platform.GetTypeName(obj));
         }
 
         /**
@@ -115,6 +114,18 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             get { return new BigInteger(bytes); }
         }
 
+        public bool HasValue(int x)
+        {
+            return this.bytes.Length - this.start <= 4
+                   && IntValue(this.bytes, this.start, SignExtSigned) == x;
+        }
+
+        public bool HasValue(long x)
+        {
+            return this.bytes.Length - this.start <= 8
+                   && LongValue(this.bytes, this.start, SignExtSigned) == x;
+        }
+
         public bool HasValue(BigInteger x)
         {
             return null != x
@@ -159,9 +170,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
             }
         }
 
-        internal override void Encode(DerOutputStream derOut)
+        internal override int EncodedLength(bool withID)
         {
-            derOut.WriteEncoded(Asn1Tags.Integer, bytes);
+            return Asn1OutputStream.GetLengthOfEncodingDL(withID, this.bytes.Length);
+        }
+
+        internal override void Encode(Asn1OutputStream asn1Out, bool withID)
+        {
+            asn1Out.WriteEncodingDL(withID, Asn1Tags.Integer, this.bytes);
         }
 
 		protected override int Asn1GetHashCode()
@@ -186,7 +202,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
         internal static int IntValue(byte[] bytes, int start, int signExt)
         {
             int length = bytes.Length;
-            int pos = System.Math.Max(start, length - 4);
+            int pos = Math.Max(start, length - 4);
 
             int val = (sbyte)bytes[pos] & signExt;
             while (++pos < length)
@@ -199,7 +215,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1
         internal static long LongValue(byte[] bytes, int start, int signExt)
         {
             int length = bytes.Length;
-            int pos = System.Math.Max(start, length - 8);
+            int pos = Math.Max(start, length - 8);
 
             long val = (sbyte)bytes[pos] & signExt;
             while (++pos < length)

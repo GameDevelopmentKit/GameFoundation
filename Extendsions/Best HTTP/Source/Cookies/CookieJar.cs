@@ -95,7 +95,7 @@ namespace BestHTTP.Cookies
                 if (string.IsNullOrEmpty(CookieFolder) || string.IsNullOrEmpty(LibraryPath))
                 {
                     CookieFolder = Path.Combine(HTTPManager.GetRootCacheFolder(), "Cookies");
-                    LibraryPath = Path.Combine(CookieFolder, "Library");
+                    LibraryPath  = Path.Combine(CookieFolder, "Library");
                 }
             }
             catch

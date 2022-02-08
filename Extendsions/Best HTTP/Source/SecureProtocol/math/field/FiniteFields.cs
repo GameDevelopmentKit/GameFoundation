@@ -1,9 +1,9 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Field
 {
+    using System;
+
     public abstract class FiniteFields
     {
         internal static readonly IFiniteField GF_2 = new PrimeField(BigInteger.ValueOf(2));
@@ -19,7 +19,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Field
             {
                 if (exponents[i] <= exponents[i - 1])
                 {
-                    throw new ArgumentException("Polynomial exponents must be montonically increasing", "exponents");
+                    throw new ArgumentException("Polynomial exponents must be monotonically increasing", "exponents");
                 }
             }
 

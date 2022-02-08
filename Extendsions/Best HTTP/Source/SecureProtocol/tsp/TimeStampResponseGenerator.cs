@@ -1,18 +1,18 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cmp;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Tsp;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 {
+    using System;
+    using System.Collections;
+    using System.IO;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cmp;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Tsp;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Date;
+
     /**
      * Generator for RFC 3161 Time Stamp Responses.
      */
@@ -164,6 +164,68 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
                 throw new TspException("created badly formatted response!", e);
             }
         }
+
+
+        public TimeStampResponse GenerateGrantedResponse(
+            TimeStampRequest request,
+            BigInteger serialNumber,
+            DateTimeObject genTime,
+            string statusString,
+            X509Extensions additionalExtensions)
+        {
+            TimeStampResp resp;
+
+            try
+            {
+                if (genTime == null)
+                    throw new TspValidationException("The time source is not available.",
+                        PkiFailureInfo.TimeNotAvailable);
+
+                request.Validate(this.acceptedAlgorithms, this.acceptedPolicies, this.acceptedExtensions);
+
+                this.status = PkiStatus.Granted;
+                this.AddStatusString(statusString);
+
+                var pkiStatusInfo = this.GetPkiStatusInfo();
+
+                ContentInfo tstTokenContentInfo;
+                try
+                {
+                    var token   = this.tokenGenerator.Generate(request, serialNumber, genTime.Value, additionalExtensions);
+                    var encoded = token.ToCmsSignedData().GetEncoded();
+
+                    tstTokenContentInfo = ContentInfo.GetInstance(Asn1Object.FromByteArray(encoded));
+                }
+                catch (IOException e)
+                {
+                    throw new TspException("Timestamp token received cannot be converted to ContentInfo", e);
+                }
+
+                resp = new TimeStampResp(pkiStatusInfo, tstTokenContentInfo);
+            }
+            catch (TspValidationException e)
+            {
+                this.status = PkiStatus.Rejection;
+
+                this.SetFailInfoField(e.FailureCode);
+                this.AddStatusString(e.Message);
+
+                var pkiStatusInfo = this.GetPkiStatusInfo();
+
+                resp = new TimeStampResp(pkiStatusInfo, null);
+            }
+
+            try
+            {
+                return new TimeStampResponse(resp);
+            }
+            catch (IOException e)
+            {
+                throw new TspException("created badly formatted response!", e);
+            }
+        }
+       
+
 
         class FailInfo
             : DerBitString

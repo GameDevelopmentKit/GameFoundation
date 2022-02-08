@@ -1,26 +1,27 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-using System.IO;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ess;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Tsp;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Cms;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 {
+	using System;
+	using System.Collections;
+	using System.IO;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ess;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Nist;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Oiw;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Pkcs;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Tsp;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Cms;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Security.Certificates;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.X509.Store;
+	using Attribute = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.Attribute;
+	using AttributeTable = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.AttributeTable;
+	using ContentInfo = BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms.ContentInfo;
+
 	public class TimeStampToken
 	{
 		private readonly CmsSignedData		tsToken;
@@ -30,7 +31,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 		private readonly CertID				certID;
 
 		public TimeStampToken(
-			Asn1.Cms.ContentInfo contentInfo)
+			ContentInfo contentInfo)
 			: this(new CmsSignedData(contentInfo))
 		{
 		}
@@ -71,7 +72,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 					TstInfo.GetInstance(
 						Asn1Object.FromByteArray(bOut.ToArray())));
 
-				Asn1.Cms.Attribute attr = tsaSignerInfo.SignedAttributes[
+				Attribute attr = tsaSignerInfo.SignedAttributes[
 					PkcsObjectIdentifiers.IdAASigningCertificate];
 
 //				if (attr == null)
@@ -87,9 +88,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 
 				if (attr != null)
 				{
-					SigningCertificate signCert = SigningCertificate.GetInstance(attr.AttrValues[0]);
-
-					this.certID = new CertID(EssCertID.GetInstance(signCert.GetCerts()[0]));
+					if (attr.AttrValues[0] is SigningCertificateV2)
+					{
+						var signCert = SigningCertificateV2.GetInstance(attr.AttrValues[0]);
+						this.certID = new CertID(EssCertIDv2.GetInstance(signCert.GetCerts()[0]));
+					}
+					else
+					{
+						var signCert = SigningCertificate.GetInstance(attr.AttrValues[0]);
+						this.certID = new CertID(EssCertID.GetInstance(signCert.GetCerts()[0]));
+					}
 				}
 				else
 				{
@@ -119,12 +127,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 			get { return tsaSignerInfo.SignerID; }
 		}
 
-		public Asn1.Cms.AttributeTable SignedAttributes
+		public AttributeTable SignedAttributes
 		{
 			get { return tsaSignerInfo.SignedAttributes; }
 		}
 
-		public Asn1.Cms.AttributeTable UnsignedAttributes
+		public AttributeTable UnsignedAttributes
 		{
 			get { return tsaSignerInfo.UnsignedAttributes; }
 		}
@@ -141,7 +149,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 			return tsToken.GetCrls(type);
 		}
 
-	    public IX509Store GetAttributeCertificates(
+		public IX509Store GetCertificates() { return this.tsToken.GetCertificates(); }
+
+		public IX509Store GetAttributeCertificates(
 			string type)
 	    {
 	        return tsToken.GetAttributeCertificates(type);
@@ -170,16 +180,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Tsp
 					certID.GetHashAlgorithmName(), cert.GetEncoded());
 
 				if (!Arrays.ConstantTimeAreEqual(certID.GetCertHash(), hash))
-				{
 					throw new TspValidationException("certificate hash does not match certID hash.");
-				}
 
 				if (certID.IssuerSerial != null)
 				{
-					if (!certID.IssuerSerial.Serial.Value.Equals(cert.SerialNumber))
-					{
+					if (!this.certID.IssuerSerial.Serial.HasValue(cert.SerialNumber))
 						throw new TspValidationException("certificate serial number does not match certID for signature.");
-					}
 
 					GeneralName[] names = certID.IssuerSerial.Issuer.GetNames();
 					X509Name principal = PrincipalUtilities.GetIssuerX509Principal(cert);

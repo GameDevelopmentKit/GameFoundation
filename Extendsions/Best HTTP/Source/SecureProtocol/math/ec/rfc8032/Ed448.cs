@@ -1,17 +1,16 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 {
+    using System;
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc7748;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.Raw;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     public abstract class Ed448
     {
         // x^2 + y^2 == 1 - 39081 * x^2 * y^2
@@ -22,10 +21,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             Ed448ph = 1,
         }
 
+        private class F : X448Field
+        {
+        }
+
         private const ulong M26UL = 0x03FFFFFFUL;
         private const ulong M28UL = 0x0FFFFFFFUL;
 
-        private const int PointBytes = 57;
+        private const int CoordUints  = 14;
+        private const int PointBytes  = CoordUints * 4 + 1;
         private const int ScalarUints = 14;
         private const int ScalarBytes = ScalarUints * 4 + 1;
 
@@ -34,13 +38,13 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
         public static readonly int SecretKeySize = 57;
         public static readonly int SignatureSize = PointBytes + ScalarBytes;
 
-        private static readonly byte[] Dom4Prefix = Strings.ToByteArray("SigEd448");
+        // "SigEd448"
+        private static readonly byte[] Dom4Prefix = { 0x53, 0x69, 0x67, 0x45, 0x64, 0x34, 0x34, 0x38 };
 
         private static readonly uint[] P = { 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU,
             0xFFFFFFFEU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU };
         private static readonly uint[] L = { 0xAB5844F3U, 0x2378C292U, 0x8DC58F55U, 0x216CC272U, 0xAED63690U, 0xC44EDB49U, 0x7CCA23E9U,
             0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x3FFFFFFFU };
-        private static readonly BigInteger N = Nat.ToBigInteger(L.Length, L);
 
         private const int L_0 = 0x04A7BB0D;     // L_0:26/24
         private const int L_1 = 0x0873D6D5;     // L_1:27/23
@@ -81,15 +85,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
         private class PointExt
         {
-            internal uint[] x = X448Field.Create();
-            internal uint[] y = X448Field.Create();
-            internal uint[] z = X448Field.Create();
+            internal readonly uint[] x = X448Field.Create();
+            internal readonly uint[] y = X448Field.Create();
+            internal readonly uint[] z = X448Field.Create();
         }
 
         private class PointPrecomp
         {
-            internal uint[] x = X448Field.Create();
-            internal uint[] y = X448Field.Create();
+            internal readonly uint[] x = X448Field.Create();
+            internal readonly uint[] y = X448Field.Create();
         }
 
         private static byte[] CalculateS(byte[] r, byte[] k, byte[] s)
@@ -98,7 +102,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             uint[] u = new uint[ScalarUints];       DecodeScalar(k, 0, u);
             uint[] v = new uint[ScalarUints];       DecodeScalar(s, 0, v);
 
-            Nat.MulAddTo(14, u, v, t);
+            Nat.MulAddTo(ScalarUints, u, v, t);
 
             byte[] result = new byte[ScalarBytes * 2];
             for (int i = 0; i < t.Length; ++i)
@@ -115,9 +119,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
         private static int CheckPoint(uint[] x, uint[] y)
         {
-            uint[] t = X448Field.Create();
-            uint[] u = X448Field.Create();
-            uint[] v = X448Field.Create();
+            var t = X448Field.Create();
+            var u = X448Field.Create();
+            var v = X448Field.Create();
 
             X448Field.Sqr(x, u);
             X448Field.Sqr(y, v);
@@ -133,10 +137,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
         private static int CheckPoint(uint[] x, uint[] y, uint[] z)
         {
-            uint[] t = X448Field.Create();
-            uint[] u = X448Field.Create();
-            uint[] v = X448Field.Create();
-            uint[] w = X448Field.Create();
+            var t = X448Field.Create();
+            var u = X448Field.Create();
+            var v = X448Field.Create();
+            var w = X448Field.Create();
 
             X448Field.Sqr(x, u);
             X448Field.Sqr(y, v);
@@ -158,19 +162,25 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             if ((p[PointBytes - 1] & 0x7F) != 0x00)
                 return false;
 
-            uint[] t = new uint[14];
-            Decode32(p, 0, t, 0, 14);
-            return !Nat.Gte(14, t, P);
+            var t = new uint[CoordUints];
+            Decode32(p, 0, t, 0, CoordUints);
+            return !Nat.Gte(CoordUints, t, P);
         }
 
-        private static bool CheckScalarVar(byte[] s)
+        private static bool CheckScalarVar(byte[] s, uint[] n)
         {
             if (s[ScalarBytes - 1] != 0x00)
                 return false;
 
-            uint[] n = new uint[ScalarUints];
             DecodeScalar(s, 0, n);
             return !Nat.Gte(ScalarUints, n, L);
+        }
+
+        private static byte[] Copy(byte[] buf, int off, int len)
+        {
+            var result = new byte[len];
+            Array.Copy(buf, off, result, 0, len);
+            return result;
         }
 
         public static IXof CreatePrehash()
@@ -217,7 +227,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
         private static bool DecodePointVar(byte[] p, int pOff, bool negate, PointExt r)
         {
-            byte[] py = Arrays.CopyOfRange(p, pOff, pOff + PointBytes);
+            var py = Copy(p, pOff, PointBytes);
             if (!CheckPointVar(py))
                 return false;
 
@@ -226,11 +236,11 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
             X448Field.Decode(py, 0, r.y);
 
-            uint[] u = X448Field.Create();
-            uint[] v = X448Field.Create();
+            var u = X448Field.Create();
+            var v = X448Field.Create();
 
             X448Field.Sqr(r.y, u);
-            X448Field.Mul(u, (uint)-C_d, v);
+            X448Field.Mul(u, -C_d, v);
             X448Field.Negate(u, u);
             X448Field.AddOne(u);
             X448Field.AddOne(v);
@@ -258,12 +268,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             Decode32(k, kOff, n, 0, ScalarUints);
         }
 
-        private static void Dom4(IXof d, byte x, byte[] y)
+        private static void Dom4(IXof d, byte phflag, byte[] ctx)
         {
-            d.BlockUpdate(Dom4Prefix, 0, Dom4Prefix.Length);
-            d.Update(x);
-            d.Update((byte)y.Length);
-            d.BlockUpdate(y, 0, y.Length);
+            var n = Dom4Prefix.Length;
+            var t = new byte[n + 2 + ctx.Length];
+            Dom4Prefix.CopyTo(t, 0);
+            t[n]     = phflag;
+            t[n + 1] = (byte)ctx.Length;
+            ctx.CopyTo(t, n + 2);
+
+            d.BlockUpdate(t, 0, t.Length);
         }
 
         private static void Encode24(uint n, byte[] bs, int off)
@@ -289,8 +303,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
         private static int EncodePoint(PointExt p, byte[] r, int rOff)
         {
-            uint[] x = X448Field.Create();
-            uint[] y = X448Field.Create();
+            var x = X448Field.Create();
+            var y = X448Field.Create();
 
             X448Field.Inv(p.z, y);
             X448Field.Mul(p.x, y, x);
@@ -325,9 +339,16 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             ScalarMultBaseEncoded(s, pk, pkOff);
         }
 
+        private static uint GetWindow4(uint[] x, int n)
+        {
+            int w = (int)((uint)n >> 3), b = (n & 7) << 2;
+            return (x[w] >> b) & 15U;
+        }
+
         private static sbyte[] GetWnafVar(uint[] n, int width)
         {
-            Debug.Assert(n[ScalarUints - 1] >> 30 == 0U);
+            Debug.Assert(n[ScalarUints - 1] <= L[ScalarUints - 1]);
+            Debug.Assert(2 <= width && width <= 8);
 
             uint[] t = new uint[ScalarUints * 2];
             {
@@ -343,9 +364,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
             sbyte[] ws = new sbyte[447];
 
-            uint pow2 = 1U << width;
-            uint mask = pow2 - 1U;
-            uint sign = pow2 >> 1;
+            var lead = 32 - width;
 
             uint carry = 0U;
             int j = 0;
@@ -363,12 +382,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
                         continue;
                     }
 
-                    uint digit = (word16 & mask) + carry;
-                    carry = digit & sign;
-                    digit -= (carry << 1);
-                    carry >>= (width - 1);
+                    var digit = (word16 | 1U) << lead;
+                    carry = digit >> 31;
 
-                    ws[(i << 4) + j] = (sbyte)digit;
+                    ws[(i << 4) + j] = (sbyte)((int)digit >> lead);
 
                     j += width;
                 }
@@ -449,13 +466,14 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             if (!CheckContextVar(ctx))
                 throw new ArgumentException("ctx");
 
-            byte[] R = Arrays.CopyOfRange(sig, sigOff, sigOff + PointBytes);
-            byte[] S = Arrays.CopyOfRange(sig, sigOff + PointBytes, sigOff + SignatureSize);
+            var R = Copy(sig, sigOff, PointBytes);
+            var S = Copy(sig, sigOff + PointBytes, ScalarBytes);
 
             if (!CheckPointVar(R))
                 return false;
 
-            if (!CheckScalarVar(S))
+            var nS = new uint[ScalarUints];
+            if (!CheckScalarVar(S, nS))
                 return false;
 
             PointExt pA = new PointExt();
@@ -473,9 +491,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
             byte[] k = ReduceScalar(h);
 
-            uint[] nS = new uint[ScalarUints];
-            DecodeScalar(S, 0, nS);
-
             uint[] nA = new uint[ScalarUints];
             DecodeScalar(k, 0, nA);
 
@@ -486,118 +501,168 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             return 0 != EncodePoint(pR, check, 0) && Arrays.AreEqual(check, R);
         }
 
+        private static bool IsNeutralElementVar(uint[] x, uint[] y) { return X448Field.IsZeroVar(x) && X448Field.IsOneVar(y); }
+
+        private static bool IsNeutralElementVar(uint[] x, uint[] y, uint[] z) { return X448Field.IsZeroVar(x) && X448Field.AreEqualVar(y, z); }
+
+        private static void PointAdd(PointExt p, PointExt r)
+        {
+            var a = X448Field.Create();
+            var b = X448Field.Create();
+            var c = X448Field.Create();
+            var d = X448Field.Create();
+            var e = X448Field.Create();
+            var f = X448Field.Create();
+            var g = X448Field.Create();
+            var h = X448Field.Create();
+
+            X448Field.Mul(p.z, r.z, a);
+            X448Field.Sqr(a, b);
+            X448Field.Mul(p.x, r.x, c);
+            X448Field.Mul(p.y, r.y, d);
+            X448Field.Mul(c, d, e);
+            X448Field.Mul(e, -C_d, e);
+            //F.Apm(b, e, f, g);
+            X448Field.Add(b, e, f);
+            X448Field.Sub(b, e, g);
+            X448Field.Add(p.x, p.y, b);
+            X448Field.Add(r.x, r.y, e);
+            X448Field.Mul(b, e, h);
+            //F.Apm(d, c, b, e);
+            X448Field.Add(d, c, b);
+            X448Field.Sub(d, c, e);
+            X448Field.Carry(b);
+            X448Field.Sub(h, b, h);
+            X448Field.Mul(h, a, h);
+            X448Field.Mul(e, a, e);
+            X448Field.Mul(f, h, r.x);
+            X448Field.Mul(e, g, r.y);
+            X448Field.Mul(f, g, r.z);
+        }
+
         private static void PointAddVar(bool negate, PointExt p, PointExt r)
         {
-            uint[] A = X448Field.Create();
-            uint[] B = X448Field.Create();
-            uint[] C = X448Field.Create();
-            uint[] D = X448Field.Create();
-            uint[] E = X448Field.Create();
-            uint[] F = X448Field.Create();
-            uint[] G = X448Field.Create();
-            uint[] H = X448Field.Create();
+            var a = X448Field.Create();
+            var b = X448Field.Create();
+            var c = X448Field.Create();
+            var d = X448Field.Create();
+            var e = X448Field.Create();
+            var f = X448Field.Create();
+            var g = X448Field.Create();
+            var h = X448Field.Create();
 
-            uint[] b, e, f, g;
+            uint[] nb, ne, nf, ng;
             if (negate)
             {
-                b = E; e = B; f = G; g = F;
-                X448Field.Sub(p.y, p.x, H);
+                nb = e;
+                ne = b;
+                nf = g;
+                ng = f;
+                X448Field.Sub(p.y, p.x, h);
             }
             else
             {
-                b = B; e = E; f = F; g = G;
-                X448Field.Add(p.y, p.x, H);
+                nb = b;
+                ne = e;
+                nf = f;
+                ng = g;
+                X448Field.Add(p.y, p.x, h);
             }
 
-            X448Field.Mul(p.z, r.z, A);
-            X448Field.Sqr(A, B);
-            X448Field.Mul(p.x, r.x, C);
-            X448Field.Mul(p.y, r.y, D);
-            X448Field.Mul(C, D, E);
-            X448Field.Mul(E, -C_d, E);
-            //X448Field.Apm(B, E, F, G);
-            X448Field.Add(B, E, f);
-            X448Field.Sub(B, E, g);
-            X448Field.Add(r.x, r.y, E);
-            X448Field.Mul(H, E, H);
-            //X448Field.Apm(D, C, B, E);
-            X448Field.Add(D, C, b);
-            X448Field.Sub(D, C, e);
-            X448Field.Carry(b);
-            X448Field.Sub(H, B, H);
-            X448Field.Mul(H, A, H);
-            X448Field.Mul(E, A, E);
-            X448Field.Mul(F, H, r.x);
-            X448Field.Mul(E, G, r.y);
-            X448Field.Mul(F, G, r.z);
+            X448Field.Mul(p.z, r.z, a);
+            X448Field.Sqr(a, b);
+            X448Field.Mul(p.x, r.x, c);
+            X448Field.Mul(p.y, r.y, d);
+            X448Field.Mul(c, d, e);
+            X448Field.Mul(e, -C_d, e);
+            //F.Apm(b, e, nf, ng);
+            X448Field.Add(b, e, nf);
+            X448Field.Sub(b, e, ng);
+            X448Field.Add(r.x, r.y, e);
+            X448Field.Mul(h, e, h);
+            //F.Apm(d, c, nb, ne);
+            X448Field.Add(d, c, nb);
+            X448Field.Sub(d, c, ne);
+            X448Field.Carry(nb);
+            X448Field.Sub(h, b, h);
+            X448Field.Mul(h, a, h);
+            X448Field.Mul(e, a, e);
+            X448Field.Mul(f, h, r.x);
+            X448Field.Mul(e, g, r.y);
+            X448Field.Mul(f, g, r.z);
         }
 
         private static void PointAddPrecomp(PointPrecomp p, PointExt r)
         {
-            uint[] B = X448Field.Create();
-            uint[] C = X448Field.Create();
-            uint[] D = X448Field.Create();
-            uint[] E = X448Field.Create();
-            uint[] F = X448Field.Create();
-            uint[] G = X448Field.Create();
-            uint[] H = X448Field.Create();
+            var b = X448Field.Create();
+            var c = X448Field.Create();
+            var d = X448Field.Create();
+            var e = X448Field.Create();
+            var f = X448Field.Create();
+            var g = X448Field.Create();
+            var h = X448Field.Create();
 
-            X448Field.Sqr(r.z, B);
-            X448Field.Mul(p.x, r.x, C);
-            X448Field.Mul(p.y, r.y, D);
-            X448Field.Mul(C, D, E);
-            X448Field.Mul(E, -C_d, E);
-            //X448Field.Apm(B, E, F, G);
-            X448Field.Add(B, E, F);
-            X448Field.Sub(B, E, G);
-            X448Field.Add(p.x, p.y, B);
-            X448Field.Add(r.x, r.y, E);
-            X448Field.Mul(B, E, H);
-            //X448Field.Apm(D, C, B, E);
-            X448Field.Add(D, C, B);
-            X448Field.Sub(D, C, E);
-            X448Field.Carry(B);
-            X448Field.Sub(H, B, H);
-            X448Field.Mul(H, r.z, H);
-            X448Field.Mul(E, r.z, E);
-            X448Field.Mul(F, H, r.x);
-            X448Field.Mul(E, G, r.y);
-            X448Field.Mul(F, G, r.z);
+            X448Field.Sqr(r.z, b);
+            X448Field.Mul(p.x, r.x, c);
+            X448Field.Mul(p.y, r.y, d);
+            X448Field.Mul(c, d, e);
+            X448Field.Mul(e, -C_d, e);
+            //F.Apm(b, e, f, g);
+            X448Field.Add(b, e, f);
+            X448Field.Sub(b, e, g);
+            X448Field.Add(p.x, p.y, b);
+            X448Field.Add(r.x, r.y, e);
+            X448Field.Mul(b, e, h);
+            //F.Apm(d, c, b, e);
+            X448Field.Add(d, c, b);
+            X448Field.Sub(d, c, e);
+            X448Field.Carry(b);
+            X448Field.Sub(h, b, h);
+            X448Field.Mul(h, r.z, h);
+            X448Field.Mul(e, r.z, e);
+            X448Field.Mul(f, h, r.x);
+            X448Field.Mul(e, g, r.y);
+            X448Field.Mul(f, g, r.z);
         }
 
         private static PointExt PointCopy(PointExt p)
         {
             PointExt r = new PointExt();
+            PointCopy(p, r);
+            return r;
+        }
+
+        private static void PointCopy(PointExt p, PointExt r)
+        {
             X448Field.Copy(p.x, 0, r.x, 0);
             X448Field.Copy(p.y, 0, r.y, 0);
             X448Field.Copy(p.z, 0, r.z, 0);
-            return r;
         }
 
         private static void PointDouble(PointExt r)
         {
-            uint[] B = X448Field.Create();
-            uint[] C = X448Field.Create();
-            uint[] D = X448Field.Create();
-            uint[] E = X448Field.Create();
-            uint[] H = X448Field.Create();
-            uint[] J = X448Field.Create();
+            var b = X448Field.Create();
+            var c = X448Field.Create();
+            var d = X448Field.Create();
+            var e = X448Field.Create();
+            var h = X448Field.Create();
+            var j = X448Field.Create();
 
-            X448Field.Add(r.x, r.y, B);
-            X448Field.Sqr(B, B);
-            X448Field.Sqr(r.x, C);
-            X448Field.Sqr(r.y, D);
-            X448Field.Add(C, D, E);
-            X448Field.Carry(E);
-            X448Field.Sqr(r.z, H);
-            X448Field.Add(H, H, H);
-            X448Field.Carry(H);
-            X448Field.Sub(E, H, J);
-            X448Field.Sub(B, E, B);
-            X448Field.Sub(C, D, C);
-            X448Field.Mul(B, J, r.x);
-            X448Field.Mul(E, C, r.y);
-            X448Field.Mul(E, J, r.z);
+            X448Field.Add(r.x, r.y, b);
+            X448Field.Sqr(b, b);
+            X448Field.Sqr(r.x, c);
+            X448Field.Sqr(r.y, d);
+            X448Field.Add(c, d, e);
+            X448Field.Carry(e);
+            X448Field.Sqr(r.z, h);
+            X448Field.Add(h, h, h);
+            X448Field.Carry(h);
+            X448Field.Sub(e, h, j);
+            X448Field.Sub(b, e, b);
+            X448Field.Sub(c, d, c);
+            X448Field.Mul(b, j, r.x);
+            X448Field.Mul(e, c, r.y);
+            X448Field.Mul(e, j, r.z);
         }
 
         private static void PointExtendXY(PointExt p)
@@ -610,17 +675,75 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             Debug.Assert(0 <= block && block < PrecompBlocks);
             Debug.Assert(0 <= index && index < PrecompPoints);
 
-            int off = block * PrecompPoints * 2 * X448Field.Size;
+            var off = block * PrecompPoints * 2 * X448Field.Size;
 
             for (int i = 0; i < PrecompPoints; ++i)
             {
                 int cond = ((i ^ index) - 1) >> 31;
-                X448Field.CMov(cond, precompBase, off, p.x, 0);     off += X448Field.Size;
-                X448Field.CMov(cond, precompBase, off, p.y, 0);     off += X448Field.Size;
+                X448Field.CMov(cond, precompBase, off, p.x, 0);
+                off += X448Field.Size;
+                X448Field.CMov(cond, precompBase, off, p.y, 0);
+                off += X448Field.Size;
             }
         }
 
-        private static PointExt[] PointPrecompVar(PointExt p, int count)
+        private static void PointLookup(uint[] x, int n, uint[] table, PointExt r)
+        {
+            // TODO This method is currently hardcoded to 4-bit windows and 8 precomputed points
+
+            var w = GetWindow4(x, n);
+
+            var sign = (int)(w >> (4 - 1)) ^ 1;
+            var abs  = ((int)w ^ -sign) & 7;
+
+            Debug.Assert(sign == 0 || sign == 1);
+            Debug.Assert(0 <= abs && abs < 8);
+
+            for (int i = 0, off = 0; i < 8; ++i)
+            {
+                var cond = ((i ^ abs) - 1) >> 31;
+                X448Field.CMov(cond, table, off, r.x, 0);
+                off += X448Field.Size;
+                X448Field.CMov(cond, table, off, r.y, 0);
+                off += X448Field.Size;
+                X448Field.CMov(cond, table, off, r.z, 0);
+                off += X448Field.Size;
+            }
+
+            X448Field.CNegate(sign, r.x);
+        }
+
+        private static uint[] PointPrecompute(PointExt p, int count)
+        {
+            Debug.Assert(count > 0);
+
+            var q = PointCopy(p);
+            var d = PointCopy(q);
+            PointDouble(d);
+
+            var table = X448Field.CreateTable(count * 3);
+            var off   = 0;
+
+            var i = 0;
+            for (;;)
+            {
+                X448Field.Copy(q.x, 0, table, off);
+                off += X448Field.Size;
+                X448Field.Copy(q.y, 0, table, off);
+                off += X448Field.Size;
+                X448Field.Copy(q.z, 0, table, off);
+                off += X448Field.Size;
+
+                if (++i == count)
+                    break;
+
+                PointAdd(d, q);
+            }
+
+            return table;
+        }
+
+        private static PointExt[] PointPrecomputeVar(PointExt p, int count)
         {
             Debug.Assert(count > 0);
 
@@ -656,9 +779,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
                 X448Field.Copy(B_y, 0, p.y, 0);
                 PointExtendXY(p);
 
-                precompBaseTable = PointPrecompVar(p, 1 << (WnafWidthBase - 2));
+                precompBaseTable = PointPrecomputeVar(p, 1 << (WnafWidthBase - 2));
 
-                precompBase = new uint[PrecompBlocks * PrecompPoints * 2 * X448Field.Size];
+                precompBase = X448Field.CreateTable(PrecompBlocks * PrecompPoints * 2);
 
                 int off = 0;
                 for (int b = 0; b < PrecompBlocks; ++b)
@@ -700,19 +823,55 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
 
                     Debug.Assert(k == PrecompPoints);
 
+                    var cs = X448Field.CreateTable(PrecompPoints);
+
+                    // TODO[ed448] A single batch inversion across all blocks?
+                    {
+                        var u = X448Field.Create();
+                        X448Field.Copy(points[0].z, 0, u, 0);
+                        X448Field.Copy(u, 0, cs, 0);
+
+                        var i = 0;
+                        while (++i < PrecompPoints)
+                        {
+                            X448Field.Mul(u, points[i].z, u);
+                            X448Field.Copy(u, 0, cs, i * X448Field.Size);
+                        }
+
+                        X448Field.InvVar(u, u);
+                        --i;
+
+                        var t = X448Field.Create();
+
+                        while (i > 0)
+                        {
+                            var j = i--;
+                            X448Field.Copy(cs, i * X448Field.Size, t, 0);
+                            X448Field.Mul(t, u, t);
+                            X448Field.Copy(t, 0, cs, j * X448Field.Size);
+                            X448Field.Mul(u, points[j].z, u);
+                        }
+
+                        X448Field.Copy(u, 0, cs, 0);
+                    }
+
                     for (int i = 0; i < PrecompPoints; ++i)
                     {
                         PointExt q = points[i];
-                        // TODO[ed448] Batch inversion
-                        X448Field.Inv(q.z, q.z);
+
+                        //F.InvVar(q.z, q.z);
+                        X448Field.Copy(cs, i * X448Field.Size, q.z, 0);
+
                         X448Field.Mul(q.x, q.z, q.x);
                         X448Field.Mul(q.y, q.z, q.y);
 
-                        //X448Field.Normalize(q.x);
-                        //X448Field.Normalize(q.y);
+                        //F.Normalize(q.x);
+                        //F.Normalize(q.y);
 
-                        X448Field.Copy(q.x, 0, precompBase, off); off += X448Field.Size;
-                        X448Field.Copy(q.y, 0, precompBase, off); off += X448Field.Size;
+                        X448Field.Copy(q.x, 0, precompBase, off);
+                        off += X448Field.Size;
+                        X448Field.Copy(q.y, 0, precompBase, off);
+                        off += X448Field.Size;
                     }
                 }
 
@@ -1006,11 +1165,43 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             return r;
         }
 
+        private static void ScalarMult(byte[] k, PointExt p, PointExt r)
+        {
+            var n = new uint[ScalarUints];
+            DecodeScalar(k, 0, n);
+
+            Debug.Assert(0U == (n[0] & 3));
+            Debug.Assert(1U == n[ScalarUints - 1] >> 31);
+
+            Nat.ShiftDownBits(ScalarUints, n, 2, 0U);
+
+            // Recode the scalar into signed-digit form
+            {
+                var c1 = Nat.CAdd(ScalarUints, ~(int)n[0] & 1, n, L, n);
+                Debug.Assert(c1 == 0U);
+                var c2 = Nat.ShiftDownBit(ScalarUints, n, 1U);
+                Debug.Assert(c2 == 1U << 31);
+            }
+
+            var table = PointPrecompute(p, 8);
+            var q     = new PointExt();
+
+            PointLookup(n, 111, table, r);
+
+            for (var w = 110; w >= 0; --w)
+            {
+                for (var i = 0; i < 4; ++i) PointDouble(r);
+
+                PointLookup(n, w, table, q);
+                PointAdd(q, r);
+            }
+
+            for (var i = 0; i < 2; ++i) PointDouble(r);
+        }
+
         private static void ScalarMultBase(byte[] k, PointExt r)
         {
             Precompute();
-
-            PointSetNeutral(r);
 
             uint[] n = new uint[ScalarUints + 1];
             DecodeScalar(k, 0, n);
@@ -1023,6 +1214,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             }
 
             PointPrecomp p = new PointPrecomp();
+
+            PointSetNeutral(r);
 
             int cOff = PrecompSpacing - 1;
             for (;;)
@@ -1083,6 +1276,34 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             X448Field.Copy(p.y, 0, y, 0);
         }
 
+        private static void ScalarMultOrderVar(PointExt p, PointExt r)
+        {
+            var width = 5;
+
+            var ws_p = GetWnafVar(L, width);
+
+            var tp = PointPrecomputeVar(p, 1 << (width - 2));
+
+            PointSetNeutral(r);
+
+            for (var bit = 446;;)
+            {
+                int wp = ws_p[bit];
+                if (wp != 0)
+                {
+                    var sign  = wp >> 31;
+                    var index = (wp ^ sign) >> 1;
+
+                    PointAddVar(sign != 0, tp[index], r);
+                }
+
+                if (--bit < 0)
+                    break;
+
+                PointDouble(r);
+            }
+        }
+
         private static void ScalarMultStrausVar(uint[] nb, uint[] np, PointExt p, PointExt r)
         {
             Precompute();
@@ -1092,7 +1313,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             sbyte[] ws_b = GetWnafVar(nb, WnafWidthBase);
             sbyte[] ws_p = GetWnafVar(np, width);
 
-            PointExt[] tp = PointPrecompVar(p, 1 << (width - 2));
+            var tp = PointPrecomputeVar(p, 1 << (width - 2));
 
             PointSetNeutral(r);
 
@@ -1171,6 +1392,35 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Rfc8032
             byte phflag = 0x01;
 
             ImplSign(sk, skOff, pk, pkOff, ctx, phflag, m, 0, m.Length, sig, sigOff);
+        }
+
+        public static bool ValidatePublicKeyFull(byte[] pk, int pkOff)
+        {
+            var p = new PointExt();
+            if (!DecodePointVar(pk, pkOff, false, p))
+                return false;
+
+            X448Field.Normalize(p.x);
+            X448Field.Normalize(p.y);
+            X448Field.Normalize(p.z);
+
+            if (IsNeutralElementVar(p.x, p.y, p.z))
+                return false;
+
+            var r = new PointExt();
+            ScalarMultOrderVar(p, r);
+
+            X448Field.Normalize(r.x);
+            X448Field.Normalize(r.y);
+            X448Field.Normalize(r.z);
+
+            return IsNeutralElementVar(r.x, r.y, r.z);
+        }
+
+        public static bool ValidatePublicKeyPartial(byte[] pk, int pkOff)
+        {
+            var p = new PointExt();
+            return DecodePointVar(pk, pkOff, false, p);
         }
 
         public static bool Verify(byte[] sig, int sigOff, byte[] pk, int pkOff, byte[] ctx, byte[] m, int mOff, int mLen)

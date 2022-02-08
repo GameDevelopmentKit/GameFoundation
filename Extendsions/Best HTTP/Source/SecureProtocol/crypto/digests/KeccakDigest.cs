@@ -1,13 +1,12 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Diagnostics;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
 {
+    using System;
+    using System.Diagnostics;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
     /// <summary>
     /// Implementation of Keccak based on following KeccakNISTInterface.c from http://keccak.noekeon.org/
     /// </summary>
@@ -26,12 +25,12 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
             0x8000000080008081UL, 0x8000000000008080UL, 0x0000000080000001UL, 0x8000000080008008UL
         };
 
-        private ulong[] state = new ulong[25];
-        protected byte[] dataQueue = new byte[192];
-        protected int rate;
-        protected int bitsInQueue;
-        protected int fixedOutputLength;
-        protected bool squeezing;
+        private            ulong[] state     = new ulong[25];
+        protected          byte[]  dataQueue = new byte[192];
+        protected          int     rate;
+        protected          int     bitsInQueue;
+        protected internal int     fixedOutputLength;
+        protected          bool    squeezing;
 
         public KeccakDigest()
             : this(288)
@@ -174,7 +173,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
             int bytesInQueue = bitsInQueue >> 3;
             int rateBytes = rate >> 3;
 
-            if (len < (rateBytes - bytesInQueue))
+            var available = rateBytes - bytesInQueue;
+            if (len < available)
             {
                 Array.Copy(data, off, dataQueue, bytesInQueue, len);
                 this.bitsInQueue += len << 3;
@@ -184,7 +184,6 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
             int count = 0;
             if (bytesInQueue > 0)
             {
-                int available = rateBytes - bytesInQueue;
                 Array.Copy(data, off, dataQueue, bytesInQueue, available);
                 count += available;
                 KeccakAbsorb(dataQueue, 0);
@@ -265,7 +264,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests
                 {
                     KeccakExtract();
                 }
-                int partialBlock = (int)System.Math.Min((long)bitsInQueue, outputLength - i);
+                int partialBlock = (int)Math.Min((long)bitsInQueue, outputLength - i);
                 Array.Copy(dataQueue, (rate - bitsInQueue) >> 3, output, offset + (int)(i >> 3), partialBlock >> 3);
                 bitsInQueue -= partialBlock;
                 i += partialBlock;

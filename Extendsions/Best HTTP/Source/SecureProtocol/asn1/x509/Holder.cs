@@ -1,11 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 {
+	using System;
+	using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+
 	/**
 	 * The Holder object.
 	 * <p>
@@ -29,9 +28,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 	 * 
 	 * <pre>
 	 *         subject CHOICE {
-	 *          baseCertificateID [0] IssuerSerial,
+	 *          baseCertificateID [0] EXPLICIT IssuerSerial,
 	 *          -- associated with a Public Key Certificate
-	 *          subjectName [1] GeneralNames },
+	 *          subjectName [1] EXPLICIT GeneralNames },
 	 *          -- associated with a name
 	 * </pre>
 	 * </p>
@@ -62,7 +61,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 				return new Holder((Asn1TaggedObject) obj);
 			}
 
-            throw new ArgumentException("unknown object in factory: " + BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Platform.GetTypeName(obj), "obj");
+            throw new ArgumentException("unknown object in factory: " + Platform.GetTypeName(obj), "obj");
 		}
 
 		/**
@@ -76,10 +75,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 			switch (tagObj.TagNo)
 			{
 				case 0:
-					baseCertificateID = IssuerSerial.GetInstance(tagObj, false);
+					this.baseCertificateID = IssuerSerial.GetInstance(tagObj, true);
 					break;
 				case 1:
-					entityName = GeneralNames.GetInstance(tagObj, false);
+					this.entityName = GeneralNames.GetInstance(tagObj, true);
 					break;
 				default:
 					throw new ArgumentException("unknown tag in Holder");
@@ -230,7 +229,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
         {
             if (version == 1)
             {
-                Asn1EncodableVector v = new Asn1EncodableVector();
+	            var v = new Asn1EncodableVector(3);
                 v.AddOptionalTagged(false, 0, baseCertificateID);
                 v.AddOptionalTagged(false, 1, entityName);
                 v.AddOptionalTagged(false, 2, objectDigestInfo);
@@ -239,10 +238,10 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X509
 
             if (entityName != null)
             {
-                return new DerTaggedObject(false, 1, entityName);
+	            return new DerTaggedObject(true, 1, this.entityName);
             }
 
-            return new DerTaggedObject(false, 0, baseCertificateID);
+            return new DerTaggedObject(true, 0, this.baseCertificateID);
         }
 	}
 }

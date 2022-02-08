@@ -178,7 +178,6 @@ namespace BestHTTP.Connections
                         catch
                         {
                         }
-
                         this.connector = null;
                     }
 
@@ -191,7 +190,6 @@ namespace BestHTTP.Connections
                         catch
                         {
                         }
-
                         this.requestHandler = null;
                     }
                 }

@@ -112,7 +112,7 @@ namespace BestHTTP.Connections
                             string location = request.Response.GetFirstHeaderValue("location");
                             if (!string.IsNullOrEmpty(location))
                             {
-                                Uri redirectUri = GetRedirectUri(request, location);
+                                var redirectUri = GetRedirectUri(request, location);
 
                                 if (HTTPManager.Logger.Level == Loglevels.All)
                                     HTTPManager.Logger.Verbose("HTTPConnection", string.Format("[{0}] - Redirected to Location: '{1}' redirectUri: '{1}'", context, location, redirectUri), loggingContext1, loggingContext2, loggingContext3);
@@ -153,7 +153,7 @@ namespace BestHTTP.Connections
                     case 304:
                         if (request.DisableCache)
                             break;
-                        
+
                         if (LoadFromCache(context, request, loggingContext1, loggingContext2, loggingContext3))
                         {
                             request.Timing.Add(TimingEventNames.Loading_From_Cache);

@@ -1,12 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.Collections;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
 {
+    using System;
+    using System.Collections;
+
     /**
      * a signed data object.
      */
@@ -149,7 +147,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Cms
             {
                 SignerInfo s = SignerInfo.GetInstance(obj);
 
-                if (s.Version.IntValueExact == 3)
+                if (s.Version.HasValue(3))
                 {
                     return true;
                 }

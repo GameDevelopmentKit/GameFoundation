@@ -1,17 +1,17 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
 {
+    using System;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Digests;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Parameters;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Math.EC.Multiplier;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Security;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities;
+    using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders;
+
     /// <summary>The SM2 Digital Signature algorithm.</summary>
     public class SM2Signer
         : ISigner
@@ -166,7 +166,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Crypto.Signers
                 while (r.SignValue == 0 || r.Add(k).Equals(n));
 
                 // A6
-                BigInteger dPlus1ModN = d.Add(BigInteger.One).ModInverse(n);
+                var dPlus1ModN = BigIntegers.ModOddInverse(n, d.Add(BigIntegers.One));
 
                 s = k.Subtract(r.Multiply(d)).Mod(n);
                 s = dPlus1ModN.Multiply(s).Mod(n);

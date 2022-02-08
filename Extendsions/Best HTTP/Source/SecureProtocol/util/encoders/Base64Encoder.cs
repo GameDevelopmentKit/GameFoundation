@@ -1,10 +1,10 @@
 #if !BESTHTTP_DISABLE_ALTERNATE_SSL && (!UNITY_WEBGL || UNITY_EDITOR)
 #pragma warning disable
-using System;
-using System.IO;
-
 namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
 {
+    using System;
+    using System.IO;
+
     public class Base64Encoder
         : IEncoder
     {
@@ -46,75 +46,79 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
             InitialiseDecodingTable();
         }
 
-        /**
-        * encode the input data producing a base 64 output stream.
-        *
-        * @return the number of bytes produced.
-        */
-        public int Encode(
-            byte[]	data,
-            int		off,
-            int		length,
-            Stream	outStream)
+        public int Encode(byte[] inBuf, int inOff, int inLen, byte[] outBuf, int outOff)
         {
-            int modulus = length % 3;
-            int dataLength = (length - modulus);
-            int a1, a2, a3;
+            var inPos  = inOff;
+            var inEnd  = inOff + inLen - 2;
+            var outPos = outOff;
 
-            for (int i = off; i < off + dataLength; i += 3)
+            while (inPos < inEnd)
             {
-                a1 = data[i] & 0xff;
-                a2 = data[i + 1] & 0xff;
-                a3 = data[i + 2] & 0xff;
+                uint a1 = inBuf[inPos++];
+                uint a2 = inBuf[inPos++];
+                uint a3 = inBuf[inPos++];
 
-                outStream.WriteByte(encodingTable[(int) ((uint) a1 >> 2) & 0x3f]);
-                outStream.WriteByte(encodingTable[((a1 << 4) | (int) ((uint) a2 >> 4)) & 0x3f]);
-                outStream.WriteByte(encodingTable[((a2 << 2) | (int) ((uint) a3 >> 6)) & 0x3f]);
-                outStream.WriteByte(encodingTable[a3 & 0x3f]);
+                outBuf[outPos++] = this.encodingTable[(a1 >> 2) & 0x3F];
+                outBuf[outPos++] = this.encodingTable[((a1 << 4) | (a2 >> 4)) & 0x3F];
+                outBuf[outPos++] = this.encodingTable[((a2 << 2) | (a3 >> 6)) & 0x3F];
+                outBuf[outPos++] = this.encodingTable[a3 & 0x3F];
             }
 
-            /*
-            * process the tail end.
-            */
-            int b1, b2, b3;
-            int d1, d2;
-
-            switch (modulus)
+            switch (inLen - (inPos - inOff))
             {
-                case 0:        /* nothing left to do */
-                    break;
                 case 1:
-                    d1 = data[off + dataLength] & 0xff;
-                    b1 = (d1 >> 2) & 0x3f;
-                    b2 = (d1 << 4) & 0x3f;
+                {
+                    uint a1 = inBuf[inPos++];
 
-                    outStream.WriteByte(encodingTable[b1]);
-                    outStream.WriteByte(encodingTable[b2]);
-                    outStream.WriteByte(padding);
-                    outStream.WriteByte(padding);
+                    outBuf[outPos++] = this.encodingTable[(a1 >> 2) & 0x3F];
+                    outBuf[outPos++] = this.encodingTable[(a1 << 4) & 0x3F];
+                    outBuf[outPos++] = this.padding;
+                    outBuf[outPos++] = this.padding;
                     break;
+                }
                 case 2:
-                    d1 = data[off + dataLength] & 0xff;
-                    d2 = data[off + dataLength + 1] & 0xff;
+                {
+                    uint a1 = inBuf[inPos++];
+                    uint a2 = inBuf[inPos++];
 
-                    b1 = (d1 >> 2) & 0x3f;
-                    b2 = ((d1 << 4) | (d2 >> 4)) & 0x3f;
-                    b3 = (d2 << 2) & 0x3f;
-
-                    outStream.WriteByte(encodingTable[b1]);
-                    outStream.WriteByte(encodingTable[b2]);
-                    outStream.WriteByte(encodingTable[b3]);
-                    outStream.WriteByte(padding);
+                    outBuf[outPos++] = this.encodingTable[(a1 >> 2) & 0x3F];
+                    outBuf[outPos++] = this.encodingTable[((a1 << 4) | (a2 >> 4)) & 0x3F];
+                    outBuf[outPos++] = this.encodingTable[(a2 << 2) & 0x3F];
+                    outBuf[outPos++] = this.padding;
                     break;
             }
+            }
 
-            return (dataLength / 3) * 4 + ((modulus == 0) ? 0 : 4);
+            return outPos - outOff;
         }
 
-        private bool ignore(
-            char c)
+        /**
+         * encode the input data producing a base 64 output stream.
+         * 
+         * @return the number of bytes produced.
+         */
+        public int Encode(byte[] buf, int off, int len, Stream outStream)
         {
-            return (c == '\n' || c =='\r' || c == '\t' || c == ' ');
+            if (len < 0)
+                return 0;
+
+            var tmp       = new byte[72];
+            var remaining = len;
+            while (remaining > 0)
+            {
+                var inLen  = Math.Min(54, remaining);
+                var outLen = this.Encode(buf, off, inLen, tmp, 0);
+                outStream.Write(tmp, 0, outLen);
+                off       += inLen;
+                remaining -= inLen;
+            }
+
+            return (len + 2) / 3 * 4;
+        }
+
+        private bool Ignore(char c)
+        {
+            return c == '\n' || c == '\r' || c == '\t' || c == ' ';
         }
 
         /**
@@ -123,23 +127,18 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
         *
         * @return the number of bytes produced.
         */
-        public int Decode(
-            byte[]	data,
-            int		off,
-            int		length,
-            Stream	outStream)
+        public int Decode(byte[] data, int off, int length, Stream outStream)
         {
             byte b1, b2, b3, b4;
-            int outLen = 0;
-
-            int end = off + length;
+            var  outBuffer = new byte[54]; // S/MIME standard
+            var  bufOff    = 0;
+            int  outLen    = 0;
+            int  end       = off + length;
 
             while (end > off)
             {
-                if (!ignore((char)data[end - 1]))
-                {
+                if (!this.Ignore((char)data[end - 1]))
                     break;
-                }
 
                 end--;
             }
@@ -147,47 +146,60 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
             int  i = off;
             int  finish = end - 4;
 
-            i = nextI(data, i, finish);
+            i = this.NextI(data, i, finish);
 
             while (i < finish)
             {
                 b1 = decodingTable[data[i++]];
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
 
                 b2 = decodingTable[data[i++]];
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
 
                 b3 = decodingTable[data[i++]];
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
 
                 b4 = decodingTable[data[i++]];
 
                 if ((b1 | b2 | b3 | b4) >= 0x80)
                     throw new IOException("invalid characters encountered in base64 data");
 
-                outStream.WriteByte((byte)((b1 << 2) | (b2 >> 4)));
-                outStream.WriteByte((byte)((b2 << 4) | (b3 >> 2)));
-                outStream.WriteByte((byte)((b3 << 6) | b4));
+                outBuffer[bufOff++] = (byte)((b1 << 2) | (b2 >> 4));
+                outBuffer[bufOff++] = (byte)((b2 << 4) | (b3 >> 2));
+                outBuffer[bufOff++] = (byte)((b3 << 6) | b4);
+
+                if (bufOff == outBuffer.Length)
+                {
+                    outStream.Write(outBuffer, 0, bufOff);
+                    bufOff = 0;
+                }
 
                 outLen += 3;
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
             }
 
-            outLen += decodeLastBlock(outStream, (char)data[end - 4], (char)data[end - 3], (char)data[end - 2], (char)data[end - 1]);
+            if (bufOff > 0) outStream.Write(outBuffer, 0, bufOff);
+
+            var e0 = this.NextI(data, i, end);
+            var e1 = this.NextI(data, e0 + 1, end);
+            var e2 = this.NextI(data, e1 + 1, end);
+            var e3 = this.NextI(data, e2 + 1, end);
+
+            outLen += this.DecodeLastBlock(outStream, (char)data[e0], (char)data[e1], (char)data[e2], (char)data[e3]);
 
             return outLen;
         }
 
-        private int nextI(
+        private int NextI(
             byte[]	data,
             int		i,
             int		finish)
         {
-            while ((i < finish) && ignore((char)data[i]))
+            while (i < finish && this.Ignore((char)data[i]))
             {
                 i++;
             }
@@ -200,9 +212,7 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
         *
         * @return the number of bytes produced.
         */
-        public int DecodeString(
-            string	data,
-            Stream	outStream)
+        public int DecodeString(string data, Stream outStream)
         {
             // Platform Implementation
 //			byte[] bytes = Convert.FromBase64String(data);
@@ -216,10 +226,8 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
 
             while (end > 0)
             {
-                if (!ignore(data[end - 1]))
-                {
+                if (!this.Ignore(data[end - 1]))
                     break;
-                }
 
                 end--;
             }
@@ -227,21 +235,21 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
             int  i = 0;
             int  finish = end - 4;
 
-            i = nextI(data, i, finish);
+            i = this.NextI(data, i, finish);
 
             while (i < finish)
             {
                 b1 = decodingTable[data[i++]];
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
 
                 b2 = decodingTable[data[i++]];
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
 
                 b3 = decodingTable[data[i++]];
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
 
                 b4 = decodingTable[data[i++]];
 
@@ -254,15 +262,15 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
 
                 length += 3;
 
-                i = nextI(data, i, finish);
+                i = this.NextI(data, i, finish);
             }
 
-            length += decodeLastBlock(outStream, data[end - 4], data[end - 3], data[end - 2], data[end - 1]);
+            length += this.DecodeLastBlock(outStream, data[end - 4], data[end - 3], data[end - 2], data[end - 1]);
 
             return length;
         }
 
-        private int decodeLastBlock(
+        private int DecodeLastBlock(
             Stream	outStream,
             char	c1,
             char	c2,
@@ -317,9 +325,9 @@ namespace BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Encoders
             }
         }
 
-        private int nextI(string data, int i, int finish)
+        private int NextI(string data, int i, int finish)
         {
-            while ((i < finish) && ignore(data[i]))
+            while (i < finish && this.Ignore(data[i]))
             {
                 i++;
             }
