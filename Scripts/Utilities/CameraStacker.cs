@@ -27,14 +27,22 @@ namespace GameFoundation.Scripts.Utilities
                 if (BaseCamera != null && BaseCamera != this)
                     throw new InvalidOperationException("Can't have 2 URP Base camera");
                 BaseCamera = this;
-                this.UpdateCameraStack();
             }
             else {
+                var cameraData = this.camera.GetUniversalAdditionalCameraData();
+                cameraData.renderType = CameraRenderType.Overlay;
                 if (BaseCamera != null)
                     BaseCamera.AddToCameraStack(this);
             }
         }
-    
+
+        private void Start()
+        {
+            if (this.isBaseCameraStack) {
+                this.UpdateCameraStack();
+            }
+        }
+
         // Find all camera and add them to camera stack
         private void UpdateCameraStack() {
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
@@ -90,6 +98,8 @@ namespace GameFoundation.Scripts.Utilities
             cameraData.cameraStack.Clear();
             foreach (var cameraStacker in CameraStackers)
                 cameraData.cameraStack.Add(cameraStacker.camera);
+            
+            // Debug.Break();
         }
     }
 }

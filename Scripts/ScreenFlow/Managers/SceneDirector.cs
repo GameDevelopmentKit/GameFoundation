@@ -9,27 +9,11 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
     using UnityEngine.SceneManagement;
     using Zenject;
 
-    public static class SceneName
-    {
-        public const string Loading        = "LoadingScene";
-        public const string Main           = "MainScene";
-        public const string Battle         = "BattleScene";
-        public const string BattleEnvScene = "BattleEnvScene";
-        public const string Splash         = "Splash";
-
-        #region ARScene
-
-        public const string Login = "LoginScene";
-        public const string AR    = "MechaAR";
-
-        #endregion
-    }
-
     /// <summary>Load, unload scenes are wrapped here </summary>
     public class SceneDirector
     {
         private readonly SignalBus signalBus;
-        public static    string    CurrentSceneName = SceneName.Loading;
+        public static    string    CurrentSceneName;
         public SceneDirector(SignalBus signalBus) { this.signalBus = signalBus; }
 
         /// <summary>Load scene async by name </summary>
@@ -73,14 +57,5 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             await GameAssets.UnloadSceneAsync(sceneName);
             GameAssets.UnloadUnusedAssets(sceneName);
         }
-
-        #region shortcut
-
-        public async void LoadLoadingScene() => await this.LoadSingleSceneAsync(SceneName.Loading);
-        public async void LoadLoginScene() => await this.LoadSingleSceneAsync(SceneName.Login);
-        public async void LoadMainScene()    => await this.LoadSingleSceneAsync(SceneName.Main);
-        public async void LoadBattleScene()  { await this.LoadMultipleSceneAsync(SceneName.Battle, SceneName.BattleEnvScene); }
-
-        #endregion
     }
 }
