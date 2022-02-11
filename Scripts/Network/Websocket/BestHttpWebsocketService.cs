@@ -15,8 +15,8 @@ namespace GameFoundation.Scripts.Network.Websocket
     {
         #region zenject
 
-        protected readonly GameFoundationLocalData   localData;
-        protected readonly ILogService logger;
+        protected readonly GameFoundationLocalData localData;
+        protected readonly ILogService             logger;
 
         #endregion
 
@@ -38,6 +38,7 @@ namespace GameFoundation.Scripts.Network.Websocket
             {
                 AuthenticationProvider = new CustomAuthenticator(token, MechVersion.Version),
             };
+
             this.HubConnection.OnConnected    += this.OnConnected;
             this.HubConnection.OnClosed       += this.OnClose;
             this.HubConnection.OnError        += this.OnError;
@@ -59,11 +60,37 @@ namespace GameFoundation.Scripts.Network.Websocket
             this.State.Value = ServiceStatus.Closed;
         }
 
+        public Task<TResult> InvokeAsync<TResult>(string target, params object[] args)
+        {
+            try
+            {
+                return this.HubConnection.InvokeAsync<TResult>(target, this.CancellationTokenSource, args);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        public Task<object> SendAsync(string target, params object[] args)
+        {
+            try
+            {
+                return this.HubConnection.SendAsync(target, this.CancellationTokenSource, args);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
         private void OnReconnected(HubConnection connection) { this.logger.Log($"{connection.Uri} reconnected!!"); }
 
         private void OnReconnecting(HubConnection connection, string arg2) { this.logger.Log($"{connection.Uri} is reconnecting!!"); }
 
-        private void OnError(HubConnection connection, string error)
+        protected virtual void OnError(HubConnection connection, string error)
         {
             this.CancellationTokenSource.Cancel();
             this.logger.Log($"{connection.Uri} error: {error}");
