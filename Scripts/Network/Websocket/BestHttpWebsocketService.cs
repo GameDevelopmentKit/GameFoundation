@@ -41,7 +41,7 @@ namespace GameFoundation.Scripts.Network.Websocket
 
             this.HubConnection.OnConnected    += this.OnConnected;
             this.HubConnection.OnClosed       += this.OnClose;
-            this.HubConnection.OnError        += this.OnError;
+            this.HubConnection.OnError        += this.OnHubError;
             this.HubConnection.OnReconnecting += this.OnReconnecting;
             this.HubConnection.OnReconnected  += this.OnReconnected;
 
@@ -60,28 +60,30 @@ namespace GameFoundation.Scripts.Network.Websocket
             this.State.Value = ServiceStatus.Closed;
         }
 
-        public Task<TResult> InvokeAsync<TResult>(string target, params object[] args)
+        protected async Task<TResult> InvokeAsync<TResult>(string target, params object[] args)
         {
             try
             {
-                return this.HubConnection.InvokeAsync<TResult>(target, this.CancellationTokenSource, args);
+                var invokeAsyncResult = await this.HubConnection.InvokeAsync<TResult>(target, this.CancellationTokenSource.Token, args);
+                return invokeAsyncResult;
             }
             catch (Exception e)
-            {
-                Console.WriteLine(e);
+            { 
+                this.OnInvokeError(e);
                 throw;
             }
         }
 
-        public Task<object> SendAsync(string target, params object[] args)
+        protected async Task<object> SendAsync(string target, params object[] args)
         {
             try
             {
-                return this.HubConnection.SendAsync(target, this.CancellationTokenSource, args);
+                var sendAsyncResult = await this.HubConnection.SendAsync(target, this.CancellationTokenSource, args);
+                return sendAsyncResult;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                this.OnInvokeError(e);
                 throw;
             }
         }
@@ -90,7 +92,7 @@ namespace GameFoundation.Scripts.Network.Websocket
 
         private void OnReconnecting(HubConnection connection, string arg2) { this.logger.Log($"{connection.Uri} is reconnecting!!"); }
 
-        protected virtual void OnError(HubConnection connection, string error)
+        protected virtual void OnHubError(HubConnection connection, string error)
         {
             this.CancellationTokenSource.Cancel();
             this.logger.Log($"{connection.Uri} error: {error}");
@@ -103,5 +105,10 @@ namespace GameFoundation.Scripts.Network.Websocket
         }
 
         private void OnConnected(HubConnection connection) { this.logger.Log($"SignalR connected to {connection.Uri}"); }
+
+        protected virtual void OnInvokeError(Exception exception)
+        {
+            
+        }
     }
 }

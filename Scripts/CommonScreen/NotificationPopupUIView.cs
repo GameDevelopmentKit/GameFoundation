@@ -77,6 +77,14 @@ namespace GameFoundation.Scripts.CommonScreen
             this.View.TxtTitle.text   = this.Model.title;
             this.View.TxtContent.text = this.Model.content;
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            this.View.BtnOk.onClick.RemoveListener(this.OkAction);
+            this.View.BtnCancel.onClick.RemoveListener(this.CloseView);
+            this.View.BtnClose.onClick.RemoveListener(this.CloseView);
+        }
     }
 
     public class NotificationPopupModel
