@@ -5,11 +5,11 @@ namespace GameFoundation.Scripts.Network.ApiHandler
     using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.WebService.Authentication;
 
-    public class SendOTPRequest : BaseHttpRequest<OtpSendResponseData>
+    public class SendOTPRequest : BaseHttpRequest<OtpSendResponseDataData>
     {
         private readonly DataLoginServices dataLoginServices;
         public SendOTPRequest(ILogService logger, DataLoginServices dataLoginServices) : base(logger) { this.dataLoginServices = dataLoginServices; }
-        public override void Process(OtpSendResponseData responseData) => this.dataLoginServices.SendCodeStatus.Value = SendCodeStatus.Sent;
+        public override void Process(OtpSendResponseDataData responseDataData) { this.dataLoginServices.SendCodeStatus.Value   = SendCodeStatus.Sent; }
 
         public override void ErrorProcess(int statusCode)
         {

@@ -1,16 +1,14 @@
 namespace Mech.Network.HttpRequest
 {
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
-    using GameFoundation.Scripts.BlueprintFlow.Signals;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.WebService.Blueprint;
-    using Zenject;
 
     /// <summary>
     /// Get blueprint download link from server
     /// </summary>
-    public class BlueprintDownloadRequest : BaseHttpRequest<GetBlueprintResponse>
+    public class BlueprintDownloadRequest : BaseHttpRequest<GetBlueprintResponseData>
     {
         #region zenject
 
@@ -23,10 +21,10 @@ namespace Mech.Network.HttpRequest
             this.blueprintReaderManager = blueprintReaderManager;
         }
 
-        public override void Process(GetBlueprintResponse responseData)
+        public override void Process(GetBlueprintResponseData responseDataData)
         {
-            this.Logger.Log($"Blueprint download link: {responseData.Url}");
-            this.blueprintReaderManager.LoadBlueprint(responseData.Url, responseData.Hash);
+            this.Logger.Log($"Blueprint download link: {responseDataData.Url}");
+            this.blueprintReaderManager.LoadBlueprint(responseDataData.Url, responseDataData.Hash);
         }
     }
 }
