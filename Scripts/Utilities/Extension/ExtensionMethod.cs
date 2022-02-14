@@ -29,13 +29,6 @@ namespace GameFoundation.Scripts.Utilities.Extension
         //check Object trigger With other object
         public static bool CheckObjectOnBound(this BaseView view, Bounds bounds, Bounds g) { return bounds.Intersects(g); }
 
-        //Create view
-        public static async Task<T> CreateView<T>(this IUIPresenter iScreen, Transform parent) where T : IUIView
-        {
-            var viewObject = Object.Instantiate(await GameAssets.LoadAssetAsync<GameObject>(typeof(T).Name), parent).GetComponent<T>();
-            return viewObject;
-        }
-
         public static void InstantiateUIPresenter<TPresenter, TView, TModel>(this IInstantiator instantiator, ref TPresenter presenter, TView view, TModel model)
             where TPresenter : IUIItemPresenter<TView, TModel> where TView : IUIView
         {
@@ -46,6 +39,14 @@ namespace GameFoundation.Scripts.Utilities.Extension
             }
 
             presenter.BindData(model);
+        }
+        
+        public static async Task<TPresenter> InstantiateUIPresenter<TPresenter, TModel>(this IInstantiator instantiator, Transform parentView, TModel model) where TPresenter : IUIItemPresenter<IUIView, TModel> 
+        {
+            var presenter = instantiator.Instantiate<TPresenter>();
+            await presenter.SetView(parentView);
+            presenter.BindData(model);
+            return presenter;
         }
 
         //FillChild Width with parent Width

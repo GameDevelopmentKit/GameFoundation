@@ -12,9 +12,14 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
     /// <summary>Load, unload scenes are wrapped here </summary>
     public class SceneDirector
     {
-        private readonly SignalBus signalBus;
-        public static    string    CurrentSceneName;
-        public SceneDirector(SignalBus signalBus) { this.signalBus = signalBus; }
+        private readonly SignalBus   signalBus;
+        protected readonly IGameAssets GameAssets;
+        public static    string      CurrentSceneName;
+        public SceneDirector(SignalBus signalBus, IGameAssets gameAssets)
+        {
+            this.signalBus  = signalBus;
+            this.GameAssets = gameAssets;
+        }
 
         /// <summary>Load scene async by name </summary>
         public async UniTask LoadSingleSceneAsync(string sceneName)
@@ -22,9 +27,9 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.signalBus.Fire<StartLoadingNewSceneSignal>();
             var lastScene = CurrentSceneName;
             CurrentSceneName = sceneName;
-            await GameAssets.LoadSceneAsync(sceneName);
+            await this.GameAssets.LoadSceneAsync(sceneName);
             Resources.UnloadUnusedAssets();
-            GameAssets.UnloadUnusedAssets(lastScene);
+            this.GameAssets.UnloadUnusedAssets(lastScene);
             this.signalBus.Fire<FinishLoadingNewSceneSignal>();
         }
 
@@ -38,11 +43,11 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             for (var index = 0; index < sceneNames.Length; index++)
             {
                 var sceneName = sceneNames[index];
-                allTask.Add(GameAssets.LoadSceneAsync(sceneName, index == 0 ? LoadSceneMode.Single : LoadSceneMode.Additive).ToUniTask());
+                allTask.Add(this.GameAssets.LoadSceneAsync(sceneName, index == 0 ? LoadSceneMode.Single : LoadSceneMode.Additive).ToUniTask());
             }
 
             allTask.Add(Resources.UnloadUnusedAssets().ToUniTask());
-            GameAssets.UnloadUnusedAssets(lastScene);
+            this.GameAssets.UnloadUnusedAssets(lastScene);
             await UniTask.WhenAll(allTask);
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneNames.Last()));
@@ -54,8 +59,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         /// <summary>Unload scene async by name </summary>
         public async UniTask UnloadSceneAsync(string sceneName)
         {
-            await GameAssets.UnloadSceneAsync(sceneName);
-            GameAssets.UnloadUnusedAssets(sceneName);
+            await this.GameAssets.UnloadSceneAsync(sceneName);
+            this.GameAssets.UnloadUnusedAssets(sceneName);
         }
     }
 }

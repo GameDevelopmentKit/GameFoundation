@@ -88,14 +88,16 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         private SignalBus    signalBus;
         private RootUICanvas rootUICanvas;
         private ILogService  logService;
+        private IGameAssets  gameAssets;
 
         #endregion
 
         [Inject]
-        public void Init(SignalBus signalBusParam, ILogService logServiceParam)
+        public void Init(SignalBus signalBusParam, ILogService logServiceParam, IGameAssets gameAssetsParam)
         {
             this.signalBus  = signalBusParam;
             this.logService = logServiceParam;
+            this.gameAssets = gameAssetsParam;
 
             this.activeScreens = new List<IScreenPresenter>();
             this.screenPool    = new Dictionary<Type, IScreenPresenter>();
@@ -164,7 +166,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         private async UniTask<IScreenView> InstantiateView(IScreenPresenter presenter)
         {
             var screenInfo = presenter.GetCustomAttribute<ScreenInfoAttribute>();
-            var viewObject = Instantiate(await GameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath), this.CurrentRootScreen).GetComponent<IScreenView>();
+            var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath), this.CurrentRootScreen).GetComponent<IScreenView>();
             presenter.SetView(viewObject);
             return viewObject;
         }

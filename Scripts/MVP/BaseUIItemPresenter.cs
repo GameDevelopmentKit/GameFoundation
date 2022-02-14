@@ -23,17 +23,25 @@
         protected         TView  View;
         protected virtual string PrefabPath { get; } = typeof(TView).Name;
 
+        [Inject] protected IGameAssets GameAssets;
+
         /// <summary>
         /// Set view automatically
         /// </summary>
         /// <param name="parent"></param>
-        public async UniTask SetView(Transform parent) { this.View ??= Object.Instantiate(await GameAssets.LoadAssetAsync<GameObject>(this.PrefabPath), parent).GetComponent<TView>(); }
+        public async UniTask SetView(Transform parent)
+        {
+            if (this.View == null)
+            {
+                this.SetView(Object.Instantiate(await this.GameAssets.LoadAssetAsync<GameObject>(this.PrefabPath), parent).GetComponent<TView>());
+            }
+        }
 
         /// <summary>
         /// Set view manually
         /// </summary>
         /// <param name="viewInstance"></param>
-        public void SetView(TView viewInstance) { this.View = viewInstance; }
+        public virtual void SetView(TView viewInstance) { this.View = viewInstance; }
         public void SetView(IUIView viewInstance) { this.View = (TView)viewInstance; }
     }
 

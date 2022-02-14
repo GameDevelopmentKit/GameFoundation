@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.ScreenFlow.Managers
 {
+    using GameFoundation.Scripts.AssetLibrary;
     using Zenject;
 
     public static class SceneName
@@ -12,7 +13,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
     public class ARSceneDirector : SceneDirector
     {
-        public ARSceneDirector(SignalBus signalBus) : base(signalBus) { }
+        public ARSceneDirector(SignalBus signalBus, IGameAssets gameAssets) : base(signalBus, gameAssets) { }
 
         #region Shortcut
 
