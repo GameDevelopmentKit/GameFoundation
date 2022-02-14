@@ -25,7 +25,7 @@ namespace GameFoundation.Scripts.Network.Authentication
 
         public async UniTask SendAsync<T, TK>(IHttpRequestData authenticationData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
         {
-            if (!(Attribute.GetCustomAttribute(authenticationData.GetType(), typeof(HttpRequestDefinitionAttribute)) is HttpRequestDefinitionAttribute httpRequestDefinition))
+            if (Attribute.GetCustomAttribute(authenticationData.GetType(), typeof(HttpRequestDefinitionAttribute)) is not HttpRequestDefinitionAttribute httpRequestDefinition)
             {
                 throw new Exception($"{typeof(T)} didn't define yet!!!");
             }
@@ -37,7 +37,7 @@ namespace GameFoundation.Scripts.Network.Authentication
 
             try
             {
-                await this.MainProcess<T, TK>(request);
+                await this.MainProcess<T, TK>(request, authenticationData);
             }
             catch (AsyncHTTPException ex)
             {
@@ -46,6 +46,11 @@ namespace GameFoundation.Scripts.Network.Authentication
             }
         }
 
-        protected override void RequestSuccessProcess<T, TK>(JObject responseData) { this.Container.Resolve<IFactory<T>>().Create().Process(responseData.ToObject<TK>()); }
+        protected override void RequestSuccessProcess<T, TK>(JObject responseData, IHttpRequestData requestData)
+        {
+            var baseHttpRequest = this.Container.Resolve<IFactory<T>>().Create();
+            baseHttpRequest.Process(responseData.ToObject<TK>());
+            baseHttpRequest.PredictProcess(requestData);
+        }
     }
 }

@@ -29,6 +29,8 @@ namespace GameFoundation.Scripts.Network.WebService
         public abstract void Process(IHttpResponseData responseData);
         public virtual  void ErrorProcess(int statusCode) { throw new MissStatusCodeException(); }
 
+        public virtual void PredictProcess(IHttpRequestData requestData) { }
+
         public class MissStatusCodeException : Exception
         {
         }

@@ -72,7 +72,7 @@ namespace GameFoundation.Scripts.Network.WebService
 
             try
             {
-                await this.MainProcess<T, TK>(request);
+                await this.MainProcess<T, TK>(request, httpRequestData);
             }
             catch (AsyncHTTPException ex)
             {
@@ -88,7 +88,7 @@ namespace GameFoundation.Scripts.Network.WebService
         /// <param name="address">Download uri</param>
         /// <param name="filePath">output file path</param>
         /// <param name="onDownloadProgress">% of download will be presented through this</param>
-        public async UniTask Download(string address, string filePath, WebService.OnDownloadProgressDelegate onDownloadProgress)
+        public async UniTask Download(string address, string filePath, OnDownloadProgressDelegate onDownloadProgress)
         {
             filePath = this.GetDownloadPath(filePath);
 

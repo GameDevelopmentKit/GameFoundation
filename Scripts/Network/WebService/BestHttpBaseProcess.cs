@@ -33,7 +33,7 @@
             this.uri       = uri;
         }
 
-        protected async UniTask MainProcess<T, TK>(HTTPRequest request) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
+        protected async UniTask MainProcess<T, TK>(HTTPRequest request, IHttpRequestData requestData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             this.Logger.Log($"{request.Uri} - [REQUEST] - Header: {request.DumpHeaders()} - \n Body:{Encoding.UTF8.GetString(request.GetEntityBody())}");
@@ -45,7 +45,7 @@
             this.PreProcess(request, response, (statusCode) =>
                 {
                     var responseData = JObject.Parse(Encoding.UTF8.GetString(response.Data));
-                    this.RequestSuccessProcess<T, TK>(responseData);
+                    this.RequestSuccessProcess<T, TK>(responseData, requestData);
                 },
                 (statusCode) =>
                 {
@@ -63,13 +63,14 @@
         }
 
         //Deserialize then process response data when request success
-        protected virtual void RequestSuccessProcess<T, TK>(JObject responseData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
+        protected virtual void RequestSuccessProcess<T, TK>(JObject responseData, IHttpRequestData requestData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
         {
-            if (responseData.TryGetValue("data", out var requestProcessData))
-            {
-                this.Container.Resolve<IFactory<T>>().Create().Process(requestProcessData.ToObject<TK>());
-                this.PostProcess();
-            }
+            if (!responseData.TryGetValue("data", out var requestProcessData)) return;
+
+            var baseHttpRequest = this.Container.Resolve<IFactory<T>>().Create();
+            baseHttpRequest.Process(requestProcessData.ToObject<TK>());
+            baseHttpRequest.PredictProcess(requestData);
+            this.PostProcess();
         }
 
         /// <summary>Handle errors that are defined by Best Http/2, return false of there is any error, otherwise return true</summary>
