@@ -7,7 +7,6 @@
         "UniTask",
         "UniTask.Addressables",
         "Unity.ResourceManager",
-        "BlueprintReader",
         "UniRx",
         "Unity.TextMeshPro",
         "MechSharingCode",

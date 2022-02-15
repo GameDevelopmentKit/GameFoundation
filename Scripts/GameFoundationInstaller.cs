@@ -12,6 +12,7 @@
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
+    using GameFoundation.Scripts.Utilities.ObjectPool;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
@@ -21,6 +22,7 @@
             SignalBusInstaller.Install(this.Container);
 
             this.Container.BindInterfacesAndSelfTo<GameAssets>();
+            this.Container.BindInterfacesAndSelfTo<ObjectPoolManager>();
             
             //CreateMasterAudio
             this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsSingle().NonLazy();

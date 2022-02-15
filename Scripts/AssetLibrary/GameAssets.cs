@@ -107,7 +107,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// A dictionary use for caching the loaded assets
         /// </summary>
         private  readonly Dictionary<object, AsyncOperationHandle> loadedScenes = new Dictionary<object, AsyncOperationHandle>();
-
+        
         /// <summary>
         /// Manage the loaded asset by scene and release them when those scene unloaded
         /// </summary>
