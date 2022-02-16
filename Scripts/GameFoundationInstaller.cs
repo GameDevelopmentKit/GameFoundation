@@ -21,8 +21,8 @@
         {
             SignalBusInstaller.Install(this.Container);
 
-            this.Container.BindInterfacesAndSelfTo<GameAssets>().AsCached();
-            this.Container.BindInterfacesAndSelfTo<ObjectPoolManager>().AsCached();
+            this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
+            this.Container.Bind<ObjectPoolManager>().AsCached();
             
             //CreateMasterAudio
             this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsSingle().NonLazy();

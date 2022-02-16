@@ -24,7 +24,7 @@
         protected virtual string PrefabPath { get; } = typeof(TView).Name;
 
         [Inject] protected IGameAssets GameAssets;
-
+        
         /// <summary>
         /// Set view automatically
         /// </summary>
