@@ -50,21 +50,13 @@ namespace GameFoundation.Scripts.Utilities
             }
         }
 
-        private void Start()
-        {
-            if (this.isBaseCameraStack)
-            {
-                this.UpdateCameraStack();
-            }
-        }
-
         // Find all camera and add them to camera stack
         private void UpdateCameraStack()
         {
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
 
             // First we find all CameraStacker.
-            var currentCameraStackers = FindObjectsOfType<CameraStacker>().Where(cameraStacker => cameraStacker != this)
+            var currentCameraStackers = FindObjectsOfType<CameraStacker>().Where(cameraStacker => cameraStacker != this && cameraStacker.camera != null)
                 .OrderBy(cameraStacker => cameraStacker.orderInCameraStack).ToList();
 
 //        Func<CameraStacker, string> toStringFunction = cameraStacker => cameraStacker != null ? $"{cameraStacker.gameObject.name}-{cameraStacker.orderInCameraStack}" : "null";
