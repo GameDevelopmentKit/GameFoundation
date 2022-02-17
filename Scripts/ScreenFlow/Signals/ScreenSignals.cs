@@ -2,11 +2,16 @@ namespace GameFoundation.Scripts.ScreenFlow.Signals
 {
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
 
+    public class ScreenCloseSignal
+    {
+        public IScreenPresenter ScreenPresenter;
+    }
+
     public class ScreenHideSignal
     {
         public IScreenPresenter ScreenPresenter;
     }
-    
+
     public class ScreenShowSignal
     {
         public IScreenPresenter ScreenPresenter;
@@ -21,7 +26,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Signals
     {
         public IScreenPresenter ScreenPresenter;
     }
-    
+
     public class ForceDestroyScreenSignal
     {
         public IScreenPresenter ScreenPresenter;

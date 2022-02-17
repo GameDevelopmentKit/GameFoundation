@@ -104,7 +104,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
             this.signalBus.Subscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
             this.signalBus.Subscribe<ScreenShowSignal>(this.OnShowScreen);
-            this.signalBus.Subscribe<ScreenHideSignal>(this.OnCloseScreen);
+            this.signalBus.Subscribe<ScreenCloseSignal>(this.OnCloseScreen);
             this.signalBus.Subscribe<ManualInitScreenSignal>(this.OnManualInitScreen);
             this.signalBus.Subscribe<ScreenSelfDestroyedSignal>(this.OnDestroyScreen);
             this.signalBus.Subscribe<PopupBlurBgShowedSignal>(this.OnPopupBlurBgShowed);
@@ -114,7 +114,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         {
             this.signalBus.Unsubscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
             this.signalBus.Unsubscribe<ScreenShowSignal>(this.OnShowScreen);
-            this.signalBus.Unsubscribe<ScreenHideSignal>(this.OnCloseScreen);
+            this.signalBus.Unsubscribe<ScreenCloseSignal>(this.OnCloseScreen);
             this.signalBus.Unsubscribe<ManualInitScreenSignal>(this.OnManualInitScreen);
             this.signalBus.Unsubscribe<ScreenSelfDestroyedSignal>(this.OnDestroyScreen);
             this.signalBus.Unsubscribe<PopupBlurBgShowedSignal>(this.OnPopupBlurBgShowed);
@@ -238,7 +238,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             }
         }
 
-        private void OnCloseScreen(ScreenHideSignal signal)
+        private void OnCloseScreen(ScreenCloseSignal signal)
         {
             var closeScreenPresenter = signal.ScreenPresenter;
             if (this.activeScreens.LastOrDefault() == closeScreenPresenter)

@@ -69,7 +69,7 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             if (this.ScreenStatus == ScreenStatus.Closed) return;
             this.ScreenStatus = ScreenStatus.Closed;
             this.View.Close();
-            this.SignalBus.Fire(new ScreenHideSignal() { ScreenPresenter = this });
+            this.SignalBus.Fire(new ScreenCloseSignal() { ScreenPresenter = this });
             this.Dispose();
         }
 
@@ -78,6 +78,7 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             if (this.ScreenStatus == ScreenStatus.Hide) return;
             this.ScreenStatus = ScreenStatus.Hide;
             this.View.Hide();
+            this.SignalBus.Fire(new ScreenHideSignal() { ScreenPresenter = this });
             this.Dispose();
         }
         public virtual void DestroyView()

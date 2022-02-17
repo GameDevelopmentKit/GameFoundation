@@ -364,6 +364,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rootUIShowTransform: {fileID: 888736690022631734}
   rootUIClosedTransform: {fileID: 2651898174255031240}
+  uiCamera: {fileID: 213689867187072650}
 --- !u!1001 &5208711966758764296
 PrefabInstance:
   m_ObjectHideFlags: 0

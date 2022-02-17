@@ -10,25 +10,30 @@ namespace GameFoundation.Scripts.Utilities
     /// Manage camera stack between scenes for URP.
     /// Usage: add to a camera that is rendered to screen. This shouldn't be added to camera that renders to a <see cref="RenderTexture"/>.
     /// </summary>
-    public class CameraStacker : MonoBehaviour {
+    public class CameraStacker : MonoBehaviour
+    {
         [SerializeField] private Camera camera;
-    
+
         private static           CameraStacker       BaseCamera; // Universal Render Pipeline base camera. This camera will manage the camera stack.
         private static           List<CameraStacker> cameraStackers;
         private static           List<CameraStacker> CameraStackers => cameraStackers ??= new List<CameraStacker>(); // Store list of CameraStacker for management. 
         [SerializeField] private bool                isBaseCameraStack; // Tick to this if this is a base camera that manages camera stack.
         [SerializeField] private int                 orderInCameraStack;
-    
-        private void OnEnable() {
+
+        private void OnEnable()
+        {
             if (this.camera == null)
                 this.camera = this.GetComponent<Camera>();
-            
-            if (this.isBaseCameraStack) {
+
+            if (this.isBaseCameraStack)
+            {
                 if (BaseCamera != null && BaseCamera != this)
-                    throw new InvalidOperationException("Can't have 2 URP Base camera");
+                    Debug.LogWarning("Have 2 camera base on scene");
                 BaseCamera = this;
+                this.UpdateCameraStack();
             }
-            else {
+            else
+            {
                 var cameraData = this.camera.GetUniversalAdditionalCameraData();
                 cameraData.renderType = CameraRenderType.Overlay;
                 if (BaseCamera != null)
@@ -36,17 +41,28 @@ namespace GameFoundation.Scripts.Utilities
             }
         }
 
+        private void OnDisable()
+        {
+            if (this.isBaseCameraStack && BaseCamera == this)
+            {
+                BaseCamera = null;
+                CameraStackers.Clear();
+            }
+        }
+
         private void Start()
         {
-            if (this.isBaseCameraStack) {
+            if (this.isBaseCameraStack)
+            {
                 this.UpdateCameraStack();
             }
         }
 
         // Find all camera and add them to camera stack
-        private void UpdateCameraStack() {
+        private void UpdateCameraStack()
+        {
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
-        
+
             // First we find all CameraStacker.
             var currentCameraStackers = FindObjectsOfType<CameraStacker>().Where(cameraStacker => cameraStacker != this)
                 .OrderBy(cameraStacker => cameraStacker.orderInCameraStack).ToList();
@@ -58,9 +74,12 @@ namespace GameFoundation.Scripts.Utilities
             var cameraStackChanged = false;
             if (CameraStackers.Count != currentCameraStackers.Count)
                 cameraStackChanged = true;
-            else {
-                for (var i = 0; i < CameraStackers.Count; i++) {
-                    if (CameraStackers[i] != currentCameraStackers[i]) {
+            else
+            {
+                for (var i = 0; i < CameraStackers.Count; i++)
+                {
+                    if (CameraStackers[i] != currentCameraStackers[i])
+                    {
                         cameraStackChanged = true;
                         break;
                     }
@@ -68,14 +87,16 @@ namespace GameFoundation.Scripts.Utilities
             }
 
             // If there are changes, update the camera stack
-            if (cameraStackChanged) {
+            if (cameraStackChanged)
+            {
                 cameraStackers = currentCameraStackers;
                 this.UpdateCameraStackInternal();
             }
         }
-    
+
         // Add this camera to the camera stack.
-        private void AddToCameraStack(CameraStacker cameraStacker) {
+        private void AddToCameraStack(CameraStacker cameraStacker)
+        {
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
 
             if (CameraStackers.Contains(cameraStacker)) return;
@@ -89,16 +110,17 @@ namespace GameFoundation.Scripts.Utilities
             this.UpdateCameraStackInternal();
 //        Debug.Log($"<color=magenta>{gameObject.name} [2] CameraStackers={CameraStackers.ToString2()}</color>");
         }
-    
+
         // Set base camera's stack to camera in CameraStackers.
-        private void UpdateCameraStackInternal() {
+        private void UpdateCameraStackInternal()
+        {
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
 
             var cameraData = this.camera.GetUniversalAdditionalCameraData();
             cameraData.cameraStack.Clear();
             foreach (var cameraStacker in CameraStackers)
                 cameraData.cameraStack.Add(cameraStacker.camera);
-            
+
             // Debug.Break();
         }
     }

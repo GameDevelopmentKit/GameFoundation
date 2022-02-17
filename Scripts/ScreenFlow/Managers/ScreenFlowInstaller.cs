@@ -11,8 +11,9 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.Container.BindInterfacesAndSelfTo<ScreenManager>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
             this.Container.DeclareSignal<StartLoadingNewSceneSignal>();
             this.Container.DeclareSignal<FinishLoadingNewSceneSignal>();
-            this.Container.DeclareSignal<ScreenHideSignal>();
+            this.Container.DeclareSignal<ScreenCloseSignal>();
             this.Container.DeclareSignal<ScreenShowSignal>();
+            this.Container.DeclareSignal<ScreenHideSignal>();
             this.Container.DeclareSignal<ManualInitScreenSignal>();
             this.Container.DeclareSignal<ScreenSelfDestroyedSignal>();
             this.Container.DeclareSignal<PopupShowedSignal>();
