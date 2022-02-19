@@ -136,12 +136,14 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public async Task<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
-            if (this.cachedLoadedPrefab.TryGetValue(prefabName, out var prefab))
-                return this.Spawn(prefab, parent, position, rotation);
+            var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
+           
+            if (!this.cachedLoadedPrefab.ContainsKey(prefabName))
+            {
+                this.cachedLoadedPrefab.Add(prefabName, prefab);
+                this.mapPrefabToKey.Add(prefab, prefabName);
+            }
 
-            prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
-            this.cachedLoadedPrefab.Add(prefabName, prefab);
-            this.mapPrefabToKey.Add(prefab, prefabName);
             return this.Spawn(prefab, parent, position, rotation);
         }
 

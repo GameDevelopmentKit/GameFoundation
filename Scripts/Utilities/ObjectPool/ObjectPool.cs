@@ -6,9 +6,10 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     public class ObjectPool : MonoBehaviour
     {
         public GameObject       prefab;
-        public List<GameObject> pooledObjects;
-        public List<GameObject> spawnedObjects;
+        public List<GameObject> pooledObjects = new List<GameObject>();
+        public List<GameObject> spawnedObjects = new List<GameObject>();
 
+        private bool isDestroying;
         public GameObject Spawn()
         {
             GameObject obj = null;
@@ -38,8 +39,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (!obj) return;
             this.pooledObjects.Add(obj);
             this.spawnedObjects.Remove(obj);
-            obj.transform.SetParent(this.transform); //instance.transform;
             obj.SetActive(false);
+            if(!this.isDestroying)
+                obj.transform.SetParent(this.transform);
         }
 
         public void CleanUpPooled()
@@ -54,6 +56,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         private void OnDestroy()
         {
+            this.isDestroying = true;
             this.prefab.DestroyAll();
         }
     }
