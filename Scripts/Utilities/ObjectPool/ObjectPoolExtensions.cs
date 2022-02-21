@@ -78,11 +78,15 @@ public static class ObjectPoolExtensions
 
     public static List<T> GetPooled<T>(this T prefab) where T : Component { return ObjectPoolManager.Instance.GetPooled(prefab, null, false); }
 
-    public static void DestroyPooled(this GameObject prefab) { ObjectPoolManager.Instance.DestroyPooled(prefab); }
+    public static void CleanUpPooled(this GameObject prefab) { ObjectPoolManager.Instance.CleanUpPooled(prefab); }
 
-    public static void DestroyPooled<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.DestroyPooled(prefab.gameObject); }
+    public static void CleanUpPooled<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.CleanUpPooled(prefab.gameObject); }
 
-    public static void DestroyAll(this GameObject prefab) { ObjectPoolManager.Instance.DestroyAll(prefab); }
+    public static void CleaUpAll(this GameObject prefab) { ObjectPoolManager.Instance.CleanUpAll(prefab); }
 
-    public static void DestroyAll<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.DestroyAll(prefab.gameObject); }
+    public static void CleaUpAll<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.CleanUpAll(prefab.gameObject); }
+    
+    public static void DestroyPool(this GameObject prefab) { ObjectPoolManager.Instance.DestroyPool(prefab); }
+
+    public static void DestroyPool<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.DestroyPool(prefab.gameObject); }
 }

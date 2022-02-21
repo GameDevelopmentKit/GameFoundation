@@ -57,7 +57,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private void OnDestroy()
         {
             this.isDestroying = true;
-            this.prefab.DestroyAll();
+            this.prefab.CleaUpAll();
         }
     }
 }

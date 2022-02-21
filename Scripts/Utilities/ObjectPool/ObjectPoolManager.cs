@@ -17,6 +17,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private readonly List<GameObject>                   tempList               = new List<GameObject>();
         private readonly Dictionary<GameObject, ObjectPool> prefabToObjectPool     = new Dictionary<GameObject, ObjectPool>();
         private readonly Dictionary<GameObject, ObjectPool> spawnedObjToObjectPool = new Dictionary<GameObject, ObjectPool>();
+        
+        private readonly Dictionary<string, GameObject>     cachedLoadedPrefab     = new Dictionary<string, GameObject>();
+        private readonly Dictionary<GameObject, string>     mapPrefabToKey         = new Dictionary<GameObject, string>();
 
         public ObjectPoolManager(IGameAssets gameAssets)
         {
@@ -128,11 +131,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         #endregion
 
-
         #region Spawn prefab in bundle
-
-        private readonly Dictionary<string, GameObject> cachedLoadedPrefab = new Dictionary<string, GameObject>();
-        private readonly Dictionary<GameObject, string> mapPrefabToKey     = new Dictionary<GameObject, string>();
 
         public async Task<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
@@ -257,30 +256,40 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         #region Destroy pool
 
-        public void DestroyPooled(GameObject prefab)
+        public void CleanUpPooled(GameObject prefab)
         {
             if (prefab != null && this.prefabToObjectPool.TryGetValue(prefab, out var pool))
             {
-                if (this.mapPrefabToKey.Remove(prefab, out var prefabName))
-                {
-                    this.gameAssets.ReleaseAsset(prefabName);
-                    this.cachedLoadedPrefab.Remove(prefabName);
-                }
-
                 pool.CleanUpPooled();
             }
         }
 
-        public void DestroyPooled<T>(T prefab) where T : Component { this.DestroyPooled(prefab.gameObject); }
+        public void CleanUpPooled<T>(T prefab) where T : Component { this.CleanUpPooled(prefab.gameObject); }
 
-        public void DestroyAll(GameObject prefab)
+        public void CleanUpAll(GameObject prefab)
         {
             this.RecycleAll(prefab);
-            this.DestroyPooled(prefab);
+            this.CleanUpPooled(prefab);
+            
+            if (this.mapPrefabToKey.Remove(prefab, out var prefabName))
+            {
+                this.gameAssets.ReleaseAsset(prefabName);
+                this.cachedLoadedPrefab.Remove(prefabName);
+            }
+
+            this.prefabToObjectPool.Remove(prefab);
         }
 
-        public void DestroyAll<T>(T prefab) where T : Component { this.DestroyAll(prefab.gameObject); }
+        public void CleanUpAll<T>(T prefab) where T : Component { this.CleanUpAll(prefab.gameObject); }
 
+
+        public void DestroyPool(GameObject prefab)
+        {
+            if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
+            {
+                Object.Destroy(pool.gameObject);
+            }
+        }
         #endregion
     }
 }
