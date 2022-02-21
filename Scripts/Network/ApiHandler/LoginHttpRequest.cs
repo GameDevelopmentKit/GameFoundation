@@ -7,7 +7,7 @@
     using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.WebService.Authentication;
 
-    public class LoginHttpRequest : BaseHttpRequest<LoginHttpResponseData>
+    public class LoginHttpRequest : BaseHttpRequest<LoginResponseData>
     {
         private readonly DataLoginServices       dataLoginServices;
         private readonly GameFoundationLocalData localData;
@@ -22,7 +22,7 @@
             this.handleLocalDataServices = handleLocalDataServices;
             this.mechPlayerState         = mechPlayerState;
         }
-        public override void Process(LoginHttpResponseData responseData)
+        public override void Process(LoginResponseData responseData)
         {
             var jwtToken       = responseData.JwtToken;
             var refreshToken   = responseData.RefreshToken;
