@@ -39,7 +39,7 @@
             this.Logger.Log($"{request.Uri} - [REQUEST] - Header: {request.DumpHeaders()} - \n Body:{Encoding.UTF8.GetString(request.GetEntityBody())}");
 #endif
             var response = await request.GetHTTPResponseAsync();
-#if UNITY_EDITOR || DEVELOPMENT_BUILD     
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             this.Logger.Log($"{request.Uri} - [RESPONSE] - raw data: {response.DataAsText}");
 #endif
             this.PreProcess(request, response, (statusCode) =>
@@ -49,15 +49,33 @@
                 },
                 (statusCode) =>
                 {
-                    //In the case server return a logic error but client didn't implement that logic yet 
-                    try
+                    switch (statusCode)
                     {
-                        this.Container.Resolve<IFactory<T>>().Create().ErrorProcess(statusCode);
-                    }
-                    catch (BaseHttpRequest.MissStatusCodeException e)
-                    {
-                        this.Logger.Error($"Didn't implement status Code: {statusCode} for {typeof(T)}");
-                        this.Logger.Exception(e);
+                        case CommonErrorCode.Unknown:
+                            this.Logger.Error($"Code {statusCode}: Unknown error");
+                            break;
+                        case CommonErrorCode.NotFound:
+                            this.Logger.Error($"Code {statusCode}: NotFound error");
+                            break;
+                        case CommonErrorCode.InvalidData:
+                            this.Logger.Error($"Code {statusCode}: InvalidData error");
+                            break;
+                        case CommonErrorCode.InvalidBlueprint:
+                            this.Logger.Error($"Code {statusCode}: InvalidBlueprint error");
+                            break;
+                        default:
+                            //In the case server return a logic error but client didn't implement that logic yet 
+                            try
+                            {
+                                this.Container.Resolve<IFactory<T>>().Create().ErrorProcess(statusCode);
+                            }
+                            catch (BaseHttpRequest.MissStatusCodeException e)
+                            {
+                                this.Logger.Error($"Didn't implement status Code: {statusCode} for {typeof(T)}");
+                                this.Logger.Exception(e);
+                            }
+
+                            break;
                     }
                 });
         }
