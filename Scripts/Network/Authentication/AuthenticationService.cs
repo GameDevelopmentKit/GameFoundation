@@ -4,6 +4,7 @@ namespace GameFoundation.Scripts.Network.Authentication
     using System.Text;
     using BestHTTP;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.Utils;
@@ -15,12 +16,14 @@ namespace GameFoundation.Scripts.Network.Authentication
     /// <summary>Unlike other requests, login request will use another Uri and the DTO will not be wrapped. It will be process in a different follow with other.</summary>
     public class AuthenticationService : BestHttpBaseProcess
     {
-        private const int               LoginTimeOut = 10;
-        private       DataLoginServices dataLoginServices;
+        private const    int                     LoginTimeOut = 10;
+        private          DataLoginServices       dataLoginServices;
+        private readonly GameFoundationLocalData localData;
 
-        public AuthenticationService(string uri, ILogService logger, DiContainer container, DataLoginServices dataLoginServices) : base(logger, container, uri)
+        public AuthenticationService(string uri, ILogService logger, DiContainer container, DataLoginServices dataLoginServices, GameFoundationLocalData localData) : base(logger, container, uri)
         {
             this.dataLoginServices = dataLoginServices;
+            this.localData         = localData;
         }
 
         public async UniTask SendAsync<T, TK>(IHttpRequestData authenticationData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
@@ -33,6 +36,14 @@ namespace GameFoundation.Scripts.Network.Authentication
             var request = new HTTPRequest(this.GetUri(httpRequestDefinition.Route), HTTPMethods.Post);
             request.Timeout = TimeSpan.FromSeconds(LoginTimeOut);
             request.AddHeader("Content-Type", "application/json");
+            
+            var jwtToken = this.localData.ServerToken.JwtToken;
+                
+            if (!string.IsNullOrEmpty(jwtToken))
+            {
+                request.AddHeader("Authorization", "Bearer " + jwtToken);
+            }
+            
             request.RawData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(authenticationData));
 
             try
