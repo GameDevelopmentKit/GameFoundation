@@ -12,6 +12,10 @@
 
     public class MasterMechSoundManager : IMechSoundManager
     {
+        public static MasterMechSoundManager Instance { get; private set; }
+
+        public MasterMechSoundManager() { Instance = this; }
+
         public void PlaySound(string name) { MasterAudio.PlaySound(name); }
         //To DO
         public void StopSound(string name)        { }

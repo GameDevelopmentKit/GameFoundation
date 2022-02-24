@@ -1,11 +1,14 @@
 namespace GameFoundation.Scripts.Utilities.Extension
 {
     using UnityEngine;
-    using UnityEngine.UI;
+    using UnityEngine.EventSystems;
 
-    public class MechButton : MonoBehaviour
+    
+    public class MechButton : BaseMechSFX,IPointerClickHandler
     {
-        [SerializeField] private Button btn;
-        private                  void   Awake() { this.btn = this.GetComponent<Button>(); }
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            this.OnPlaySfx();
+        }
     }
 }
