@@ -48,9 +48,16 @@ namespace GameFoundation.Scripts.Network.WebService
 
         protected BaseHttpRequest(ILogService logger) { this.Logger = logger; }
 
-        public override void Process(IHttpResponseData responseData) { this.Process((T)responseData); }
+        public override void Process(IHttpResponseData responseData)
+        {
+            this.PostProcess((T)responseData);
+            this.Process((T)responseData);
+            this.PreProcess((T)responseData);
+        }
 
         public abstract void Process(T responseData);
+        public virtual  void PostProcess(T responseData) { }
+        public virtual  void PreProcess(T responseData)  { }
 
 
         public void Dispose()                   { this.pool.Despawn(this); }
