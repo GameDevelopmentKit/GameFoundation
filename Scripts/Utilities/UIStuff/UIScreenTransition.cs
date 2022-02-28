@@ -17,9 +17,8 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
         private void Awake()
         {
             this.eventSystem   = EventSystem.current;
-            this.animationTask = new UniTaskCompletionSource();
             if (!this.introAnimation.playableAsset)
-                Debug.LogError($"Intro Animation for {this.gameObject.name} is not available", this);
+                Debug.LogWarning($"Intro Animation for {this.gameObject.name} is not available", this);
             else
             {
                 this.introAnimation.playOnAwake =  false;
@@ -27,7 +26,7 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
             }
 
             if (!this.outroAnimation.playableAsset)
-                Debug.LogError($"Outro animation for {this.gameObject.name} is not available", this);
+                Debug.LogWarning($"Outro animation for {this.gameObject.name} is not available", this);
             else
             {
                 this.outroAnimation.playOnAwake =  false;
@@ -56,10 +55,12 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
 
         private UniTask PlayAnim(PlayableDirector anim)
         {
-            if (!anim.playableAsset || this.animationTask.Task.Status != UniTaskStatus.Succeeded)
+            if (!anim.playableAsset || this.animationTask?.Task.Status == UniTaskStatus.Pending)
             {
                 return UniTask.CompletedTask;
             }
+            
+            this.animationTask = new UniTaskCompletionSource();
 
             if (this.lockInput && this.eventSystem != null) {
                 this.eventSystem.enabled = !this.lockInput;

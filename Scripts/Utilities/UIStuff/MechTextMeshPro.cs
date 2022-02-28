@@ -10,12 +10,10 @@ namespace GameFoundation.Scripts.Utilities.Extension
     public class MechTextMeshPro : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI     txtText;
-        [Inject]         private ILogService         logger;
-        [Inject]         private LocalizationService localizationService;
         private void Awake()
         {
             this.txtText      = this.GetComponent<TextMeshProUGUI>();
-            this.txtText.text = this.localizationService.GetTextWithKey(this.txtText.text);
+            this.txtText.text = LocalizationService.Instance.GetTextWithKey(this.txtText.text);
         }
     }
 }

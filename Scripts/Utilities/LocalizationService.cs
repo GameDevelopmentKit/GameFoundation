@@ -4,6 +4,11 @@ namespace GameFoundation.Scripts.Utilities
 
     public class LocalizationService
     {
-        public string GetTextWithKey(string key) { return LocalizationManager.TryGetTranslation(key, out var localization) ? localization : ""; }
+        public static LocalizationService Instance { get; private set; }
+        public LocalizationService()
+        {
+            Instance = this;
+        }
+        public string GetTextWithKey(string key) { return LocalizationManager.TryGetTranslation(key, out var localization) ? localization : key; }
     }
 }
