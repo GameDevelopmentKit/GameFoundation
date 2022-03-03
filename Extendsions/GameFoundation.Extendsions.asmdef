@@ -5,7 +5,8 @@
         "Unity.TextMeshPro",
         "MessagePack.Annotations",
         "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Unity.ResourceManager",
+        "Unity.Timeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

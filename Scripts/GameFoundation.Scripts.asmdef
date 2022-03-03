@@ -10,7 +10,8 @@
         "UniRx",
         "Unity.TextMeshPro",
         "MechSharingCode",
-        "Unity.RenderPipelines.Universal.Runtime"
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.Timeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
