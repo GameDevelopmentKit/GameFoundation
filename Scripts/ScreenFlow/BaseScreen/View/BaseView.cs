@@ -26,6 +26,11 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
             
             this.screenTransition ??= this.GetComponent<UIScreenTransition>();
 
+            if (this.screenTransition == null)
+            {
+                Debug.LogError($"Can not find UIScreenTransition component in {this.gameObject.name} screen", this);
+            }
+
             this.RectTransform = this.GetComponent<RectTransform>();
 
             // Set the alpha to zero so the item is created

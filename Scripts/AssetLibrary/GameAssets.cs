@@ -48,7 +48,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         /// <param name="keys"></param>
         /// <returns></returns>
-        List<AsyncOperationHandle<object>> PreloadAsync(params object[] keys);
+        List<AsyncOperationHandle<Object>> PreloadAsync(params object[] keys);
         AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label);
         /// <summary>
         /// Load a single asset by key
@@ -170,15 +170,8 @@ namespace GameFoundation.Scripts.AssetLibrary
             catch (Exception e)
             {
                 Debug.LogError($"Unable to load load assets {key}, error: {e.Message}");
-                if (this.loadedAssets.ContainsKey(key))
-                {
-                    this.loadedAssets.Remove(key);
-                }
-
-                if (this.loadingAssets.ContainsKey(key))
-                {
-                    this.loadingAssets.Remove(key);
-                }
+                this.loadedAssets.Remove(key);
+                this.loadingAssets.Remove(key);
             }
 
             return default;
@@ -320,7 +313,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         /// <param name="keys"></param>
         /// <returns></returns>
-        public  List<AsyncOperationHandle<object>> PreloadAsync(params object[] keys)
+        public List<AsyncOperationHandle<Object>> PreloadAsync(params object[] keys)
         {
 
             if (keys == null)
@@ -333,7 +326,7 @@ namespace GameFoundation.Scripts.AssetLibrary
                 throw new ArgumentException(nameof(keys));
             }
 
-            return  keys.Select(o => LoadAssetAsync<object>(o)).ToList();
+            return  keys.Select(o => LoadAssetAsync<Object>(o)).ToList();
         }
         
         public  AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label)

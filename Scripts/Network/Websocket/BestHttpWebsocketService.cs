@@ -78,7 +78,7 @@ namespace GameFoundation.Scripts.Network.Websocket
         {
             try
             {
-                var sendAsyncResult = await this.HubConnection.SendAsync(target, this.CancellationTokenSource, args);
+                var sendAsyncResult = await this.HubConnection.SendAsync(target, this.CancellationTokenSource.Token, args);
                 return sendAsyncResult;
             }
             catch (Exception e)
