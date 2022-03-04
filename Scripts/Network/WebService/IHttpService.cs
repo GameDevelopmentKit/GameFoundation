@@ -50,9 +50,9 @@ namespace GameFoundation.Scripts.Network.WebService
 
         public override void Process(IHttpResponseData responseData)
         {
-            this.PostProcess((T)responseData);
-            this.Process((T)responseData);
             this.PreProcess((T)responseData);
+            this.Process((T)responseData);
+            this.PostProcess((T)responseData);
         }
 
         public abstract void Process(T responseData);
