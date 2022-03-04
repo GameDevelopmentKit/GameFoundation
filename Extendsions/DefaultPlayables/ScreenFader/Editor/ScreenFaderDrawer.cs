@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -20,3 +21,4 @@ public class ScreenFaderDrawer : PropertyDrawer
         EditorGUI.PropertyField(singleFieldRect, colorProp);
     }
 }
+#endif

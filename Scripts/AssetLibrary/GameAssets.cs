@@ -48,7 +48,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         /// <param name="keys"></param>
         /// <returns></returns>
-        List<AsyncOperationHandle<Object>> PreloadAsync(params object[] keys);
+        List<AsyncOperationHandle<T>> PreloadAsync<T>(params object[] keys);
         AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label);
         /// <summary>
         /// Load a single asset by key
@@ -313,7 +313,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         /// <param name="keys"></param>
         /// <returns></returns>
-        public List<AsyncOperationHandle<Object>> PreloadAsync(params object[] keys)
+        public List<AsyncOperationHandle<T>> PreloadAsync<T>(params object[] keys)
         {
 
             if (keys == null)
@@ -326,7 +326,7 @@ namespace GameFoundation.Scripts.AssetLibrary
                 throw new ArgumentException(nameof(keys));
             }
 
-            return  keys.Select(o => LoadAssetAsync<Object>(o)).ToList();
+            return  keys.Select(o => LoadAssetAsync<T>(o)).ToList();
         }
         
         public  AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label)

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using UnityEditor;
 
 [CustomPropertyDrawer(typeof(TransformTweenBehaviour))]
@@ -42,3 +43,4 @@ public class TransformTweenDrawer : PropertyDrawer
         }
     }
 }
+#endif

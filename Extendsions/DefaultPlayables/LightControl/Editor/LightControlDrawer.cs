@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -31,3 +32,4 @@ public class LightControlDrawer : PropertyDrawer
         EditorGUI.PropertyField(singleFieldRect, rangeProp);
     }
 }
+#endif
