@@ -1,7 +1,6 @@
 namespace GameFoundation.Scripts.ScreenFlow.Managers
 {
     using System.Collections.Generic;
-    using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.ScreenFlow.Signals;
@@ -33,11 +32,11 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.signalBus.Fire<FinishLoadingNewSceneSignal>();
         }
 
-        public async UniTask LoadMultipleSceneAsync(params string[] sceneNames)
+        public async UniTask LoadMultipleSceneAsync(string activesScene,params string[] sceneNames)
         {
             this.signalBus.Fire<StartLoadingNewSceneSignal>();
             var lastScene = CurrentSceneName;
-            CurrentSceneName = sceneNames[0];
+            CurrentSceneName = activesScene;
             var allTask = new List<UniTask>();
 
             for (var index = 0; index < sceneNames.Length; index++)
@@ -50,8 +49,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.GameAssets.UnloadUnusedAssets(lastScene);
             await UniTask.WhenAll(allTask);
 
-            SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneNames.Last()));
-
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(activesScene));
 
             this.signalBus.Fire<FinishLoadingNewSceneSignal>();
         }
