@@ -16,6 +16,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
     //</summary>
     public static class ExtensionMethod
     {
+        
         //Remove all Button Listener On View
         public static void OnRemoveButtonListener(this MonoBehaviour view)
         {
@@ -83,5 +84,9 @@ namespace GameFoundation.Scripts.Utilities.Extension
         public static string Path(this GameObject gameObject) {
             return GetPath(gameObject.transform);
         }
+        
+        public static Vector2 AsUnityVector2(this System.Numerics.Vector2 v) { return new Vector2(v.X, v.Y); }
+
+        public static Vector3 AsUnityVector3(this System.Numerics.Vector3 v) { return new Vector3(v.X, v.Y, v.Y); }
     }
 }
