@@ -86,6 +86,8 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// Destroys all instantiated instances of <paramref name="aRef"/>
         /// </summary>
         void DestroyAllInstances(AssetReference aRef);
+
+        Dictionary<object, AsyncOperationHandle> GetLoadingAssets();
     }
 
     /// <summary>
@@ -307,6 +309,8 @@ namespace GameFoundation.Scripts.AssetLibrary
         #endregion
 
         #region Asset Handler
+
+        public Dictionary<object, AsyncOperationHandle> GetLoadingAssets() => this.loadingAssets;
 
         /// <summary>
         ///     Preload assets.

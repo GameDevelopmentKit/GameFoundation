@@ -42,6 +42,19 @@
         }
 
         /// <summary>
+        /// Set view automatically
+        /// </summary>
+        /// <param name="prefabView"></param>
+        /// <param name="parent"></param>
+        public void SetView(GameObject prefabView, Transform parent)
+        {
+            if (this.View == null)
+            {
+                this.SetView(Object.Instantiate(prefabView, parent).GetComponent<TView>());
+            }
+        }
+
+        /// <summary>
         /// Set view manually
         /// </summary>
         /// <param name="viewInstance"></param>
