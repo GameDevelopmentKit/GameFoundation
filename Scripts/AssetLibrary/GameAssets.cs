@@ -96,31 +96,31 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <summary>
         /// A dictionary use for manage the loading assets to make sure a asset doesn't call Addressable too many times at a time
         /// </summary>
-        private  readonly Dictionary<object, AsyncOperationHandle> loadingAssets = new Dictionary<object, AsyncOperationHandle>(20);
+        private readonly Dictionary<object, AsyncOperationHandle> loadingAssets = new Dictionary<object, AsyncOperationHandle>(20);
 
         /// <summary>
         /// A dictionary use for caching the loaded assets
         /// </summary>
-        private  readonly Dictionary<object, AsyncOperationHandle> loadedAssets = new Dictionary<object, AsyncOperationHandle>(100);
-        
+        protected readonly Dictionary<object, AsyncOperationHandle> loadedAssets = new Dictionary<object, AsyncOperationHandle>(100);
+
         /// <summary>
         /// A dictionary use for caching the loaded assets
         /// </summary>
-        private  readonly Dictionary<object, AsyncOperationHandle> loadedScenes = new Dictionary<object, AsyncOperationHandle>();
-        
+        private readonly Dictionary<object, AsyncOperationHandle> loadedScenes = new Dictionary<object, AsyncOperationHandle>();
+
         /// <summary>
         /// Manage the loaded asset by scene and release them when those scene unloaded
         /// </summary>
-        private  readonly Dictionary<string, List<object>> assetsAutoUnloadByScene = new Dictionary<string, List<object>>();
+        private readonly Dictionary<string, List<object>> assetsAutoUnloadByScene = new Dictionary<string, List<object>>();
 
         /// <summary>
         /// Cache all objects that instantiated by GameAssets
         /// </summary>
-        private  readonly Dictionary<object, List<GameObject>> instantiatedObjects = new Dictionary<object, List<GameObject>>(10);
+        private readonly Dictionary<object, List<GameObject>> instantiatedObjects = new Dictionary<object, List<GameObject>>(10);
 
-        private  void CheckRuntimeKey(object key) { }
+        private void CheckRuntimeKey(object key) { }
 
-        private  void CheckRuntimeKey(AssetReference aRef)
+        private void CheckRuntimeKey(AssetReference aRef)
         {
             if (!aRef.RuntimeKeyIsValid())
             {
@@ -136,7 +136,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <param name="isAutoUnload">If true, asset will be automatically released when the current scene was unloaded</param>
         /// <param name="isLoadScene"></param>
         /// <typeparam name="T">Type of asset</typeparam>
-        private  AsyncOperationHandle<T> InternalLoadAsync<T>(Func<AsyncOperationHandle<T>> handlerFunc, object key, bool isAutoUnload = true, bool isLoadScene = false)
+        private AsyncOperationHandle<T> InternalLoadAsync<T>(Func<AsyncOperationHandle<T>> handlerFunc, object key, bool isAutoUnload = true, bool isLoadScene = false)
         {
             try
             {
@@ -157,12 +157,12 @@ namespace GameFoundation.Scripts.AssetLibrary
                 handler.Completed += op =>
                 {
                     if (isAutoUnload) TrackingAssetByScene(key);
-                    
-                    if(isLoadScene)
+
+                    if (isLoadScene)
                         this.loadedScenes.Add(key, op);
                     else
                         this.loadedAssets.Add(key, op);
-                    
+
                     this.loadingAssets.Remove(key);
                 };
                 return handler;
@@ -183,7 +183,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <param name="key">The key of the location of the scene to remove.</param>
         /// <param name="asyncOperationHandleRemoved"> The load operation was removed</param>
         /// <returns></returns>
-        private  bool TryRemoveAsyncOperationHandleAsset(object key, out AsyncOperationHandle? asyncOperationHandleRemoved)
+        private bool TryRemoveAsyncOperationHandleAsset(object key, out AsyncOperationHandle? asyncOperationHandleRemoved)
         {
             if (this.loadingAssets.ContainsKey(key))
             {
@@ -198,7 +198,7 @@ namespace GameFoundation.Scripts.AssetLibrary
                 this.loadedAssets.Remove(key);
                 return true;
             }
-            
+
             if (this.loadedScenes.ContainsKey(key))
             {
                 asyncOperationHandleRemoved = this.loadedScenes[key];
@@ -211,9 +211,9 @@ namespace GameFoundation.Scripts.AssetLibrary
             return false;
         }
 
-        public  AsyncOperationHandle DownloadDependenciesAsync(AssetLabelReference labelReference) { return Addressables.DownloadDependenciesAsync(labelReference.RuntimeKey); }
+        public AsyncOperationHandle DownloadDependenciesAsync(AssetLabelReference labelReference) { return Addressables.DownloadDependenciesAsync(labelReference.RuntimeKey); }
 
-        public  AsyncOperationHandle DownloadDependenciesAsync(IEnumerable keys, Addressables.MergeMode mode = Addressables.MergeMode.Intersection)
+        public AsyncOperationHandle DownloadDependenciesAsync(IEnumerable keys, Addressables.MergeMode mode = Addressables.MergeMode.Intersection)
         {
             return Addressables.DownloadDependenciesAsync(keys, mode);
         }
@@ -227,7 +227,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <param name="key">The key of the location of the scene to load.</param>
         /// <param name="loadMode"><see cref="LoadSceneMode"/></param>
         /// <param name="activeOnLoad">If false, the scene will load but not activate (for background loading).  The SceneInstance returned has an Activate() method that can be called to do this at a later point.</param>
-        public  AsyncOperationHandle<SceneInstance> LoadSceneAsync(object key, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
+        public AsyncOperationHandle<SceneInstance> LoadSceneAsync(object key, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
         {
             return InternalLoadAsync(() => Addressables.LoadSceneAsync(key, loadMode, activeOnLoad), key, true, true);
         }
@@ -235,7 +235,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <summary>
         /// Load scene in Addressable by AssetReference
         /// </summary>
-        public  AsyncOperationHandle<SceneInstance> LoadSceneAsync(AssetReference sceneRef, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
+        public AsyncOperationHandle<SceneInstance> LoadSceneAsync(AssetReference sceneRef, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
         {
             return LoadSceneAsync(sceneRef.RuntimeKey, loadMode, activeOnLoad);
         }
@@ -244,7 +244,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// Release scene by key
         /// </summary>
         /// <param name="key">The key of the location of the scene to unload.</param>
-        public  AsyncOperationHandle<SceneInstance> UnloadSceneAsync(object key)
+        public AsyncOperationHandle<SceneInstance> UnloadSceneAsync(object key)
         {
             try
             {
@@ -268,14 +268,14 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <summary>
         /// Release scene by AssetReference
         /// </summary>
-        public  AsyncOperationHandle<SceneInstance> UnloadSceneAsync(AssetReference sceneRef) { return UnloadSceneAsync(sceneRef.RuntimeKey); }
+        public AsyncOperationHandle<SceneInstance> UnloadSceneAsync(AssetReference sceneRef) { return UnloadSceneAsync(sceneRef.RuntimeKey); }
 
         /// <summary>
         /// Cache the asset into <see cref="assetsAutoUnloadByScene"/>.
         /// This asset will be automatically released when the current scene was unloaded
         /// </summary>
         /// /// <param name="key">The key of the location of the asset.</param>
-        private  void TrackingAssetByScene(object key)
+        private void TrackingAssetByScene(object key)
         {
             if (!this.assetsAutoUnloadByScene.TryGetValue(SceneDirector.CurrentSceneName, out var listAsset))
             {
@@ -290,7 +290,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// Unload all auto unload assets in scene
         /// </summary>
         /// <param name="sceneName"> Scene Target</param>
-        public  void UnloadUnusedAssets(string sceneName)
+        public void UnloadUnusedAssets(string sceneName)
         {
             if (!this.assetsAutoUnloadByScene.TryGetValue(sceneName, out var listAsset)) return;
             foreach (var asset in listAsset)
@@ -315,7 +315,6 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <returns></returns>
         public List<AsyncOperationHandle<T>> PreloadAsync<T>(params object[] keys)
         {
-
             if (keys == null)
             {
                 throw new ArgumentNullException(nameof(keys));
@@ -326,12 +325,12 @@ namespace GameFoundation.Scripts.AssetLibrary
                 throw new ArgumentException(nameof(keys));
             }
 
-            return  keys.Select(o => LoadAssetAsync<T>(o)).ToList();
+            return keys.Select(o => LoadAssetAsync<T>(o)).ToList();
         }
-        
-        public  AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label)
+
+        public AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label)
         {
-            var handle     = Addressables.ResourceManager.StartOperation(new LoadAssetsByLabelOperation(this.loadedAssets, this.loadingAssets, label), default);
+            var handle = Addressables.ResourceManager.StartOperation(new LoadAssetsByLabelOperation(this.loadedAssets, this.loadingAssets, label), default);
             return handle;
         }
 
@@ -341,15 +340,12 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <typeparam name="T">The type of the asset.</typeparam>
         /// <param name="key">The key of the location of the asset.</param>
         /// <param name="isAutoUnload">If true, asset will be automatically released when the current scene was unloaded</param>
-        public  AsyncOperationHandle<T> LoadAssetAsync<T>(object key, bool isAutoUnload = true)
-        {
-            return InternalLoadAsync(() => Addressables.LoadAssetAsync<T>(key), key, isAutoUnload);
-        }
-        
+        public virtual AsyncOperationHandle<T> LoadAssetAsync<T>(object key, bool isAutoUnload = true) { return InternalLoadAsync(() => Addressables.LoadAssetAsync<T>(key), key, isAutoUnload); }
+
         /// <summary>
         /// Load a single asset by AssetReference
         /// </summary>
-        public  AsyncOperationHandle<T> LoadAssetAsync<T>(AssetReference assetReference, bool isAutoUnload = true)
+        public AsyncOperationHandle<T> LoadAssetAsync<T>(AssetReference assetReference, bool isAutoUnload = true)
         {
             CheckRuntimeKey(assetReference);
             return LoadAssetAsync<T>(assetReference.RuntimeKey, isAutoUnload);
@@ -362,7 +358,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <param name="key">The key of the location of the asset.</param>
         /// <param name="isAutoUnload">If true, asset will be automatically released when the current scene was unloaded</param>
         /// <typeparam name="T">The type of the asset.</typeparam>
-        public  T ForceLoadAsset<T>(object key, bool isAutoUnload = true)
+        public T ForceLoadAsset<T>(object key, bool isAutoUnload = true)
         {
             var op = LoadAssetAsync<T>(key, isAutoUnload);
             return op.IsDone ? op.Result : op.WaitForCompletion();
@@ -372,7 +368,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// Release asset and its associated resources by key
         /// </summary>
         /// <param name="key">The key of the location of the asset to release.</param>
-        public  void ReleaseAsset(object key)
+        public void ReleaseAsset(object key)
         {
             try
             {
@@ -393,7 +389,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <summary>
         /// Release asset and its associated resources by AssetReference
         /// </summary>
-        public  void ReleaseAsset(AssetReference assetReference)
+        public void ReleaseAsset(AssetReference assetReference)
         {
             CheckRuntimeKey(assetReference);
             var key = assetReference.RuntimeKey;
@@ -409,7 +405,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <summary>
         /// Instantiate async a GameObject by AssetReference
         /// </summary>
-        public  async UniTask<GameObject> InstantiateGameObject(AssetReference assetReference)
+        public async UniTask<GameObject> InstantiateGameObject(AssetReference assetReference)
         {
             var key = assetReference.RuntimeKey;
 
@@ -429,7 +425,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <summary>
         /// Destroys all instantiated instances of <paramref name="aRef"/>
         /// </summary>
-        public  void DestroyAllInstances(AssetReference aRef)
+        public void DestroyAllInstances(AssetReference aRef)
         {
             CheckRuntimeKey(aRef);
 
@@ -442,7 +438,7 @@ namespace GameFoundation.Scripts.AssetLibrary
             DestroyAllInstances(aRef.RuntimeKey);
         }
 
-        private  void DestroyAllInstances(object key)
+        private void DestroyAllInstances(object key)
         {
             if (!this.instantiatedObjects.ContainsKey(key))
             {
@@ -460,7 +456,7 @@ namespace GameFoundation.Scripts.AssetLibrary
             this.instantiatedObjects.Remove(key);
         }
 
-        private  void DestroyInternal(Object obj)
+        private void DestroyInternal(Object obj)
         {
             var c = obj as Component;
             if (c != null)
