@@ -11,6 +11,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using MechSharingCode.Blueprints.BlueprintReader;
+    using Mono.CSharp;
     using UnityEngine;
     using Zenject;
 
@@ -64,7 +65,15 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             this.listRawBlueprints = await UniTask.RunOnThreadPool(this.UnzipBlueprint);
 
             //Load all blueprints to instances
-            await this.ReadAllBlueprint();
+            try
+            {
+                await this.ReadAllBlueprint();
+            }
+            catch (FieldDontExistInBlueprint e)
+            {
+                this.logService.Error(e.Message);
+            }
+
             this.logService.Log("[BlueprintReader] All blueprint are loaded");
 
             this.signalBus.Fire<LoadBlueprintDataSuccessedSignal>();
