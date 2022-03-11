@@ -16,7 +16,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             this.Container.Bind<BlueprintReaderManager>().AsCached();
             this.Container.Bind<BlueprintConfig>().AsCached();
 
-            this.Container.BindAllTypeDriveFrom<IGenericBlueprint>();
+            this.Container.BindAllTypeDriveFrom<IGenericBlueprintReader>();
 
             this.Container.DeclareSignal<LoadBlueprintDataSuccessedSignal>();
             this.Container.DeclareSignal<LoadBlueprintDataProgressSignal>();

@@ -108,10 +108,10 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             }
 
             var listReadTask    = new List<UniTask>();
-            var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprint>();
+            var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>();
             foreach (var blueprintType in allDerivedTypes)
             {
-                var blueprintInstance = (IGenericBlueprint)this.diContainer.Resolve(blueprintType);
+                var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);
                 if (blueprintInstance != null)
                 {
                     listReadTask.Add(UniTask.RunOnThreadPool(() => this.OpenReadBlueprint(blueprintInstance)));
@@ -125,7 +125,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             return UniTask.WhenAll(listReadTask);
         }
 
-        private async UniTask OpenReadBlueprint(IGenericBlueprint blueprintReader)
+        private async UniTask OpenReadBlueprint(IGenericBlueprintReader blueprintReader)
         {
             var bpAttribute = blueprintReader.GetCustomAttribute<BlueprintReaderAttribute>();
             if (bpAttribute != null)
