@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.MVP;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
+    using Mono.CSharp;
     using Newtonsoft.Json;
     using UnityEngine;
     using UnityEngine.UI;
@@ -16,7 +17,17 @@ namespace GameFoundation.Scripts.Utilities.Extension
     //</summary>
     public static class ExtensionMethod
     {
-        
+        public static List<T> GetListRandom<T>(this object obj, List<T> seedData, int amount)
+        {
+            var result = new List<T>();
+            for (int i = 0; i < amount; i++)
+            {
+                result.Add(seedData[Random.Range(0, seedData.Count)]);
+            }
+
+            return result;
+        }
+
         //Remove all Button Listener On View
         public static void OnRemoveButtonListener(this MonoBehaviour view)
         {
@@ -41,8 +52,9 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
             presenter.BindData(model);
         }
-        
-        public static async Task<TPresenter> InstantiateUIPresenter<TPresenter, TModel>(this IInstantiator instantiator, Transform parentView, TModel model) where TPresenter : IUIItemPresenter<IUIView, TModel> 
+
+        public static async Task<TPresenter> InstantiateUIPresenter<TPresenter, TModel>(this IInstantiator instantiator, Transform parentView, TModel model)
+            where TPresenter : IUIItemPresenter<IUIView, TModel>
         {
             var presenter = instantiator.Instantiate<TPresenter>();
             await presenter.SetView(parentView);
@@ -59,32 +71,27 @@ namespace GameFoundation.Scripts.Utilities.Extension
         }
 
 
-        public static async void Add<TPresenter, TModel>(this List<TPresenter> listPresenter, TPresenter presenter, Transform parentView, TModel model) where TPresenter : IUIItemPresenter<IUIView, TModel> 
+        public static async void Add<TPresenter, TModel>(this List<TPresenter> listPresenter, TPresenter presenter, Transform parentView, TModel model)
+            where TPresenter : IUIItemPresenter<IUIView, TModel>
         {
             await presenter.SetView(parentView);
             presenter.BindData(model);
             listPresenter.Add(presenter);
         }
-        
-        public static string ToJson<T>(this T obj)
+
+        public static string ToJson<T>(this T obj) { return JsonConvert.SerializeObject(obj); }
+
+        public static string GetPath(this Transform current)
         {
-            return JsonConvert.SerializeObject(obj);
-        }
-        
-        public static string GetPath(this Transform current) {
             if (current.parent == null)
                 return current.name;
             return current.parent.GetPath() + "/" + current.name;
         }
 
-        public static string Path(this Component component) {
-            return GetPath(component.transform);
-        }
+        public static string Path(this Component component) { return GetPath(component.transform); }
 
-        public static string Path(this GameObject gameObject) {
-            return GetPath(gameObject.transform);
-        }
-        
+        public static string Path(this GameObject gameObject) { return GetPath(gameObject.transform); }
+
         public static Vector2 AsUnityVector2(this System.Numerics.Vector2 v) { return new Vector2(v.X, v.Y); }
 
         public static Vector3 AsUnityVector3(this System.Numerics.Vector3 v) { return new Vector3(v.X, v.Y, v.Z); }
