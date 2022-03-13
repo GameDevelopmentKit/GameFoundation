@@ -9,6 +9,8 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
     {
         [SerializeField] private PlayableDirector introAnimation;
         [SerializeField] private PlayableDirector outroAnimation;
+        
+        [Tooltip("if lockInput = true, disable event system while anim is running and otherwise.")]
         [SerializeField] private bool             lockInput = true;
 
         private EventSystem             eventSystem;
@@ -30,16 +32,7 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
             else
             {
                 this.outroAnimation.playOnAwake =  false;
-                this.introAnimation.stopped     += this.OnAnimComplete;
-            }
-        }
-
-        private void OnAnimComplete(PlayableDirector obj)
-        {
-            this.animationTask.TrySetResult();
-            if (this.lockInput && this.eventSystem != null)
-            {
-                this.eventSystem.enabled = true;
+                this.outroAnimation.stopped     += this.OnAnimComplete;
             }
         }
 
@@ -61,14 +54,25 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
             }
             
             this.animationTask = new UniTaskCompletionSource();
+            this.SetLookInput(false);
 
-            if (this.lockInput && this.eventSystem != null) {
-                this.eventSystem.enabled = !this.lockInput;
-            }
-            
             anim.Play();
             return this.animationTask.Task;
            
+        }
+        
+        private void OnAnimComplete(PlayableDirector obj)
+        {
+            this.animationTask.TrySetResult();
+            this.SetLookInput(true);
+        }
+
+        private void SetLookInput(bool value)
+        {
+            if (this.lockInput && this.eventSystem != null)
+            {
+                this.eventSystem.enabled = value;
+            }
         }
     }
 }
