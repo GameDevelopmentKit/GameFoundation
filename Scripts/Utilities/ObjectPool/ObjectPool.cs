@@ -30,6 +30,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             }
 
             obj = Instantiate(this.prefab, this.transform);
+            obj.SetActive(true);
             this.spawnedObjects.Add(obj);
             return obj;
         }
