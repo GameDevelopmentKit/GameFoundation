@@ -21,8 +21,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         [SerializeField] private TranslucentImageSource translucentImageSource;
 
         private IScreenPresenter currentPopup;
-        private Coroutine    showImageCoroutine;
-        private SignalBus    signalBus;
+        private Coroutine        showImageCoroutine;
+        private SignalBus        signalBus;
 
         private readonly Dictionary<Type, PopupInfoAttribute> popupInfoPool = new Dictionary<Type, PopupInfoAttribute>();
 
@@ -56,8 +56,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             if (this.currentPopup != null && this.currentPopup.ScreenStatus != ScreenStatus.Opened)
             {
                 this.ShowImage(false);
-                this.blurImage.raycastTarget = false;
-                this.currentPopup            = null;
+                this.btnClose.enabled = false;
+                this.currentPopup          = null;
             }
         }
 
@@ -70,8 +70,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
                 this.ShowImage(true);
             }
 
-            this.blurImage.raycastTarget = true;
-
+            this.btnClose.enabled = popupInfo.IsCloseWhenTapOutside;
             var currentIndex = this.currentPopup.ViewSiblingIndex;
             this.blurImage.rectTransform.SetSiblingIndex(currentIndex - 1);
         }
