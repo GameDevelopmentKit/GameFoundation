@@ -56,7 +56,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             if (this.currentPopup != null && this.currentPopup.ScreenStatus != ScreenStatus.Opened)
             {
                 this.ShowImage(false);
-                this.btnClose.enabled = false;
+                this.btnClose.gameObject.SetActive(false);
                 this.currentPopup          = null;
             }
         }
@@ -69,8 +69,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             {
                 this.ShowImage(true);
             }
-
-            this.btnClose.enabled = popupInfo.IsCloseWhenTapOutside;
+            this.btnClose.gameObject.SetActive(popupInfo.IsCloseWhenTapOutside);
             var currentIndex = this.currentPopup.ViewSiblingIndex;
             this.blurImage.rectTransform.SetSiblingIndex(currentIndex - 1);
         }

@@ -346,7 +346,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blurImage: {fileID: 3350278953765418212}
-  btnClose: {fileID: 163493460789595}
+  btnClose: {fileID: 8947161407330118046}
   translucentImageSource: {fileID: 4001136320888468850}
 --- !u!1 &4002435157974185213
 GameObject:
@@ -643,17 +643,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 52cd5be70716ec740960d13ae1826bb4, type: 3}
---- !u!114 &163493460789595 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5208865270354687571, guid: 52cd5be70716ec740960d13ae1826bb4, type: 3}
-  m_PrefabInstance: {fileID: 5208711966758764296}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &3350278953765418212 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7365526255491140588, guid: 52cd5be70716ec740960d13ae1826bb4, type: 3}
@@ -670,3 +659,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4568283465243304397, guid: 52cd5be70716ec740960d13ae1826bb4, type: 3}
   m_PrefabInstance: {fileID: 5208711966758764296}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8947161407330118046 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3775067666017261206, guid: 52cd5be70716ec740960d13ae1826bb4, type: 3}
+  m_PrefabInstance: {fileID: 5208711966758764296}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
