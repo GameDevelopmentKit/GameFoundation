@@ -33,7 +33,7 @@
         /// Set view automatically
         /// </summary>
         /// <param name="parent"></param>
-        public async UniTask SetView(Transform parent)
+        public virtual async UniTask SetView(Transform parent)
         {
             if (this.View == null)
             {
