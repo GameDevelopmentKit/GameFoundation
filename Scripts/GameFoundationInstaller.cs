@@ -25,8 +25,8 @@
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
             
             //CreateMasterAudio
-            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsSingle().NonLazy();
-            this.Container.Bind<IMechSoundManager>().To<MasterMechSoundManager>().AsSingle().NonLazy();            
+            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsCached().NonLazy();
+            this.Container.Bind<IMechSoundManager>().To<MasterMechSoundManager>().AsCached().NonLazy();            
             
             //Localization services
             this.Container.Bind<LocalizationService>().AsCached().NonLazy();
@@ -35,7 +35,7 @@
             this.Container.Bind<ILogService>().To<LogService>().AsSingle().NonLazy();
 
             //Game Manager
-            this.Container.Bind<HandleLocalDataServices>().AsSingle().NonLazy();
+            this.Container.Bind<HandleLocalDataServices>().AsCached().NonLazy();
             this.Container.Bind<GameFoundationLocalData>().FromResolveGetter<HandleLocalDataServices>(services => services.Load<GameFoundationLocalData>()).AsCached();
 
             //Player state
@@ -43,7 +43,7 @@
             
 
             //Genarate fps
-            this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
+            this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
 
             //Installer
             BlueprintServicesInstaller.Install(this.Container);
