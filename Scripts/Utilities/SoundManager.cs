@@ -6,29 +6,39 @@
     {
         void PlaySound(string name);
         void StopSound(string name);
-        void PlayPlayList(string playlist);
-        void StopPlaylist(string playlist, bool stopAll = false);
+        void PlayPlayList(string playlist, bool random = false);
+        void StopPlaylist(string playlist);
+        void StopAllPlaylist();
+        void MutePlaylist(string playlist);
+        void MuteAllPlaylist();
+        void SetVolumePlaylist(float value);
     }
 
     public class MasterMechSoundManager : IMechSoundManager
     {
+        protected readonly PlaylistController playlistController;
+
         public static MasterMechSoundManager Instance { get; private set; }
 
-        public MasterMechSoundManager() { Instance = this; }
-
-        public void PlaySound(string name) { MasterAudio.PlaySound(name); }
-        //To DO
-        public void StopSound(string name)        { }
-        public void PlayPlayList(string playlist) { MasterAudio.StartPlaylist(playlist); }
-        public void StopPlaylist(string playlist, bool stopAll = false)
+        public MasterMechSoundManager(PlaylistController playlistController)
         {
-            if (stopAll)
-            {
-                MasterAudio.StopAllPlaylists();
-                return;
-            }
-
-            MasterAudio.StopPlaylist(playlist);
+            this.playlistController = playlistController;
+            Instance                = this;
         }
+
+        public virtual void PlaySound(string name) { MasterAudio.PlaySound(name); }
+        public virtual void StopSound(string name) { }
+        public virtual void PlayPlayList(string playlist, bool random = false)
+        {
+            this.playlistController.isShuffle = random;
+            MasterAudio.StartPlaylist(playlist);
+        }
+
+        public virtual void StopPlaylist(string playlist)  { MasterAudio.StopPlaylist(playlist); }
+        public virtual void MutePlaylist(string playlist)  { MasterAudio.MutePlaylist(); }
+        public virtual void StopAllPlaylist()              { MasterAudio.StopAllPlaylists(); }
+        public virtual void MuteAllPlaylist()              { MasterAudio.MuteAllPlaylists(); }
+        public virtual void SetVolumePlaylist(float value) { MasterAudio.MasterVolumeLevel = value; }
     }
+
 }
