@@ -1,13 +1,24 @@
-namespace GameFoundation.Scripts.Utilities.Extension
+namespace GameFoundation.Scripts.Utilities.UIStuff
 {
+    using System;
     using UnityEngine;
+    using UnityEngine.Events;
     using UnityEngine.EventSystems;
     using UnityEngine.UI;
 
-    public class MechButton : BaseMechSFX, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+    [RequireComponent(typeof(Button))]
+    [RequireComponent(typeof(DisallowMultipleComponent))]
+    public class MechButton : BaseMechSFX, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IDisposable
     {
         [SerializeField] private GameObject defaultParticle, appearParticle, hoverParticle, pressParticle;
         private                  bool       isActiveHover;
+        private                  Button     btn;
+        public                   Button     Btn => this.btn;
+
+        private void Awake()
+        {
+            this.btn = this.GetComponent<Button>();
+        }
 
         public void OnPointerClick(PointerEventData eventData)
         {
@@ -42,6 +53,11 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             if (this.appearParticle == null) return;
             this.appearParticle.SetActive(true);
+        }
+        
+        public void Dispose()
+        {
+            
         }
     }
 }
