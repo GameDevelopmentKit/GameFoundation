@@ -7,6 +7,15 @@
     using Zenject;
     using Object = UnityEngine.Object;
 
+    public interface IUIItemPresenter : IUIPresenter
+    {
+        /// <summary>
+        /// Show/Hide view
+        /// </summary>
+        /// <param name="value"></param>
+        void SetActiveView(bool value);
+    }
+    
     public interface IUIItemPresenter<TView, TModel>
     {
         public UniTask SetView(Transform parent);
@@ -18,7 +27,7 @@
     /// Base UI presenter for item
     /// </summary>
     /// <typeparam name="TView">Type of view</typeparam>
-    public abstract class BaseUIItemPresenter<TView> : IUIPresenter where TView : IUIView
+    public abstract class BaseUIItemPresenter<TView> : IUIItemPresenter where TView : MonoBehaviour, IUIView
     {
         protected         TView  View;
         protected virtual string PrefabPath { get; } = typeof(TView).Name;
@@ -60,9 +69,12 @@
         /// <param name="viewInstance"></param>
         public virtual void SetView(TView viewInstance) { this.View = viewInstance; }
         public void SetView(IUIView viewInstance) { this.View = (TView)viewInstance; }
+        
+       
+        public virtual void SetActiveView(bool value) {if (this.View != null) this.View.gameObject.SetActive(value);}
     }
 
-    public abstract class BaseUIItemPresenter<TView, TModel> : BaseUIItemPresenter<TView>, IUIItemPresenter<TView, TModel> where TView : IUIView
+    public abstract class BaseUIItemPresenter<TView, TModel> : BaseUIItemPresenter<TView>, IUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
     {
         public abstract void BindData(TModel param);
         protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets)
@@ -70,7 +82,7 @@
         }
     }
 
-    public abstract class BaseUIItemPresenter<TView, TModel1, TModel2> : BaseUIItemPresenter<TView> where TView : IUIView
+    public abstract class BaseUIItemPresenter<TView, TModel1, TModel2> : BaseUIItemPresenter<TView> where TView : MonoBehaviour, IUIView
     {
         public abstract void BindData(TModel1 param1, TModel2 param2);
         protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets)
@@ -82,14 +94,9 @@
     /// Base UI presenter for item that can poolable
     /// </summary>
     /// <typeparam name="TView">Type of view</typeparam>
-    public abstract class BaseUIItemPoolablePresenter<TView> : BaseUIItemPresenter<TView>, IPoolable<IMemoryPool>, IDisposable where TView :  IUIView
+    public abstract class BaseUIItemPoolablePresenter<TView> : BaseUIItemPresenter<TView>, IPoolable<IMemoryPool>, IDisposable where TView :  MonoBehaviour, IUIView
     {
         private IMemoryPool pool;
-
-        public void SetActiveView(bool value)
-        {
-            if (this.View != null) (this.View as MonoBehaviour)?.gameObject.SetActive(value);
-        }
 
         public void OnDespawned()
         {
