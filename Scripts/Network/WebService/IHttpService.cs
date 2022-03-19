@@ -64,4 +64,9 @@ namespace GameFoundation.Scripts.Network.WebService
         public void OnDespawned()               { this.Logger.Log($"spawned {this}"); }
         public void OnSpawned(IMemoryPool pool) { this.pool = pool; }
     }
+
+    public interface IFakeResponseAble<out T> : IHttpResponseData
+    {
+        T FakeResponse();
+    }
 }

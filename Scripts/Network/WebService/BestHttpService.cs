@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.Network.WebService
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using BestHTTP;
     using Cysharp.Threading.Tasks;
@@ -18,8 +19,8 @@ namespace GameFoundation.Scripts.Network.WebService
     {
         #region Injection
 
-        private readonly NetworkConfig networkConfig; // Our global network config data
-        private readonly GameFoundationLocalData     localData;
+        private readonly NetworkConfig           networkConfig; // Our global network config data
+        private readonly GameFoundationLocalData localData;
 
         #endregion
 
@@ -46,6 +47,15 @@ namespace GameFoundation.Scripts.Network.WebService
                 throw new Exception($"{typeof(T)} didn't define yet!!!");
             }
 
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR) &&FAKE_DATA
+            if (typeof(IFakeResponseAble<TK>).IsAssignableFrom(typeof(T)))
+            {
+                var baseHttpRequest = this.Container.Resolve<IFactory<T>>().Create();
+                var responseData    = ((IFakeResponseAble<TK>)baseHttpRequest).FakeResponse();
+                baseHttpRequest.Process(responseData);
+                return;
+            }
+#endif
             //Init request
             var request = new HTTPRequest(this.GetUri(httpRequestDefinition.Route), HTTPMethods.Post);
             request.Timeout = TimeSpan.FromSeconds(this.GetHttpTimeout());
@@ -55,7 +65,7 @@ namespace GameFoundation.Scripts.Network.WebService
                 request.AddHeader("Content-Type", "application/json");
 
                 var jwtToken = this.localData.ServerToken.JwtToken;
-                
+
                 if (!string.IsNullOrEmpty(jwtToken))
                 {
                     request.AddHeader("Authorization", "Bearer " + jwtToken);
