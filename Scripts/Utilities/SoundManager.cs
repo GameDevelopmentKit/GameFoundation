@@ -12,6 +12,10 @@
         void MutePlaylist(string playlist);
         void MuteAllPlaylist();
         void SetVolumePlaylist(float value);
+        void MuteSound(bool value);
+        void MuteMusic(bool value);
+        void SetSoundValue(float value);
+        void SetMusicValue(float value);
     }
 
     public class MasterMechSoundManager : IMechSoundManager
@@ -25,6 +29,7 @@
             this.playlistController = playlistController;
             Instance                = this;
         }
+        
 
         public virtual void PlaySound(string name) { MasterAudio.PlaySound(name); }
         public virtual void StopSound(string name) { }
@@ -39,6 +44,11 @@
         public virtual void StopAllPlaylist()              { MasterAudio.StopAllPlaylists(); }
         public virtual void MuteAllPlaylist()              { MasterAudio.MuteAllPlaylists(); }
         public virtual void SetVolumePlaylist(float value) { MasterAudio.MasterVolumeLevel = value; }
+        
+        public         void MuteSound(bool value)          { }
+        public         void MuteMusic(bool value)          { }
+        public         void SetSoundValue(float value)     { }
+        public         void SetMusicValue(float value)     { }
     }
 
 }
