@@ -29,7 +29,7 @@
     /// <typeparam name="TView">Type of view</typeparam>
     public abstract class BaseUIItemPresenter<TView> : IUIItemPresenter where TView : MonoBehaviour, IUIView
     {
-        protected         TView  View;
+        public            TView  View       { get; private set; }
         protected virtual string PrefabPath { get; } = typeof(TView).Name;
 
         protected IGameAssets GameAssets;

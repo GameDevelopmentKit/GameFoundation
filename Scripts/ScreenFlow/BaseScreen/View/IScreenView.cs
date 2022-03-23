@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
 {
     using System;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.MVP;
     using UnityEngine;
 
@@ -15,8 +16,8 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
     {
         public RectTransform RectTransform { get; }
         public bool          IsReadyToUse  { get; }
-        public void          Open();
-        public void          Close();
+        public UniTask          Open();
+        public UniTask          Close();
         public void          Hide();
 
         public void DestroySelf();

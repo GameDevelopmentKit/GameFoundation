@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
 {
     using System;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Utilities.UIStuff;
     using UnityEngine;
 
@@ -13,8 +14,10 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
         public event Action                         ViewDidOpen;
         public event Action                         ViewDidDestroy;
 
-        protected virtual CanvasGroup   ViewRoot      { get => this.viewRoot; set => this.viewRoot = value; }
-        public            RectTransform RectTransform { get;                  private set; }
+        
+        protected         UIScreenTransition ScreenTransition => this.screenTransition;
+        protected virtual CanvasGroup        ViewRoot         { get => this.viewRoot; set => this.viewRoot = value; }
+        public            RectTransform      RectTransform    { get;                  private set; }
 
 
         #region Unity3D Event
@@ -24,9 +27,9 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
             // This will allow to set the view in the inspector if we want to
             if (!this.ViewRoot) this.ViewRoot                 = this.GetComponent<CanvasGroup>();
             
-            this.screenTransition ??= this.GetComponent<UIScreenTransition>();
+            this.screenTransition = this.ScreenTransition ? this.ScreenTransition : this.GetComponent<UIScreenTransition>();
 
-            if (this.screenTransition == null)
+            if (this.ScreenTransition == null)
             {
                 Debug.LogError($"Can not find UIScreenTransition component in {this.gameObject.name} screen", this);
             }
@@ -63,17 +66,20 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.View
         #endregion
 
         public bool IsReadyToUse { get; private set; }
-        public virtual async void Open()
+
+        public virtual async UniTask Open()
         {
             this.UpdateAlpha(1f);
-            await this.screenTransition.PlayIntroAnim();
+            await this.ScreenTransition.PlayIntroAnim();
+            Debug.Log($"open screen view {this.name}");
             this.ViewDidOpen?.Invoke();
         }
 
-        public virtual async void Close()
+        public virtual async UniTask Close()
         {
+            await this.ScreenTransition.PlayOutroAnim();
+            Debug.Log($"Close screen view {this.name}");
             this.UpdateAlpha(0);
-            await this.screenTransition.PlayOutroAnim();
             this.ViewDidClose?.Invoke();
         }
         public void Hide() { this.UpdateAlpha(0); }

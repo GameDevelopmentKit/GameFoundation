@@ -15,6 +15,9 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
 
         private EventSystem             eventSystem;
         private UniTaskCompletionSource animationTask;
+        
+        public PlayableDirector IntroAnimation => this.introAnimation;
+        public PlayableDirector OutroAnimation => this.outroAnimation;
 
         private void Awake()
         {
