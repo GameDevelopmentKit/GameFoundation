@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.GameManager
 {
     using GameFoundation.Scripts.Network.Authentication;
+    using UniRx;
 
     /// <summary>
     /// Manage all the local data in Game
@@ -11,6 +12,8 @@ namespace GameFoundation.Scripts.GameManager
         public UserDataLogin  UserDataLogin  { get; set; } = new UserDataLogin();
         public ServerToken    ServerToken    { get; set; } = new ServerToken();
         public BlueprintModel BlueprintModel { get; set; } = new BlueprintModel();
+        
+        public IndexSettingRecord IndexSettingRecord = new IndexSettingRecord();
     }
 
     public class UserDataLogin
@@ -39,5 +42,13 @@ namespace GameFoundation.Scripts.GameManager
     public class BlueprintModel
     {
         public string BlueprintDownloadUrl { get; set; }
+    }
+    
+    public class IndexSettingRecord
+    {
+        public BoolReactiveProperty  MuteMusic  { get; set; } = new(false);
+        public BoolReactiveProperty  MuteSound  { get; set; } = new(false);
+        public FloatReactiveProperty MusicValue { get; set; } = new(1);
+        public FloatReactiveProperty SoundValue { get; set; } = new(1);
     }
 }

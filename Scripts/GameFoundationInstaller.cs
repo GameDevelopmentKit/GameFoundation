@@ -26,7 +26,7 @@
             
             //CreateMasterAudio
             this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsCached().NonLazy();
-            this.Container.Bind<IMechSoundManager>().To<MasterMechSoundManager>().AsCached().NonLazy();            
+            this.Container.BindInterfacesTo<MasterMechSoundManager>().AsCached().NonLazy();            
             
             //Localization services
             this.Container.Bind<LocalizationService>().AsCached().NonLazy();
