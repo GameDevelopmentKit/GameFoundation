@@ -14,17 +14,21 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
         private                  Button           btn;
         public                   Button           Btn => this.btn;
 
-        private void Awake() { this.btn = this.GetComponent<Button>(); }
+        private void Awake()
+        {
+            this.btn           = this.GetComponent<Button>();
+            this.isActiveHover = false;
+        }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            this.OnPlaySfx();
-
             if (this.pressParticles.Count <= 0) return;
             foreach (var pressParticle in this.pressParticles)
             {
                 pressParticle.SetActive(true);
             }
+            
+            this.OnPlaySfx();
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -43,17 +47,18 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
             if (this.hoverParticles.Count <= 0) return;
             foreach (var hoverParticle in this.hoverParticles)
             {
-                hoverParticle.SetActive(true);
+                hoverParticle.SetActive(false);
             }
         }
 
         public void SetDefaultParticleActive(bool isActive)
         {
-            this.isActiveHover = isActive;
+            this.SetActiveHover(isActive);
+
             if (this.defaultParticles.Count <= 0) return;
             foreach (var defaultParticle in this.defaultParticles)
             {
-                defaultParticle.SetActive(true);
+                defaultParticle.SetActive(isActive);
             }
         }
 
@@ -64,6 +69,26 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
             {
                 appearParticle.SetActive(true);
             }
+        }
+
+        public void SetDisableAllFx()
+        {
+            foreach (var appearParticle in this.appearParticles)
+            {
+                appearParticle.SetActive(false);
+            }
+
+            this.SetDefaultParticleActive(false);
+            
+            foreach (var pressParticle in this.pressParticles)
+            {
+                pressParticle.SetActive(false);
+            }
+        }
+
+        public void SetActiveHover(bool pIsActiveHover)
+        {
+            this.isActiveHover = pIsActiveHover;
         }
     }
 }
