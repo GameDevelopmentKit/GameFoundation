@@ -304,24 +304,23 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         private void Update()
         {
             // back button flow
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (!Input.GetKeyDown(KeyCode.Escape)) return;
+            
+            if (this.activeScreens.Count > 1)
             {
-                if (this.activeScreens.Count > 1)
+                Debug.Log("Close last screen");
+                this.activeScreens.Last().CloseView();
+            }
+            else
+            {
+                Debug.Log("Show popup confirm quit app");
+                _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
                 {
-                    Debug.Log("Close last screen");
-                    this.activeScreens.Last().CloseView();
-                }
-                else
-                {
-                    Debug.Log("Show popup confirm quit app");
-                    _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
-                    {
-                        content     = "Do you really want to quit?",
-                        title       = "Are you sure?",
-                        type        = NotificationType.Option,
-                        OkAction = this.QuitApplication,
-                    });
-                }
+                    content  = "Do you really want to quit?",
+                    title    = "Are you sure?",
+                    type     = NotificationType.Option,
+                    OkAction = this.QuitApplication,
+                });
             }
         }
 
@@ -332,7 +331,6 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 #else
                              Application.Quit();
 #endif
-
         }
 
         #endregion
