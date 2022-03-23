@@ -49,7 +49,21 @@
                 this.SetView(Object.Instantiate(await this.GameAssets.LoadAssetAsync<GameObject>(this.PrefabPath), parent).GetComponent<TView>());
             }
         }
-
+        
+        /// <summary>
+        /// Set view automatically
+        /// </summary>
+        /// <param name="parent"></param>
+        public async UniTask SetView(Vector3 worldPosition)
+        {
+            if (this.View == null)
+            {
+                var view = Object.Instantiate(await this.GameAssets.LoadAssetAsync<GameObject>(this.PrefabPath)).GetComponent<TView>();
+                this.SetView(view);
+                view.transform.position = worldPosition;
+            }
+        }
+        
         /// <summary>
         /// Set view automatically
         /// </summary>
