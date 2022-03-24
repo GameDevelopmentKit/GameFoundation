@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: PoupBlurBGBlurConfig
   m_EditorClassIdentifier: 
   radius: 1.875
-  iteration: 3
-  maxDepth: 6
-  strength: 15
+  iteration: 4
+  maxDepth: 10
+  strength: 30

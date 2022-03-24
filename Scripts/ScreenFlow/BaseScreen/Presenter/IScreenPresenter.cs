@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 {
     using System;
+    using System.Threading.Tasks;
     using GameFoundation.Scripts.MVP;
     using UnityEngine;
     using Zenject;
@@ -20,7 +21,8 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
         public void SetViewParent(Transform parent);
         public void BindData();
 
-        public void OpenView();
+        public Task OpenViewAsync();
+        public Task CloseViewAsync();
         public void CloseView();
         public void HideView();
         public void DestroyView();
@@ -33,9 +35,9 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
         public int ViewSiblingIndex { get; set; }
     }
 
-    public interface IScreenPresenter<TModel> : IScreenPresenter
+    public interface IScreenPresenter<in TModel> : IScreenPresenter
     {
-        public void OpenView(TModel model);
+        public Task OpenView(TModel model);
     }
 
     public enum ScreenStatus

@@ -3,6 +3,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.CommonScreen;
@@ -36,7 +37,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         /// <summary>
         /// Close a screen on top
         /// </summary>
-        public void CloseCurrentScreen();
+        public Task CloseCurrentScreen();
 
         /// <summary>
         /// Close all screen on current scene
@@ -82,7 +83,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
         [SerializeField] private IScreenPresenter previousActiveScreen;
 
-        private Dictionary<Type, IScreenPresenter> screenPool;
+        private Dictionary<Type, IScreenPresenter>          typeToLoadedScreenPresenter;
+        private Dictionary<Type, UniTask<IScreenPresenter>> typeToPendingScreen;
 
 
         private SignalBus    signalBus;
@@ -99,8 +101,9 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.logService = logServiceParam;
             this.gameAssets = gameAssetsParam;
 
-            this.activeScreens = new List<IScreenPresenter>();
-            this.screenPool    = new Dictionary<Type, IScreenPresenter>();
+            this.activeScreens               = new List<IScreenPresenter>();
+            this.typeToLoadedScreenPresenter = new Dictionary<Type, IScreenPresenter>();
+            this.typeToPendingScreen         = new Dictionary<Type, UniTask<IScreenPresenter>>();
 
             this.signalBus.Subscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
             this.signalBus.Subscribe<ScreenShowSignal>(this.OnShowScreen);
@@ -127,7 +130,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             var nextScreen = await this.GetScreen<T>();
             if (nextScreen != null)
             {
-                nextScreen.OpenView();
+                await nextScreen.OpenViewAsync();
                 return nextScreen;
             }
             else
@@ -142,7 +145,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             var nextScreen = (await this.GetScreen<TPresenter>());
             if (nextScreen != null)
             {
-                nextScreen.OpenView(model);
+                await nextScreen.OpenView(model);
                 return nextScreen;
             }
             else
@@ -156,24 +159,33 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         public async UniTask<T> GetScreen<T>() where T : IScreenPresenter
         {
             var screenType = typeof(T);
-            if (this.screenPool.TryGetValue(screenType, out var screenController)) return (T)screenController;
-            screenController = this.Instantiator.Instantiate<T>();
-            await this.InstantiateView(screenController);
-            this.screenPool.Add(screenType, screenController);
-            return (T)screenController;
+            if (this.typeToLoadedScreenPresenter.TryGetValue(screenType, out var screenPresenter)) return (T)screenPresenter;
+
+            if (!this.typeToPendingScreen.TryGetValue(screenType, out var loadingTask))
+            {
+                loadingTask = InstantiateScreen();
+                this.typeToPendingScreen.Add(screenType, loadingTask);
+            }
+
+            var result = await loadingTask;
+            this.typeToPendingScreen.Remove(screenType);
+            return (T)result;
+
+            async UniTask<IScreenPresenter> InstantiateScreen()
+            {
+                screenPresenter = this.Instantiator.Instantiate<T>();
+                var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
+                var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath), this.CurrentRootScreen).GetComponent<IScreenView>();
+                screenPresenter.SetView(viewObject);
+                this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
+                return (T)screenPresenter;
+            }
         }
 
-        private async UniTask<IScreenView> InstantiateView(IScreenPresenter presenter)
+        public async Task CloseCurrentScreen()
         {
-            var screenInfo = presenter.GetCustomAttribute<ScreenInfoAttribute>();
-            var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath), this.CurrentRootScreen).GetComponent<IScreenView>();
-            presenter.SetView(viewObject);
-            return viewObject;
-        }
-
-        public void CloseCurrentScreen()
-        {
-            if (this.activeScreens.Count > 0) this.activeScreens.Last().CloseView();
+            if (this.activeScreens.Count > 0)
+                await this.activeScreens.Last().CloseViewAsync();
         }
 
         public void CloseAllScreen()
@@ -182,7 +194,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.activeScreens.Clear();
             foreach (var screen in cacheActiveScreens)
             {
-                screen.CloseView();
+                screen.CloseViewAsync();
             }
 
             this.currentActiveScreen  = null;
@@ -194,12 +206,12 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             this.activeScreens.Clear();
             this.currentActiveScreen  = null;
             this.previousActiveScreen = null;
-            foreach (var screen in this.screenPool)
+            foreach (var screen in this.typeToLoadedScreenPresenter)
             {
                 screen.Value.Dispose();
             }
 
-            this.screenPool.Clear();
+            this.typeToLoadedScreenPresenter.Clear();
         }
         public Transform        CurrentRootScreen { get; set; }
         public Transform        CurrentHiddenRoot { get; set; }
@@ -225,7 +237,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             {
                 if (this.currentActiveScreen.IsClosePrevious)
                 {
-                    this.previousActiveScreen.CloseView();
+                    this.previousActiveScreen.CloseViewAsync();
                     this.previousActiveScreen = null;
                 }
                 else
@@ -252,7 +264,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
                     if (nextScreen.ScreenStatus == ScreenStatus.Opened)
                         this.OnShowScreen(new ScreenShowSignal() { ScreenPresenter = nextScreen });
                     else
-                        nextScreen.OpenView();
+                        nextScreen.OpenViewAsync();
                 }
             }
             else
@@ -267,8 +279,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         {
             var screenPresenter = signal.ScreenPresenter;
             var screenType      = screenPresenter.GetType();
-            if (this.screenPool.ContainsKey(screenType)) return;
-            this.screenPool.Add(screenType, screenPresenter);
+            if (this.typeToLoadedScreenPresenter.ContainsKey(screenType)) return;
+            this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
             var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
 
             var viewObj = this.CurrentRootScreen.Find(screenInfo.AddressableScreenPath);
@@ -285,7 +297,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             var screenPresenter                                                                                                   = signal.ScreenPresenter;
             var screenType                                                                                                        = screenPresenter.GetType();
             if (this.previousActiveScreen != null && this.previousActiveScreen.Equals(screenPresenter)) this.previousActiveScreen = null;
-            this.screenPool.Remove(screenType);
+            this.typeToLoadedScreenPresenter.Remove(screenType);
             this.activeScreens.Remove(screenPresenter);
         }
 
@@ -305,11 +317,11 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         {
             // back button flow
             if (!Input.GetKeyDown(KeyCode.Escape)) return;
-            
+
             if (this.activeScreens.Count > 1)
             {
                 Debug.Log("Close last screen");
-                this.activeScreens.Last().CloseView();
+                this.activeScreens.Last().CloseViewAsync();
             }
             else
             {

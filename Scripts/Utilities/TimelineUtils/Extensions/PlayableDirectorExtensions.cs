@@ -105,6 +105,16 @@
 
             Debug.LogError($"Track {trackName} not found..");
         }
+        
+        public static void Bind(this PlayableDirector playableDirector, Dictionary<string, Object> trackNameToBindingObject) {
+            var timelineAsset = (TimelineAsset) playableDirector.playableAsset;
+            foreach (var outputBinding in timelineAsset.outputs) {
+                if (!trackNameToBindingObject.TryGetValue(outputBinding.streamName, out var objectToBind)) continue;
+
+                var track = outputBinding.sourceObject;
+                playableDirector.SetGenericBinding(track, objectToBind);
+            }
+        }
 
         /// <summary>
         /// Bind multiple objects to multiple tracks in playable director.

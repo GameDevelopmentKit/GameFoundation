@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 {
+    using System.Threading.Tasks;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.LogService;
@@ -35,16 +36,16 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
         
         protected BasePopupPresenter(SignalBus signalBus, ILogService logService) : base(signalBus) { this.logService = logService; }
 
-        public void OpenView(TModel model)
+        public async Task OpenView(TModel model)
         {
             if (model != null)
             {
                 this.Model = model;
             }
-            this.OpenView();
+            await this.OpenViewAsync();
         }
         
-        public override void OpenView()
+        public override async Task OpenViewAsync()
         {
             if (this.Model != null)
             {
@@ -54,7 +55,7 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             {
                 this.logService.Warning($"{this.GetType().Name} don't have Model!!!");
             }
-            base.OpenView();
+            await base.OpenViewAsync();
         }
         
         public sealed override void BindData() { }

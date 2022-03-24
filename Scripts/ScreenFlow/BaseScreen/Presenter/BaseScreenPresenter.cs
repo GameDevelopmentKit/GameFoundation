@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 {
+    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.MVP;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
@@ -53,24 +54,29 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 
         public abstract void BindData();
 
-        public virtual void OpenView()
+        public virtual async Task OpenViewAsync()
         {
             // Always fill data for screen
             this.BindData();
 
             if (this.ScreenStatus == ScreenStatus.Opened) return;
             this.ScreenStatus = ScreenStatus.Opened;
-            this.View.Open();
             this.SignalBus.Fire(new ScreenShowSignal() { ScreenPresenter = this });
+            await this.View.Open();
+        }
+
+        public virtual async Task CloseViewAsync()
+        {
+            if (this.ScreenStatus == ScreenStatus.Closed) return;
+            this.ScreenStatus = ScreenStatus.Closed;
+            await this.View.Close();
+            this.SignalBus.Fire(new ScreenCloseSignal() { ScreenPresenter = this });
+            this.Dispose();
         }
 
         public virtual void CloseView()
         {
-            if (this.ScreenStatus == ScreenStatus.Closed) return;
-            this.ScreenStatus = ScreenStatus.Closed;
-            this.View.Close();
-            this.SignalBus.Fire(new ScreenCloseSignal() { ScreenPresenter = this });
-            this.Dispose();
+            _ = this.CloseViewAsync();
         }
 
         public virtual void HideView()
@@ -108,9 +114,9 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
         protected          TModel      Model;
         protected BaseScreenPresenter(SignalBus signalBus, ILogService logger) : base(signalBus) { this.Logger = logger; }
 
-        public override void OpenView()
+        public override async Task OpenViewAsync()
         {
-            base.OpenView();
+            await base.OpenViewAsync();
             if (this.Model != null)
             {
                 this.BindData(this.Model);
@@ -120,14 +126,14 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
                 this.Logger.Warning($"{this.GetType().Name} don't have Model!!!");
             }
         }
-        public virtual void OpenView(TModel model)
+        public virtual async Task OpenView(TModel model)
         {
             if (model != null)
             {
                 this.Model = model;
             }
 
-            this.OpenView();
+            await this.OpenViewAsync();
         }
 
         public sealed override void BindData() { }
