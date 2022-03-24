@@ -5,7 +5,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class BaseMechSFX : MonoBehaviour
 {
-    [SerializeField] private string sfxName;
+    [SerializeField] protected string sfxName;
     
     [Header("For Tool Set sfx")]
     [SerializeField] private Object obj;

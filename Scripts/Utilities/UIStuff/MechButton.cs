@@ -16,19 +16,19 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
 
         private void Awake()
         {
+            this.sfxName       = "btn_team_menu_select";
             this.btn           = this.GetComponent<Button>();
             this.isActiveHover = false;
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            this.OnPlaySfx();
             if (this.pressParticles.Count <= 0) return;
             foreach (var pressParticle in this.pressParticles)
             {
                 pressParticle.SetActive(true);
             }
-            
-            this.OnPlaySfx();
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -79,16 +79,13 @@ namespace GameFoundation.Scripts.Utilities.UIStuff
             }
 
             this.SetDefaultParticleActive(false);
-            
+
             foreach (var pressParticle in this.pressParticles)
             {
                 pressParticle.SetActive(false);
             }
         }
 
-        public void SetActiveHover(bool pIsActiveHover)
-        {
-            this.isActiveHover = pIsActiveHover;
-        }
+        public void SetActiveHover(bool pIsActiveHover) { this.isActiveHover = pIsActiveHover; }
     }
 }
