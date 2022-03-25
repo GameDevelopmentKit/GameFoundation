@@ -17,17 +17,6 @@ namespace GameFoundation.Scripts.Utilities.Extension
     //</summary>
     public static class ExtensionMethod
     {
-        public static List<T> GetListRandom<T>(this object obj, List<T> seedData, int amount)
-        {
-            var result = new List<T>();
-            for (int i = 0; i < amount; i++)
-            {
-                result.Add(seedData[Random.Range(0, seedData.Count)]);
-            }
-
-            return result;
-        }
-
         //Remove all Button Listener On View
         public static void OnRemoveButtonListener(this MonoBehaviour view)
         {
