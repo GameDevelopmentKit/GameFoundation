@@ -131,8 +131,20 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         #endregion
 
-        #region Spawn prefab in bundle
+        #region Load prefab in bundle
+        public async Task<ObjectPool> CreatePool(string prefabName, int initialPoolSize)
+        {
+            var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
+           
+            if (!this.cachedLoadedPrefab.ContainsKey(prefabName))
+            {
+                this.cachedLoadedPrefab.Add(prefabName, prefab);
+                this.mapPrefabToKey.Add(prefab, prefabName);
+            }
 
+            return this.CreatePool(prefab, initialPoolSize);
+        }
+        
         public async Task<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
             var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
