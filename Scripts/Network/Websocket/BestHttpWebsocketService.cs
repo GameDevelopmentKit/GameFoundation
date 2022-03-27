@@ -37,6 +37,7 @@ namespace GameFoundation.Scripts.Network.Websocket
             this.HubConnection = new HubConnection(new Uri(uri), new MessagePackProtocol())
             {
                 AuthenticationProvider = new CustomAuthenticator(token, MechVersion.Version),
+                Options = { SkipNegotiation = true,PreferedTransport = TransportTypes.WebSocket}
             };
 
             this.HubConnection.OnConnected    += this.OnConnected;
