@@ -163,7 +163,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
             if (!this.typeToPendingScreen.TryGetValue(screenType, out var loadingTask))
             {
-                loadingTask = InstantiateScreen();
+                loadingTask = InstantiateScreen().Preserve();
                 this.typeToPendingScreen.Add(screenType, loadingTask);
             }
 
