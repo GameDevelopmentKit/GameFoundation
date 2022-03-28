@@ -1,16 +1,19 @@
 ﻿namespace GameFoundation.Scripts.Utilities
 {
     using System;
+    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.GameManager;
     using UnityEngine;
     using Zenject;
     using UniRx;
+    using Vector2 = System.Numerics.Vector2;
 
     public interface IMechSoundManager
     {
-        void PlaySound(string name);
+        void PlaySound(string name, bool isLoop = false);
+        void StopSound(string name);
         void PlayPlayList(string playlist, bool random = false);
         void StopPlaylist(string playlist);
         void StopAllPlaylist();
@@ -25,16 +28,27 @@
 
     public class MasterMechSoundManager : IMechSoundManager, IInitializable, IDisposable
     {
-        private readonly PlaylistController      playlistController;
-        private readonly GameFoundationLocalData gameFoundationLocalData;
-        public static    MasterMechSoundManager  Instance { get; private set; }
-        private          CompositeDisposable     compositeDisposable;
-
-        public MasterMechSoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData)
+        public static    MasterMechSoundManager   Instance { get; private set; }
+        
+        private readonly PlaylistController       playlistController;
+        private readonly GameFoundationLocalData  gameFoundationLocalData;
+        private readonly MasterAudio              masterAudio;
+        private readonly DynamicSoundGroupCreator groupCreator;
+        
+        private  CompositeDisposable compositeDisposable;
+        private  List<Transform>          listSfxSoundMecha = new List<Transform>();
+        
+        public MasterMechSoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
         {
             this.playlistController      = playlistController;
             this.gameFoundationLocalData = gameFoundationLocalData;
+            this.masterAudio             = masterAudio;
             Instance                     = this;
+            var AllsoundTrans = masterAudio.transform.GetComponentsInChildren<Transform>();
+            foreach (var t in AllsoundTrans)
+            {
+                this.listSfxSoundMecha.Add(t);
+            }
         }
 
         public void Initialize() { this.SubscribeMasterAudio(); }
@@ -51,11 +65,12 @@
             };
         }
 
-        public virtual void PlaySound(string name)
+        public virtual void PlaySound(string name, bool isLoop = false)
         {
             if (this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Value) return;
-            MasterAudio.PlaySound(name);
+            MasterAudio.PlaySound(name, isChaining: isLoop);
         }
+        public void StopSound(string name) { MasterAudio.StopAllOfSound(name); }
 
         public virtual void PlayPlayList(string playlist, bool random = false)
         {
@@ -74,7 +89,16 @@
 
         public virtual void SetVolumePlaylist(float value) { MasterAudio.PlaylistMasterVolume = value; }
 
-        public virtual void MuteSound(bool value) { }
+        public virtual void MuteSound(bool value)
+        {
+            if (value)
+            {
+                foreach (var t in this.listSfxSoundMecha)
+                {
+                    MasterAudio.StopAllSoundsOfTransform(t);
+                }
+            }
+        }
 
         public virtual void MuteMusic(bool value)
         {
