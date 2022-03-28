@@ -1,7 +1,9 @@
 ﻿namespace GameFoundation.Scripts.Utilities.Extension
 {
+    using System;
     using System.Collections.Generic;
-    using UnityEngine;
+    using System.Linq;
+    using Random = UnityEngine.Random;
 
     public static class ListExtension
     {
@@ -28,5 +30,20 @@
         }
 
         public static T RandomElement<T>(this IList<T> list) { return list[Random.Range(0, list.Count)]; }
+        
+        public static T PickRandom<T>(this IEnumerable<T> source)
+        {
+            return source.PickRandom(1).Single();
+        }
+
+        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, int count)
+        {
+            return source.Shuffle().Take(count);
+        }
+
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
+        {
+            return source.OrderBy(x => Guid.NewGuid());
+        }
     }
 }
