@@ -83,7 +83,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
         [SerializeField] private IScreenPresenter previousActiveScreen;
 
-        private Dictionary<Type, IScreenPresenter>          typeToLoadedScreenPresenter;
+        private Dictionary<Type, IScreenPresenter>       typeToLoadedScreenPresenter;
         private Dictionary<Type, Task<IScreenPresenter>> typeToPendingScreen;
 
 
@@ -294,8 +294,9 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
         private void OnDestroyScreen(ScreenSelfDestroyedSignal signal)
         {
-            var screenPresenter                                                                                                   = signal.ScreenPresenter;
-            var screenType                                                                                                        = screenPresenter.GetType();
+            var screenPresenter = signal.ScreenPresenter;
+            var screenType      = screenPresenter.GetType();
+
             if (this.previousActiveScreen != null && this.previousActiveScreen.Equals(screenPresenter)) this.previousActiveScreen = null;
             this.typeToLoadedScreenPresenter.Remove(screenType);
             this.activeScreens.Remove(screenPresenter);
@@ -328,10 +329,10 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
                 Debug.Log("Show popup confirm quit app");
                 _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
                 {
-                    content  = "Do you really want to quit?",
-                    title    = "Are you sure?",
-                    type     = NotificationType.Option,
-                    OkAction = this.QuitApplication,
+                    content        = "Do you really want to quit?",
+                    title          = "Are you sure?",
+                    type           = NotificationType.Option,
+                    OkNoticeAction = this.QuitApplication,
                 });
             }
         }
