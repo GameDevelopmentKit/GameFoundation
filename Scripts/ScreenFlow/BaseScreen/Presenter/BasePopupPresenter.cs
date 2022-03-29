@@ -25,15 +25,6 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             this.SignalBus.Fire(new ScreenCloseSignal() { ScreenPresenter = this });
             this.Dispose();
         }
-
-        protected override void OnViewDestroyed()
-        {
-            base.OnViewDestroyed();
-            this.SignalBus.Fire(new PopupHiddenSignal()
-            {
-                ScreenPresenter = this
-            }); 
-        }
     }
 
     public abstract class BasePopupPresenter<TView, TModel> : BasePopupPresenter<TView>, IScreenPresenter<TModel> where TView : IScreenView 
