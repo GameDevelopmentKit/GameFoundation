@@ -60,8 +60,8 @@ namespace GameFoundation.Scripts.CommonScreen
 
         private void SwitchMode()
         {
-            this.View.NoticeObj.SetActive(this.Model.type == NotificationType.Option);
-            this.View.CloseObj.SetActive(this.Model.type == NotificationType.Close);
+            this.View.NoticeObj.SetActive(this.Model.Type == NotificationType.Option);
+            this.View.CloseObj.SetActive(this.Model.Type == NotificationType.Close);
         }
 
         public override void CloseView()
@@ -88,8 +88,8 @@ namespace GameFoundation.Scripts.CommonScreen
 
         private void SetNotificationContent()
         {
-            this.View.TxtTitle.text   = this.Model.title;
-            this.View.TxtContent.text = this.Model.content;
+            this.View.TxtTitle.text   = this.Model.Title;
+            this.View.TxtContent.text = this.Model.Content;
         }
 
         public override void Dispose()
@@ -103,9 +103,9 @@ namespace GameFoundation.Scripts.CommonScreen
 
     public class NotificationPopupModel
     {
-        public string           title;
-        public string           content;
-        public NotificationType type;
+        public string           Title;
+        public string           Content;
+        public NotificationType Type;
 
         public Action OkAction       { get; set; }
         public Action OkNoticeAction { get; set; }

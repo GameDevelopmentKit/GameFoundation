@@ -329,9 +329,9 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
                 Debug.Log("Show popup confirm quit app");
                 _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
                 {
-                    content        = "Do you really want to quit?",
-                    title          = "Are you sure?",
-                    type           = NotificationType.Option,
+                    Content        = "Do you really want to quit?",
+                    Title          = "Are you sure?",
+                    Type           = NotificationType.Option,
                     OkNoticeAction = this.QuitApplication,
                 });
             }
