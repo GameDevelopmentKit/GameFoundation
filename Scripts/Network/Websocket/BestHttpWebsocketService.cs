@@ -109,7 +109,7 @@ namespace GameFoundation.Scripts.Network.Websocket
 
         protected virtual void OnInvokeError(Exception exception)
         {
-            
+            this.logger.Exception(exception);
         }
     }
 }
