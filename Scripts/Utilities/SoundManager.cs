@@ -20,35 +20,30 @@
         void MutePlaylist(string playlist);
         void MuteAllPlaylist();
         void SetVolumePlaylist(float value);
-        void MuteSound(bool value);
-        void MuteMusic(bool value);
+        void CheckToMuteSound(bool value);
+        void CheckToMuteMusic(bool value);
         void SetSoundValue(float value);
         void SetMusicValue(float value);
     }
 
     public class MasterMechSoundManager : IMechSoundManager, IInitializable, IDisposable
     {
-        public static    MasterMechSoundManager   Instance { get; private set; }
-        
+        public static MasterMechSoundManager Instance { get; private set; }
+
         private readonly PlaylistController       playlistController;
         private readonly GameFoundationLocalData  gameFoundationLocalData;
         private readonly MasterAudio              masterAudio;
         private readonly DynamicSoundGroupCreator groupCreator;
-        
-        private  CompositeDisposable compositeDisposable;
-        private  List<Transform>          listSfxSoundMecha = new List<Transform>();
-        
+
+        private          CompositeDisposable    compositeDisposable;
+        private readonly List<MasterAudioGroup> listSFXGroups = new List<MasterAudioGroup>();
+
         public MasterMechSoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
         {
             this.playlistController      = playlistController;
             this.gameFoundationLocalData = gameFoundationLocalData;
             this.masterAudio             = masterAudio;
             Instance                     = this;
-            var AllsoundTrans = masterAudio.transform.GetComponentsInChildren<Transform>();
-            foreach (var t in AllsoundTrans)
-            {
-                this.listSfxSoundMecha.Add(t);
-            }
         }
 
         public void Initialize() { this.SubscribeMasterAudio(); }
@@ -56,10 +51,16 @@
         private async void SubscribeMasterAudio()
         {
             await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
+            var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
+            foreach (var t in groups)
+            {
+                this.listSFXGroups.Add(t);
+            }
+
             this.compositeDisposable = new CompositeDisposable
             {
-                this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.MuteMusic),
-                this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.MuteSound),
+                this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
                 this.gameFoundationLocalData.IndexSettingRecord.MusicValue.Subscribe(this.SetMusicValue),
                 this.gameFoundationLocalData.IndexSettingRecord.SoundValue.Subscribe(this.SetSoundValue)
             };
@@ -74,9 +75,17 @@
 
         public virtual void PlayPlayList(string playlist, bool random = false)
         {
-            if (this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Value) return;
             this.playlistController.isShuffle = random;
+            var check = !this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Value;
             MasterAudio.StartPlaylist(playlist);
+            if (check)
+            {
+                MasterAudio.PauseAllPlaylists();
+            }
+            else
+            {
+                MasterAudio.UnpauseAllPlaylists();
+            }
         }
 
         public virtual void StopPlaylist(string playlist) { MasterAudio.StopPlaylist(playlist); }
@@ -89,18 +98,15 @@
 
         public virtual void SetVolumePlaylist(float value) { MasterAudio.PlaylistMasterVolume = value; }
 
-        public virtual void MuteSound(bool value)
+        public virtual void CheckToMuteSound(bool value)
         {
-            if (value)
+            foreach (var t in this.listSFXGroups)
             {
-                foreach (var t in this.listSfxSoundMecha)
-                {
-                    MasterAudio.StopAllSoundsOfTransform(t);
-                }
+                t.isMuted = value;
             }
         }
 
-        public virtual void MuteMusic(bool value)
+        public virtual void CheckToMuteMusic(bool value)
         {
             if (value)
             {
