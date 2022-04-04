@@ -17,8 +17,8 @@
 
             return result;
         }
-        
-        public static List<int> GetRandomListInt(this object obj,int amount, int rangeMin = 0, int rangeMax = 100)
+
+        public static List<int> GetRandomListInt(this object obj, int amount, int rangeMin = 0, int rangeMax = 100)
         {
             var result = new List<int>();
             for (var i = 0; i < amount; i++)
@@ -30,20 +30,15 @@
         }
 
         public static T RandomElement<T>(this IList<T> list) { return list[Random.Range(0, list.Count)]; }
-        
-        public static T PickRandom<T>(this IEnumerable<T> source)
-        {
-            return source.PickRandom(1).Single();
-        }
 
-        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, int count)
-        {
-            return source.Shuffle().Take(count);
-        }
+        public static T PickRandom<T>(this IEnumerable<T> source) { return source.PickRandom(1).Single(); }
+
+        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, int count) { return source.Shuffle().Take(count); }
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
-            return source.OrderBy(x => Guid.NewGuid());
+            return source.OrderBy(x => Guid.NewGuid().ToString());
         }
+       
     }
 }
