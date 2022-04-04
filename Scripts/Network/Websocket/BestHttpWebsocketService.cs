@@ -8,7 +8,6 @@ namespace GameFoundation.Scripts.Network.Websocket
     using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Utilities.LogService;
     using UniRx;
-    using UnityEngine;
 
     /// <summary>Temporary websocket service (signalR) for battle.</summary>
     public class BestHttpWebsocketService : IWebSocketService
@@ -37,7 +36,7 @@ namespace GameFoundation.Scripts.Network.Websocket
             this.HubConnection = new HubConnection(new Uri(uri), new MessagePackProtocol())
             {
                 AuthenticationProvider = new CustomAuthenticator(token, MechVersion.Version),
-                Options = { SkipNegotiation = true,PreferedTransport = TransportTypes.WebSocket}
+                Options                = { SkipNegotiation = true, PreferedTransport = TransportTypes.WebSocket }
             };
 
             this.HubConnection.OnConnected    += this.OnConnected;
@@ -51,65 +50,74 @@ namespace GameFoundation.Scripts.Network.Websocket
 
         public async Task OpenConnection()
         {
+            this.logger.Log($"[SignalR] OpenConnection");
             await this.HubConnection.ConnectAsync();
             this.State.Value = ServiceStatus.Connected;
         }
 
         public async Task CloseConnection()
         {
+            this.logger.Log($"[SignalR] CloseConnection");
             await this.HubConnection.CloseAsync();
             this.State.Value = ServiceStatus.Closed;
         }
 
-        protected async Task<TResult> InvokeAsync<TResult>(string target, params object[] args)
+        protected Task<TResult> InvokeAsync<TResult>(string target, params object[] args)
         {
             try
             {
-                var invokeAsyncResult = await this.HubConnection.InvokeAsync<TResult>(target, this.CancellationTokenSource.Token, args);
-                return invokeAsyncResult;
-            }
-            catch (Exception e)
-            { 
-                this.OnInvokeError(e);
-                throw;
-            }
-        }
+                if (this.State.Value == ServiceStatus.Connected)
+                {
+                    return this.HubConnection.InvokeAsync<TResult>(target, this.CancellationTokenSource.Token, args);
+                }
 
-        protected async Task<object> SendAsync(string target, params object[] args)
-        {
-            try
-            {
-                var sendAsyncResult = await this.HubConnection.SendAsync(target, this.CancellationTokenSource.Token, args);
-                return sendAsyncResult;
+                this.logger.Warning($"Not in Connected state! Current state: {this.State.Value}");
             }
             catch (Exception e)
             {
                 this.OnInvokeError(e);
-                throw;
             }
+
+            return Task.FromResult(default(TResult));
         }
 
-        private void OnReconnected(HubConnection connection) { this.logger.Log($"{connection.Uri} reconnected!!"); }
+        protected Task SendAsync(string target, params object[] args)
+        {
+            try
+            {
+                if (this.State.Value == ServiceStatus.Connected)
+                {
+                    return this.HubConnection.SendAsync(target, this.CancellationTokenSource.Token, args);;
+                }
+                
+                this.logger.Warning($"Not in Connected state! Current state: {this.State.Value}");
+            }
+            catch (Exception e)
+            {
+                this.OnInvokeError(e);
+            }
+            
+            return Task.CompletedTask;
+        }
 
-        private void OnReconnecting(HubConnection connection, string arg2) { this.logger.Log($"{connection.Uri} is reconnecting!!"); }
+        private void OnReconnected(HubConnection connection) { this.logger.Log($"[SignalR] {connection.Uri} reconnected!!"); }
+
+        private void OnReconnecting(HubConnection connection, string arg2) { this.logger.Log($"[SignalR] {connection.Uri} is reconnecting!!"); }
 
         protected virtual void OnHubError(HubConnection connection, string error)
         {
             this.CancellationTokenSource.Cancel();
-            this.logger.Log($"{connection.Uri} error: {error}");
+            this.logger.Log($"[SignalR] {connection.Uri} error: {error}");
         }
 
         private void OnClose(HubConnection connection)
         {
-            this.logger.Log($"SignalR closed connection to {connection.Uri}");
+            this.logger.Log($"[SignalR] closed connection to {connection.Uri}");
             this.CancellationTokenSource.Cancel();
         }
 
-        private void OnConnected(HubConnection connection) { this.logger.Log($"SignalR connected to {connection.Uri}"); }
+        private void OnConnected(HubConnection connection) { this.logger.Log($"[SignalR] connected to {connection.Uri}"); }
 
-        protected virtual void OnInvokeError(Exception exception)
-        {
-            this.logger.Exception(exception);
-        }
+        protected virtual void OnInvokeError(Exception exception) { this.logger.Exception(exception); }
     }
 }
