@@ -63,7 +63,7 @@
                     break;
             }
 
-            this.handleLocalDataServices.Save(this.localData);
+            this.handleLocalDataServices.Save(this.localData,true);
             this.dataLoginServices.Status.Value = AuthenticationStatus.Authenticated;
         }
 
