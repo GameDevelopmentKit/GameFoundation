@@ -13,6 +13,7 @@
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
+    using I2.Loc;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
@@ -23,12 +24,13 @@
 
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
-            
+
             //CreateMasterAudio
             this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsCached().NonLazy();
-            this.Container.BindInterfacesTo<MasterMechSoundManager>().AsCached().NonLazy();            
-            
+            this.Container.BindInterfacesTo<MasterMechSoundManager>().AsCached().NonLazy();
+
             //Localization services
+            this.Container.Bind<SetLanguage>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
             this.Container.Bind<LocalizationService>().AsCached().NonLazy();
 
             //Service
@@ -40,7 +42,7 @@
 
             //Player state
             this.Container.Bind<PlayerState>().AsCached();
-            
+
 
             //Genarate fps
             this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();

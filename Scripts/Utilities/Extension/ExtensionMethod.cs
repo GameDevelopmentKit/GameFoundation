@@ -8,6 +8,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
     using Mono.CSharp;
     using Newtonsoft.Json;
+    using TMPro;
     using UnityEngine;
     using UnityEngine.UI;
     using Zenject;
@@ -84,5 +85,28 @@ namespace GameFoundation.Scripts.Utilities.Extension
         public static Vector2 AsUnityVector2(this System.Numerics.Vector2 v) { return new Vector2(v.X, v.Y); }
 
         public static Vector3 AsUnityVector3(this System.Numerics.Vector3 v) { return new Vector3(v.X, v.Y, v.Z); }
+
+
+        //mechText extension
+        public static void SetTextLocalization(this TextMeshProUGUI t, string key, Color color = default)
+        {
+            var mechTextMeshPro = t.GetComponent<MechTextMeshPro>();
+            if (mechTextMeshPro == null)
+            {
+                return;
+            }
+
+            mechTextMeshPro.SetTextWithLocalization(key, color);
+        }
+        public static void SetTextLocalization(this TMP_InputField t, string key)
+        {
+            var mechTextMeshPro = t.textComponent.GetComponent<MechTextMeshPro>();
+            if (mechTextMeshPro == null)
+            {
+                return;
+            }
+
+            mechTextMeshPro.SetTextWithLocalization(key);
+        }
     }
 }
