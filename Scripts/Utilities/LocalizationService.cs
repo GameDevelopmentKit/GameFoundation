@@ -20,7 +20,7 @@ namespace GameFoundation.Scripts.Utilities
             var output = LocalizationManager.TryGetTranslation(key, out var localization) ? localization : key;
             if (output.Equals(key))
             {
-                Debug.LogError($"{key} have no localization");
+                Debug.LogWarning($"{key} have no localization");
             }
 
             return output;
