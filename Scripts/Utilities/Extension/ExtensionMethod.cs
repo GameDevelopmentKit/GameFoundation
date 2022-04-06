@@ -93,6 +93,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var mechTextMeshPro = t.GetComponent<MechTextMeshPro>();
             if (mechTextMeshPro == null)
             {
+                Debug.Log($"{t.gameObject.name} have no MechTextPro");
                 return;
             }
 
