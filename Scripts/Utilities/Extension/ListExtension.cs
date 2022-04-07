@@ -37,7 +37,7 @@
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
-            return source.OrderBy(x => Guid.NewGuid().ToString());
+            return source.OrderBy(x => Guid.NewGuid());
         }
        
     }
