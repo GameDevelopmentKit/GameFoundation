@@ -4,6 +4,7 @@
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using UniRx;
     using Zenject;
+    using ObservableExtensions = UniRx.ObservableExtensions;
 
     /// <summary>
     /// A timer cooldown by cycle automatically, mainly use for UI
@@ -55,8 +56,7 @@
 
             var currentCycle = this.GetCycleByTime(this.currentCooldownTime);
 //        Debug.Log("Create count down with depth = " + Depth);
-            this.observableTimer = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(currentCycle))
-                .Subscribe(_ =>
+            this.observableTimer = ObservableExtensions.Subscribe(Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(currentCycle)), _ =>
                 {
                     // Debug.Log($"count down = {cooldownTime} - depth = {Depth}");
                     this.onEveryCycle?.Invoke(this.currentCooldownTime);

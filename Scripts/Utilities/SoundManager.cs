@@ -5,10 +5,9 @@
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.GameManager;
-    using UnityEngine;
-    using Zenject;
     using UniRx;
-    using Vector2 = System.Numerics.Vector2;
+    using Zenject;
+    using ObservableExtensions = System.ObservableExtensions;
 
     public interface IMechSoundManager
     {
@@ -36,7 +35,7 @@
         private readonly DynamicSoundGroupCreator groupCreator;
 
         private          CompositeDisposable    compositeDisposable;
-        private readonly List<MasterAudioGroup> listSFXGroups = new List<MasterAudioGroup>();
+        private readonly List<MasterAudioGroup> listSFXGroups = new();
 
         public MasterMechSoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
         {
@@ -59,10 +58,10 @@
 
             this.compositeDisposable = new CompositeDisposable
             {
-                this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-                this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-                this.gameFoundationLocalData.IndexSettingRecord.MusicValue.Subscribe(this.SetMusicValue),
-                this.gameFoundationLocalData.IndexSettingRecord.SoundValue.Subscribe(this.SetSoundValue)
+                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.MuteMusic, this.CheckToMuteMusic),
+                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.MuteSound, this.CheckToMuteSound),
+                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.MusicValue, this.SetMusicValue),
+                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.SoundValue, this.SetSoundValue)
             };
         }
 
