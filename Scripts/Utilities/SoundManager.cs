@@ -6,6 +6,7 @@
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.GameManager;
     using UniRx;
+    using UnityEngine;
     using Zenject;
     using ObservableExtensions = System.ObservableExtensions;
 
@@ -75,16 +76,7 @@
         public virtual void PlayPlayList(string playlist, bool random = false)
         {
             this.playlistController.isShuffle = random;
-            var check = !this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Value;
             MasterAudio.StartPlaylist(playlist);
-            if (check)
-            {
-                MasterAudio.PauseAllPlaylists();
-            }
-            else
-            {
-                MasterAudio.UnpauseAllPlaylists();
-            }
         }
 
         public virtual void StopPlaylist(string playlist) { MasterAudio.StopPlaylist(playlist); }
@@ -109,11 +101,11 @@
         {
             if (value)
             {
-                MasterAudio.PauseAllPlaylists();
+                MasterAudio.MuteAllPlaylists();
             }
             else
             {
-                MasterAudio.UnpauseAllPlaylists();
+                MasterAudio.UnmuteAllPlaylists();
             }
         }
 
