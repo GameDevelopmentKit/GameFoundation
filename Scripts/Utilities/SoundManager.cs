@@ -1,14 +1,12 @@
-﻿namespace GameFoundation.Scripts.Utilities
+﻿using System;
+namespace GameFoundation.Scripts.Utilities
 {
-    using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.GameManager;
     using UniRx;
-    using UnityEngine;
     using Zenject;
-    using ObservableExtensions = System.ObservableExtensions;
 
     public interface IMechSoundManager
     {
@@ -36,7 +34,7 @@
         private readonly DynamicSoundGroupCreator groupCreator;
 
         private          CompositeDisposable    compositeDisposable;
-        private readonly List<MasterAudioGroup> listSFXGroups = new();
+        private readonly List<MasterAudioGroup> listSfxGroups = new();
 
         public MasterMechSoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
         {
@@ -54,15 +52,15 @@
             var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
             foreach (var t in groups)
             {
-                this.listSFXGroups.Add(t);
+                this.listSfxGroups.Add(t);
             }
 
             this.compositeDisposable = new CompositeDisposable
             {
-                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.MuteMusic, this.CheckToMuteMusic),
-                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.MuteSound, this.CheckToMuteSound),
-                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.MusicValue, this.SetMusicValue),
-                ObservableExtensions.Subscribe(this.gameFoundationLocalData.IndexSettingRecord.SoundValue, this.SetSoundValue)
+                this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
+                this.gameFoundationLocalData.IndexSettingRecord.MusicValue.Subscribe(this.SetMusicValue),
+                this.gameFoundationLocalData.IndexSettingRecord.SoundValue.Subscribe(this.SetSoundValue)
             };
         }
 
@@ -91,7 +89,7 @@
 
         public virtual void CheckToMuteSound(bool value)
         {
-            foreach (var t in this.listSFXGroups)
+            foreach (var t in this.listSfxGroups)
             {
                 t.isMuted = value;
             }
