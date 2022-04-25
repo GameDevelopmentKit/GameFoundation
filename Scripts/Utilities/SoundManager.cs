@@ -1,7 +1,7 @@
 ﻿using System;
+
 namespace GameFoundation.Scripts.Utilities
 {
-    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.GameManager;
@@ -11,14 +11,14 @@ namespace GameFoundation.Scripts.Utilities
     public interface IMechSoundManager
     {
         void PlaySound(string name, bool isLoop = false);
-        void StopSound(string name);
+        void StopAllSound(string name);
         void PlayPlayList(string playlist, bool random = false);
         void StopPlaylist(string playlist);
         void StopAllPlaylist();
         void MutePlaylist(string playlist);
         void MuteAllPlaylist();
         void SetVolumePlaylist(float value);
-        void CheckToMuteSound(bool value);
+        void CheckToMuteSound(bool isMute);
         void CheckToMuteMusic(bool value);
         void SetSoundValue(float value);
         void SetMusicValue(float value);
@@ -33,8 +33,7 @@ namespace GameFoundation.Scripts.Utilities
         private readonly MasterAudio              masterAudio;
         private readonly DynamicSoundGroupCreator groupCreator;
 
-        private          CompositeDisposable    compositeDisposable;
-        private readonly List<MasterAudioGroup> listSfxGroups = new();
+        private CompositeDisposable compositeDisposable;
 
         public MasterMechSoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
         {
@@ -49,12 +48,6 @@ namespace GameFoundation.Scripts.Utilities
         private async void SubscribeMasterAudio()
         {
             await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
-            var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
-            foreach (var t in groups)
-            {
-                this.listSfxGroups.Add(t);
-            }
-
             this.compositeDisposable = new CompositeDisposable
             {
                 this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
@@ -64,12 +57,9 @@ namespace GameFoundation.Scripts.Utilities
             };
         }
 
-        public virtual void PlaySound(string name, bool isLoop = false)
-        {
-            if (this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Value) return;
-            MasterAudio.PlaySound(name, isChaining: isLoop);
-        }
-        public void StopSound(string name) { MasterAudio.StopAllOfSound(name); }
+        public virtual void PlaySound(string name, bool isLoop = false) =>MasterAudio.PlaySound(name, isChaining: isLoop); 
+        
+        public         void StopAllSound(string name)                    =>MasterAudio.StopAllOfSound(name);
 
         public virtual void PlayPlayList(string playlist, bool random = false)
         {
@@ -87,11 +77,12 @@ namespace GameFoundation.Scripts.Utilities
 
         public virtual void SetVolumePlaylist(float value) { MasterAudio.PlaylistMasterVolume = value; }
 
-        public virtual void CheckToMuteSound(bool value)
+        public virtual void CheckToMuteSound(bool isMute)
         {
-            foreach (var t in this.listSfxGroups)
+            var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
+            foreach (var transform in groups)
             {
-                t.isMuted = value;
+                transform.groupMasterVolume = isMute ? 0 : 1;
             }
         }
 
