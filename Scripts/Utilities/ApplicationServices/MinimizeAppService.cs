@@ -22,8 +22,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
         private void OnApplicationPause(bool pauseStatus)
         {
             this.applicationPauseSignal.PauseStatus = pauseStatus;
-            this.signalBus.Fire(this.applicationPauseSignal);
-
+            // this.signalBus.Fire(this.applicationPauseSignal); // Active this signal later, when need
 
             if (pauseStatus)
             {
@@ -34,6 +33,8 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
             }
             else
             {
+                //TODO: Reload when open minimized game
+                
                 var intervalTimeMinimize = DateTime.Now - this.timeBeforeAppPause;
 
                 if (MinimizeTimeToReload > 0 && intervalTimeMinimize.TotalMinutes >= MinimizeTimeToReload)
@@ -42,7 +43,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
                 }
 
                 this.updateTimeAfterFocusSignal.MinimizeTime = intervalTimeMinimize.TotalSeconds;
-                this.signalBus.Fire(this.updateTimeAfterFocusSignal);
+                //this.signalBus.Fire(this.updateTimeAfterFocusSignal); // temporary disable this function, re-active later when game specs require
             }
         }
 
