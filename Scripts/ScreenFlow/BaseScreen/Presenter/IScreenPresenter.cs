@@ -18,8 +18,9 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
         public bool         IsClosePrevious { get; }
         public ScreenStatus ScreenStatus    { get; }
 
-        public void SetViewParent(Transform parent);
-        public void BindData();
+        public void      SetViewParent(Transform parent);
+        public Transform GetViewParent();
+        public void      BindData();
 
         public Task OpenViewAsync();
         public Task CloseViewAsync();

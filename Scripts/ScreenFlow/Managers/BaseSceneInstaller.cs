@@ -12,14 +12,15 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         /// Instance of Root UI Canvas on Scene
         /// </summary>
         [SerializeField] protected RootUICanvas rootUICanvas;
-
-
+        
         [Inject] private IScreenManager screenManager;
+        
         public override void InstallBindings()
         {
-            this.screenManager.CurrentRootScreen = this.rootUICanvas.RootUIShowTransform;
-            this.screenManager.CurrentHiddenRoot = this.rootUICanvas.RootUIClosedTransform;
-            this.screenManager.Instantiator      = this.Container;
+            this.screenManager.CurrentRootScreen  = this.rootUICanvas.RootUIShowTransform;
+            this.screenManager.CurrentHiddenRoot  = this.rootUICanvas.RootUIClosedTransform;
+            this.screenManager.CurrentOverlayRoot = this.rootUICanvas.RootUIOverlayTransform;
+            this.screenManager.Instantiator       = this.Container;
         }
     }
 }

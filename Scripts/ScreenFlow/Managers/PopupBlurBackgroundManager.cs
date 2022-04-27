@@ -71,7 +71,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             }
             this.btnClose.gameObject.SetActive(popupInfo.IsCloseWhenTapOutside);
             var currentIndex = this.currentPopup.ViewSiblingIndex;
-            this.blurImage.rectTransform.SetSiblingIndex(currentIndex - 1);
+            this.blurImage.transform.SetParent(this.currentPopup.GetViewParent());
+            this.blurImage.rectTransform.SetSiblingIndex(currentIndex > 0 ? currentIndex - 1 : 0);
         }
 
         private void ShowImage(bool enable)

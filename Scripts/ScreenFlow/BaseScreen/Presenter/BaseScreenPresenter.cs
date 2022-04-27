@@ -51,6 +51,10 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             if (this.View.Equals(null)) return;
             this.View.RectTransform.SetParent(parent);
         }
+        public Transform GetViewParent()
+        {
+            return this.View.RectTransform.parent;
+        }
 
         public abstract void BindData();
 

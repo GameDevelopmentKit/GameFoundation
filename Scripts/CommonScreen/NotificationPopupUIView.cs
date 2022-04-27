@@ -37,7 +37,7 @@ namespace GameFoundation.Scripts.CommonScreen
         public GameObject      CloseObj    => this.closeObj;
     }
 
-    [PopupInfo("UIPopupNotice", isEnableBlur: true, isCloseWhenTapOutside: false)]
+    [PopupInfo("UIPopupNotice", isEnableBlur: true, isCloseWhenTapOutside: false, isOverlay: true)]
     public class NotificationPopupPresenter : BasePopupPresenter<NotificationPopupUIView, NotificationPopupModel>
     {
         private readonly IMechSoundManager mechSoundManager;

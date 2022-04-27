@@ -57,6 +57,11 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
         public Transform CurrentHiddenRoot { get; set; }
 
         /// <summary>
+        /// Get overlay transform
+        /// </summary>
+        public Transform CurrentOverlayRoot { get; set; }
+
+        /// <summary>
         /// Reference to low level DiContainer follow scene
         /// </summary>
         public IInstantiator Instantiator { get; set; }
@@ -175,7 +180,9 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             {
                 screenPresenter = this.Instantiator.Instantiate<T>();
                 var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
-                var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath), this.CurrentRootScreen).GetComponent<IScreenView>();
+
+                var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
+                    this.CheckPopupIsOverlay(screenPresenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
                 screenPresenter.SetView(viewObject);
                 this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
                 return (T)screenPresenter;
@@ -213,20 +220,33 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
             this.typeToLoadedScreenPresenter.Clear();
         }
-        public Transform        CurrentRootScreen { get; set; }
-        public Transform        CurrentHiddenRoot { get; set; }
-        public IInstantiator    Instantiator      { get; set; }
-        public IScreenPresenter CurrentScreen     => this.currentActiveScreen;
+        public Transform        CurrentRootScreen  { get; set; }
+        public Transform        CurrentHiddenRoot  { get; set; }
+        public Transform        CurrentOverlayRoot { get; set; }
+        public IInstantiator    Instantiator       { get; set; }
+        public IScreenPresenter CurrentScreen      => this.currentActiveScreen;
 
         #endregion
 
         #region Handle events
 
+        #region Check Overlay Popup
+
+        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter) { return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>)); }
+
+        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter)
+        {
+            return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay;
+        }
+
+        #endregion
+
         private void OnShowScreen(ScreenShowSignal signal)
         {
             this.previousActiveScreen = this.currentActiveScreen;
             this.currentActiveScreen  = signal.ScreenPresenter;
-            this.currentActiveScreen.SetViewParent(this.CurrentRootScreen);
+
+            this.currentActiveScreen.SetViewParent(this.CheckPopupIsOverlay(this.currentActiveScreen) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
 
             // if show the screen that already in the active screens list, remove current one in list and add it to the last of list
             if (this.activeScreens.Contains(signal.ScreenPresenter))
@@ -244,7 +264,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
                 {
                     this.previousActiveScreen.OnOverlap();
                     //With the current screen is popup, the previous screen will be hide after the blur background is shown
-                    if (!this.currentActiveScreen.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>)))
+                    if (!this.CheckScreenIsPopup(this.currentActiveScreen))
                         this.previousActiveScreen.HideView();
                 }
             }

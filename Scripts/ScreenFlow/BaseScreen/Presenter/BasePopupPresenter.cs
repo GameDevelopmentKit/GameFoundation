@@ -10,10 +10,15 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
     {
         public BasePopupPresenter(SignalBus signalBus) : base(signalBus) { }
 
-        public override Task OpenViewAsync()
+        public override async Task OpenViewAsync()
         {
+            this.BindData();
+
+            if (this.ScreenStatus == ScreenStatus.Opened) return;
+            this.ScreenStatus = ScreenStatus.Opened;
+            this.SignalBus.Fire(new ScreenShowSignal() { ScreenPresenter  = this });
             this.SignalBus.Fire(new PopupShowedSignal() { ScreenPresenter = this });
-            return base.OpenViewAsync();
+            await this.View.Open();
         }
 
         public override async Task CloseViewAsync()
