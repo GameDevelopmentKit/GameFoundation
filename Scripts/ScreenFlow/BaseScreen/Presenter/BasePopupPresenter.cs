@@ -30,13 +30,21 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             this.SignalBus.Fire(new ScreenCloseSignal() { ScreenPresenter = this });
             this.Dispose();
         }
+        public override void HideView()
+        {
+            if (this.ScreenStatus == ScreenStatus.Hide) return;
+            this.ScreenStatus = ScreenStatus.Hide;
+            this.View.Hide();
+            this.SignalBus.Fire(new PopupHiddenSignal() { ScreenPresenter = this });
+            this.Dispose();
+        }
     }
 
-    public abstract class BasePopupPresenter<TView, TModel> : BasePopupPresenter<TView>, IScreenPresenter<TModel> where TView : IScreenView 
+    public abstract class BasePopupPresenter<TView, TModel> : BasePopupPresenter<TView>, IScreenPresenter<TModel> where TView : IScreenView
     {
         protected readonly ILogService logService;
-        protected        TModel      Model;
-        
+        protected          TModel      Model;
+
         protected BasePopupPresenter(SignalBus signalBus, ILogService logService) : base(signalBus) { this.logService = logService; }
 
         public async Task OpenView(TModel model)
@@ -45,9 +53,10 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             {
                 this.Model = model;
             }
+
             await this.OpenViewAsync();
         }
-        
+
         public override async Task OpenViewAsync()
         {
             if (this.Model != null)
@@ -58,9 +67,10 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             {
                 this.logService.Warning($"{this.GetType().Name} don't have Model!!!");
             }
+
             await base.OpenViewAsync();
         }
-        
+
         public sealed override void BindData() { }
 
         public abstract void BindData(TModel popupModel);
