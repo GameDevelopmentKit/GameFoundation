@@ -8,7 +8,7 @@ public class FollowLayoutElementPreferredSize : UIBehaviour, ILayoutSelfControll
     [SerializeField] private bool isValid;
 
     [Tooltip("Target component must be inherited from ILayoutElement")]
-    [SerializeField] private Graphic target;
+    [SerializeField] private LayoutGroup target;
     [Tooltip("Can be null if Target Component and Target RectTransform is in the same object")]
     [SerializeField] private RectTransform targetRectTransform;
     
@@ -34,18 +34,11 @@ public class FollowLayoutElementPreferredSize : UIBehaviour, ILayoutSelfControll
     {
         get
         {
-            if (this.targetRectTransform == null)
-                this.targetRectTransform = target.GetComponent<RectTransform>();
-            return this.targetRectTransform;
+                return this.targetRectTransform;
         }
     }
 
     private WaitForEndOfFrame waitForEndOfFrame;
-
-    public void SetTarget(Graphic value) {
-        this.target = (Graphic) value;
-        OnEnable();
-    }
     
     protected override void Start() {
         base.Start();
