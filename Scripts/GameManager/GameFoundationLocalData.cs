@@ -46,10 +46,10 @@ namespace GameFoundation.Scripts.GameManager
 
     public class IndexSettingRecord
     {
-        public FloatReactiveProperty MasterVolume { get; set; } = new(1);
-        public BoolReactiveProperty  MuteMusic    { get; set; } = new(false);
-        public BoolReactiveProperty  MuteSound    { get; set; } = new(false);
-        public FloatReactiveProperty MusicValue   { get; set; } = new(1);
-        public FloatReactiveProperty SoundValue   { get; set; } = new(1);
+        public BoolReactiveProperty MasterVolume { get; set; } = new(true);
+        public BoolReactiveProperty   MuteMusic    { get; set; } = new(false);
+        public BoolReactiveProperty   MuteSound    { get; set; } = new(false);
+        public FloatReactiveProperty  MusicValue   { get; set; } = new(1);
+        public FloatReactiveProperty  SoundValue   { get; set; } = new(1);
     }
 }

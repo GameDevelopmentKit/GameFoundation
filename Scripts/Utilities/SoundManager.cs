@@ -51,7 +51,12 @@ namespace GameFoundation.Scripts.Utilities
             };
         }
 
-        private void SetMasterVolume(float value) { MasterAudio.MasterVolumeLevel = value; }
+        private void SetMasterVolume(bool value)
+        {
+            var finalValue = value ? 1 : 0;
+            MasterAudio.MasterVolumeLevel    = finalValue;
+            MasterAudio.PlaylistMasterVolume = finalValue;
+        }
 
         public virtual void PlaySound(string name, bool isLoop = false) => MasterAudio.PlaySound(name, isChaining: isLoop);
 
