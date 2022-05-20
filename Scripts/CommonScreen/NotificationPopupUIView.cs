@@ -4,6 +4,7 @@ namespace GameFoundation.Scripts.CommonScreen
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.Utilities;
+    using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using TMPro;
     using UnityEngine;
@@ -23,7 +24,6 @@ namespace GameFoundation.Scripts.CommonScreen
         [SerializeField] private Button          btnOk;
         [SerializeField] private Button          btnOkNotice;
         [SerializeField] private Button          btnCancel;
-        [SerializeField] private Button          btnClose;
         [SerializeField] private GameObject      noticeObj;
         [SerializeField] private GameObject      closeObj;
 
@@ -32,7 +32,6 @@ namespace GameFoundation.Scripts.CommonScreen
         public Button          BtnOk       => this.btnOk;
         public Button          BtnOkNotice => this.btnOkNotice;
         public Button          BtnCancel   => this.btnCancel;
-        public Button          BtnClose    => this.btnClose;
         public GameObject      NoticeObj   => this.noticeObj;
         public GameObject      CloseObj    => this.closeObj;
     }
@@ -55,7 +54,6 @@ namespace GameFoundation.Scripts.CommonScreen
             this.View.BtnOk.onClick.AddListener(this.OkAction);
             this.View.BtnOkNotice.onClick.AddListener(this.OkNoticeAction);
             this.View.BtnCancel.onClick.AddListener(this.CloseView);
-            this.View.BtnClose.onClick.AddListener(this.CloseView);
         }
 
         private void SwitchMode()
@@ -88,8 +86,8 @@ namespace GameFoundation.Scripts.CommonScreen
 
         private void SetNotificationContent()
         {
-            this.View.TxtTitle.text   = this.Model.Title;
-            this.View.TxtContent.text = this.Model.Content;
+            this.View.TxtTitle.SetTextLocalization(this.Model.Title);
+            this.View.TxtContent.SetTextLocalization(this.Model.Content);
         }
 
         public override void Dispose()
@@ -97,7 +95,6 @@ namespace GameFoundation.Scripts.CommonScreen
             base.Dispose();
             this.View.BtnOk.onClick.RemoveListener(this.OkAction);
             this.View.BtnCancel.onClick.RemoveListener(this.CloseView);
-            this.View.BtnClose.onClick.RemoveListener(this.CloseView);
         }
     }
 
