@@ -51,10 +51,8 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             if (this.View.Equals(null)) return;
             this.View.RectTransform.SetParent(parent);
         }
-        public Transform GetViewParent()
-        {
-            return this.View.RectTransform.parent;
-        }
+        public Transform GetViewParent()  { return this.View.RectTransform.parent; }
+        public Transform CurrentTransform => this.View.RectTransform;
 
         public abstract void BindData();
 
@@ -78,10 +76,7 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
             this.Dispose();
         }
 
-        public virtual void CloseView()
-        {
-            _ = this.CloseViewAsync();
-        }
+        public virtual void CloseView() { _ = this.CloseViewAsync(); }
 
         public virtual void HideView()
         {

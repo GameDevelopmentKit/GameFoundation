@@ -57,7 +57,8 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             {
                 this.ShowImage(false);
                 this.btnClose.gameObject.SetActive(false);
-                this.currentPopup          = null;
+                this.currentPopup = null;
+                this.blurImage.transform.SetParent(null,false);
             }
         }
 
@@ -69,10 +70,10 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             {
                 this.ShowImage(true);
             }
+
             this.btnClose.gameObject.SetActive(popupInfo.IsCloseWhenTapOutside);
-            var currentIndex = this.currentPopup.ViewSiblingIndex;
-            this.blurImage.transform.SetParent(this.currentPopup.GetViewParent());
-            this.blurImage.rectTransform.SetSiblingIndex(currentIndex > 0 ? currentIndex - 1 : 0);
+            this.blurImage.transform.SetParent(this.currentPopup.CurrentTransform,false);
+            this.blurImage.rectTransform.SetAsFirstSibling();
         }
 
         private void ShowImage(bool enable)

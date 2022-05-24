@@ -20,6 +20,8 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 
         public void      SetViewParent(Transform parent);
         public Transform GetViewParent();
+
+        public Transform CurrentTransform { get;  }
         public void      BindData();
 
         public Task OpenViewAsync();
