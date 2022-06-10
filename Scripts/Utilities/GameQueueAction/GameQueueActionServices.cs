@@ -26,11 +26,11 @@ namespace GameFoundation.Scripts.Utilities.GameQueueAction
             this.screenManager = screenManager;
             this.signalBus     = signalBus;
             Instance           = this;
-            this.signalBus.Subscribe<ScreenShowSignal>(signal => this.OnStartAtLocation(signal.ScreenPresenter));
+            this.screenManager.CurrentActiveScreen.Subscribe(this.OnStartAtLocation);
         }
         private void OnStartAtLocation(IScreenPresenter currentScreen)
         {
-            this.curLocation = currentScreen.ScreenId;
+            this.curLocation = currentScreen == null ? string.Empty : currentScreen.ScreenId;
             this.isDequeuing = false;
             if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0) return;
             this.isDequeuing = true;
@@ -77,7 +77,7 @@ namespace GameFoundation.Scripts.Utilities.GameQueueAction
 
                 if (location == this.curLocation && !this.isDequeuing)
                 {
-                    this.OnStartAtLocation(this.screenManager.CurrentScreen);
+                    this.OnStartAtLocation(this.screenManager.CurrentActiveScreen.Value);
                 }
             }
 
