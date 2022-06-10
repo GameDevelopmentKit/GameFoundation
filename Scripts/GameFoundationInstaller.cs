@@ -11,6 +11,7 @@
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Scripts.Utilities.GameQueueAction;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using I2.Loc;
@@ -53,6 +54,7 @@
             ScreenFlowInstaller.Install(this.Container);
             ServicesLoginInstaller.Install(this.Container);
             ApplicationServiceInstaller.Install(this.Container);
+            GameQueueActionInstaller.Install(this.Container);
         }
     }
 }

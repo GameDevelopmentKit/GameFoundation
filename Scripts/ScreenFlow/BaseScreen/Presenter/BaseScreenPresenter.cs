@@ -4,6 +4,7 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.MVP;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Scripts.ScreenFlow.Managers;
     using GameFoundation.Scripts.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
@@ -11,6 +12,7 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 
     public abstract class BaseScreenPresenter<TView> : IScreenPresenter where TView : IScreenView
     {
+        public         string       ScreenId        { get; private set; }
         public virtual bool         IsClosePrevious { get; protected set; } = false;
         public         ScreenStatus ScreenStatus    { get; protected set; } = ScreenStatus.Closed;
 
@@ -28,7 +30,8 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
 
         public async void SetView(IUIView viewInstance)
         {
-            this.View = (TView)viewInstance;
+            this.View     = (TView)viewInstance;
+            this.ScreenId = $"{SceneDirector.CurrentSceneName}/{typeof(TView).Name}";
             if (this.View.IsReadyToUse)
             {
                 this.OnViewReady();

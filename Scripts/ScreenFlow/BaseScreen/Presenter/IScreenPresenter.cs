@@ -15,6 +15,7 @@ namespace GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter
     /// </summary>
     public interface IScreenPresenter : IUIPresenter, IInitializable, IDisposable
     {
+        public string       ScreenId        { get; }
         public bool         IsClosePrevious { get; }
         public ScreenStatus ScreenStatus    { get; }
 

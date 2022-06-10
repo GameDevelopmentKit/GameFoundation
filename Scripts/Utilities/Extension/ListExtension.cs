@@ -40,5 +40,13 @@
             return source.OrderBy(x => Guid.NewGuid());
         }
        
+        public static void TryInsert<T>(this List<T> list, T item, int index) {
+            if (index >= 0 && index < list.Count) {
+                list.Insert(index, item);
+            }
+            else {
+                list.Add(item);
+            }
+        }
     }
 }
