@@ -17,10 +17,11 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private readonly List<GameObject>                   tempList               = new List<GameObject>();
         private readonly Dictionary<GameObject, ObjectPool> prefabToObjectPool     = new Dictionary<GameObject, ObjectPool>();
         private readonly Dictionary<GameObject, ObjectPool> spawnedObjToObjectPool = new Dictionary<GameObject, ObjectPool>();
-        
-        private readonly Dictionary<string, GameObject>     cachedLoadedPrefab     = new Dictionary<string, GameObject>();
-        private readonly Dictionary<GameObject, string>     mapPrefabToKey         = new Dictionary<GameObject, string>();
 
+        private readonly Dictionary<string, GameObject> cachedLoadedPrefab = new Dictionary<string, GameObject>();
+        private readonly Dictionary<GameObject, string> mapPrefabToKey     = new Dictionary<GameObject, string>();
+
+        private GameObject currentRoot;
         public ObjectPoolManager(IGameAssets gameAssets)
         {
             this.gameAssets = gameAssets;
@@ -36,8 +37,13 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (prefab == null) return null;
 
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool)) return pool;
+            if (this.currentRoot == null)
+            {
+                this.currentRoot = new GameObject { name = "ObjectPoolManager" };
+            }
 
             pool = new GameObject($"[Pool] {prefab.name}", typeof(ObjectPool)).GetComponent<ObjectPool>();
+            pool.transform.SetParent(this.currentRoot.transform,false);
             this.prefabToObjectPool.Add(prefab, pool);
 
             var list = new List<GameObject>();
@@ -132,10 +138,11 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         #endregion
 
         #region Load prefab in bundle
+
         public async Task<ObjectPool> CreatePool(string prefabName, int initialPoolSize)
         {
             var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
-           
+
             if (!this.cachedLoadedPrefab.ContainsKey(prefabName))
             {
                 this.cachedLoadedPrefab.Add(prefabName, prefab);
@@ -144,11 +151,11 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
             return this.CreatePool(prefab, initialPoolSize);
         }
-        
+
         public async Task<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
             var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
-           
+
             if (!this.cachedLoadedPrefab.ContainsKey(prefabName))
             {
                 this.cachedLoadedPrefab.Add(prefabName, prefab);
@@ -254,7 +261,6 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                     this.Recycle(this.tempList[i]);
                 this.tempList.Clear();
             }
-           
         }
 
         public void RecycleAll()
@@ -285,7 +291,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         {
             this.RecycleAll(prefab);
             this.CleanUpPooled(prefab);
-            
+
             if (this.mapPrefabToKey.Remove(prefab, out var prefabName))
             {
                 this.gameAssets.ReleaseAsset(prefabName);
@@ -305,6 +311,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 Object.Destroy(pool.gameObject);
             }
         }
+
         #endregion
     }
 }
