@@ -10,11 +10,20 @@ namespace GameFoundation.Scripts.Utilities
 
     public class LocalizationService
     {
-        [Inject] private IGameAssets         gameAssets;
-        [Inject] private SetLanguage         setLanguage;
+        private readonly IGameAssets         gameAssets;
+        private readonly SetLanguage         setLanguage;
         public static    LocalizationService Instance { get; private set; }
         public event Action                  OnLanguageChange;
-        public LocalizationService() { Instance = this; }
+
+        private const string DefaultLanguage = "English";
+
+        public LocalizationService(IGameAssets gameAssets, SetLanguage setLanguage)
+        {
+            this.gameAssets  = gameAssets;
+            this.setLanguage = setLanguage;
+            Instance         = this;
+            this.ChangeLanguage(DefaultLanguage);
+        }
         public string GetTextWithKey(string key)
         {
             var output = LocalizationManager.TryGetTranslation(key, out var localization) ? localization : key;
