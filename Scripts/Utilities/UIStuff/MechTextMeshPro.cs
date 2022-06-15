@@ -18,7 +18,8 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public async void SetTextWithLocalization(string key, Color colorCode = default)
         {
-            this.txtText.text = LocalizationService.Instance.GetTextWithKey(key);
+            this.txtText      ??= this.GetComponent<TextMeshProUGUI>();
+            this.txtText.text =   LocalizationService.Instance.GetTextWithKey(key);
             if (colorCode != default)
             {
                 this.txtText.color = colorCode;
