@@ -44,7 +44,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             this.blueprintConfig         = blueprintConfig;
         }
 
-        public async void LoadBlueprint(string url, string hash = "test")
+        public virtual async void LoadBlueprint(string url, string hash = "test")
         {
             if (!this.IsLoadLocalBlueprint(url, hash))
             {

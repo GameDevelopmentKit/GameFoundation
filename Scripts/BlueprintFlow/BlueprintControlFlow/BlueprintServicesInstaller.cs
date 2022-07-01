@@ -12,6 +12,8 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     {
         public override void InstallBindings()
         {
+            //BindBlueprint reader for mobile
+            this.Container.Bind<PreProcessBlueprintMobile>().AsCached().NonLazy();
             this.Container.Bind<BlueprintDownloader>().WhenInjectedInto<BlueprintReaderManager>();
             this.Container.Bind<BlueprintReaderManager>().AsCached();
             this.Container.Bind<BlueprintConfig>().AsCached();
