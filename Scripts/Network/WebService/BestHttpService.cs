@@ -2,14 +2,13 @@ namespace GameFoundation.Scripts.Network.WebService
 {
     using System;
     using System.IO;
-    using System.Linq;
     using System.Text;
     using BestHTTP;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Network.WebService.Interface;
     using GameFoundation.Scripts.Utilities.LogService;
-    using MechSharingCode.Utils;
-    using MechSharingCode.WebService.Interface;
+    using GameFoundation.Scripts.Utilities.Utils;
     using Newtonsoft.Json;
     using UnityEngine;
     using Zenject;
@@ -27,7 +26,8 @@ namespace GameFoundation.Scripts.Network.WebService
         #region HttpRequest
 
         /// <summary>Zenject injection will go here.</summary>
-        public BestHttpService(string uri, NetworkConfig networkConfig, ILogService logger, DiContainer container, GameFoundationLocalData localData) : base(logger, container, uri)
+        public BestHttpService(string uri, NetworkConfig networkConfig, ILogService logger, DiContainer container,
+            GameFoundationLocalData localData) : base(logger, container, uri)
         {
             this.networkConfig = networkConfig;
             this.localData     = localData;
@@ -40,9 +40,11 @@ namespace GameFoundation.Scripts.Network.WebService
         /// <typeparam name="T">http request object type</typeparam>
         /// <typeparam name="TK">usable game data type</typeparam>
         /// <returns>Return usable game data</returns>
-        public async UniTask SendAsync<T, TK>(IHttpRequestData httpRequestData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
+        public async UniTask SendAsync<T, TK>(IHttpRequestData httpRequestData) where T : BaseHttpRequest, IDisposable
+            where TK : IHttpResponseData
         {
-            if (!(Attribute.GetCustomAttribute(httpRequestData.GetType(), typeof(HttpRequestDefinitionAttribute)) is HttpRequestDefinitionAttribute httpRequestDefinition))
+            if (!(Attribute.GetCustomAttribute(httpRequestData.GetType(), typeof(HttpRequestDefinitionAttribute)) is
+                    HttpRequestDefinitionAttribute httpRequestDefinition))
             {
                 throw new Exception($"{typeof(T)} didn't define yet!!!");
             }
@@ -51,7 +53,7 @@ namespace GameFoundation.Scripts.Network.WebService
             if (typeof(IFakeResponseAble<TK>).IsAssignableFrom(typeof(T)))
             {
                 var baseHttpRequest = this.Container.Resolve<IFactory<T>>().Create();
-                var responseData    = ((IFakeResponseAble<TK>)baseHttpRequest).FakeResponse();
+                var responseData = ((IFakeResponseAble<TK>)baseHttpRequest).FakeResponse();
                 baseHttpRequest.Process(responseData);
                 return;
             }
@@ -123,7 +125,9 @@ namespace GameFoundation.Scripts.Network.WebService
                     }
                     else
                     {
-                        this.Logger.Warning(string.Format("Request finished Successfully, but the server sent an error. Status Code: {0}-{1} Message: {2}", response.StatusCode, response.Message,
+                        this.Logger.Warning(string.Format(
+                            "Request finished Successfully, but the server sent an error. Status Code: {0}-{1} Message: {2}",
+                            response.StatusCode, response.Message,
                             response.DataAsText));
                     }
 

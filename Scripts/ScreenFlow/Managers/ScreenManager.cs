@@ -75,7 +75,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
     public class ScreenManager : MonoBehaviour, IScreenManager, IDisposable
     {
-        #region Properties
+         #region Properties
 
         /// <summary>
         /// List of active screens

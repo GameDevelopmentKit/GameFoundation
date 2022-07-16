@@ -4,28 +4,15 @@
     using System.Text;
     using BestHTTP;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.Network.WebService.Interface;
+    using GameFoundation.Scripts.Network.WebService.Requests;
     using GameFoundation.Scripts.Utilities.LogService;
-    using MechSharingCode.WebService;
-    using MechSharingCode.WebService.Interface;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Zenject;
 
     public abstract class BestHttpBaseProcess
     {
-        #region Injection
-
-        protected readonly ILogService Logger; // wrapped log 
-        protected readonly DiContainer Container; // zenject container of this
-
-        private readonly string uri; // uri of service 
-
-        #endregion
-
-        protected delegate void RequestSuccess(int statusCode);
-
-        protected delegate void RequestError(int statusCode);
-
         protected BestHttpBaseProcess(ILogService logger, DiContainer container, string uri)
         {
             this.Logger    = logger;
@@ -33,10 +20,12 @@
             this.uri       = uri;
         }
 
-        protected async UniTask MainProcess<T, TK>(HTTPRequest request, IHttpRequestData requestData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
+        protected async UniTask MainProcess<T, TK>(HTTPRequest request, IHttpRequestData requestData)
+            where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            this.Logger.Log($"{request.Uri} - [REQUEST] - Header: {request.DumpHeaders()} - \n Body:{Encoding.UTF8.GetString(request.GetEntityBody())}");
+            this.Logger.Log(
+                $"{request.Uri} - [REQUEST] - Header: {request.DumpHeaders()} - \n Body:{Encoding.UTF8.GetString(request.GetEntityBody())}");
 #endif
             var response = await request.GetHTTPResponseAsync();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -81,7 +70,8 @@
         }
 
         //Deserialize then process response data when request success
-        protected virtual void RequestSuccessProcess<T, TK>(JObject responseData, IHttpRequestData requestData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
+        protected virtual void RequestSuccessProcess<T, TK>(JObject responseData, IHttpRequestData requestData)
+            where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
         {
             if (!responseData.TryGetValue("data", out var requestProcessData)) return;
 
@@ -92,7 +82,8 @@
         }
 
         /// <summary>Handle errors that are defined by Best Http/2, return false of there is any error, otherwise return true</summary>
-        protected void PreProcess(HTTPRequest req, HTTPResponse resp, RequestSuccess onRequestSuccess, RequestError onRequestError)
+        protected void PreProcess(HTTPRequest req, HTTPResponse resp, RequestSuccess onRequestSuccess,
+            RequestError onRequestError)
         {
             switch (req.State)
             {
@@ -110,13 +101,15 @@
                             var errorMessage = JsonConvert.DeserializeObject<ErrorResponse>(resp.DataAsText);
                             if (errorMessage != null)
                             {
-                                this.Logger.Error($"{req.Uri} request receive error code: {errorMessage.Code}-{errorMessage.Message}");
+                                this.Logger.Error(
+                                    $"{req.Uri} request receive error code: {errorMessage.Code}-{errorMessage.Message}");
                                 onRequestError(errorMessage.Code);
                             }
                         }
                         else
                         {
-                            this.Logger.Error($"{req.Uri}- Request finished Successfully, but the server sent an error. Status Code: {resp.StatusCode}-{resp.Message} Message: {resp.DataAsText}");
+                            this.Logger.Error(
+                                $"{req.Uri}- Request finished Successfully, but the server sent an error. Status Code: {resp.StatusCode}-{resp.Message} Message: {resp.DataAsText}");
                         }
                     }
 
@@ -124,7 +117,9 @@
 
                 // The request finished with an unexpected error. The request's Exception property may contain more info about the error.
                 case HTTPRequestStates.Error:
-                    this.Logger.Error("Request Finished with Error! " + (req.Exception != null ? (req.Exception.Message + "\n" + req.Exception.StackTrace) : "No Exception"));
+                    this.Logger.Error("Request Finished with Error! " + (req.Exception != null
+                        ? (req.Exception.Message + "\n" + req.Exception.StackTrace)
+                        : "No Exception"));
                     break;
 
                 // The request aborted, initiated by the user.
@@ -167,5 +162,18 @@
         }
 
         protected Uri GetUri(string route) => new Uri($"{this.uri}/{route}");
+
+        protected delegate void RequestSuccess(int statusCode);
+
+        protected delegate void RequestError(int statusCode);
+
+        #region Injection
+
+        protected readonly ILogService Logger; // wrapped log 
+        protected readonly DiContainer Container; // zenject container of this
+
+        private readonly string uri; // uri of service 
+
+        #endregion
     }
 }

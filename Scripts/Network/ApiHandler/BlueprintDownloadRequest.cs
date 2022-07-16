@@ -2,8 +2,8 @@ namespace Mech.Network.HttpRequest
 {
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.Scripts.Network.WebService;
+    using GameFoundation.Scripts.Network.WebService.Requests;
     using GameFoundation.Scripts.Utilities.LogService;
-    using MechSharingCode.WebService.Blueprint;
 
     /// <summary>
     /// Get blueprint download link from server
@@ -15,8 +15,9 @@ namespace Mech.Network.HttpRequest
         private readonly BlueprintReaderManager blueprintReaderManager;
 
         #endregion
-        
-        public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) : base(logger)
+
+        public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) :
+            base(logger)
         {
             this.blueprintReaderManager = blueprintReaderManager;
         }
