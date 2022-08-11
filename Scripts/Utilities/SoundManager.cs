@@ -15,9 +15,9 @@ namespace GameFoundation.Scripts.Utilities
         void PlayPlayList(string playlist, bool random = false);
     }
 
-    public class MasterMechSoundManager : IMechSoundManager, IInitializable, IDisposable
+    public class SoundManager : IMechSoundManager, IInitializable, IDisposable
     {
-        public static MasterMechSoundManager Instance { get; private set; }
+        public static SoundManager Instance { get; private set; }
 
         private readonly PlaylistController       playlistController;
         private readonly GameFoundationLocalData  gameFoundationLocalData;
@@ -26,7 +26,7 @@ namespace GameFoundation.Scripts.Utilities
 
         private CompositeDisposable compositeDisposable;
 
-        public MasterMechSoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
+        public SoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
         {
             this.playlistController      = playlistController;
             this.gameFoundationLocalData = gameFoundationLocalData;
@@ -43,6 +43,7 @@ namespace GameFoundation.Scripts.Utilities
             this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Value = false;
             this.compositeDisposable = new CompositeDisposable
             {
+                //TODO uncomment this when we have a proper solution
                 // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
                 // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
                 this.gameFoundationLocalData.IndexSettingRecord.MusicValue.Subscribe(this.SetMusicValue),

@@ -27,8 +27,9 @@
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
             //CreateMasterAudio
-            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("MechMasterAudio").AsCached().NonLazy();
-            this.Container.BindInterfacesTo<MasterMechSoundManager>().AsCached().NonLazy();
+            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("GameFoundationAudio").AsCached().NonLazy();
+            this.Container.Bind<PlaylistController>().FromResolveGetter<MasterAudio>((masterAudio) => masterAudio.GetComponent<PlaylistController>()).AsCached().NonLazy();
+            this.Container.BindInterfacesTo<SoundManager>().AsCached().NonLazy();
 
             //Localization services
             this.Container.Bind<SetLanguage>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
