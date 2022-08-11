@@ -4,17 +4,18 @@
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Network.Authentication;
     using GameFoundation.Scripts.Network.WebService;
+    using GameFoundation.Scripts.Network.WebService.Requests;
     using GameFoundation.Scripts.Utilities.LogService;
-    using MechSharingCode.WebService.Authentication;
 
     public class LoginHttpRequest : BaseHttpRequest<LoginResponseData>
     {
         private readonly DataLoginServices       dataLoginServices;
-        private readonly GameFoundationLocalData localData;
         private readonly HandleLocalDataServices handleLocalDataServices;
+        private readonly GameFoundationLocalData localData;
         private readonly PlayerState             mechPlayerState;
 
-        public LoginHttpRequest(ILogService logger, DataLoginServices dataLoginServices, GameFoundationLocalData localData,
+        public LoginHttpRequest(ILogService logger, DataLoginServices dataLoginServices,
+            GameFoundationLocalData localData,
             HandleLocalDataServices handleLocalDataServices, PlayerState mechPlayerState) : base(logger)
         {
             this.dataLoginServices       = dataLoginServices;
@@ -35,7 +36,8 @@
             this.SaveDataToLocalData(jwtToken, refreshToken, expirationTime, email, fullName, avatar, wallet);
         }
 
-        private void SaveDataToLocalData(string jwtToken, string refreshToken, long expirationTime, string email, string fullName, string avatar, string wallet)
+        private void SaveDataToLocalData(string jwtToken, string refreshToken, long expirationTime, string email,
+            string fullName, string avatar, string wallet)
         {
             this.localData.ServerToken.JwtToken       = jwtToken;
             this.localData.ServerToken.RefreshToken   = refreshToken;
@@ -63,7 +65,7 @@
                     break;
             }
 
-            this.handleLocalDataServices.Save(this.localData,true);
+            this.handleLocalDataServices.Save(this.localData, true);
             this.dataLoginServices.Status.Value = AuthenticationStatus.Authenticated;
         }
 
@@ -75,7 +77,9 @@
                     // ToDo
                     break;
                 case 2:
-                    this.dataLoginServices.Status.Value = this.dataLoginServices.currentTypeLogin == TypeLogIn.Google ? AuthenticationStatus.FailWithGoogleToken : AuthenticationStatus.FailWithFbToken;
+                    this.dataLoginServices.Status.Value = this.dataLoginServices.currentTypeLogin == TypeLogIn.Google
+                        ? AuthenticationStatus.FailWithGoogleToken
+                        : AuthenticationStatus.FailWithFbToken;
                     break;
                 case 3:
                     this.dataLoginServices.Status.Value = AuthenticationStatus.InvalidRefreshToken;

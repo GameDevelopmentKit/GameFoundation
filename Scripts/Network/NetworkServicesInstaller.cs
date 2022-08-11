@@ -9,12 +9,12 @@ namespace GameFoundation.Scripts.Network
     /// <summary>Is used in zenject, install all stuffs relate to network into global context.</summary>
     public class NetworkServicesInstaller : Installer<NetworkServicesInstaller>
     {
-        [Inject] private GameConfig gameConfig;
+        // [Inject] private GameConfig gameConfig;
         public override void InstallBindings()
         {
             // Network services
-            this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments(this.gameConfig.ServerConfig.GameServer);
-            this.Container.Bind<AuthenticationService>().To<AuthenticationService>().AsCached().WithArguments(this.gameConfig.ServerConfig.AuthServer);
+            // this.Container.Bind<IHttpService>().To<BestHttpService>().AsCached().WithArguments(this.gameConfig.ServerConfig.GameServer);
+            // this.Container.Bind<AuthenticationService>().To<AuthenticationService>().AsCached().WithArguments(this.gameConfig.ServerConfig.AuthServer);
 
             // //TODO move this into BestHttpService instead of separate them
             this.Container.Bind<NetworkConfig>().AsSingle().NonLazy();

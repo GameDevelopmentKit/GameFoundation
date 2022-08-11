@@ -6,9 +6,9 @@ namespace GameFoundation.Scripts.Network.Authentication
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Network.WebService;
+    using GameFoundation.Scripts.Network.WebService.Interface;
     using GameFoundation.Scripts.Utilities.LogService;
-    using MechSharingCode.Utils;
-    using MechSharingCode.WebService.Interface;
+    using GameFoundation.Scripts.Utilities.Utils;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Zenject;
@@ -17,18 +17,21 @@ namespace GameFoundation.Scripts.Network.Authentication
     public class AuthenticationService : BestHttpBaseProcess
     {
         private const    int                     LoginTimeOut = 10;
-        private          DataLoginServices       dataLoginServices;
         private readonly GameFoundationLocalData localData;
+        private          DataLoginServices       dataLoginServices;
 
-        public AuthenticationService(string uri, ILogService logger, DiContainer container, DataLoginServices dataLoginServices, GameFoundationLocalData localData) : base(logger, container, uri)
+        public AuthenticationService(string uri, ILogService logger, DiContainer container,
+            DataLoginServices dataLoginServices, GameFoundationLocalData localData) : base(logger, container, uri)
         {
             this.dataLoginServices = dataLoginServices;
             this.localData         = localData;
         }
 
-        public async UniTask SendAsync<T, TK>(IHttpRequestData authenticationData) where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
+        public async UniTask SendAsync<T, TK>(IHttpRequestData authenticationData)
+            where T : BaseHttpRequest, IDisposable where TK : IHttpResponseData
         {
-            if (Attribute.GetCustomAttribute(authenticationData.GetType(), typeof(HttpRequestDefinitionAttribute)) is not HttpRequestDefinitionAttribute httpRequestDefinition)
+            if (Attribute.GetCustomAttribute(authenticationData.GetType(), typeof(HttpRequestDefinitionAttribute)) is
+                not HttpRequestDefinitionAttribute httpRequestDefinition)
             {
                 throw new Exception($"{typeof(T)} didn't define yet!!!");
             }
@@ -36,14 +39,14 @@ namespace GameFoundation.Scripts.Network.Authentication
             var request = new HTTPRequest(this.GetUri(httpRequestDefinition.Route), HTTPMethods.Post);
             request.Timeout = TimeSpan.FromSeconds(LoginTimeOut);
             request.AddHeader("Content-Type", "application/json");
-            
+
             var jwtToken = this.localData.ServerToken.JwtToken;
-                
+
             if (!string.IsNullOrEmpty(jwtToken))
             {
                 request.AddHeader("Authorization", "Bearer " + jwtToken);
             }
-            
+
             request.RawData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(authenticationData));
 
             try

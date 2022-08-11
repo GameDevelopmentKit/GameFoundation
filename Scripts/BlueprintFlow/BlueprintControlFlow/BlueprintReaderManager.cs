@@ -5,12 +5,12 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     using System.IO;
     using System.IO.Compression;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.BlueprintFlow.BlueprintReader;
     using GameFoundation.Scripts.BlueprintFlow.Signals;
     using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
-    using MechSharingCode.Blueprints.BlueprintReader;
     using UnityEngine;
     using Zenject;
 
@@ -19,20 +19,8 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     /// </summary>
     public class BlueprintReaderManager
     {
-        #region zeject
-
-        private readonly SignalBus                  signalBus;
-        private readonly ILogService                logService;
-        private readonly DiContainer                diContainer;
-        private readonly GameFoundationLocalData    localData;
-        private readonly HandleLocalDataServices    handleLocalDataServices;
-        private readonly IHttpService               httpService;
-        private          Dictionary<string, string> listRawBlueprints;
-        private readonly BlueprintConfig            blueprintConfig;
-        
-        #endregion
-
-        public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer, GameFoundationLocalData localData, HandleLocalDataServices handleLocalDataServices,
+        public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer,
+            GameFoundationLocalData localData, HandleLocalDataServices handleLocalDataServices,
             IHttpService httpService, BlueprintConfig blueprintConfig)
         {
             this.signalBus               = signalBus;
@@ -50,14 +38,16 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             {
                 //Download new blueprints version from remote
                 var progressSignal = new LoadBlueprintDataProgressSignal();
-                await this.httpService.Download(url, string.Format(this.blueprintConfig.BlueprintZipFilename, this.blueprintConfig.CurrentBlueprintVersion), (downloaded, length) =>
-                {
-                    progressSignal.percent = downloaded / (float)length * 100f;
-                    this.signalBus.Fire(progressSignal);
-                });
+                await this.httpService.Download(url,
+                    string.Format(this.blueprintConfig.BlueprintZipFilename,
+                        this.blueprintConfig.CurrentBlueprintVersion), (downloaded, length) =>
+                    {
+                        progressSignal.percent = downloaded / (float)length * 100f;
+                        this.signalBus.Fire(progressSignal);
+                    });
 
                 this.localData.BlueprintModel.BlueprintDownloadUrl = url;
-                this.handleLocalDataServices.Save(this.localData,true);
+                this.handleLocalDataServices.Save(this.localData, true);
             }
 
             // Unzip file to memory
@@ -79,7 +69,8 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         }
 
         protected virtual bool IsLoadLocalBlueprint(string url, string hash) =>
-            this.localData.BlueprintModel.BlueprintDownloadUrl == url && MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash &&
+            this.localData.BlueprintModel.BlueprintDownloadUrl == url &&
+            MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash &&
             File.Exists(this.blueprintConfig.BlueprintZipFilepath);
 
         private async UniTask<Dictionary<string, string>> UnzipBlueprint()
@@ -89,7 +80,8 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             {
                 foreach (var entry in archive.Entries)
                 {
-                    if (!entry.FullName.EndsWith(BlueprintConfig.BlueprintFileType, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!entry.FullName.EndsWith(BlueprintConfig.BlueprintFileType, StringComparison.OrdinalIgnoreCase))
+                        continue;
                     using var streamReader = new StreamReader(entry.Open());
                     result.Add(entry.Name, await streamReader.ReadToEndAsync());
                 }
@@ -102,7 +94,8 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         {
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
-                this.logService.Error($"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!");
+                this.logService.Error(
+                    $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!");
                 return UniTask.CompletedTask;
             }
 
@@ -135,9 +128,11 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                 string rawCsv;
                 if (!bpAttribute.IsLoadFromResource)
                 {
-                    if (!this.listRawBlueprints.TryGetValue(bpAttribute.DataPath + BlueprintConfig.BlueprintFileType, out rawCsv))
+                    if (!this.listRawBlueprints.TryGetValue(bpAttribute.DataPath + BlueprintConfig.BlueprintFileType,
+                            out rawCsv))
                     {
-                        this.logService.Warning($"[BlueprintReader] Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
+                        this.logService.Warning(
+                            $"[BlueprintReader] Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
                         rawCsv = await LoadRawCsvFromResourceFolder();
                     }
                 }
@@ -151,7 +146,8 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                     await UniTask.SwitchToMainThread();
                     try
                     {
-                        return ((TextAsset)await Resources.LoadAsync<TextAsset>(BlueprintConfig.ResourceBlueprintPath + bpAttribute.DataPath)).text;
+                        return ((TextAsset)await Resources.LoadAsync<TextAsset>(BlueprintConfig.ResourceBlueprintPath +
+                            bpAttribute.DataPath)).text;
                     }
                     catch (Exception e)
                     {
@@ -165,12 +161,27 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                 if (!string.IsNullOrEmpty(rawCsv))
                     await blueprintReader.DeserializeFromCsv(rawCsv);
                 else
-                    this.logService.Warning($"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");
+                    this.logService.Warning(
+                        $"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");
             }
             else
             {
-                this.logService.Warning($"[BlueprintReader] Class {blueprintReader} does not have BlueprintReaderAttribute yet");
+                this.logService.Warning(
+                    $"[BlueprintReader] Class {blueprintReader} does not have BlueprintReaderAttribute yet");
             }
         }
+
+        #region zeject
+
+        private readonly SignalBus                  signalBus;
+        private readonly ILogService                logService;
+        private readonly DiContainer                diContainer;
+        private readonly GameFoundationLocalData    localData;
+        private readonly HandleLocalDataServices    handleLocalDataServices;
+        private readonly IHttpService               httpService;
+        private          Dictionary<string, string> listRawBlueprints;
+        private readonly BlueprintConfig            blueprintConfig;
+
+        #endregion
     }
 }

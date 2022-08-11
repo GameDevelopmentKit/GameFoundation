@@ -11,7 +11,7 @@ namespace GameFoundation.Scripts.GameManager
     {
         private const string LocalDataPrefix = "LD-";
 
-        private Dictionary<string, object> localDataCaches = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> localDataCaches = new();
 
         /// <summary>
         /// Save a class data to local
@@ -27,13 +27,11 @@ namespace GameFoundation.Scripts.GameManager
                 this.localDataCaches.Add(key, data);
             }
 
-            if (force)
-            {
-                var json = JsonConvert.SerializeObject(data);
-                PlayerPrefs.SetString(key, json);
-                Debug.Log("Save " + key + ": " + json);
-                PlayerPrefs.Save();
-            }
+            if (!force) return;
+            var json = JsonConvert.SerializeObject(data);
+            PlayerPrefs.SetString(key, json);
+            Debug.Log("Save " + key + ": " + json);
+            PlayerPrefs.Save();
         }
 
         /// <summary>
@@ -61,6 +59,7 @@ namespace GameFoundation.Scripts.GameManager
             {
                 PlayerPrefs.SetString(localData.Key, JsonConvert.SerializeObject(localData.Value));
             }
+
             PlayerPrefs.Save();
             Debug.Log("Save Data To File");
         }
