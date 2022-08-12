@@ -18,7 +18,7 @@ public class BaseMechSFX : MonoBehaviour
             return;
         }
 
-        SoundManager.Instance.PlaySound(this.sfxName);
+        AudioManager.Instance.PlaySound(this.sfxName);
     }
 
     /// <summary>

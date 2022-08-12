@@ -39,8 +39,8 @@ namespace GameFoundation.Scripts.CommonScreen
     [PopupInfo("UIPopupNotice", isEnableBlur: true, isCloseWhenTapOutside: false, isOverlay: true)]
     public class NotificationPopupPresenter : BasePopupPresenter<NotificationPopupUIView, NotificationPopupModel>
     {
-        private readonly IMechSoundManager mechSoundManager;
-        public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IMechSoundManager mechSoundManager) : base(signalBus, logService) { this.mechSoundManager = mechSoundManager; }
+        private readonly IAudioManager audioManager;
+        public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioManager audioManager) : base(signalBus, logService) { this.audioManager = audioManager; }
 
         public override void BindData(NotificationPopupModel popupPopupModel)
         {
@@ -64,7 +64,7 @@ namespace GameFoundation.Scripts.CommonScreen
 
         public override void CloseView()
         {
-            this.mechSoundManager.PlaySound("button_click");
+            this.audioManager.PlaySound("button_click");
             base.CloseView();
             this.Model.CloseAction?.Invoke();
             this.Model.CancelAction?.Invoke();
@@ -72,14 +72,14 @@ namespace GameFoundation.Scripts.CommonScreen
 
         private void OkAction()
         {
-            this.mechSoundManager.PlaySound("button_click");
+            this.audioManager.PlaySound("button_click");
             this.CloseView();
             this.Model.OkAction?.Invoke();
         }
         
         private void OkNoticeAction()
         {
-            this.mechSoundManager.PlaySound("button_click");
+            this.audioManager.PlaySound("button_click");
             this.CloseView();
             this.Model.OkNoticeAction?.Invoke();
         }

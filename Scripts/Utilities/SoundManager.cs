@@ -8,16 +8,16 @@ namespace GameFoundation.Scripts.Utilities
     using UniRx;
     using Zenject;
 
-    public interface IMechSoundManager
+    public interface IAudioManager
     {
         void PlaySound(string name, bool isLoop = false);
         void StopAllSound(string name);
         void PlayPlayList(string playlist, bool random = false);
     }
 
-    public class SoundManager : IMechSoundManager, IInitializable, IDisposable
+    public class AudioManager : IAudioManager, IInitializable, IDisposable
     {
-        public static SoundManager Instance { get; private set; }
+        public static AudioManager Instance { get; private set; }
 
         private readonly PlaylistController       playlistController;
         private readonly GameFoundationLocalData  gameFoundationLocalData;
@@ -26,7 +26,7 @@ namespace GameFoundation.Scripts.Utilities
 
         private CompositeDisposable compositeDisposable;
 
-        public SoundManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
+        public AudioManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
         {
             this.playlistController      = playlistController;
             this.gameFoundationLocalData = gameFoundationLocalData;
