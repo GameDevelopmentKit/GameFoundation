@@ -1,5 +1,6 @@
-namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
+namespace GameFoundation.Scripts.BlueprintFlow.DebugBlueprint
 {
+    using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using UnityEngine;
 
     public class DebugBlueprintConfig : BlueprintConfig
