@@ -27,8 +27,8 @@
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
             //CreateMasterAudio
+            this.Container.Bind<PlaylistController>().FromComponentInNewPrefabResource("GameFoundationPlaylistController").AsCached().NonLazy();
             this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("GameFoundationAudio").AsCached().NonLazy();
-            this.Container.Bind<PlaylistController>().FromResolveGetter<MasterAudio>((masterAudio) => masterAudio.GetComponent<PlaylistController>()).AsCached().NonLazy();
             this.Container.BindInterfacesTo<AudioManager>().AsCached().NonLazy();
 
             //Localization services
