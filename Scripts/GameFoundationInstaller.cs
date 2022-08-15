@@ -12,6 +12,7 @@
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.GameQueueAction;
+    using GameFoundation.Scripts.Utilities.LoadImage;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using I2.Loc;
@@ -45,9 +46,11 @@
             //Player state
             this.Container.Bind<PlayerState>().AsCached();
 
-
             //Genarate fps
             this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
+            
+            //Helper
+            this.Container.Bind<LoadImageHelper>().AsCached();
 
             //Installer
             BlueprintServicesInstaller.Install(this.Container);

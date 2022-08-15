@@ -9,9 +9,9 @@
         "Unity.ResourceManager",
         "UniRx",
         "Unity.TextMeshPro",
-        "MechSharingCode",
         "Unity.RenderPipelines.Universal.Runtime",
-        "Unity.Timeline"
+        "Unity.Timeline",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
