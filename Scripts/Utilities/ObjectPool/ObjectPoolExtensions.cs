@@ -4,13 +4,13 @@ using UnityEngine;
 
 public static class ObjectPoolExtensions
 {
-    public static void CreatePool<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.CreatePool(prefab, 0); }
+    public static void CreatePool<T>(this T prefab, GameObject root  = null) where T : Component { ObjectPoolManager.Instance.CreatePool(prefab, 0, root); }
 
-    public static void CreatePool<T>(this T prefab, int initialPoolSize) where T : Component { ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize); }
+    public static void CreatePool<T>(this T prefab, int initialPoolSize, GameObject root  = null) where T : Component { ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize, root); }
 
-    public static void CreatePool(this GameObject prefab) { ObjectPoolManager.Instance.CreatePool(prefab, 0); }
+    public static void CreatePool(this GameObject prefab, GameObject root  = null) { ObjectPoolManager.Instance.CreatePool(prefab, 0, root); }
 
-    public static void CreatePool(this GameObject prefab, int initialPoolSize) { ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize); }
+    public static void CreatePool(this GameObject prefab, int initialPoolSize, GameObject root  = null) { ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize, root); }
 
     public static T Spawn<T>(this T prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Component { return ObjectPoolManager.Instance.Spawn(prefab, parent, position, rotation); }
 
