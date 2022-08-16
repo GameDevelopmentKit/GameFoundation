@@ -13,15 +13,15 @@ public class PreProcessBlueprintMobile
     public async UniTask LoadStreamAsset()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        var output = await LoadStreamingAsset(FileName);
+        var output = await LoadStreamingAssetMobile(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
 #endif
-#if UNITY_EDITOR||UNITY_STANDALONE
+#if UNITY_STANDALONE
         var output = await LoadStreamingAssetFromWindow(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
 #endif
     }
-    
+
     [Obsolete]
     private async UniTask<byte[]> LoadStreamingAssetFromWindow(string filename)
     {
