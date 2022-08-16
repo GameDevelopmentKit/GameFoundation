@@ -16,7 +16,7 @@ public class PreProcessBlueprintMobile
         var output = await LoadStreamingAssetMobile(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
 #endif
-#if UNITY_STANDALONE
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
         var output = await LoadStreamingAssetFromWindow(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
 #endif
