@@ -95,8 +95,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
                 this.logService.Error(
-                    $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!");
-                return UniTask.CompletedTask;
+                    $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
             }
 
             var listReadTask    = new List<UniTask>();
