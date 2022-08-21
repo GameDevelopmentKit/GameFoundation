@@ -3,6 +3,7 @@
     using System;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using UniRx;
+    using UnityEngine;
     using Zenject;
     using ObservableExtensions = UniRx.ObservableExtensions;
 
@@ -81,6 +82,24 @@
 
                     this.currentCooldownTime -= currentCycle;
                 });
+
+            return this;
+        }
+
+        public IDisposable CountDownFixedUpdate(float coolDownTime, Action<float> cycleCompleteParam, Action onCompleteParam)
+        {
+            var currentTime = coolDownTime;
+            this.onComplete = onCompleteParam;
+
+            this.observableTimer = Observable.EveryFixedUpdate().Subscribe(_ =>
+            {
+                currentTime -= Time.fixedDeltaTime;
+                cycleCompleteParam?.Invoke(currentTime);
+
+                if (currentTime > 0) return;
+                this.onComplete?.Invoke();
+                this.Dispose();
+            });
 
             return this;
         }
