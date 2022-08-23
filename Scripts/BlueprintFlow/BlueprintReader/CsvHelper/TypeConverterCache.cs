@@ -108,6 +108,12 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintReader.CsvHelper
                 return this.GetConverter(type);
             }
 
+            if (type == typeof(List<Vector2>))
+            {
+                this.AddConverter(type, new UnityListVector2Converter());
+                return this.GetConverter(type);
+            }
+            
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 this.AddConverter(type, new NullableConverter(type, this));
@@ -162,6 +168,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintReader.CsvHelper
                 return this.GetConverter(type);
             }
 
+            
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>))
             {
                 this.AddConverter(type, new ListGenericConverter());
