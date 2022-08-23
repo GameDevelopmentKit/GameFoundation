@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6524194592385007547}
-  - component: {fileID: 79058800059652626}
   - component: {fileID: 3563130087248786876}
+  - component: {fileID: 9018965447522478066}
   - component: {fileID: 3775067666017261206}
   m_Layer: 17
   m_Name: NonDrawingGraphic
@@ -39,7 +39,15 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &79058800059652626
+--- !u!222 &3563130087248786876
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 285849255814793550}
+  m_CullTransparentMesh: 1
+--- !u!114 &9018965447522478066
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -48,7 +56,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 285849255814793550}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51db53697a53f7a479b8570674dae649, type: 3}
+  m_Script: {fileID: 11500000, guid: fdbdb6e381404a76aaaa7a74cf7f76f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -59,14 +67,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!222 &3563130087248786876
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 285849255814793550}
-  m_CullTransparentMesh: 1
 --- !u!114 &3775067666017261206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,7 +107,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 79058800059652626}
+  m_TargetGraphic: {fileID: 9018965447522478066}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
