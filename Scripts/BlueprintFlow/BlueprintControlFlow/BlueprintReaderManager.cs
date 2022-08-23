@@ -76,6 +76,11 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         private async UniTask<Dictionary<string, string>> UnzipBlueprint()
         {
             var result = new Dictionary<string, string>();
+            if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
+            {
+                return result;
+            }
+
             using (var archive = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath))
             {
                 foreach (var entry in archive.Entries)
