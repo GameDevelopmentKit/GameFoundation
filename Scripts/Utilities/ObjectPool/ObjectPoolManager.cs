@@ -47,7 +47,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             {
                 while (list.Count < initialPoolSize)
                 {
-                    var obj = Object.Instantiate(prefab);
+                    var obj = Object.Instantiate(prefab, pool.transform);
                     obj.SetActive(false);
                     list.Add(obj);
                 }

@@ -4,15 +4,21 @@ using UnityEngine;
 
 public static class ObjectPoolExtensions
 {
-    public static void CreatePool<T>(this T prefab, GameObject root  = null) where T : Component { ObjectPoolManager.Instance.CreatePool(prefab, 0, root); }
+    public static ObjectPool CreatePool<T>(this T prefab, GameObject root = null) where T : Component { return ObjectPoolManager.Instance.CreatePool(prefab, 0, root); }
 
-    public static void CreatePool<T>(this T prefab, int initialPoolSize, GameObject root  = null) where T : Component { ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize, root); }
+    public static ObjectPool CreatePool<T>(this T prefab, int initialPoolSize, GameObject root = null) where T : Component
+    {
+        return ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize, root);
+    }
 
-    public static void CreatePool(this GameObject prefab, GameObject root  = null) { ObjectPoolManager.Instance.CreatePool(prefab, 0, root); }
+    public static ObjectPool CreatePool(this GameObject prefab, GameObject root = null) { return ObjectPoolManager.Instance.CreatePool(prefab, 0, root); }
 
-    public static void CreatePool(this GameObject prefab, int initialPoolSize, GameObject root  = null) { ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize, root); }
+    public static ObjectPool CreatePool(this GameObject prefab, int initialPoolSize, GameObject root = null) { return ObjectPoolManager.Instance.CreatePool(prefab, initialPoolSize, root); }
 
-    public static T Spawn<T>(this T prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Component { return ObjectPoolManager.Instance.Spawn(prefab, parent, position, rotation); }
+    public static T Spawn<T>(this T prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Component
+    {
+        return ObjectPoolManager.Instance.Spawn(prefab, parent, position, rotation);
+    }
 
     public static T Spawn<T>(this T prefab, Vector3 position, Quaternion rotation) where T : Component { return ObjectPoolManager.Instance.Spawn(prefab, null, position, rotation); }
 
@@ -85,7 +91,7 @@ public static class ObjectPoolExtensions
     public static void CleaUpAll(this GameObject prefab) { ObjectPoolManager.Instance.CleanUpAll(prefab); }
 
     public static void CleaUpAll<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.CleanUpAll(prefab.gameObject); }
-    
+
     public static void DestroyPool(this GameObject prefab) { ObjectPoolManager.Instance.DestroyPool(prefab); }
 
     public static void DestroyPool<T>(this T prefab) where T : Component { ObjectPoolManager.Instance.DestroyPool(prefab.gameObject); }
