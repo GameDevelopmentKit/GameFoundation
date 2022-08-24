@@ -7,12 +7,20 @@
 
     public static class ListExtension
     {
-        public static List<T> GetListRandom<T>(this object obj, List<T> seedData, int amount)
+        public static List<T> GetListRandom<T>(this List<T> seedData, int amount)
         {
             var result = new List<T>();
-            for (int i = 0; i < amount; i++)
+            var marked = new HashSet<int>();
+            for (var i = 0; i < amount; i++)
             {
-                result.Add(seedData[Random.Range(0, seedData.Count)]);
+                int randomIndex;
+                do
+                {
+                    randomIndex = Random.Range(0, seedData.Count);
+                } while (marked.Contains(randomIndex));
+                
+                marked.Add(randomIndex);
+                result.Add(seedData[randomIndex]);
             }
 
             return result;
