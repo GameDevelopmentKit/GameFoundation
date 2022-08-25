@@ -6,7 +6,8 @@
         "MessagePack.Annotations",
         "Unity.Addressables",
         "Unity.ResourceManager",
-        "Unity.Timeline"
+        "Unity.Timeline",
+        "OSA.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -11,7 +11,8 @@
         "Unity.TextMeshPro",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.Timeline",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "OSA.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
