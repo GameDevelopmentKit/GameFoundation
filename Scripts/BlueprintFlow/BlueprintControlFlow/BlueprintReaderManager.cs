@@ -73,7 +73,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash &&
             File.Exists(this.blueprintConfig.BlueprintZipFilepath);
 
-        private async UniTask<Dictionary<string, string>> UnzipBlueprint()
+        protected virtual async UniTask<Dictionary<string, string>> UnzipBlueprint()
         {
             var result = new Dictionary<string, string>();
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
@@ -183,7 +183,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         private readonly GameFoundationLocalData    localData;
         private readonly HandleLocalDataServices    handleLocalDataServices;
         private readonly IHttpService               httpService;
-        private          Dictionary<string, string> listRawBlueprints;
+        private          Dictionary<string, string> listRawBlueprints = new();
         private readonly BlueprintConfig            blueprintConfig;
 
         #endregion
