@@ -15,4 +15,10 @@ namespace GameFoundation.Scripts.BlueprintFlow.Signals
     {
         public float percent;
     }
+    
+    public class ReadBlueprintProgressSignal
+    {
+        public int MaxBlueprint;
+        public int CurrentProgress;
+    }
 }
