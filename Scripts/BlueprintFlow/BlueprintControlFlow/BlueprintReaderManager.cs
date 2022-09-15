@@ -101,7 +101,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         {
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
-                this.logService.Error(
+                this.logService.Warning(
                     $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
             }
 
