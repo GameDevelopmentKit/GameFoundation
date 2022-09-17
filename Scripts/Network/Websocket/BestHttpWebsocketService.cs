@@ -1,3 +1,4 @@
+#if !BESTHTTP_DISABLE_SIGNALR_CORE && BESTHTTP_SIGNALR_CORE_ENABLE_GAMEDEVWARE_MESSAGEPACK
 namespace GameFoundation.Scripts.Network.Websocket
 {
     using System;
@@ -121,3 +122,4 @@ namespace GameFoundation.Scripts.Network.Websocket
         protected virtual void OnInvokeError(Exception exception) { this.logger.Exception(exception); }
     }
 }
+#endif
