@@ -4,6 +4,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.BlueprintFlow.BlueprintReader;
     using GameFoundation.Scripts.BlueprintFlow.Signals;
@@ -19,6 +20,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
     /// </summary>
     public class BlueprintReaderManager
     {
+        private ReadBlueprintProgressSignal readBlueprintProgressSignal = new();
         public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer,
             GameFoundationLocalData localData, HandleLocalDataServices handleLocalDataServices,
             IHttpService httpService, BlueprintConfig blueprintConfig)
@@ -73,9 +75,14 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
             MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash &&
             File.Exists(this.blueprintConfig.BlueprintZipFilepath);
 
-        private async UniTask<Dictionary<string, string>> UnzipBlueprint()
+        protected virtual async UniTask<Dictionary<string, string>> UnzipBlueprint()
         {
             var result = new Dictionary<string, string>();
+            if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
+            {
+                return result;
+            }
+
             using (var archive = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath))
             {
                 foreach (var entry in archive.Entries)
@@ -94,13 +101,13 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         {
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
-                this.logService.Error(
-                    $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!");
-                return UniTask.CompletedTask;
+                this.logService.Warning(
+                    $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
             }
 
             var listReadTask    = new List<UniTask>();
             var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>();
+            this.readBlueprintProgressSignal.MaxBlueprint = allDerivedTypes.Count();
             foreach (var blueprintType in allDerivedTypes)
             {
                 var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);
@@ -129,7 +136,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                 if (!bpAttribute.IsLoadFromResource)
                 {
                     if (!this.listRawBlueprints.TryGetValue(bpAttribute.DataPath + BlueprintConfig.BlueprintFileType,
-                            out rawCsv))
+                        out rawCsv))
                     {
                         this.logService.Warning(
                             $"[BlueprintReader] Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
@@ -147,7 +154,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                     try
                     {
                         return ((TextAsset)await Resources.LoadAsync<TextAsset>(BlueprintConfig.ResourceBlueprintPath +
-                            bpAttribute.DataPath)).text;
+                                                                                bpAttribute.DataPath)).text;
                     }
                     catch (Exception e)
                     {
@@ -159,7 +166,11 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 
                 // Deserialize the raw blueprint to the blueprint reader instance
                 if (!string.IsNullOrEmpty(rawCsv))
+                {
                     await blueprintReader.DeserializeFromCsv(rawCsv);
+                    this.readBlueprintProgressSignal.CurrentProgress++;
+                    this.signalBus.Fire(this.readBlueprintProgressSignal);
+                }
                 else
                     this.logService.Warning(
                         $"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");
@@ -179,7 +190,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
         private readonly GameFoundationLocalData    localData;
         private readonly HandleLocalDataServices    handleLocalDataServices;
         private readonly IHttpService               httpService;
-        private          Dictionary<string, string> listRawBlueprints;
+        private          Dictionary<string, string> listRawBlueprints = new();
         private readonly BlueprintConfig            blueprintConfig;
 
         #endregion

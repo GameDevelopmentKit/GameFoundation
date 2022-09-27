@@ -2,7 +2,9 @@ namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System.Linq;
     using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
+    using GameFoundation.Scripts.ScreenFlow.Managers;
     using GameFoundation.Scripts.ScreenFlow.Signals;
+    using UnityEngine;
     using Zenject;
 
     public static class ZenjectUtils
@@ -51,6 +53,23 @@ namespace GameFoundation.Scripts.Utilities.Extension
             {
                 diContainer.Bind(type).AsCached().NonLazy();
             }
+        }
+
+        private static SceneContext currentSceneContext;
+        /// <summary>
+        /// Get DiContainer from Scene context in the current active scene
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static  DiContainer GetCurrentContainer(this object obj)
+        {
+            if (currentSceneContext == null)
+            {
+                Debug.Log($"GetCurrentContainer on scene = {SceneDirector.CurrentSceneName}");
+                currentSceneContext = Object.FindObjectOfType<SceneContext>();
+            }
+
+            return currentSceneContext.Container;
         }
     }
 }

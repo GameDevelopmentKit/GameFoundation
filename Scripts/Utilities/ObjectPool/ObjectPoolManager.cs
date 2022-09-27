@@ -21,7 +21,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private readonly Dictionary<string, GameObject> cachedLoadedPrefab = new Dictionary<string, GameObject>();
         private readonly Dictionary<GameObject, string> mapPrefabToKey     = new Dictionary<GameObject, string>();
 
-        private GameObject currentRoot;
+        private GameObject defaultRoot;
         public ObjectPoolManager(IGameAssets gameAssets)
         {
             this.gameAssets = gameAssets;
@@ -30,20 +30,16 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         #region Pool
 
-        public ObjectPool CreatePool<T>(T prefab, int initialPoolSize) where T : Component { return this.CreatePool(prefab.gameObject, initialPoolSize); }
+        public ObjectPool CreatePool<T>(T prefab, int initialPoolSize, GameObject root) where T : Component { return this.CreatePool(prefab.gameObject, initialPoolSize, root); }
 
-        public ObjectPool CreatePool(GameObject prefab, int initialPoolSize)
+        public ObjectPool CreatePool(GameObject prefab, int initialPoolSize, GameObject root)
         {
             if (prefab == null) return null;
 
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool)) return pool;
-            if (this.currentRoot == null)
-            {
-                this.currentRoot = new GameObject { name = "ObjectPoolManager" };
-            }
 
             pool = new GameObject($"[Pool] {prefab.name}", typeof(ObjectPool)).GetComponent<ObjectPool>();
-            pool.transform.SetParent(this.currentRoot.transform,false);
+            pool.transform.SetParent(this.ChooseRoot(root).transform, false);
             this.prefabToObjectPool.Add(prefab, pool);
 
             var list = new List<GameObject>();
@@ -51,7 +47,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             {
                 while (list.Count < initialPoolSize)
                 {
-                    var obj = Object.Instantiate(prefab);
+                    var obj = Object.Instantiate(prefab, pool.transform);
                     obj.SetActive(false);
                     list.Add(obj);
                 }
@@ -61,6 +57,17 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             pool.pooledObjects = list;
 
             return pool;
+        }
+
+        private GameObject ChooseRoot(GameObject root)
+        {
+            if (root != null) return root;
+            if (this.defaultRoot == null)
+            {
+                this.defaultRoot = new GameObject { name = "ObjectPoolManager" };
+            }
+
+            return this.defaultRoot;
         }
 
         public int CountPooled<T>(T prefab) where T : Component => this.CountPooled(prefab.gameObject);
@@ -139,7 +146,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         #region Load prefab in bundle
 
-        public async Task<ObjectPool> CreatePool(string prefabName, int initialPoolSize)
+        public async Task<ObjectPool> CreatePool(string prefabName, int initialPoolSize, GameObject root)
         {
             var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
 
@@ -149,7 +156,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 this.mapPrefabToKey.Add(prefab, prefabName);
             }
 
-            return this.CreatePool(prefab, initialPoolSize);
+            return this.CreatePool(prefab, initialPoolSize, root);
         }
 
         public async Task<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
@@ -186,7 +193,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 return spawnedObj;
             }
 
-            this.CreatePool(prefab, 1);
+            this.CreatePool(prefab, 1, null);
             return this.Spawn(prefab, parent, position, rotation);
         }
 

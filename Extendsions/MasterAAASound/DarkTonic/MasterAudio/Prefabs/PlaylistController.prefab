@@ -245,7 +245,7 @@ MonoBehaviour:
   _playlistVolume: 1
   isMuted: 0
   startPlaylistName: 
-  syncGroupNum: -1
+  syncGroupNum: 0
   mixerChannel: {fileID: 0}
   spatialBlendType: 0
   spatialBlend: 0

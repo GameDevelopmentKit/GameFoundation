@@ -22,6 +22,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
 
             this.Container.DeclareSignal<LoadBlueprintDataSuccessedSignal>();
             this.Container.DeclareSignal<LoadBlueprintDataProgressSignal>();
+            this.Container.DeclareSignal<ReadBlueprintProgressSignal>();
         }
     }
 }

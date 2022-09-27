@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1219092216096219394}
   - component: {fileID: 2755446240932856890}
   m_Layer: 2
-  m_Name: MechMasterAudio
+  m_Name: GameFoundationAudio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -222,7 +222,7 @@ MonoBehaviour:
     - alias: 
       audLocation: 2
       clip: {fileID: 0}
-      songName: 03
+      songName: 
       resourceFileName: 
       audioClipAddressable:
         m_AssetGUID: a6a778af9ce2b3940961d60ad9ddce20

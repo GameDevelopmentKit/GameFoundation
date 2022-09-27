@@ -13,13 +13,27 @@ public class PreProcessBlueprintMobile
     public async UniTask LoadStreamAsset()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        var output = await LoadStreamingAsset(FileName);
+        var output = await LoadStreamingAssetMobile(FileName);
+        await this.MoveBlueprintToDevice(FileName, output);
+#endif
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        var output = await LoadStreamingAssetFromWindow(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
 #endif
     }
 
     [Obsolete]
-    private async UniTask<byte[]> LoadStreamingAsset(string fileName)
+    private async UniTask<byte[]> LoadStreamingAssetFromWindow(string filename)
+    {
+        var filePath = $"{Application.dataPath}/StreamingAssets/{filename}";
+        Debug.Log($"Load blueprint {filePath}");
+        var www = new WWW(filePath);
+        await www;
+        return www.bytes;
+    }
+
+    [Obsolete]
+    private async UniTask<byte[]> LoadStreamingAssetMobile(string fileName)
     {
         //Read blueprint Data from stream Assets
         var filePath = "jar:file://" + Application.dataPath + "!/assets/" + fileName;
@@ -30,6 +44,7 @@ public class PreProcessBlueprintMobile
 
     private UniTask MoveBlueprintToDevice(string fileName, byte[] data)
     {
+        Debug.Log($"Move Blueprint To {Application.persistentDataPath + "/" + fileName}");
         File.WriteAllBytes(Application.persistentDataPath + "/" + fileName, data);
         return UniTask.CompletedTask;
     }

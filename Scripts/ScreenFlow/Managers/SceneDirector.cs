@@ -29,7 +29,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
             await this.GameAssets.LoadSceneAsync(sceneName);
             Resources.UnloadUnusedAssets();
             this.GameAssets.UnloadUnusedAssets(lastScene);
-            //this.signalBus.Fire<FinishLoadingNewSceneSignal>(); // Active this signal later
+            this.signalBus.Fire<FinishLoadingNewSceneSignal>();
         }
 
         public async UniTask LoadMultipleSceneAsync(string activesScene,params string[] sceneNames)
@@ -51,7 +51,7 @@ namespace GameFoundation.Scripts.ScreenFlow.Managers
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(activesScene));
 
-            //this.signalBus.Fire<FinishLoadingNewSceneSignal>(); // Active this signal later
+            this.signalBus.Fire<FinishLoadingNewSceneSignal>();
         }
 
         /// <summary>Unload scene async by name </summary>
