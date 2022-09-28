@@ -2,7 +2,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using GameFoundation.CustomTimeline;
+    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker;
+    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider;
+    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITextCounter;
     using UnityEngine;
     using UnityEngine.Playables;
     using UnityEngine.Timeline;

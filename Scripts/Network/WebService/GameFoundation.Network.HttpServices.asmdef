@@ -1,0 +1,21 @@
+{
+    "name": "GameFoundation.Network.HttpServices",
+    "rootNamespace": "",
+    "references": [
+        "Zenject-Source",
+        "UniTask",
+        "GameFoundtion.Utilities",
+        "GameFoundation.Models",
+        "GameFoundation.Network.Config",
+        "BestHTTP"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

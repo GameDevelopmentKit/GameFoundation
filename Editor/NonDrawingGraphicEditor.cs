@@ -6,6 +6,8 @@ using UnityEditor.UI;
 
 namespace UnityEngine.UI.Extensions
 {
+    using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
+
     [CanEditMultipleObjects, CustomEditor(typeof(NonDrawingGraphic), false)]
     public class NonDrawingGraphicEditor : GraphicEditor
     {

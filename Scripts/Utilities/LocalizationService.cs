@@ -6,7 +6,6 @@ namespace GameFoundation.Scripts.Utilities
     using I2.Loc;
     using TMPro;
     using UnityEngine;
-    using Zenject;
 
     public class LocalizationService
     {
@@ -46,10 +45,9 @@ namespace GameFoundation.Scripts.Utilities
         //todo for change font asset
         public async UniTask<TMP_FontAsset> GetFontAsset()
         {
-            TMP_FontAsset fontAsset   = null;
             const string  fontKey     = "!!FONT_SETTING";
             var           fontAddress = LocalizationManager.TryGetTranslation(fontKey, out var localization) ? localization : fontKey;
-            fontAsset = await this.gameAssets.LoadAssetAsync<TMP_FontAsset>(fontAddress);
+            var fontAsset   = await this.gameAssets.LoadAssetAsync<TMP_FontAsset>(fontAddress);
             return fontAsset;
         }
     }

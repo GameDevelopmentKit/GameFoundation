@@ -1,4 +1,4 @@
-namespace GameFoundation.CustomTimeline {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAnimation {
     using UnityEngine;
     using UnityEngine.Playables;
 

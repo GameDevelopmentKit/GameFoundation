@@ -4,7 +4,7 @@ namespace GameFoundation.Scripts.Utilities
 {
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
-    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Models;
     using UniRx;
     using Zenject;
 

@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using UniRx;
-using UnityEngine;
-
-namespace GameDebug
+namespace GameFoundation.Scripts.Utilities.LogService
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using GameFoundation.Scripts.Utilities.Extension;
+    using UniRx;
+    using UnityEngine;
 
     public enum LoadTime
     {

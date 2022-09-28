@@ -1,0 +1,16 @@
+{
+    "name": "Zenject-Signals",
+    "rootNamespace": "",
+    "references": [
+        "Zenject-Source"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

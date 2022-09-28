@@ -1,0 +1,28 @@
+{
+    "name": "GameFoundtion.Utilities",
+    "rootNamespace": "",
+    "references": [
+        "I2Localization.Scripts",
+        "MasterAAASound.Scripts",
+        "UniRx",
+        "Unity.TextMeshPro",
+        "UniTask",
+        "Unity.Timeline",
+        "GameFoundation.AssetLibrary",
+        "Zenject-Source",
+        "GameFoundation.Models",
+        "Zenject-Signals",
+        "UniTask.Addressables",
+        "Unity.ResourceManager",
+        "Unity.Addressables"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

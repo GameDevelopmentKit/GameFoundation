@@ -1,7 +1,6 @@
 namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
     using System;
-    using GameFoundation.Scripts.GameManager;
     using UnityEngine;
     using Zenject;
 

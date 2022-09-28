@@ -1,0 +1,24 @@
+{
+    "name": "Zenject-IntegrationTests",
+    "rootNamespace": "",
+    "references": [
+        "Zenject-TestFramework",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Zenject-Source"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Zenject-usage.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

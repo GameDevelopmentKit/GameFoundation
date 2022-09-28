@@ -3,7 +3,6 @@ namespace GameFoundation.Scripts.Network.Authentication
     using System.Net;
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.GameManager;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;

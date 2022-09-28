@@ -1,0 +1,25 @@
+{
+    "name": "GameFoundation.BlueprintFlow",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "GameFoundtion.Utilities",
+        "Zenject-Source",
+        "Zenject-Signals",
+        "GameFoundation.Network.HttpServices",
+        "GameFoundation.Models"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Sylvan.Data.Csv.dll",
+        "Newtonsoft.Json.dll",
+        "Zenject-usage.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -5,7 +5,7 @@ namespace GameFoundation.Scripts.Network.Websocket
     using System.Threading.Tasks;
     using BestHTTP.SignalRCore;
     using BestHTTP.SignalRCore.Encoders;
-    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities.LogService;
     using UniRx;
 

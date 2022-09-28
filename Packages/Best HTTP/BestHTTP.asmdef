@@ -1,0 +1,16 @@
+{
+    "name": "BestHTTP",
+    "rootNamespace": "",
+    "references": [
+        "GameDevWare.Serialization"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

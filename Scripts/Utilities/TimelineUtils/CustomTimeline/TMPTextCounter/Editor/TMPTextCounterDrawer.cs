@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
-namespace GameFoundation.CustomTimeline {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextCounter.Editor {
+    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider;
     using UnityEditor;
     using UnityEngine;
 

@@ -1,0 +1,21 @@
+{
+    "name": "GameFoundation.Network.Websocket",
+    "rootNamespace": "",
+    "references": [
+        "UniRx",
+        "GameFoundtion.Utilities",
+        "GameFoundation.Models",
+        "BestHTTP"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        ""
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

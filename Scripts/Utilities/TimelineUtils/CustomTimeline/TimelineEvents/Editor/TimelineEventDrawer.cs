@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-namespace GameFoundation.CustomTimeline {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimelineEvents.Editor {
     using System;
     using System.Collections.Generic;
     using System.Linq;

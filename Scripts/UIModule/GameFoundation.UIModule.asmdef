@@ -1,0 +1,29 @@
+{
+    "name": "GameFoundation.UIModule",
+    "rootNamespace": "",
+    "references": [
+        "Unity.RenderPipelines.Universal.Runtime",
+        "LeTai.TranslucentImage.Scripts",
+        "UniTask",
+        "GameFoundation.AssetLibrary",
+        "GameFoundtion.Utilities",
+        "Unity.TextMeshPro",
+        "Zenject-Source",
+        "Zenject-Signals",
+        "OSA.Core",
+        "UniRx",
+        "DOTween.Modules",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "UniTask.Addressables"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

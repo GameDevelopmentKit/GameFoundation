@@ -1,0 +1,16 @@
+{
+    "name": "I2Localization.Examples",
+    "rootNamespace": "",
+    "references": [
+        "I2Localization.Scripts"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

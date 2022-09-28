@@ -4,7 +4,7 @@ namespace GameFoundation.Scripts.Network.Authentication
     using System.Text;
     using BestHTTP;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Network.WebService.Interface;
     using GameFoundation.Scripts.Utilities.LogService;

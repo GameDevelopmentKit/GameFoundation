@@ -1,9 +1,6 @@
 namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System.Linq;
-    using GameFoundation.Scripts.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.ScreenFlow.Managers;
-    using GameFoundation.Scripts.ScreenFlow.Signals;
     using UnityEngine;
     using Zenject;
 
@@ -27,21 +24,6 @@ namespace GameFoundation.Scripts.Utilities.Extension
             }
         }
         
-        
-        /// <summary>
-        /// Utils use to initialize a screen presenter manually, and the view is already initialized on the scene
-        /// </summary>
-        /// <param name="container"></param>
-        /// <typeparam name="T"> Type of screen presenter</typeparam>
-        public static void InitScreenManually<T>(this DiContainer container) where T: IScreenPresenter
-        {
-            container.Bind<T>().AsSingle().OnInstantiated<T>((context, presenter) =>
-            {
-                context.Container.Resolve<SignalBus>().Fire(new ManualInitScreenSignal() { ScreenPresenter = presenter });
-            }).NonLazy();
-        }
-
-
         /// <summary>
         /// Binding all class type that inherited <paramref name="T"/>
         /// </summary>
@@ -65,7 +47,6 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             if (currentSceneContext == null)
             {
-                Debug.Log($"GetCurrentContainer on scene = {SceneDirector.CurrentSceneName}");
                 currentSceneContext = Object.FindObjectOfType<SceneContext>();
             }
 

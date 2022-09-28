@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR
-namespace GameFoundation.CustomTimeline {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeMachine.Editor {
 	using UnityEditor;
 
 	[CustomEditor(typeof(TimeMachineClip))]

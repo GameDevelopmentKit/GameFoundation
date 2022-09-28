@@ -1,4 +1,4 @@
-namespace GameFoundation.CustomTimeline {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider {
     using UnityEngine.Playables;
     using UnityEngine.UI;
 

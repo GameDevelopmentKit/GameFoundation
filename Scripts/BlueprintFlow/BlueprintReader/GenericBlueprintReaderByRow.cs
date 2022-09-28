@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintReader
     using System.Linq;
     using System.Threading.Tasks;
     using GameFoundation.Scripts.BlueprintFlow.BlueprintReader.CsvHelper;
+    using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.Utils;
     using Sylvan.Data.Csv;
 

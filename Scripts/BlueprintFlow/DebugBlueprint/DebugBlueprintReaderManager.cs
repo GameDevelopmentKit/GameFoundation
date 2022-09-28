@@ -1,8 +1,9 @@
 namespace GameFoundation.Scripts.BlueprintFlow.DebugBlueprint
 {
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
-    using GameFoundation.Scripts.GameManager;
+    using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Network.WebService;
+    using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;
 

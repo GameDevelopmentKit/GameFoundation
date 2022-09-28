@@ -1,4 +1,4 @@
-namespace GameFoundation.CustomTimeline {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker {
     using UnityEngine.Playables;
 
     public class MarkerMixerBehaviour : PlayableBehaviour {

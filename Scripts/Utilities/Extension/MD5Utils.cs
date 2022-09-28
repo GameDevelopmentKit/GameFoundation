@@ -4,6 +4,7 @@
     using System.IO;
     using System.Security.Cryptography;
     using System.Text;
+    using UnityEngine;
 
     public class MD5Utils
     {
@@ -11,24 +12,20 @@
         {
             try
             {
-                using (var md5 = MD5.Create())
-                {
-                    using (var stream = File.OpenRead(fileName))
-                    {
-                        var hash = md5.ComputeHash(stream);
+                using var md5    = MD5.Create();
+                using var stream = File.OpenRead(fileName);
+                var       hash   = md5.ComputeHash(stream);
 
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < hash.Length; i++)
-                        {
-                            sb.Append(hash[i].ToString("X2"));
-                        }
-                        return sb.ToString();
-                    }
+                var sb = new StringBuilder();
+                foreach (var t in hash)
+                {
+                    sb.Append(t.ToString("X2"));
                 }
+                return sb.ToString();
             }
             catch (Exception ex)
             {
-
+                Debug.LogException(ex);
             }
 
             return string.Empty;

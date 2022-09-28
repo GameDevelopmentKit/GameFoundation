@@ -1,4 +1,4 @@
-namespace GameFoundation.CustomTimeline {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker {
     using UnityEngine;
     using UnityEngine.Playables;
     using UnityEngine.Timeline;

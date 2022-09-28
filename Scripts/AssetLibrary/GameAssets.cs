@@ -6,7 +6,6 @@ namespace GameFoundation.Scripts.AssetLibrary
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.ScreenFlow.Managers;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
@@ -275,7 +274,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <param name="targetScene"></param>
         private void TrackingAssetByScene(object key, string targetScene = "")
         {
-            var sceneName = string.IsNullOrEmpty(targetScene) ? SceneDirector.CurrentSceneName : targetScene;
+            var sceneName = string.IsNullOrEmpty(targetScene) ? SceneManager.GetActiveScene().name : targetScene;
             if (!this.assetsAutoUnloadByScene.TryGetValue(sceneName, out var listAsset))
             {
                 listAsset = new List<object>();
