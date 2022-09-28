@@ -88,7 +88,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
             imageComponent.preserveAspect = originPreserveAspect;
             imageComponent.sprite         = sprite;
-            imageComponent.DOFade(originAlpha, 0.5f);
+            // imageComponent.DOFade(originAlpha, 0.5f);
         }
 
         public async Task<Sprite> LoadSpriteFromUrl(string url)
