@@ -169,8 +169,8 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
                 if (!string.IsNullOrEmpty(rawCsv))
                 {
                     await blueprintReader.DeserializeFromCsv(rawCsv);
-                    this.readBlueprintProgressSignal.CurrentProgress++;
-                    this.signalBus.Fire(this.readBlueprintProgressSignal);
+                    // this.readBlueprintProgressSignal.CurrentProgress++;
+                    // this.signalBus.Fire(this.readBlueprintProgressSignal);
                 }
                 else
                     this.logService.Warning(
