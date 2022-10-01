@@ -1,13 +1,19 @@
 {
-    "name": "GameFoundation.Network.HttpServices",
+    "name": "GameFoundation.Script",
     "rootNamespace": "",
     "references": [
-        "Zenject-Source",
-        "UniTask",
         "GameFoundation.Utilities",
+        "GameFoundation.AssetLibrary",
+        "GameFoundation.BlueprintFlow",
         "GameFoundation.Models",
+        "GameFoundation.Network.Auth",
+        "GameFoundation.UIModule",
+        "GameFoundation.Network.HttpServices",
         "GameFoundation.Network.Config",
-        "BestHTTP"
+        "MasterAAASound.Scripts",
+        "I2Localization.Scripts",
+        "Zenject-Source",
+        "Zenject-Signals"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -3,7 +3,7 @@
     "rootNamespace": "",
     "references": [
         "UniTask",
-        "GameFoundtion.Utilities",
+        "GameFoundation.Utilities",
         "Zenject-Source",
         "Zenject-Signals",
         "GameFoundation.Network.HttpServices",

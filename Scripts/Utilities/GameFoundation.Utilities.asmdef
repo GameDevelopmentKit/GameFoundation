@@ -1,5 +1,5 @@
 {
-    "name": "GameFoundtion.Utilities",
+    "name": "GameFoundation.Utilities",
     "rootNamespace": "",
     "references": [
         "I2Localization.Scripts",

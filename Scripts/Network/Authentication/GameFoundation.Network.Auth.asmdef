@@ -5,7 +5,7 @@
         "GameFoundation.Network.HttpServices",
         "Zenject-Source",
         "UniRx",
-        "GameFoundtion.Utilities",
+        "GameFoundation.Utilities",
         "GameFoundation.Models",
         "UniTask",
         "Zenject-Signals",

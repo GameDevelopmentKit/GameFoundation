@@ -3,7 +3,7 @@
     "rootNamespace": "",
     "references": [
         "UniRx",
-        "GameFoundtion.Utilities",
+        "GameFoundation.Utilities",
         "GameFoundation.Models",
         "BestHTTP"
     ],
