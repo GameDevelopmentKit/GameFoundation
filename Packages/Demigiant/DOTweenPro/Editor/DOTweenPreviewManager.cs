@@ -157,6 +157,7 @@ namespace DG.DOTweenEditor
             if (_previewOnlyIfSetToAutoPlay && !src.autoPlay) return;
 
             Tween t = src.CreateEditorPreview();
+            if (t == null) return;
             _AnimationToTween.Add(src, new TweenInfo(src, t, src.isFrom));
             // Tween setup
             DOTweenEditorPreview.PrepareTweenForPreview(t);

@@ -26,7 +26,8 @@
             Starts an editor coroutine. You can't use normal <code>yield new WaitFor</code> methods because
             those are Unity runtime, but you can instead use <see cref="M:DG.DemiEditor.DeEditorCoroutines.WaitForSeconds(System.Single)"/>.
             Other than that, you can use normal <code>yield null/etc</code>.<para/>
-            Returns an <see cref="T:System.Collections.IEnumerator"/> which you can use with <see cref="M:DG.DemiEditor.DeEditorCoroutines.StopCoroutine(System.Collections.IEnumerator)"/> to cancel the coroutine.
+            Returns an <see cref="T:System.Collections.IEnumerator"/> (which you can use with <see cref="M:DG.DemiEditor.DeEditorCoroutines.StopCoroutine(System.Collections.IEnumerator)"/> to cancel the coroutine),
+            or NULL in case the coroutine completed immediately.
             </summary>
         </member>
         <member name="M:DG.DemiEditor.DeEditorCoroutines.StopCoroutine(System.Collections.IEnumerator)">
@@ -209,6 +210,11 @@
             Returns the total number of Component GUIDs that were fixed
             </summary>
         </member>
+        <member name="E:DG.DemiEditor.DeEditorNotification.OnUnityReady">
+            <summary>
+            Dispatched when Unity has finished compiling code and updating the AssetDatabase
+            </summary>
+        </member>
         <member name="T:DG.DemiEditor.DeEditorPackageManager">
             <summary>
             Utils to manage UnityPackages import/export and file mirroring
@@ -318,6 +324,9 @@
             </para>
             </summary>
         </member>
+        <member name="P:DG.DemiEditor.DeEditorUtils.isUnityReady">
+            <summary>Returns TRUE if Unity editor is neither compiling code nor updating assets</summary>
+        </member>
         <member name="M:DG.DemiEditor.DeEditorUtils.DelayedCall(System.Single,System.Action)">
             <summary>Calls the given action after the given delay</summary>
         </member>
@@ -348,6 +357,16 @@
             <param name="id"></param>
             <param name="buildTargetGroup"><see cref="T:UnityEditor.BuildTargetGroup"/>to use. Leave NULL to add to all of them.</param>
         </member>
+        <member name="M:DG.DemiEditor.DeEditorUtils.AddGlobalDefines(System.Collections.Generic.List{System.String},System.Nullable{UnityEditor.BuildTargetGroup})">
+            <summary>
+            Adds the given list of global defines (if they're not already present) to all the <see cref="T:UnityEditor.BuildTargetGroup"/>
+            or only to the given <see cref="T:UnityEditor.BuildTargetGroup"/>, depending on passed parameters,
+            and returns TRUE if it was added, FALSE otherwise.<para/>
+            NOTE: when adding to all of them some legacy warnings might appear, which you can ignore.
+            </summary>
+            <param name="ids">Defines to add</param>
+            <param name="buildTargetGroup"><see cref="T:UnityEditor.BuildTargetGroup"/>to use. Leave NULL to add to all of them.</param>
+        </member>
         <member name="M:DG.DemiEditor.DeEditorUtils.RemoveGlobalDefine(System.String,System.Nullable{UnityEditor.BuildTargetGroup})">
             <summary>
             Removes the given global define (if present) from all the <see cref="T:UnityEditor.BuildTargetGroup"/>
@@ -358,13 +377,28 @@
             <param name="id"></param>
             <param name="buildTargetGroup"><see cref="T:UnityEditor.BuildTargetGroup"/>to use. Leave NULL to remove from all of them.</param>
         </member>
+        <member name="M:DG.DemiEditor.DeEditorUtils.RemoveGlobalDefines(System.Collections.Generic.List{System.String},System.Nullable{UnityEditor.BuildTargetGroup})">
+            <summary>
+            Removes the given global defines (if present) from all the <see cref="T:UnityEditor.BuildTargetGroup"/>
+            or only from the given <see cref="T:UnityEditor.BuildTargetGroup"/>, depending on passed parameters,
+            and returns TRUE if it was removed, FALSE otherwise.<para/>
+            NOTE: when removing from all of them some legacy warnings might appear, which you can ignore.
+            </summary>
+            <param name="ids">Defines to remove</param>
+            <param name="buildTargetGroup"><see cref="T:UnityEditor.BuildTargetGroup"/>to use. Leave NULL to remove from all of them.</param>
+        </member>
         <member name="M:DG.DemiEditor.DeEditorUtils.HasGlobalDefine(System.String,System.Nullable{UnityEditor.BuildTargetGroup})">
             <summary>
-            Returns TRUE if the given global define is present in all the <see cref="T:UnityEditor.BuildTargetGroup"/>
+            Returns TRUE if the given global define is present in at least one of the <see cref="T:UnityEditor.BuildTargetGroup"/>
             or only in the given <see cref="T:UnityEditor.BuildTargetGroup"/>, depending on passed parameters.<para/>
             </summary>
             <param name="id"></param>
-            <param name="buildTargetGroup"><see cref="T:UnityEditor.BuildTargetGroup"/>to use. Leave NULL to check in all of them.</param>
+            <param name="buildTargetGroup"><see cref="T:UnityEditor.BuildTargetGroup"/>to use. Leave NULL to check in all of them for the first occurrence.</param>
+        </member>
+        <member name="M:DG.DemiEditor.DeEditorUtils.GetGlobalDefinesForCurrentBuildTargetGroup">
+            <summary>
+            Returns an array of all defines in the current <see cref="T:UnityEditor.BuildTargetGroup"/>.<para/>
+            </summary>
         </member>
         <member name="M:DG.DemiEditor.DeEditorUtils.SetGizmosIconVisibility(System.Boolean,System.String[])">
             <summary>
@@ -843,6 +877,10 @@
             Requires to be updated at the beginning of every GUI call.
             </summary>
         </member>
+        <member name="P:DG.DemiEditor.DeGUIKey.interpretOSXCommandAs">
+            <summary>Note: ALT isn't correctly interpreted as OPTION on OSX, contrary to what Unity manual states,
+            so using Command instead fixes that</summary>
+        </member>
         <member name="M:DG.DemiEditor.DeGUIKey.Refresh(System.String)">
             <summary>
             Call this method to update data required by softCtrl calculations.
@@ -892,7 +930,7 @@
         <member name="P:DG.DemiEditor.DeScrollView.visibleContentArea">
             <summary>Content area currently visible (scroll bars excluded)</summary>
         </member>
-        <member name="P:DG.DemiEditor.DeScrollView.scrollPosition">
+        <member name="F:DG.DemiEditor.DeScrollView.scrollPosition">
             <summary>Current scrollPosition</summary>
         </member>
         <member name="M:DG.DemiEditor.DeScrollView.Current">
@@ -1539,6 +1577,16 @@
         <member name="M:DG.DemiEditor.DeGUILayout.SceneField(System.String,UnityEngine.Object)">
             <summary>Scene field</summary>
         </member>
+        <member name="M:DG.DemiEditor.DeGUILayout.SortingLayer(System.String,System.Int32,UnityEngine.GUIStyle)">
+            <summary>
+            Draws a dropdown for choosing a SortingLayer ID
+            </summary>
+        </member>
+        <member name="M:DG.DemiEditor.DeGUILayout.SortingLayer(UnityEngine.GUIContent,System.Int32,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])">
+            <summary>
+            Draws a dropdown for choosing a SortingLayer ID
+            </summary>
+        </member>
         <member name="T:DG.DemiEditor.DeGUI">
             <summary>
             Global Demigiant GUI manager. Call <see cref="M:DG.DemiEditor.DeGUI.BeginGUI(DG.DemiLib.DeColorPalette,DG.DemiEditor.DeStylePalette)"/> to initialize it inside GUI calls.
@@ -1900,6 +1948,16 @@
         </member>
         <member name="M:DG.DemiEditor.DeGUI.FlatDivider(UnityEngine.Rect,System.Nullable{UnityEngine.Color})">
             <summary>Divider</summary>
+        </member>
+        <member name="M:DG.DemiEditor.DeGUI.SortingLayer(UnityEngine.Rect,System.String,System.Int32,UnityEngine.GUIStyle)">
+            <summary>
+            Draws a dropdown for choosing a SortingLayer ID
+            </summary>
+        </member>
+        <member name="M:DG.DemiEditor.DeGUI.SortingLayer(UnityEngine.Rect,UnityEngine.GUIContent,System.Int32,UnityEngine.GUIStyle)">
+            <summary>
+            Draws a dropdown for choosing a SortingLayer ID
+            </summary>
         </member>
         <member name="M:DG.DemiEditor.DeGUI.Vector2FieldAdvanced(UnityEngine.Rect,UnityEngine.GUIContent,UnityEngine.Vector2,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
             <summary>Draws a Vector3Field that can have single axes disabled</summary>
@@ -2281,9 +2339,16 @@
             (their name must be the same as the serialized field they refer to)
             </summary>
         </member>
+        <member name="M:DG.DemiEditor.DeSerializedPropertySet.#ctor(UnityEditor.SerializedObject,System.String[])">
+            <summary>
+            Automatically retrieves all serializable properties on the given serializedObject,
+            or only specific ones if propNames is specified
+            </summary>
+        </member>
         <member name="M:DG.DemiEditor.DeSerializedPropertySet.DrawAllPropertyFields">
             <summary>
-            Draws all property fields
+            Draws all property fields. Remember to wrap this within <code>serializedObject.Update</code>
+            and <code>serializedObject.ApplyModifiedProperties</code>
             </summary>
         </member>
     </members>

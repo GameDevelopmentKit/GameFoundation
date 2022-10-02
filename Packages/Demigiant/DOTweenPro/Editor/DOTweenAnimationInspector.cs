@@ -536,7 +536,10 @@ namespace DG.DOTweenEditor
                     GUIEndValueV3(targetGO);
                     canBeRelative = false;
                     _src.optionalInt0 = EditorGUILayout.IntSlider(new GUIContent("    Vibrato", "How much will the shake vibrate"), _src.optionalInt0, 1, 50);
-                    _src.optionalFloat0 = EditorGUILayout.Slider(new GUIContent("    Randomness", "The shake randomness"), _src.optionalFloat0, 0, 90);
+                    using (new GUILayout.HorizontalScope()) {
+                        _src.optionalFloat0 = EditorGUILayout.Slider(new GUIContent("    Randomness", "The shake randomness"), _src.optionalFloat0, 0, 90);
+                        _src.optionalShakeRandomnessMode = (ShakeRandomnessMode)EditorGUILayout.EnumPopup(_src.optionalShakeRandomnessMode, GUILayout.Width(70));
+                    }
                     _src.optionalBool1 = EditorGUILayout.Toggle(new GUIContent("    FadeOut", "If selected the shake will fade out, otherwise it will constantly play with full force"), _src.optionalBool1);
                     if (_src.animationType == DOTweenAnimation.AnimationType.ShakePosition) _src.optionalBool0 = EditorGUILayout.Toggle("    Snapping", _src.optionalBool0);
                     break;
