@@ -1,0 +1,17 @@
+{
+    "name": "DOTweenPro.Script",
+    "rootNamespace": "",
+    "references": [
+        "Unity.TextMeshPro",
+        "DG.Tween.Modules"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

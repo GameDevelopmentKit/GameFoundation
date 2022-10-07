@@ -1,0 +1,29 @@
+{
+  "name": "com.gdk.core",
+  "displayName": "Game Foundation Core",
+  "description": "Game Foundation provides pre-built common game systems that are flexible and extensible so that developers can focus on building unique gameplay.",
+  "version": "0.0.1",
+  "unity": "2021.3",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GameDevelopmentKit/GameFoundation.git"
+  },
+  "author": {
+    "name": "Game Development Kit",
+    "email": "ninhnv15@gmail.com"
+  },
+  "gitDependencies": {
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.neuecc.unirx": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts"
+  },
+  "dependencies": {
+    "com.unity.addressables": "1.20.5",
+    "com.unity.nuget.newtonsoft-json": "3.0.2"
+  },
+  "keywords": [
+    "SDK",
+    "Tools",
+    "GDK"
+  ]
+}
