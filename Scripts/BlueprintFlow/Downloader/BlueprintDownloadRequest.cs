@@ -1,3 +1,4 @@
+#if GDK_NETWORK_ENABLE
 namespace GameFoundation.Scripts.BlueprintFlow.Downloader
 {
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
@@ -29,3 +30,4 @@ namespace GameFoundation.Scripts.BlueprintFlow.Downloader
         }
     }
 }
+#endif

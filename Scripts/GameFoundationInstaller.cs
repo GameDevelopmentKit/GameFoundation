@@ -4,8 +4,6 @@
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.Scripts.Models;
-    using GameFoundation.Scripts.Network;
-    using GameFoundation.Scripts.Network.Authentication;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
     using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
@@ -53,9 +51,7 @@
 
             //Installer
             BlueprintServicesInstaller.Install(this.Container);
-            NetworkServicesInstaller.Install(this.Container);
             ScreenFlowInstaller.Install(this.Container);
-            ServicesLoginInstaller.Install(this.Container);
             ApplicationServiceInstaller.Install(this.Container);
             GameQueueActionInstaller.Install(this.Container);
         }
