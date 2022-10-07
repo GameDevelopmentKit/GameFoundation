@@ -25,7 +25,7 @@ For game assembly, normally, you will add these
 
 ### Using Package Manager
 Firstly, you need to use [GitDependencyResolverForUnity](https://github.com/mob-sakai/GitDependencyResolverForUnity) package by mob-sakai to resolves git-based dependencies by adding https://github.com/mob-sakai/GitDependencyResolverForUnity.git to Package Manager.
-Then, you add Game Foundation Core SDk by https://github.com/GameDevelopmentKit/GameFoundation.git
+Then, you add Game Foundation Core by https://github.com/GameDevelopmentKit/GameFoundation.git
 
 Or find the `manifest.json` file in the `Packages` directory in your project and edit it as follows:
 ```
