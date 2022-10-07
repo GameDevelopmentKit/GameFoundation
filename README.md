@@ -23,11 +23,9 @@ For game assembly, normally, you will add these
 
 * Unity 2021.3 or later
 
-### Using Git
+### Using Package Manager
 Firstly, you need to use [GitDependencyResolverForUnity](https://github.com/mob-sakai/GitDependencyResolverForUnity) package by mob-sakai to resolves git-based dependencies by adding https://github.com/mob-sakai/GitDependencyResolverForUnity.git to Package Manager.
 Then, you add Myria Core SDk by https://gitlab.com/myriaworld/myrianet/sdk/myria-core-sdk.git
-
-![image](/uploads/54dbaa7a0339d1bfb4c6ac62bd8ead20/image.png)
 
 Or find the `manifest.json` file in the `Packages` directory in your project and edit it as follows:
 ```
@@ -40,5 +38,10 @@ Or find the `manifest.json` file in the `Packages` directory in your project and
 }
 ```
 
+### Using Git submodule
+This package need to be cloned to Packages folder. And we still use [GitDependencyResolverForUnity](https://github.com/mob-sakai/GitDependencyResolverForUnity) package like above
+```
+git submodule add git@github.com:GameDevelopmentKit/GameFoundation.git .\Packages\com.gdk.core
+```
 
 <br>
