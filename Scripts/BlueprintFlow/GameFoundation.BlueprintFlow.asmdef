@@ -6,8 +6,8 @@
         "GameFoundation.Utilities",
         "Zenject-Source",
         "Zenject-Signals",
-        "GameFoundation.Network.HttpServices",
-        "GameFoundation.Models"
+        "GameFoundation.Models",
+        "GameFoundation.Network.HttpServices"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -20,6 +20,12 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.gdk.network",
+            "expression": "",
+            "define": "GDK_NETWORK_ENABLE"
+        }
+    ],
     "noEngineReferences": false
 }

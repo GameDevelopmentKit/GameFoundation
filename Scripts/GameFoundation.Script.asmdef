@@ -8,8 +8,6 @@
         "GameFoundation.Models",
         "GameFoundation.Network.Auth",
         "GameFoundation.UIModule",
-        "GameFoundation.Network.HttpServices",
-        "GameFoundation.Network.Config",
         "MasterAAASound.Scripts",
         "I2Localization.Scripts",
         "Zenject-Source",

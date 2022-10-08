@@ -1,8 +1,8 @@
 namespace GameFoundation.Scripts.BlueprintFlow.Downloader
 {
     using System;
-    using System.Net;
     using System.Threading.Tasks;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;
@@ -13,15 +13,16 @@ namespace GameFoundation.Scripts.BlueprintFlow.Downloader
     public class BlueprintDownloader
     {
         [Inject] private ILogService     logService;
-        [Inject] private BlueprintConfig blueprintConfig;
         
-        public Task DownloadBlueprintAsync(string blueprintDownloadUrl)
+#if !GDK_NETWORK_ENABLE
+        public Task DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
         {
             try
             {
-                using var client = new WebClient();
+                using var client = new System.Net.WebClient();
                 var       uri    = new Uri(blueprintDownloadUrl);
-                var       task   = client.DownloadFileTaskAsync(uri, this.blueprintConfig.BlueprintZipFilepath);
+                var       task   = client.DownloadFileTaskAsync(uri, filePath);
+                client.DownloadProgressChanged += (sender, args) => onDownloadProgress.Invoke(args.BytesReceived, args.TotalBytesToReceive);
                 return task;
             }
             catch (Exception e)
@@ -30,5 +31,14 @@ namespace GameFoundation.Scripts.BlueprintFlow.Downloader
                 throw;
             }
         }
+        
+#else
+        [Inject] private Network.WebService.IHttpService httpService;
+        public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
+        {
+            return this.httpService.Download(blueprintDownloadUrl, filePath, onDownloadProgress.Invoke);
+        }
+        
+#endif
     }
 }

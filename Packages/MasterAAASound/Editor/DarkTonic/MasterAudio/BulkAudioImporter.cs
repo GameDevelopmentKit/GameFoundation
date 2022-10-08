@@ -826,7 +826,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             importer.forceToMono = info.ForceMono;
             importer.loadInBackground = info.LoadBG;
-            importer.preloadAudioData = info.Preload;
+            settings.preloadAudioData = info.Preload;
             settings.loadType = info.LoadType;
             settings.compressionFormat = info.CompressionFormat;
             if (settings.compressionFormat == AudioCompressionFormat.Vorbis)
@@ -978,7 +978,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                 // ReSharper disable once UseObjectOrCollectionInitializer
                 AudioImporterSampleSettings settings = importer.defaultSampleSettings;
-                var newClip = new AudioInformation(aPath, Path.GetFileNameWithoutExtension(aPath), importer.forceToMono, importer.loadInBackground, importer.preloadAudioData,
+                var newClip = new AudioInformation(aPath, Path.GetFileNameWithoutExtension(aPath), importer.forceToMono, importer.loadInBackground, settings.preloadAudioData,
                     settings.loadType, settings.compressionFormat, settings.quality, settings.sampleRateSetting, int.Parse(settings.sampleRateOverride.ToString()));
 
                 newClip.LastUpdated = updatedTime;

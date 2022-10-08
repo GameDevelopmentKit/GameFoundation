@@ -1,15 +1,11 @@
 {
-    "name": "GameFoundation.Editor",
+    "name": "DOTweenPro.Script",
     "rootNamespace": "",
     "references": [
-        "GameFoundation.UIModule",
-        "GameFoundation.Models",
-        "GameFoundation.Network.Config",
-        "GameFoundation.Utilities"
+        "Unity.TextMeshPro",
+        "DG.Tween.Modules"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

@@ -4,7 +4,6 @@
     "references": [
         "UniTask.Addressables",
         "Unity.Addressables",
-        "",
         "Unity.ResourceManager",
         "UniTask"
     ],
