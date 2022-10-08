@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="GeneralConfigPanel">
+        <ui:Label text="General parameters" display-tooltip-when-elided="true" style="-unity-font-style: bold;" />
+    </ui:VisualElement>
+</ui:UXML>

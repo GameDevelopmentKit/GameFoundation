@@ -2,7 +2,10 @@
     "name": "GameFoundation.Editor",
     "rootNamespace": "",
     "references": [
-        "GameFoundation.UIModule"
+        "GameFoundation.UIModule",
+        "GameFoundation.Models",
+        "GameFoundation.Network.Config",
+        "GameFoundation.Utilities"
     ],
     "includePlatforms": [
         "Editor"

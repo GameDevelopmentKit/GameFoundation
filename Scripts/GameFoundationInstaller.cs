@@ -12,6 +12,7 @@
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
+    using global::Models;
     using I2.Loc;
     using Zenject;
 
@@ -21,6 +22,8 @@
         {
             SignalBusInstaller.Install(this.Container);
 
+            this.Container.Bind<GDKConfig>().AsSingle().NonLazy();
+            
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
