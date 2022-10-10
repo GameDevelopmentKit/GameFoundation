@@ -717,12 +717,6 @@
             Utility for parsing and emitting expression delegates.
             </summary>
         </member>
-        <member name="F:Sirenix.Utilities.Editor.Expressions.ExpressionUtility.ExpressionCacheClearTimeSeconds">
-            <summary>
-            The time that the expression cache waits to clear expressions
-            since the last time they have been used.
-            </summary>
-        </member>
         <member name="M:Sirenix.Utilities.Editor.Expressions.ExpressionUtility.ParseExpression(System.String,System.Boolean,System.Type,System.String@,System.Boolean)">
             <summary>Parses an expression and tries to emit a delegate method.</summary>
             <param name="expression">The expression to parse.</param>
@@ -2203,7 +2197,7 @@
             The ID of the current editor window.
             </value>
         </member>
-        <member name="F:Sirenix.Utilities.Editor.GUIHelper.RepaintRequested">
+        <member name="P:Sirenix.Utilities.Editor.GUIHelper.RepaintRequested">
             <summary>
             Gets a value indicating whether a repaint has been requested.
             </summary>
@@ -5516,15 +5510,6 @@
             <param name="messageType">Type of the message.</param>
             <param name="wide">If set to <c>true</c> the message box will be wide.</param>
         </member>
-        <member name="M:Sirenix.Utilities.Editor.SirenixEditorGUI.MessageBox(System.String,UnityEditor.MessageType,UnityEngine.GUIStyle,System.Boolean)">
-            <summary>
-            Draws a message box.
-            </summary>
-            <param name="message">The message.</param>
-            <param name="messageType">Type of the message.</param>
-            <param name="style">The style.</param>
-            <param name="wide">If set to <c>true</c> the message box will be wide.</param>
-        </member>
         <member name="M:Sirenix.Utilities.Editor.SirenixEditorGUI.PrivateMessageBox(System.String,UnityEditor.MessageType,UnityEngine.GUIStyle,System.Boolean)">
             <summary>
             Draws a message box.
@@ -6456,41 +6441,6 @@
             Column title background colors.
             </summary>
         </member>
-        <member name="F:Sirenix.Utilities.Editor.SirenixGUIStyles.DefaultSelectedMenuTreeColorDarkSkin">
-            <summary>
-            The default background color for when a menu item is selected.
-            </summary>
-        </member>
-        <member name="F:Sirenix.Utilities.Editor.SirenixGUIStyles.DefaultSelectedInactiveMenuTreeColorDarkSkin">
-            <summary>
-            The default background color for when a menu item is selected.
-            </summary>
-        </member>
-        <member name="F:Sirenix.Utilities.Editor.SirenixGUIStyles.DefaultSelectedMenuTreeColorLightSkin">
-            <summary>
-            The default background color for when a menu item is selected.
-            </summary>
-        </member>
-        <member name="F:Sirenix.Utilities.Editor.SirenixGUIStyles.DefaultSelectedInactiveMenuTreeColorLightSkin">
-            <summary>
-            The default background color for when a menu item is selected.
-            </summary>
-        </member>
-        <member name="F:Sirenix.Utilities.Editor.SirenixGUIStyles.MouseOverBgOverlayColor">
-            <summary>
-            A mouse over background overlay color.
-            </summary>
-        </member>
-        <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.DefaultSelectedMenuTreeColor">
-            <summary>
-            The default background color for when a menu item is selected.
-            </summary>
-        </member>
-        <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.DefaultSelectedMenuTreeInactiveColor">
-            <summary>
-            The default background color for when a menu item is selected.
-            </summary>
-        </member>
         <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.ListItemEven">
             <summary>
             List item background color for every other item. OBSOLETE: Use ListItemColorEven instead.
@@ -6573,12 +6523,12 @@
         </member>
         <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.Button">
             <summary>
-            Button style.
+            Left button style.
             </summary>
         </member>
         <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.ButtonSelected">
             <summary>
-            Button selected style.
+            Left button selected style.
             </summary>
         </member>
         <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.ButtonLeft">
@@ -6689,11 +6639,6 @@
         <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.LabelCentered">
             <summary>
             Centered label style.
-            </summary>
-        </member>
-        <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.MiniLabelCentered">
-            <summary>
-            Centered mini label style.
             </summary>
         </member>
         <member name="P:Sirenix.Utilities.Editor.SirenixGUIStyles.LeftAlignedCenteredLabel">
@@ -7831,11 +7776,6 @@
             Sometimes, an idiot overrides a delay action subscription to <see cref="F:UnityEditor.EditorApplication.delayCall"/>,
             which can be done because the people at Unity didn't know what events were once upon a time.
             This method subscribes to a lot of different callbacks, in the hopes of catching at least one.
-            </summary>
-        </member>
-        <member name="E:Sirenix.OdinInspector.Editor.UnityEditorEventUtility.DuringSceneGUI">
-            <summary>
-            In 2019.1+, this event subscribes to SceneView.duringSceneGui. In 2018.4 and lower, it subscribes to SceneView.onSceneGUIDelegate.
             </summary>
         </member>
         <member name="E:Sirenix.OdinInspector.Editor.UnityEditorEventUtility.EditorApplication_delayCall">

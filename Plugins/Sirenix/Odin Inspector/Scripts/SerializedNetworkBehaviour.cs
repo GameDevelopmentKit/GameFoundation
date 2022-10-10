@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SerializedNetworkBehaviour.cs" company="Sirenix ApS">
-// Copyright (c) Sirenix ApS. All rights reserved.
+// <copyright file="SerializedNetworkBehaviour.cs" company="Sirenix IVS">
+// Copyright (c) Sirenix IVS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 

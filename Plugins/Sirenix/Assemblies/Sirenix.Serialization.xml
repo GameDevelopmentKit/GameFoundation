@@ -91,13 +91,6 @@
             <param name="value">The value to serialize.</param>
             <param name="writer">The writer to serialize with.</param>
         </member>
-        <member name="M:Sirenix.Serialization.WeakStackFormatter.SerializeImplementation(System.Object@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Provides the actual implementation for serializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The value to serialize.</param>
-            <param name="writer">The writer to serialize with.</param>
-        </member>
         <member name="T:Sirenix.Serialization.VersionFormatter">
             <summary>
             Custom formatter for the <see cref="T:System.Version"/> type.
@@ -5706,62 +5699,6 @@
             <param name="value">The value to serialize.</param>
             <param name="writer">The writer to serialize with.</param>
         </member>
-        <member name="T:Sirenix.Serialization.WeakBaseFormatter">
-            <summary>
-            Provides common functionality for serializing and deserializing weakly typed values of a given type, and provides automatic support for the following common serialization conventions:
-            <para />
-            <see cref="T:System.Runtime.Serialization.IObjectReference"/>, <see cref="!:ISerializationCallbackReceiver"/>, <see cref="T:System.Runtime.Serialization.OnSerializingAttribute"/>, <see cref="T:System.Runtime.Serialization.OnSerializedAttribute"/>, <see cref="T:System.Runtime.Serialization.OnDeserializingAttribute"/> and <see cref="T:System.Runtime.Serialization.OnDeserializedAttribute"/>.
-            </summary>
-            <seealso cref="T:Sirenix.Serialization.IFormatter" />
-        </member>
-        <member name="M:Sirenix.Serialization.WeakBaseFormatter.Serialize(System.Object,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Serializes a value using a specified <see cref="T:Sirenix.Serialization.IDataWriter" />.
-            </summary>
-            <param name="value">The value to serialize.</param>
-            <param name="writer">The writer to use.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakBaseFormatter.Deserialize(Sirenix.Serialization.IDataReader)">
-            <summary>
-            Deserializes a value using a specified <see cref="T:Sirenix.Serialization.IDataReader" />.
-            </summary>
-            <param name="reader">The reader to use.</param>
-            <returns>
-            The deserialized value.
-            </returns>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakBaseFormatter.RegisterReferenceID(System.Object,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Registers the given object reference in the deserialization context.
-            <para />
-            NOTE that this method only does anything if <see cref="!:T"/> is not a value type.
-            </summary>
-            <param name="value">The value to register.</param>
-            <param name="reader">The reader which is currently being used.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakBaseFormatter.InvokeOnDeserializingCallbacks(System.Object,Sirenix.Serialization.DeserializationContext)">
-            <summary>
-            Invokes all methods on the object with the [OnDeserializing] attribute.
-            <para />
-            WARNING: This method will not be called automatically if you override GetUninitializedObject and return null! You will have to call it manually after having created the object instance during deserialization.
-            </summary>
-            <param name="value">The value to invoke the callbacks on.</param>
-            <param name="context">The deserialization context.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakBaseFormatter.DeserializeImplementation(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Provides the actual implementation for deserializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The uninitialized value to serialize into. This value will have been created earlier using <see cref="M:Sirenix.Serialization.BaseFormatter`1.GetUninitializedObject" />.</param>
-            <param name="reader">The reader to deserialize with.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakBaseFormatter.SerializeImplementation(System.Object@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Provides the actual implementation for serializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The value to serialize.</param>
-            <param name="writer">The writer to serialize with.</param>
-        </member>
         <member name="T:Sirenix.Serialization.DateTimeFormatter">
             <summary>
             Custom formatter for the <see cref="T:System.DateTime"/> type.
@@ -6098,28 +6035,6 @@
             <param name="value">The value to serialize.</param>
             <param name="writer">The writer to serialize with.</param>
         </member>
-        <member name="M:Sirenix.Serialization.WeakGenericCollectionFormatter.GetUninitializedObject">
-            <summary>
-            Gets a new object of type <see cref="!:T" />.
-            </summary>
-            <returns>
-            A new object of type <see cref="!:T" />.
-            </returns>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakGenericCollectionFormatter.DeserializeImplementation(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Provides the actual implementation for deserializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The uninitialized value to serialize into. This value will have been created earlier using <see cref="M:Sirenix.Serialization.BaseFormatter`1.GetUninitializedObject" />.</param>
-            <param name="reader">The reader to deserialize with.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakGenericCollectionFormatter.SerializeImplementation(System.Object@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Provides the actual implementation for serializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The value to serialize.</param>
-            <param name="writer">The writer to serialize with.</param>
-        </member>
         <member name="T:Sirenix.Serialization.HashSetFormatter`1">
             <summary>
             Custom generic formatter for the generic type definition <see cref="T:System.Collections.Generic.HashSet`1"/>.
@@ -6143,28 +6058,6 @@
             <param name="reader">The reader to deserialize with.</param>
         </member>
         <member name="M:Sirenix.Serialization.HashSetFormatter`1.SerializeImplementation(System.Collections.Generic.HashSet{`0}@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Provides the actual implementation for serializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The value to serialize.</param>
-            <param name="writer">The writer to serialize with.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakHashSetFormatter.GetUninitializedObject">
-            <summary>
-            Returns null.
-            </summary>
-            <returns>
-            A null value.
-            </returns>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakHashSetFormatter.DeserializeImplementation(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Provides the actual implementation for deserializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The uninitialized value to serialize into. This value will have been created earlier using <see cref="M:Sirenix.Serialization.BaseFormatter`1.GetUninitializedObject" />.</param>
-            <param name="reader">The reader to deserialize with.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakHashSetFormatter.SerializeImplementation(System.Object@,Sirenix.Serialization.IDataWriter)">
             <summary>
             Provides the actual implementation for serializing a value of type <see cref="!:T" />.
             </summary>
@@ -6357,49 +6250,6 @@
             <param name="value">The value to register.</param>
             <param name="reader">The reader which is currently being used.</param>
         </member>
-        <member name="F:Sirenix.Serialization.WeakMinimalBaseFormatter.IsValueType">
-            <summary>
-            Whether the serialized value is a value type.
-            </summary>
-        </member>
-        <member name="P:Sirenix.Serialization.WeakMinimalBaseFormatter.Sirenix#Serialization#IFormatter#SerializedType">
-            <summary>
-            Gets the type that the formatter can serialize.
-            </summary>
-            <value>
-            The type that the formatter can serialize.
-            </value>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakMinimalBaseFormatter.GetUninitializedObject">
-            <summary>
-            Get an uninitialized object of type <see cref="!:T"/>. WARNING: If you override this and return null, the object's ID will not be automatically registered.
-            You will have to call <see cref="!:MinimalBaseFormatter&lt;T&gt;&lt;T&gt;.RegisterReferenceID(T, IDataReader, DeserializationContext)"/> immediately after creating the object yourself during deserialization.
-            </summary>
-            <returns>An uninitialized object of type <see cref="!:T"/>.</returns>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakMinimalBaseFormatter.Read(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Reads into the specified value using the specified reader.
-            </summary>
-            <param name="value">The value to read into.</param>
-            <param name="reader">The reader to use.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakMinimalBaseFormatter.Write(System.Object@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Writes from the specified value using the specified writer.
-            </summary>
-            <param name="value">The value to write from.</param>
-            <param name="writer">The writer to use.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakMinimalBaseFormatter.RegisterReferenceID(System.Object,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Registers the given object reference in the deserialization context.
-            <para />
-            NOTE that this method only does anything if the serialized type is not a value type.
-            </summary>
-            <param name="value">The value to register.</param>
-            <param name="reader">The reader which is currently being used.</param>
-        </member>
         <member name="T:Sirenix.Serialization.MultiDimensionalArrayFormatter`2">
             <summary>
             Formatter for all arrays with more than one dimension.
@@ -6424,28 +6274,6 @@
             <param name="reader">The reader to deserialize with.</param>
         </member>
         <member name="M:Sirenix.Serialization.MultiDimensionalArrayFormatter`2.SerializeImplementation(`0@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Provides the actual implementation for serializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The value to serialize.</param>
-            <param name="writer">The writer to serialize with.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakMultiDimensionalArrayFormatter.GetUninitializedObject">
-            <summary>
-            Returns null.
-            </summary>
-            <returns>
-            A null value.
-            </returns>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakMultiDimensionalArrayFormatter.DeserializeImplementation(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Provides the actual implementation for deserializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The uninitialized value to serialize into. This value will have been created earlier using <see cref="M:Sirenix.Serialization.BaseFormatter`1.GetUninitializedObject" />.</param>
-            <param name="reader">The reader to deserialize with.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakMultiDimensionalArrayFormatter.SerializeImplementation(System.Object@,Sirenix.Serialization.IDataWriter)">
             <summary>
             Provides the actual implementation for serializing a value of type <see cref="!:T" />.
             </summary>
@@ -6507,28 +6335,6 @@
             <param name="value">The value to write from.</param>
             <param name="writer">The writer to use.</param>
         </member>
-        <member name="M:Sirenix.Serialization.WeakPrimitiveArrayFormatter.GetUninitializedObject">
-            <summary>
-            Returns null.
-            </summary>
-            <returns>
-            A null value.
-            </returns>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakPrimitiveArrayFormatter.Read(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Reads into the specified value using the specified reader.
-            </summary>
-            <param name="value">The value to read into.</param>
-            <param name="reader">The reader to use.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakPrimitiveArrayFormatter.Write(System.Object@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Writes from the specified value using the specified writer.
-            </summary>
-            <param name="value">The value to write from.</param>
-            <param name="writer">The writer to use.</param>
-        </member>
         <member name="T:Sirenix.Serialization.ReflectionFormatter`1">
             <summary>
             Final fallback formatter for all types which have no other formatters. This formatter relies on reflection to work, and is thus comparatively slow and creates more garbage than a custom formatter.
@@ -6563,16 +6369,6 @@
             </summary>
         </member>
         <member name="M:Sirenix.Serialization.SelfFormatterFormatter`1.SerializeImplementation(`0@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Calls <see cref="M:Sirenix.Serialization.ISelfFormatter.Serialize(Sirenix.Serialization.IDataWriter)" />  on the value to deserialize.
-            </summary>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakSelfFormatterFormatter.DeserializeImplementation(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Calls <see cref="M:Sirenix.Serialization.ISelfFormatter.Deserialize(Sirenix.Serialization.IDataReader)" />  on the value to deserialize.
-            </summary>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakSelfFormatterFormatter.SerializeImplementation(System.Object@,Sirenix.Serialization.IDataWriter)">
             <summary>
             Calls <see cref="M:Sirenix.Serialization.ISelfFormatter.Serialize(Sirenix.Serialization.IDataWriter)" />  on the value to deserialize.
             </summary>
@@ -6622,29 +6418,6 @@
             </summary>
             <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> to write.</param>
             <param name="writer">The writer to use.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakSerializableFormatter.GetUninitializedObject">
-            <summary>
-            Get an uninitialized object of type <see cref="!:T" />. WARNING: If you override this and return null, the object's ID will not be automatically registered and its OnDeserializing callbacks will not be automatically called, before deserialization begins.
-            You will have to call <see cref="!:BaseFormatter&lt;T&gt;.RegisterReferenceID(T, IDataReader, DeserializationContext)" /> and <see cref="!:BaseFormatter&lt;T&gt;.InvokeOnDeserializingCallbacks(T, IDataReader, DeserializationContext)" /> immediately after creating the object yourself during deserialization.
-            </summary>
-            <returns>
-            An uninitialized object of type <see cref="!:T" />.
-            </returns>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakSerializableFormatter.DeserializeImplementation(System.Object@,Sirenix.Serialization.IDataReader)">
-            <summary>
-            Provides the actual implementation for deserializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The uninitialized value to serialize into. This value will have been created earlier using <see cref="M:Sirenix.Serialization.BaseFormatter`1.GetUninitializedObject" />.</param>
-            <param name="reader">The reader to deserialize with.</param>
-        </member>
-        <member name="M:Sirenix.Serialization.WeakSerializableFormatter.SerializeImplementation(System.Object@,Sirenix.Serialization.IDataWriter)">
-            <summary>
-            Provides the actual implementation for serializing a value of type <see cref="!:T" />.
-            </summary>
-            <param name="value">The value to serialize.</param>
-            <param name="writer">The writer to serialize with.</param>
         </member>
         <member name="T:Sirenix.Serialization.TimeSpanFormatter">
             <summary>
@@ -8932,18 +8705,6 @@
             </summary>
             <param name="type">The type to get a formatter for.</param>
             <param name="policy">The serialization policy to use if a formatter has to be emitted. If null, <see cref="P:Sirenix.Serialization.SerializationPolicies.Strict"/> is used.</param>
-            <returns>
-            A formatter for the given type.
-            </returns>
-            <exception cref="T:System.ArgumentNullException">The type argument is null.</exception>
-        </member>
-        <member name="M:Sirenix.Serialization.FormatterLocator.GetFormatter(System.Type,Sirenix.Serialization.ISerializationPolicy,System.Boolean)">
-            <summary>
-            Gets a formatter for a given type.
-            </summary>
-            <param name="type">The type to get a formatter for.</param>
-            <param name="policy">The serialization policy to use if a formatter has to be emitted. If null, <see cref="P:Sirenix.Serialization.SerializationPolicies.Strict"/> is used.</param>
-            <param name="allowWeakFallbackFormatters">Whether to allow the use of weak fallback formatters which do not implement the strongly typed <see cref="T:Sirenix.Serialization.IFormatter`1"/>, but which conversely do not need to have had AOT support generated.</param>
             <returns>
             A formatter for the given type.
             </returns>

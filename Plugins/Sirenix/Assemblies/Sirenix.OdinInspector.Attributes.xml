@@ -380,7 +380,7 @@
         </member>
         <member name="F:Sirenix.OdinInspector.ButtonAttribute.DirtyOnClick">
             <summary>
-            Whether the containing object or scene (if there is one) should be marked dirty when the button is clicked. True by default. Note that if this is false, undo for any changes caused by the button click is also disabled, as registering undo events also causes dirtying.
+            Whether the containing object or scene (if there is one) should be marked dirty when the button is clicked. True by default.
             </summary>
         </member>
         <member name="P:Sirenix.OdinInspector.ButtonAttribute.DrawResult">
@@ -646,40 +646,6 @@
             <summary>
             Disables a property if it is drawn from a prefab asset or a prefab instance.
             </summary>
-        </member>
-        <member name="F:Sirenix.OdinInspector.DisallowPrefabModificationsAttribute.ErrorMessage">
-            <summary>
-            The message of the info box.
-            </summary>
-        </member>
-        <member name="F:Sirenix.OdinInspector.DisallowPrefabModificationsAttribute.MessageType">
-            <summary>
-            The type of the info box.
-            </summary>
-        </member>
-        <member name="M:Sirenix.OdinInspector.DisallowPrefabModificationsAttribute.#ctor">
-            <summary>
-            Adds an error box to the inspector, if the property is missing.
-            </summary>
-        </member>
-        <member name="M:Sirenix.OdinInspector.DisallowPrefabModificationsAttribute.#ctor(System.String,Sirenix.OdinInspector.InfoMessageType)">
-            <summary>
-            Adds an info box to the inspector, if the property is missing.
-            </summary>
-            <param name="errorMessage">The message to display in the error box.</param>
-            <param name="messageType">The type of info box to draw.</param>
-        </member>
-        <member name="M:Sirenix.OdinInspector.DisallowPrefabModificationsAttribute.#ctor(System.String)">
-            <summary>
-            Adds an error box to the inspector, if the property is missing.
-            </summary>
-            <param name="errorMessage">The message to display in the error box.</param>
-        </member>
-        <member name="M:Sirenix.OdinInspector.DisallowPrefabModificationsAttribute.#ctor(Sirenix.OdinInspector.InfoMessageType)">
-            <summary>
-            Adds an info box to the inspector, if the property is missing.
-            </summary>
-            <param name="messageType">The type of info box to draw.</param>
         </member>
         <member name="T:Sirenix.OdinInspector.DoNotDrawAsReferenceAttribute">
             <summary>
@@ -1660,74 +1626,6 @@
             Adds a space between properties.
             </summary>
         </member>
-        <member name="F:Sirenix.OdinInspector.RequiredInPrefabAssetsAttribute.ErrorMessage">
-            <summary>
-            The message of the info box.
-            </summary>
-        </member>
-        <member name="F:Sirenix.OdinInspector.RequiredInPrefabAssetsAttribute.MessageType">
-            <summary>
-            The type of the info box.
-            </summary>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabAssetsAttribute.#ctor">
-            <summary>
-            Adds an error box to the inspector, if the property is missing.
-            </summary>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabAssetsAttribute.#ctor(System.String,Sirenix.OdinInspector.InfoMessageType)">
-            <summary>
-            Adds an info box to the inspector, if the property is missing.
-            </summary>
-            <param name="errorMessage">The message to display in the error box.</param>
-            <param name="messageType">The type of info box to draw.</param>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabAssetsAttribute.#ctor(System.String)">
-            <summary>
-            Adds an error box to the inspector, if the property is missing.
-            </summary>
-            <param name="errorMessage">The message to display in the error box.</param>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabAssetsAttribute.#ctor(Sirenix.OdinInspector.InfoMessageType)">
-            <summary>
-            Adds an info box to the inspector, if the property is missing.
-            </summary>
-            <param name="messageType">The type of info box to draw.</param>
-        </member>
-        <member name="F:Sirenix.OdinInspector.RequiredInPrefabInstancesAttribute.ErrorMessage">
-            <summary>
-            The message of the info box.
-            </summary>
-        </member>
-        <member name="F:Sirenix.OdinInspector.RequiredInPrefabInstancesAttribute.MessageType">
-            <summary>
-            The type of the info box.
-            </summary>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabInstancesAttribute.#ctor">
-            <summary>
-            Adds an error box to the inspector, if the property is missing.
-            </summary>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabInstancesAttribute.#ctor(System.String,Sirenix.OdinInspector.InfoMessageType)">
-            <summary>
-            Adds an info box to the inspector, if the property is missing.
-            </summary>
-            <param name="errorMessage">The message to display in the error box.</param>
-            <param name="messageType">The type of info box to draw.</param>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabInstancesAttribute.#ctor(System.String)">
-            <summary>
-            Adds an error box to the inspector, if the property is missing.
-            </summary>
-            <param name="errorMessage">The message to display in the error box.</param>
-        </member>
-        <member name="M:Sirenix.OdinInspector.RequiredInPrefabInstancesAttribute.#ctor(Sirenix.OdinInspector.InfoMessageType)">
-            <summary>
-            Adds an info box to the inspector, if the property is missing.
-            </summary>
-            <param name="messageType">The type of info box to draw.</param>
-        </member>
         <member name="T:Sirenix.OdinInspector.ResponsiveButtonGroupAttribute">
             <summary>
             Groups buttons into a group that will position and resize the buttons based on the amount of available layout space.
@@ -2377,11 +2275,6 @@
             </code>
             </example>
         </member>
-        <member name="T:Sirenix.OdinInspector.ISelfValidator">
-            <summary>
-            Any type implementing this interface will be considered to be validating itself using the implemented logic, as if a custom validator had been written for it.
-            </summary>
-        </member>
         <member name="T:Sirenix.OdinInspector.ObjectFieldAlignment">
             <summary>
             How the square object field should be aligned.
@@ -3009,6 +2902,54 @@
             </summary>
             <param name="attr">Not yet documented.</param>
             <returns>Not yet documented.</returns>
+        </member>
+        <member name="T:Sirenix.OdinInspector.ShowForPrefabOnlyAttribute">
+            <summary>
+            <para>ShowForPrefabOnlyAttribute is used on any field or property, and only shows properties from prefab assets inspector.</para>
+            <para>Use this to ensure the same value on a property, across all instances of a prefab.</para>
+            </summary>
+            <remarks>
+            <para>On non-prefab objects or instances, this attribute does nothing, and allows properties to be edited as normal.</para>
+            </remarks>
+            <example>
+            <para>The following example shows how ShowForPrefabOnlyAttribute is used on properties.</para>
+            <code>
+            public class MyComponent
+            {
+            	[ShowForPrefabOnlyAttribute]
+            	public int MyInt;
+            }
+            </code>
+            </example>
+            <seealso cref="T:Sirenix.OdinInspector.EnableForPrefabOnlyAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.ShowIfAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.HideIfAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.EnableIfAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.DisableIfAttribute"/>
+        </member>
+        <member name="T:Sirenix.OdinInspector.EnableForPrefabOnlyAttribute">
+            <summary>
+            <para>EnableForPrefabOnly is used on any field or property, and only allows editing of values from prefab assets inspector.</para>
+            <para>Use this to ensure the same value on a property, across all instances of a prefab.</para>
+            </summary>
+            <remarks>
+            <para>On non-prefab objects or instances, this attribute does nothing, and allows properties to be edited as normal.</para>
+            </remarks>
+            <example>
+            <para>The following example shows how EnableForPrefabOnly is used on properties.</para>
+            <code>
+            public class MyComponent
+            {
+            	[EnableForPrefabOnly]
+            	public int MyInt;
+            }
+            </code>
+            </example>
+            <seealso cref="T:Sirenix.OdinInspector.EnableForPrefabOnlyAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.EnableIfAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.DisableIfAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.ShowIfAttribute"/>
+            <seealso cref="T:Sirenix.OdinInspector.HideIfAttribute"/>
         </member>
         <member name="T:Sirenix.OdinInspector.EnableIfAttribute">
              <summary>

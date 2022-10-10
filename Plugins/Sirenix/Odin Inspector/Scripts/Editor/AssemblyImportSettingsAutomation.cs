@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------
-// <copyright file="AssemblyImportSettingsAutomation.cs" company="Sirenix ApS">
-// Copyright (c) Sirenix ApS. All rights reserved.
+// <copyright file="AssemblyImportSettingsAutomation.cs" company="Sirenix IVS">
+// Copyright (c) Sirenix IVS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 

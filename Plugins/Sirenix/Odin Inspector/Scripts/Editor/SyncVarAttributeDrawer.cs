@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SyncVarAttributeDrawer.cs" company="Sirenix ApS">
-// Copyright (c) Sirenix ApS. All rights reserved.
+// <copyright file="SyncVarAttributeDrawer.cs" company="Sirenix IVS">
+// Copyright (c) Sirenix IVS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 

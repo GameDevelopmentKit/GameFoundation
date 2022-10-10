@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EnsureOdinInspectorDefine.cs" company="Sirenix ApS">
-// Copyright (c) Sirenix ApS. All rights reserved.
+// <copyright file="EnsureOdinInspectorDefine.cs" company="Sirenix IVS">
+// Copyright (c) Sirenix IVS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ namespace Sirenix.Utilities
     /// </summary>
     internal static class EnsureOdinInspectorDefine
     {
-        private static readonly string[] DEFINES = new string[] { "ODIN_INSPECTOR", "ODIN_INSPECTOR_3", "ODIN_INSPECTOR_3_1" };
+        private static readonly string[] DEFINES = new string[] { "ODIN_INSPECTOR", "ODIN_INSPECTOR_3" };
 
         [InitializeOnLoadMethod]
         private static void EnsureScriptingDefineSymbol()

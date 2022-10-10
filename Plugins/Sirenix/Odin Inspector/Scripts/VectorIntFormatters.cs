@@ -1,8 +1,8 @@
 ﻿#if UNITY_2017_2_OR_NEWER
 
 //-----------------------------------------------------------------------
-// <copyright file="VectorIntFormatters.cs" company="Sirenix ApS">
-// Copyright (c) Sirenix ApS. All rights reserved.
+// <copyright file="VectorIntFormatters.cs" company="Sirenix IVS">
+// Copyright (c) Sirenix IVS. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 
