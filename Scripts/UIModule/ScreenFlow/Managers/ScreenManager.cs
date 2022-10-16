@@ -215,6 +215,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.previousActiveScreen = null;
             foreach (var screen in this.typeToLoadedScreenPresenter)
             {
+                if (screen.Value.ScreenStatus != ScreenStatus.Opened) continue;
                 screen.Value.Dispose();
             }
 
