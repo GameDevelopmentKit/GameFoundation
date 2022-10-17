@@ -1,28 +1,40 @@
 namespace GameFoundation.Scripts.UIModule.Adapter
 {
-    using System;
     using System.Collections;
     using System.Collections.Generic;
     using Com.TheFallenGames.OSA.Core;
     using Com.TheFallenGames.OSA.CustomParams;
     using Com.TheFallenGames.OSA.DataHelpers;
+    using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
+    using Zenject;
 
     // There are 2 important callbacks you need to implement, apart from Start(): CreateViewsHolder() and UpdateViewsHolder()
     // See explanations below
-    public class BasicListAdapter : OSA<BaseParamsWithPrefab, MyListItemViewsHolder>
+    public class BasicListAdapter<TModel, TView, TPresenter> : OSA<BaseParamsWithPrefab, MyListItemViewsHolder>
+        where TModel : new() where TPresenter : BaseUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public  SimpleDataHelper<MyListItemModel> Data { get; private set; }
-        public  Action<MyListItemViewsHolder>     UpdateViewHolder;
-        private CanvasGroup                       canvasGroup;
+        private SimpleDataHelper<TModel> Models { get; set; }
+        private CanvasGroup              canvasGroup;
+        private List<TPresenter>         presenters;
+
+        private DiContainer diContainer;
+
+        [Inject]
+        public void Constructor(DiContainer diContainer)
+        {
+            Debug.Log("Inject into BasicListAdapter");
+            this.diContainer = diContainer;
+        }
 
         #region OSA implementation
 
         protected override void Start()
         {
-            this.Data = new SimpleDataHelper<MyListItemModel>(this);
+            this.Models = new SimpleDataHelper<TModel>(this);
 
             // Calling this initializes internal data and prepares the adapter to handle item count changes
             base.Start();
@@ -43,7 +55,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             this.canvasGroup.alpha = alpha;
         }
-        
+
         // This is called initially, as many times as needed to fill the viewport, 
         // and anytime the viewport's size grows, thus allowing more items to be displayed
         // Here you create the "ViewsHolder" instance whose views will be re-used
@@ -61,9 +73,23 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
         // *For the method's full description check the base implementation
-        protected override void UpdateViewsHolder(MyListItemViewsHolder newOrRecycled)
+        protected override void UpdateViewsHolder(MyListItemViewsHolder v)
         {
-            this.UpdateViewHolder?.Invoke(newOrRecycled);
+            var index      = v.ItemIndex;
+            var model      = this.Models[index];
+            var viewObject = v.root.GetComponentInChildren<TView>(true);
+            if (this.presenters.Count == index)
+            {
+                var p = this.diContainer.Instantiate<TPresenter>();
+                p.SetView(viewObject);
+                p.BindData(model);
+                this.presenters.Add(p);
+            }
+            else
+            {
+                this.presenters[index].SetView(viewObject);
+                this.presenters[index].BindData(model);
+            }
         }
 
         #endregion
@@ -75,13 +101,13 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         #region data manipulation
 
-        public void AddItemsAt(int index, IList<MyListItemModel> items)
+        public void AddItemsAt(int index, IList<TModel> items)
         {
             // Commented: the below 2 lines exemplify how you can use a plain list to manage the data, instead of a DataHelper, in case you need full control
             //YourList.InsertRange(index, items);
             //InsertItems(index, items.Length);
 
-            this.Data.InsertItems(index, items);
+            this.Models.InsertItems(index, items);
         }
 
         public void RemoveItemsFrom(int index, int count)
@@ -90,17 +116,17 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             //YourList.RemoveRange(index, count);
             //RemoveItems(index, count);
 
-            this.Data.RemoveItems(index, count);
+            this.Models.RemoveItems(index, count);
         }
 
-        public void SetItems(IList<MyListItemModel> items)
+        public void SetItems(IList<TModel> items)
         {
             // Commented: the below 3 lines exemplify how you can use a plain list to manage the data, instead of a DataHelper, in case you need full control
             //YourList.Clear();
             //YourList.AddRange(items);
             //ResetItems(YourList.Count);
 
-            this.Data.ResetItems(items);
+            this.Models.ResetItems(items);
         }
 
         #endregion
@@ -116,28 +142,27 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             // Simulating data retrieving delay
             yield return new WaitForSeconds(0f);
 
-            var newItems = new MyListItemModel[count];
+            var newItems = new TModel[count];
 
             this.OnDataRetrieved(newItems);
         }
 
-        void OnDataRetrieved(MyListItemModel[] newItems) { this.Data.InsertItemsAtEnd(newItems); }
+        void OnDataRetrieved(TModel[] newItems) { this.Models.InsertItemsAtEnd(newItems); }
+
+        public async void InitItemAdapter(List<TModel> modelList)
+        {
+            this.Models = new SimpleDataHelper<TModel>(this);
+            this.presenters = new List<TPresenter>();
+
+            await UniTask.WaitUntil(() => this.IsInitialized);
+            this.Models.InsertItems(0, modelList);
+        }
     }
 
-    // Class containing the data associated with an item
-    public class MyListItemModel
-    {
-        /*
-        public string title;
-        public Color color;
-        */
-    }
 
-
-    // This class keeps references to an item's views.
-    // Your views holder should extend BaseItemViewsHolder for ListViews and CellViewsHolder for GridViews
+// This class keeps references to an item's views.
+// Your views holder should extend BaseItemViewsHolder for ListViews and CellViewsHolder for GridViews
     public class MyListItemViewsHolder : BaseItemViewsHolder
     {
-       
     }
 }

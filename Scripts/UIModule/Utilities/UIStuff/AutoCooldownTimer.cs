@@ -111,7 +111,7 @@
 
         public void Dispose()
         {
-            this.signalBus.TryUnsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
+            this.signalBus.Unsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
             this.observableTimer?.Dispose();
             this.pool?.Despawn(this);
         }
