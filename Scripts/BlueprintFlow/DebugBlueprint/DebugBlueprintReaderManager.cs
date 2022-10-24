@@ -1,7 +1,7 @@
-namespace GameFoundation.Scripts.BlueprintFlow.DebugBlueprint
+namespace BlueprintFlow.DebugBlueprint
 {
-    using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
-    using GameFoundation.Scripts.BlueprintFlow.Downloader;
+    using BlueprintFlow.BlueprintControlFlow;
+    using BlueprintFlow.Downloader;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.LogService;

@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.BlueprintFlow.BlueprintReader
+namespace BlueprintFlow.BlueprintReader
 {
     using System;
 
