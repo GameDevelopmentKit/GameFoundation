@@ -55,8 +55,9 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
             results = typeInfo.GetFields().Select(fieldInfo => new MemberInfo
             {
-                MemberName = fieldInfo.Name, MemberType = fieldInfo.FieldType, SetValue = fieldInfo.SetValue,
-                GetValue   = fieldInfo.GetValue
+                MemberName = fieldInfo.Name, MemberType = fieldInfo.FieldType,
+                SetValue = fieldInfo.SetValue, GetValue   = fieldInfo.GetValue,
+                IsDefined = type => fieldInfo.IsDefined(type,false)
             }).ToList();
             
             results.AddRange(typeInfo.GetProperties().Select(propertyInfo => new MemberInfo
