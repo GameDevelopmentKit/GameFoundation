@@ -12,7 +12,7 @@ namespace BlueprintFlow.BlueprintReader
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
 
     /// <summary> Attribute used to mark the Header Key for GenericDatabaseByRow </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Struct)]
     public class CsvHeaderKeyAttribute : Attribute
     {
         public readonly string HeaderKey;
@@ -62,7 +62,7 @@ namespace BlueprintFlow.BlueprintReader
         void CleanUp();
     }
 
-    public class BlueprintByRow<TKey, TRecord> : Dictionary<TKey, TRecord>, IBlueprintCollection where TRecord : class
+    public class BlueprintByRow<TKey, TRecord> : Dictionary<TKey, TRecord>, IBlueprintCollection
     {
         private readonly BlueprintRecordReader<TRecord> blueprintRecordReader;
 
@@ -259,7 +259,7 @@ namespace BlueprintFlow.BlueprintReader
         private bool IsBlueprintNested(MemberInfo typeInfo) => typeInfo.IsDefined(typeof(NestedBlueprintAttribute)) && (typeInfo.MemberType.IsClass || typeInfo.MemberType.IsValueType);
     }
 
-    public class BlueprintRecordReader<TRecord> : BlueprintRecordReader where TRecord : class
+    public class BlueprintRecordReader<TRecord> : BlueprintRecordReader
     {
         public BlueprintRecordReader(Type blueprintType) : base(blueprintType, typeof(TRecord)) { }
 
