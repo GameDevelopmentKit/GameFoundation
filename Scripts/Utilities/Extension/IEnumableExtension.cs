@@ -601,7 +601,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         ///     Adds element to <paramref name="collection" /> only if it isn't null. Returns <c>true</c> if element was
         ///     added.
         /// </summary>
-        public static bool AddNotNull<T>(this ICollection<T> collection, T? element) where T : class
+        public static bool AddNotNull<T>(this ICollection<T> collection, T? element)
         {
             if (element == null) return false;
             collection.Add(element);

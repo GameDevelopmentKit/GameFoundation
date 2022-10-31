@@ -92,7 +92,7 @@ namespace BlueprintFlow.BlueprintReader
     }
 
     // Need to be public due to reflection construction
-    public class BlueprintByRow<TRecord> : List<TRecord>, IBlueprintCollection where TRecord : class
+    public class BlueprintByRow<TRecord> : List<TRecord>, IBlueprintCollection
     {
         private readonly BlueprintRecordReader<TRecord> blueprintRecordReader;
 
