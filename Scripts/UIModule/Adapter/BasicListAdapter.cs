@@ -26,7 +26,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         [Inject]
         public void Constructor(DiContainer diContainer)
         {
-            Debug.Log("Inject into BasicListAdapter");
             this.diContainer = diContainer;
         }
 

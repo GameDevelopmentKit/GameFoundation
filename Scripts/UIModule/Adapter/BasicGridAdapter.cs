@@ -5,23 +5,35 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     using System.Collections.Generic;
     using Com.TheFallenGames.OSA.CustomAdapters.GridView;
     using Com.TheFallenGames.OSA.DataHelpers;
+    using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
+    using Zenject;
 
     // There is 1 important callback you need to implement, apart from Start(): UpdateCellViewsHolder()
     // See explanations below
-    public class BasicGridAdapter : GridAdapter<GridParams, MyGridItemViewsHolder>
+    public class BasicGridAdapter<TModel, TView, TPresenter> : GridAdapter<GridParams, MyGridItemViewsHolder>
+        where TModel : new() where TPresenter : BaseUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public  SimpleDataHelper<MyGridItemModel> Data { get; private set; }
-        public  Action<MyGridItemViewsHolder>     UpdateCellViewHolder;
-        private CanvasGroup                       canvasGroup;
+        public  SimpleDataHelper<TModel> Models { get; private set; }
+        private CanvasGroup              canvasGroup;
+        private List<TPresenter>         presenters;
+        
+        private DiContainer diContainer;
+        
+        [Inject]
+        public void Constructor(DiContainer diContainer)
+        {
+            this.diContainer = diContainer;
+        }
 
         #region GridAdapter implementation
 
         protected override void Start()
         {
-            this.Data = new SimpleDataHelper<MyGridItemModel>(this);
+            this.Models = new SimpleDataHelper<TModel>(this);
 
             // Calling this initializes internal data and prepares the adapter to handle item count changes
             base.Start();
@@ -42,15 +54,30 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             this.canvasGroup.alpha = alpha;
         }
+        
         // This is called anytime a previously invisible item become visible, or after it's created, 
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
         // *For the method's full description check the base implementation
-        protected override void UpdateCellViewsHolder(MyGridItemViewsHolder newOrRecycled)
+        protected override void UpdateCellViewsHolder(MyGridItemViewsHolder v)
         {
-            this.UpdateCellViewHolder?.Invoke(newOrRecycled);
+            var index      = v.ItemIndex;
+            var model      = this.Models[index];
+            var viewObject = v.root.GetComponentInChildren<TView>(true);
+            if (this.presenters.Count == index)
+            {
+                var p = this.diContainer.Instantiate<TPresenter>();
+                p.SetView(viewObject);
+                p.BindData(model);
+                this.presenters.Add(p);
+            }
+            else
+            {
+                this.presenters[index].SetView(viewObject);
+                this.presenters[index].BindData(model);
+            }
         }
-      
+
         #endregion
 
         // These are common data manipulation methods
@@ -60,23 +87,23 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         #region data manipulation
 
-        public void AddItemsAt(int index, IList<MyGridItemModel> items)
+        public void AddItemsAt(int index, IList<TModel> items)
         {
             //Commented: this only works with Lists. ATM, Insert for Grids only works by manually changing the list and calling NotifyListChangedExternally() after
             //Data.InsertItems(index, items);
-            this.Data.List.InsertRange(index, items);
-            this.Data.NotifyListChangedExternally();
+            this.Models.List.InsertRange(index, items);
+            this.Models.NotifyListChangedExternally();
         }
 
         public void RemoveItemsFrom(int index, int count)
         {
             //Commented: this only works with Lists. ATM, Remove for Grids only works by manually changing the list and calling NotifyListChangedExternally() after
             //Data.RemoveRange(index, count);
-            this.Data.List.RemoveRange(index, count);
-            this.Data.NotifyListChangedExternally();
+            this.Models.List.RemoveRange(index, count);
+            this.Models.NotifyListChangedExternally();
         }
 
-        public void SetItems(IList<MyGridItemModel> items) { this.Data.ResetItems(items); }
+        public void SetItems(IList<TModel> items) { this.Models.ResetItems(items); }
 
         #endregion
 
@@ -91,33 +118,30 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             // Simulating data retrieving delay
             yield return new WaitForSeconds(0f);
 
-            var newItems = new MyGridItemModel[count];
+            var newItems = new TModel[count];
 
-          
 
             this.OnDataRetrieved(newItems);
         }
 
-        void OnDataRetrieved(MyGridItemModel[] newItems)
+        void OnDataRetrieved(TModel[] newItems)
         {
             //Commented: this only works with Lists. ATM, Insert for Grids only works by manually changing the list and calling NotifyListChangedExternally() after
             // Data.InsertItemsAtEnd(newItems);
 
-            this.Data.List.AddRange(newItems);
-            this.Data.NotifyListChangedExternally();
+            this.Models.List.AddRange(newItems);
+            this.Models.NotifyListChangedExternally();
+        }
+        
+        public async void InitItemAdapter(List<TModel> modelList)
+        {
+            this.Models     = new SimpleDataHelper<TModel>(this);
+            this.presenters = new List<TPresenter>();
+
+            await UniTask.WaitUntil(() => this.IsInitialized);
+            this.Models.InsertItems(0, modelList);
         }
     }
-
-
-    // Class containing the data associated with an item
-    public class MyGridItemModel
-    {
-        /*
-        public string title;
-        public Color color;
-        */
-    }
-
 
     // This class keeps references to an item's views.
     // Your views holder should extend BaseItemViewsHolder for ListViews and CellViewsHolder for GridViews
@@ -125,6 +149,5 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     // UI elements. A cell's root is never disabled - when a cell is removed, only its "views" GameObject will be disabled
     public class MyGridItemViewsHolder : CellViewsHolder
     {
-      
     }
 }
