@@ -45,6 +45,11 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// <returns></returns>
         public static  DiContainer GetCurrentContainer(this object obj)
         {
+            return  GetCurrentContainer();
+        }
+        
+        public static DiContainer GetCurrentContainer()
+        {
             if (currentSceneContext == null)
             {
                 currentSceneContext = Object.FindObjectOfType<SceneContext>();

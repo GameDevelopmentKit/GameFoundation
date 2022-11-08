@@ -56,5 +56,26 @@
                 list.Add(item);
             }
         }
+        
+        public static bool TryGetItem<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource item, out int index)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof (source));
+            if (predicate == null)
+                throw new ArgumentNullException(nameof (predicate));
+            index = 0;
+            foreach (TSource source1 in source)
+            {
+                if (predicate(source1))
+                {
+                    item = source1;
+                    return true;
+                }
+                index++;
+            }
+
+            item = default;
+            return false;
+        }
     }
 }
