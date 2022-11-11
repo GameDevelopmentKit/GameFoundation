@@ -15,7 +15,7 @@
         "UniTask.Addressables",
         "Zenject-Source",
         "Zenject-Signals",
-        "DG.Tween.Modules"
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
