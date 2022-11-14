@@ -77,7 +77,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             var index      = v.ItemIndex;
             var model      = this.Models[index];
             var viewObject = v.root.GetComponentInChildren<TView>(true);
-            if (this.presenters.Count == index)
+            if (this.presenters.Count >= index)
             {
                 var p = this.diContainer.Instantiate<TPresenter>();
                 p.SetView(viewObject);
