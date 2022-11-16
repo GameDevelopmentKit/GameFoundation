@@ -21,9 +21,7 @@ namespace BlueprintFlow.BlueprintReader
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class NestedBlueprintAttribute : Attribute
-    {
-    }
+    public class NestedBlueprintAttribute : Attribute { }
 
 
     /// <summary>
@@ -125,7 +123,7 @@ namespace BlueprintFlow.BlueprintReader
         private readonly List<MemberInfo> fieldAndProperties;
         private          List<MemberInfo> blueprintCollectionMemberInfos;
 
-        private List<IBlueprintCollection>  listBlueprintCollections;
+        private List<IBlueprintCollection>                    listBlueprintCollections;
         private Dictionary<MemberInfo, BlueprintRecordReader> nestedMemberInfoToRecordReader;
 
         public string RequireKey;
@@ -223,7 +221,8 @@ namespace BlueprintFlow.BlueprintReader
 
         public List<List<string>> ToRawData(object inputObject, bool containHeader = false)
         {
-            var result = new List<List<string>>();
+            var result                  = new List<List<string>>();
+            var notCollectionFieldCount = this.fieldAndProperties.Count;
             if (containHeader) result.Add(this.fieldAndProperties.Select(memberInfo => memberInfo.MemberName).ToList());
 
             var newRow = new List<string>();
@@ -232,6 +231,20 @@ namespace BlueprintFlow.BlueprintReader
             {
                 var converter = CsvHelper.TypeConverterCache.GetConverter(memberInfo.MemberType);
                 newRow.Add(converter.ConvertToString(memberInfo.GetValue(inputObject), memberInfo.MemberType));
+            }
+
+            if (this.nestedMemberInfoToRecordReader != null)
+            {
+                foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
+                {
+                    notCollectionFieldCount += recordReader.fieldAndProperties.Count;
+                    var nestedObj              = nestedMemberInfo.GetValue(inputObject);
+                    var nestedBlueprintRawData = recordReader.ToRawData(nestedObj, containHeader);
+                    for (int i = 0; i < nestedBlueprintRawData.Count; i++)
+                    {
+                        result[i].AddRange(nestedBlueprintRawData[i]);
+                    }
+                }
             }
 
 
@@ -243,7 +256,7 @@ namespace BlueprintFlow.BlueprintReader
                     for (var index = 0; index < subBlueprintRawData.Count; index++)
                     {
                         if (index > result.Count - 1)
-                            result.Add(Enumerable.Repeat(string.Empty, this.fieldAndProperties.Count).ToList());
+                            result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
 
                         result[index].AddRange(subBlueprintRawData[index]);
                     }
