@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.Utilities.ObjectPool
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -243,8 +244,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             }
             else
             {
-                Debug.LogWarning($"Can't recycle object {obj.Path()}");
-                Object.Destroy(obj);
+                throw new Exception($"Can't recycle object {obj.Path()}, maybe you already recycled it!");
             }
         }
 
