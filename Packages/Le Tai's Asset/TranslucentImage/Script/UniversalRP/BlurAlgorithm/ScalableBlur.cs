@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting.APIUpdating;
@@ -11,6 +12,7 @@ public class ScalableBlur : IBlurAlgorithm
     Shader             shader;
     Material           material;
     ScalableBlurConfig config;
+    BlitMode           blitMode;
 
     const int BLUR_PASS      = 0;
     const int CROP_BLUR_PASS = 1;
@@ -27,9 +29,22 @@ public class ScalableBlur : IBlurAlgorithm
         set => material = value;
     }
 
-    public void Init(BlurConfig config)
+    public void Init(BlurConfig config, BlitMode blitMode)
     {
-        this.config = (ScalableBlurConfig) config;
+        this.config   = (ScalableBlurConfig)config;
+        this.blitMode = blitMode;
+
+        switch (blitMode)
+        {
+        case BlitMode.Procedural:
+            Material.EnableKeyword("PROCEDURAL_QUAD");
+            break;
+        case BlitMode.Triangle:
+            Material.DisableKeyword("PROCEDURAL_QUAD");
+            break;
+        default:
+            throw new ArgumentOutOfRangeException(nameof(blitMode), blitMode, null);
+        }
     }
 
     public void Blur(CommandBuffer          cmd,
@@ -47,7 +62,7 @@ public class ScalableBlur : IBlurAlgorithm
 
         int firstIRT = ShaderId.intermediateRT[0];
         CreateTempRenderTextureFrom(cmd, firstIRT, target, firstDownsampleFactor);
-        cmd.BlitFullscreenTriangle(src, firstIRT, Material, CROP_BLUR_PASS);
+        cmd.BlitCustom(src, firstIRT, Material, CROP_BLUR_PASS, blitMode);
 
 
         for (var i = 1; i < stepCount; i++)
@@ -55,10 +70,11 @@ public class ScalableBlur : IBlurAlgorithm
             BlurAtDepth(cmd, i, target);
         }
 
-        cmd.BlitFullscreenTriangle(ShaderId.intermediateRT[stepCount - 1],
-                           target,
-                           Material,
-                           BLUR_PASS);
+        cmd.BlitCustom(ShaderId.intermediateRT[stepCount - 1],
+                       target,
+                       Material,
+                       BLUR_PASS,
+                       blitMode);
 
         CleanupIntermediateRT(cmd, stepCount);
     }
@@ -81,9 +97,10 @@ public class ScalableBlur : IBlurAlgorithm
         sizeLevel = Mathf.Min(sizeLevel, config.MaxDepth);
         CreateTempRenderTextureFrom(cmd, ShaderId.intermediateRT[depth], baseTexture, sizeLevel);
 
-        cmd.BlitFullscreenTriangle(ShaderId.intermediateRT[depth - 1],
-                           ShaderId.intermediateRT[depth],
-                           Material, 0);
+        cmd.BlitCustom(ShaderId.intermediateRT[depth - 1],
+                       ShaderId.intermediateRT[depth],
+                       Material, 0,
+                       blitMode);
     }
 
     private void CleanupIntermediateRT(CommandBuffer cmd, int amount)

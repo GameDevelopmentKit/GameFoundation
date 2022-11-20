@@ -19,6 +19,8 @@ struct TISPassData
     public RenderTargetIdentifier cameraColorTarget;
     public TranslucentImageSource blurSource;
     public IBlurAlgorithm         blurAlgorithm;
+    public RenderOrder            renderOrder;
+    public BlitMode               blitMode;
     public bool                   isPreviewing;
 }
 
@@ -68,15 +70,18 @@ public class TranslucentImageBlurRenderPass : ScriptableRenderPass
 #if URP12_OR_NEWER
         if (currentPassData.rendererType == RendererType.Universal)
         {
-            source = universalRendererInternal.GetBackBuffer().Identifier();
+            source = universalRendererInternal.GetBackBuffer();
         }
         else
         {
 #endif
-            source = renderingData.cameraData.postProcessEnabled
-                         ? afterPostprocessTexture
-                         : currentPassData.cameraColorTarget;
-
+        bool useAfterPostTex = renderingData.cameraData.postProcessEnabled;
+#if URP12_OR_NEWER
+            useAfterPostTex &= currentPassData.renderOrder == RenderOrder.AfterPostProcessing;
+#endif
+        source = useAfterPostTex
+                     ? afterPostprocessTexture
+                     : currentPassData.cameraColorTarget;
 #if URP12_OR_NEWER
         }
 #endif
@@ -90,10 +95,11 @@ public class TranslucentImageBlurRenderPass : ScriptableRenderPass
         {
             PreviewMaterial.SetVector(ShaderIdCommon.CROP_REGION,
                                       currentPassData.blurSource.BlurRegion.ToMinMaxVector());
-            cmd.BlitFullscreenTriangle(currentPassData.blurSource.BlurredScreen,
-                                       source,
-                                       PreviewMaterial,
-                                       0);
+            cmd.BlitCustom(currentPassData.blurSource.BlurredScreen,
+                           source,
+                           PreviewMaterial,
+                           0,
+                           BlitMode.Triangle);
         }
 
         context.ExecuteCommandBuffer(cmd);

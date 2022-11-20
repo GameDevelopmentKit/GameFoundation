@@ -22,7 +22,7 @@ namespace LeTai.Asset.TranslucentImage
             set
             {
                 m_spriteBlending = value;
-                SetLayoutDirty();
+                SetVerticesDirty();
             }
         }
 

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Scripting.APIUpdating;
 using Debug = UnityEngine.Debug;
@@ -13,8 +13,12 @@ namespace LeTai.Asset.TranslucentImage.UniversalRP
 {
 class UniversalRendererInternal
 {
-    ScriptableRenderer       renderer;
+    ScriptableRenderer renderer;
+#if UNITY_2022_1_OR_NEWER
+    Func<RTHandle> getBackBufferDelegate;
+#else
     Func<RenderTargetHandle> getBackBufferDelegate;
+#endif
 
     public void CacheRenderer(ScriptableRenderer renderer)
     {
@@ -22,6 +26,11 @@ class UniversalRendererInternal
         if (this.renderer == renderer) return;
 
         this.renderer = renderer;
+#if UNITY_2022_1_OR_NEWER
+        const string backBufferMethodName = "PeekBackBuffer";
+#else
+        const string backBufferMethodName = "GetBackBuffer";
+#endif
 
         if (renderer is UniversalRenderer ur)
         {
@@ -31,14 +40,18 @@ class UniversalRendererInternal
                         .GetValue(ur);
             var gbb = cbs.GetType()
                          .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                         .First(m => m.Name == "GetBackBuffer"
+                         .First(m => m.Name == backBufferMethodName
                                   && m.GetParameters().Length == 0);
+#if UNITY_2022_1_OR_NEWER
+            getBackBufferDelegate = (Func<RTHandle>)gbb.CreateDelegate(typeof(Func<RTHandle>), cbs);
+#else
             getBackBufferDelegate = (Func<RenderTargetHandle>)gbb.CreateDelegate(typeof(Func<RenderTargetHandle>), cbs);
+#endif
         }
 #endif
     }
 
-    public RenderTargetHandle GetBackBuffer()
+    public RenderTargetIdentifier GetBackBuffer()
     {
         Debug.Assert(getBackBufferDelegate != null);
 
@@ -46,19 +59,41 @@ class UniversalRendererInternal
         var r = getBackBufferDelegate.Invoke();
         // sw.Stop();
         // Debug.Log($"{sw.Elapsed.TotalMilliseconds}");
-        return r;
+#if UNITY_2022_1_OR_NEWER
+        return r.nameID;
+#else
+        return r.Identifier();
+#endif
     }
+}
+
+public enum RenderOrder
+{
+    AfterPostProcessing,
+    BeforePostProcessing,
 }
 
 [MovedFrom("LeTai.Asset.TranslucentImage.LWRP")]
 public class TranslucentImageBlurSource : ScriptableRendererFeature
 {
+#if URP12_OR_NEWER
+    public RenderOrder renderOrder = RenderOrder.AfterPostProcessing;
+#endif
+    public BlitMode blitMode = BlitMode.Procedural;
+
     readonly Dictionary<Camera, TranslucentImageSource> tisCache = new Dictionary<Camera, TranslucentImageSource>();
 
     UniversalRendererInternal      universalRendererInternal;
     TranslucentImageBlurRenderPass pass;
     IBlurAlgorithm                 blurAlgorithm;
 
+    BlitMode GetActiveBlitMode()
+    {
+        if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2)
+            return BlitMode.Triangle;
+
+        return blitMode;
+    }
 
     /// <summary>
     /// When adding new Translucent Image Source to existing Camera at run time, the new Source must be registered here
@@ -76,46 +111,95 @@ public class TranslucentImageBlurSource : ScriptableRendererFeature
         blurAlgorithm = new ScalableBlur();
 
         universalRendererInternal = new UniversalRendererInternal();
-        pass = new TranslucentImageBlurRenderPass(universalRendererInternal) {
+
+        // ReSharper disable once JoinDeclarationAndInitializer
+        RenderPassEvent renderPassEvent;
 #if URP12_OR_NEWER
-            renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing
+        renderPassEvent = renderOrder == RenderOrder.BeforePostProcessing
+                              ? RenderPassEvent.BeforeRenderingPostProcessing
+                              : RenderPassEvent.AfterRenderingPostProcessing;
 #else
-            renderPassEvent = RenderPassEvent.AfterRendering
+        renderPassEvent = RenderPassEvent.AfterRendering;
 #endif
+        pass = new TranslucentImageBlurRenderPass(universalRendererInternal) {
+            renderPassEvent = renderPassEvent
         };
 
         tisCache.Clear();
     }
 
+    void Setup(ScriptableRenderer renderer, in RenderingData renderingData)
+    {
+        var cameraData = renderingData.cameraData;
+        var tis        = GetTIS(cameraData.camera);
+
+        if (tis == null)
+            return;
+
+        RendererType rendererType = RendererType.Universal;
+
+        if (renderer is UniversalRenderer)
+        {
+            universalRendererInternal.CacheRenderer(renderer);
+        }
+        else
+        {
+            rendererType = RendererType.Renderer2D;
+        }
+#if UNITY_BUGGED_HAS_PASSES_AFTER_POSTPROCESS
+        bool applyFinalPostProcessing = renderingData.postProcessingEnabled
+                                     && cameraData.resolveFinalTarget
+                                     && (cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing
+                                        );
+        pass.renderPassEvent = applyFinalPostProcessing ? RenderPassEvent.AfterRenderingPostProcessing : RenderPassEvent.AfterRendering;
+#endif
+
+        var passData = new TISPassData {
+            rendererType = rendererType,
+#if UNITY_2022_1_OR_NEWER
+            cameraColorTarget = renderer.cameraColorTargetHandle,
+#else
+            cameraColorTarget = renderer.cameraColorTarget,
+#endif
+            blurAlgorithm = blurAlgorithm,
+#if URP12_OR_NEWER
+            renderOrder   = renderOrder,
+#endif
+            blitMode      = GetActiveBlitMode(),
+            blurSource    = tis,
+            isPreviewing  = tis.preview,
+        };
+
+        pass.Setup(passData);
+    }
+
+#if UNITY_2022_1_OR_NEWER
+    public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
+    {
+        Setup(renderer, renderingData);
+    }
+#endif
+
     public override void AddRenderPasses(ScriptableRenderer renderer,
                                          ref RenderingData  renderingData)
     {
+#if !UNITY_2022_1_OR_NEWER
+        Setup(renderer, renderingData);
+#endif
+
+        if(!(renderer is UniversalRenderer))
+        {
+            Debug.LogError("Only Forward/Universal Renderer is supported in URP");
+            return;
+        }
+
         var tis = GetTIS(renderingData.cameraData.camera);
 
         if (tis == null || !tis.shouldUpdateBlur())
             return;
 
         tis.OnBeforeBlur();
-        blurAlgorithm.Init(tis.BlurConfig);
-        RendererType rendererType = RendererType.Universal;
-        if (renderer.ToString() == "UnityEngine.Rendering.Universal.Renderer2D")
-        {
-            rendererType = RendererType.Renderer2D;
-        }
-        else
-        {
-            universalRendererInternal.CacheRenderer(renderer);
-        }
-
-        var passData = new TISPassData {
-            rendererType      = rendererType,
-            cameraColorTarget = renderer.cameraColorTarget,
-            blurAlgorithm     = blurAlgorithm, //hack for now
-            blurSource        = tis,
-            isPreviewing      = tis.preview
-        };
-
-        pass.Setup(passData);
+        blurAlgorithm.Init(tis.BlurConfig, GetActiveBlitMode());
 
         renderer.EnqueuePass(pass);
     }

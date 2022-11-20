@@ -24,7 +24,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private Coroutine        showImageCoroutine;
         private SignalBus        signalBus;
 
-        private readonly Dictionary<Type, PopupInfoAttribute> popupInfoPool = new Dictionary<Type, PopupInfoAttribute>();
+        private readonly Dictionary<Type, PopupInfoAttribute> popupInfoPool = new();
 
 
         [Inject]

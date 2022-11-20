@@ -39,7 +39,7 @@ public partial class TranslucentImage : Image, IMeshModifier
     static readonly int _blurTexPropId    = Shader.PropertyToID("_BlurTex");
     static readonly int _cropRegionPropId = Shader.PropertyToID("_CropRegion");
 
-    Material replacedMaterial;
+    Material materialForRenderingCached;
     bool     shouldRun;
 
     protected override void Start()
@@ -51,8 +51,19 @@ public partial class TranslucentImage : Image, IMeshModifier
         oldFlatten    = flatten;
 
         AutoAcquireSource();
-        if (source && material)
-            material.SetTexture(_blurTexPropId, source.BlurredScreen);
+
+        if (material)
+        {
+            //Have to use string comparison as Addressable break object comparision :(
+            if (Application.isPlaying && material.shader.name != "UI/TranslucentImage")
+            {
+                Debug.LogWarning("Translucent Image requires a material using the \"UI/TranslucentImage\" shader");
+            }
+            else if (source)
+            {
+                material.SetTexture(_blurTexPropId, source.BlurredScreen);
+            }
+        }
 
 #if UNITY_5_6_OR_NEWER
         if (canvas)
@@ -103,13 +114,6 @@ public partial class TranslucentImage : Image, IMeshModifier
         if (!source.BlurredScreen)
             return false;
 
-        // Have to use string comparison as Addressable break object comparision :(
-        if (material.shader.name != "UI/TranslucentImage")
-        {
-            Debug.LogWarning("Translucent Image requires a material using the \"UI/TranslucentImage\" shader");
-            return false;
-        }
-
         return true;
     }
 
@@ -117,24 +121,14 @@ public partial class TranslucentImage : Image, IMeshModifier
     {
         if (!shouldRun) return;
 
-        if (replacedMaterial)
+        // After re-enabled
+        if (!materialForRenderingCached)
         {
-            replacedMaterial.SetTexture(_blurTexPropId, source.BlurredScreen);
-            replacedMaterial.SetVector(_cropRegionPropId, source.BlurRegionNormalizedScreenSpace.ToMinMaxVector());
-        }
-        else
-        {
-            material.SetTexture(_blurTexPropId, source.BlurredScreen);
-            material.SetVector(_cropRegionPropId, source.BlurRegionNormalizedScreenSpace.ToMinMaxVector());
+            materialForRenderingCached = materialForRendering;
         }
 
-#if UNITY_EDITOR
-        if (!Application.isPlaying && replacedMaterial)
-        {
-            material.SetTexture(_blurTexPropId, source.BlurredScreen);
-            material.SetVector(_cropRegionPropId, source.BlurRegionNormalizedScreenSpace.ToMinMaxVector());
-        }
-#endif
+        materialForRenderingCached.SetTexture(_blurTexPropId, source.BlurredScreen);
+        materialForRenderingCached.SetVector(_cropRegionPropId, source.BlurRegionNormalizedScreenSpace.ToMinMaxVector());
     }
 
     void Update()
@@ -145,7 +139,7 @@ public partial class TranslucentImage : Image, IMeshModifier
         if (_vibrancyPropId == 0 || _brightnessPropId == 0 || _flattenPropId == 0)
             return;
 
-        replacedMaterial = materialForRendering;
+        materialForRenderingCached = materialForRendering;
 
         SyncMaterialProperty(_vibrancyPropId,   ref vibrancy,   ref oldVibrancy);
         SyncMaterialProperty(_brightnessPropId, ref brightness, ref oldBrightness);
@@ -167,8 +161,8 @@ public partial class TranslucentImage : Image, IMeshModifier
         {
             if (Mathf.Abs(value - oldValue) > 1e-4)
             {
-                if (replacedMaterial)
-                    replacedMaterial.SetFloat(propId, value);
+                if (materialForRenderingCached)
+                    materialForRenderingCached.SetFloat(propId, value);
 
                 material.SetFloat(propId, value);
                 SetMaterialDirty();

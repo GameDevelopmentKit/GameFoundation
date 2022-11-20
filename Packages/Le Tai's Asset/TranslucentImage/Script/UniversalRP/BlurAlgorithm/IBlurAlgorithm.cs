@@ -13,7 +13,7 @@ public enum BlurAlgorithmType
 [MovedFrom("LeTai.Asset.TranslucentImage.LWRP")]
 public interface IBlurAlgorithm
 {
-    void Init(BlurConfig config);
+    void Init(BlurConfig config, BlitMode blitMode);
 
     void Blur(CommandBuffer          cmd,
               RenderTargetIdentifier src,

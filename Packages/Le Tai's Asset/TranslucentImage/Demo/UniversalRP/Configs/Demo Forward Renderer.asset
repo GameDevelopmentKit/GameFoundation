@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RendererFeatures:
   - {fileID: 6360919674349005157}
-  m_RendererFeatureMap: 
+  m_RendererFeatureMap: 0519d7d612323b58
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   shaders:
     blitPS: {fileID: 4800000, guid: c17132b1f77d20942aa75f8429c0f8bc, type: 3}
@@ -50,3 +50,4 @@ MonoBehaviour:
   m_Name: TranslucentImageBlurSource
   m_EditorClassIdentifier: 
   m_Active: 1
+  blitMode: 0
