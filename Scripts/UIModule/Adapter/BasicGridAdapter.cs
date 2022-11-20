@@ -1,7 +1,5 @@
 namespace GameFoundation.Scripts.UIModule.Adapter
 {
-    using System;
-    using System.Collections;
     using System.Collections.Generic;
     using Com.TheFallenGames.OSA.CustomAdapters.GridView;
     using Com.TheFallenGames.OSA.DataHelpers;
@@ -12,22 +10,18 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
     // There is 1 important callback you need to implement, apart from Start(): UpdateCellViewsHolder()
     // See explanations below
-    public class BasicGridAdapter<TModel, TView, TPresenter> : GridAdapter<GridParams, MyGridItemViewsHolder>
-        where TModel : new() where TPresenter : BaseUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
+    public class BasicGridAdapter<TModel, TView, TPresenter> : GridAdapter<GridParams, MyGridItemViewsHolder> where TPresenter : BaseUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
         public  SimpleDataHelper<TModel> Models { get; private set; }
         private CanvasGroup              canvasGroup;
         private List<TPresenter>         presenters;
-        
+
         private DiContainer diContainer;
-        
+
         [Inject]
-        public void Constructor(DiContainer diContainer)
-        {
-            this.diContainer = diContainer;
-        }
+        public void Constructor(DiContainer diContainer) { this.diContainer = diContainer; }
 
         #region GridAdapter implementation
 
@@ -44,17 +38,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             */
         }
 
-        public void SetViewAlpha(float alpha)
-        {
-            this.canvasGroup = this.GetComponent<CanvasGroup>();
-            if (this.canvasGroup == null)
-            {
-                this.canvasGroup = this.gameObject.AddComponent<CanvasGroup>();
-            }
-
-            this.canvasGroup.alpha = alpha;
-        }
-        
         // This is called anytime a previously invisible item become visible, or after it's created, 
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
@@ -62,9 +45,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override void UpdateCellViewsHolder(MyGridItemViewsHolder v)
         {
             var index      = v.ItemIndex;
+            if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
             var viewObject = v.root.GetComponentInChildren<TView>(true);
-            if (this.presenters.Count >= index)
+            if (this.presenters.Count <= index)
             {
                 var p = this.diContainer.Instantiate<TPresenter>();
                 p.SetView(viewObject);
@@ -74,6 +58,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             else
             {
                 this.presenters[index].SetView(viewObject);
+                this.presenters[index].Dispose();
                 this.presenters[index].BindData(model);
             }
         }
@@ -85,54 +70,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. 
         // For GridAdapters, only Refresh and ResetItems work for now
 
-        #region data manipulation
-
-        public void AddItemsAt(int index, IList<TModel> items)
-        {
-            //Commented: this only works with Lists. ATM, Insert for Grids only works by manually changing the list and calling NotifyListChangedExternally() after
-            //Data.InsertItems(index, items);
-            this.Models.List.InsertRange(index, items);
-            this.Models.NotifyListChangedExternally();
-        }
-
-        public void RemoveItemsFrom(int index, int count)
-        {
-            //Commented: this only works with Lists. ATM, Remove for Grids only works by manually changing the list and calling NotifyListChangedExternally() after
-            //Data.RemoveRange(index, count);
-            this.Models.List.RemoveRange(index, count);
-            this.Models.NotifyListChangedExternally();
-        }
-
-        public void SetItems(IList<TModel> items) { this.Models.ResetItems(items); }
-
-        #endregion
-
-
-        // Here, we're requesting <count> items from the data source
-        void RetrieveDataAndUpdate(int count) { this.StartCoroutine(this.FetchMoreItemsFromDataSourceAndUpdate(count)); }
-
-        // Retrieving <count> models from the data source and calling OnDataRetrieved after.
-        // In a real case scenario, you'd query your server, your database or whatever is your data source and call OnDataRetrieved after
-        IEnumerator FetchMoreItemsFromDataSourceAndUpdate(int count)
-        {
-            // Simulating data retrieving delay
-            yield return new WaitForSeconds(0f);
-
-            var newItems = new TModel[count];
-
-
-            this.OnDataRetrieved(newItems);
-        }
-
-        void OnDataRetrieved(TModel[] newItems)
-        {
-            //Commented: this only works with Lists. ATM, Insert for Grids only works by manually changing the list and calling NotifyListChangedExternally() after
-            // Data.InsertItemsAtEnd(newItems);
-
-            this.Models.List.AddRange(newItems);
-            this.Models.NotifyListChangedExternally();
-        }
-        
         public async void InitItemAdapter(List<TModel> modelList)
         {
             this.Models     = new SimpleDataHelper<TModel>(this);
