@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using FMODUnity;
-using Newtonsoft.Json;
-using Photon.Pun;
+using GameFoundation.Scripts;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -15,47 +13,61 @@ using UnityEngine;
 // ------------------------------------------------------------------------
 // https://docs.unity3d.com/Manual/CommandLineArguments.html
 // ------------------------------------------------------------------------
-public static class MNABuild
+public static class Build
 {
-    public const string PlatformOsx = "osx-x64";
+    public const string PlatformOsx   = "osx-x64";
     public const string PlatformWin64 = "win-x64";
     public const string PlatformWin32 = "win-x86";
-
+    public const string PlatformAndroid = "win-x86";
+    public const string PlatformIOS = "win-x86";
+    public const string PlatformWebGL = "win-x86";
+    
     public class BuildTargetInfo
     {
         public string Platform; // eg "win-x64"
         public BuildTarget BuildTarget;
         public BuildTargetGroup BuildTargetGroup;
-        public string OutputPath; // eg "PC/MyNeighborAlice.exe"
     }
 
-    private static readonly List<BuildTargetInfo> Targets = new List<BuildTargetInfo>
-                                                           {
-                                                               new BuildTargetInfo
-                                                               {
-                                                                   Platform = PlatformWin32, BuildTarget = BuildTarget.StandaloneWindows, BuildTargetGroup = BuildTargetGroup.Standalone, OutputPath = $"{PlatformWin32}/MyNeighborAlice.exe"
-                                                               },
-                                                               new BuildTargetInfo
-                                                               {
-                                                                   Platform = PlatformWin64, BuildTarget = BuildTarget.StandaloneWindows64, BuildTargetGroup = BuildTargetGroup.Standalone, OutputPath = $"{PlatformWin64}/MyNeighborAlice.exe"
-                                                               },
-                                                               new BuildTargetInfo
-                                                               {
-                                                                   Platform = PlatformOsx, BuildTarget = BuildTarget.StandaloneOSX, BuildTargetGroup = BuildTargetGroup.Standalone, OutputPath = $"{PlatformOsx}/MyNeighborAlice.app"
-                                                               }
-                                                           };
+    private static readonly List<BuildTargetInfo> Targets = new()
+                                                            {
+                                                                      new BuildTargetInfo
+                                                                      {
+                                                                          Platform = PlatformWin32, BuildTarget = BuildTarget.StandaloneWindows, BuildTargetGroup = BuildTargetGroup.Standalone
+                                                                      },
+                                                                      new BuildTargetInfo
+                                                                      {
+                                                                          Platform = PlatformWin64, BuildTarget = BuildTarget.StandaloneWindows64, BuildTargetGroup = BuildTargetGroup.Standalone
+                                                                      },
+                                                                      new BuildTargetInfo
+                                                                      {
+                                                                          Platform = PlatformOsx, BuildTarget = BuildTarget.StandaloneOSX, BuildTargetGroup = BuildTargetGroup.Standalone
+                                                                      },
+                                                                      new BuildTargetInfo
+                                                                      {
+                                                                          Platform = PlatformAndroid, BuildTarget = BuildTarget.Android, BuildTargetGroup = BuildTargetGroup.Android
+                                                                      },
+                                                                      new BuildTargetInfo
+                                                                      {
+                                                                          Platform = PlatformIOS, BuildTarget = BuildTarget.iOS, BuildTargetGroup = BuildTargetGroup.iOS
+                                                                      },
+                                                                      new BuildTargetInfo
+                                                                      {
+                                                                          Platform = PlatformWebGL, BuildTarget = BuildTarget.WebGL, BuildTargetGroup = BuildTargetGroup.WebGL
+                                                                      }
+                                                                  };
 
-    private static BuildTargetInfo defaultBuildTargetInfo = Targets.First(info => info.Platform.Equals(PlatformWin64));
     static string[] SCENES = FindEnabledEditorScenes();
 
     public static void BuildMNAFromCommandLine()
     {
         // Grab the CSV platforms string
-        var platforms = string.Join(";", Targets.Select(t => t.Platform));
-        var scriptingBackend = ScriptingImplementation.Mono2x;
-        var args = Environment.GetCommandLineArgs();
-        var buildOptions = BuildOptions.None;
+        var platforms              = string.Join(";", Targets.Select(t => t.Platform));
+        var scriptingBackend       = ScriptingImplementation.Mono2x;
+        var args                   = Environment.GetCommandLineArgs();
+        var buildOptions           = BuildOptions.None;
         var scriptingDefineSymbols = string.Empty;
+        var outputPath             = "template.exe";
         for (var i = 0; i < args.Length; ++i)
         {
             switch (args[i])
@@ -64,16 +76,12 @@ public static class MNABuild
                     platforms = args[++i];
                     break;
                 case "-scriptingBackend":
-                    switch (args[++i].ToLowerInvariant())
-                    {
-                        case "il2cpp":
-                            scriptingBackend = ScriptingImplementation.IL2CPP;
-                            break;
-                        case "mono":
-                            scriptingBackend = ScriptingImplementation.Mono2x;
-                            break;
-                        default: throw new Exception("Unknown scripting backend");
-                    }
+                    scriptingBackend = args[++i].ToLowerInvariant() switch
+                                       {
+                                           "il2cpp" => ScriptingImplementation.IL2CPP,
+                                           "mono"   => ScriptingImplementation.Mono2x,
+                                           _        => throw new Exception("Unknown scripting backend")
+                                       };
 
                     break;
                 case "-development":
@@ -81,6 +89,9 @@ public static class MNABuild
                     break;
                 case "-scriptingDefineSymbols":
                     scriptingDefineSymbols = args[++i];
+                    break;
+                case "-outputPath":
+                    outputPath = args[++i];
                     break;
             }
         }
@@ -91,21 +102,16 @@ public static class MNABuild
 
         // Get a list of targets to build
         var plaftformTargets = platforms.Split(';');
-        BuildMNAInternal(scriptingBackend, buildOptions, plaftformTargets, scriptingDefineSymbols);
+        BuildMNAInternal(scriptingBackend, buildOptions, plaftformTargets, outputPath, scriptingDefineSymbols);
     }
 
-    public static void BuildMNAInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string scriptingDefineSymbols = "")
+    public static void BuildMNAInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "")
     {
         MNABuildTools.ResetBuildSettings();
-        SetApplicationVersion();
-
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
-
-        // Log which targets we're gonna build
-        Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray()));
+        Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray())); // Log which targets we're gonna build
 
         var errors = false;
-        BuildAddressable();
         foreach (var platform in platforms)
         {
             Console.WriteLine($"----------{new string('-', platform.Platform.Length)}");
@@ -113,6 +119,8 @@ public static class MNABuild
             Console.WriteLine($"----------{new string('-', platform.Platform.Length)}");
 
             PlayerSettings.SetScriptingBackend(platform.BuildTargetGroup, scriptingBackend);
+            SetApplicationVersion(platform);
+            BuildAddressable(platform);
 
             // If we're not in batch mode, we can do this
             if (!InternalEditorUtility.inBatchMode)
@@ -122,7 +130,7 @@ public static class MNABuild
             var buildPlayerOptions = new BuildPlayerOptions
             {
                 scenes = SCENES,
-                locationPathName = Path.GetFullPath("../Build/Client/" + platform.OutputPath),
+                locationPathName = Path.GetFullPath("../Build/Client/" + outputPath),
                 target = platform.BuildTarget,
                 options = options
             };
@@ -134,35 +142,20 @@ public static class MNABuild
             errors = errors || buildResult.summary.result != BuildResult.Succeeded;
         }
 
-        if (errors)
-        {
-            Console.WriteLine("*** Some targets failed ***");
-        }
-        else
-        {
-            Console.WriteLine("All targets built successfully!");
-        }
+        Console.WriteLine(errors ? "*** Some targets failed ***" : "All targets built successfully!");
 
         Console.WriteLine(new string('=', 80));
         Console.WriteLine();
-
-        PlayerSettings.SetScriptingBackend(defaultBuildTargetInfo.BuildTargetGroup, PlayerSettings.GetScriptingBackend(defaultBuildTargetInfo.BuildTargetGroup));
-
-        // reset back to normal win64
-        if (!InternalEditorUtility.inBatchMode)
-            EditorUserBuildSettings.SwitchActiveBuildTarget(defaultBuildTargetInfo.BuildTargetGroup, defaultBuildTargetInfo.BuildTarget);
     }
 
     /// <summary>
     /// Clean Addressable before build and init FMOD
     /// </summary>
-    private static void BuildAddressable()
+    /// <param name="buildTargetInfo"></param>
+    private static void BuildAddressable(BuildTargetInfo buildTargetInfo)
     {
         AddressableAssetSettings.CleanPlayerContent(AddressableAssetSettingsDefaultObject.Settings.ActivePlayerDataBuilder);
         AddressableAssetSettings.BuildPlayerContent();
-
-        //Init FMOD
-        EventManager.RefreshBanks();
     }
 
     /// <summary>
@@ -227,29 +220,27 @@ public static class MNABuild
         file.WriteLine();
     }
 
-    private static string Prefix(LogType type)
-    {
-        switch (type)
+    private static string Prefix(LogType type) =>
+        type switch
         {
-            case LogType.Assert: return "A";
-            case LogType.Error: return "E";
-            case LogType.Exception: return "X";
-            case LogType.Log: return "L";
-            case LogType.Warning: return "W";
-        }
-
-        return "????";
-    }
+            LogType.Assert    => "A",
+            LogType.Error     => "E",
+            LogType.Exception => "X",
+            LogType.Log       => "L",
+            LogType.Warning   => "W",
+            _                 => "????"
+        };
 
     /// <summary>
     ///  Sync build version with blockchain server, photon server by version file which was generated by jenkins
     /// </summary>
-    private static void SetApplicationVersion()
+    /// <param name="buildTargetInfo"></param>
+    private static void SetApplicationVersion(BuildTargetInfo buildTargetInfo)
     {
         // Bundle version will be use for some third party like Backtrace, DeltaDNA,...
-        PlayerSettings.bundleVersion = MNAVersion.Version;
+        PlayerSettings.bundleVersion = GameVersion.Version;
         // This will be use to separate players by version in Photon server 
-        string appVersion = MNAVersion.Version;
+        var appVersion = GameVersion.Version;
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         appVersion += "_development";
 #endif
