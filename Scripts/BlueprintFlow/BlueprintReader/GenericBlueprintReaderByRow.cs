@@ -21,7 +21,9 @@ namespace BlueprintFlow.BlueprintReader
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class NestedBlueprintAttribute : Attribute { }
+    public class NestedBlueprintAttribute : Attribute
+    {
+    }
 
 
     /// <summary>
@@ -30,7 +32,6 @@ namespace BlueprintFlow.BlueprintReader
     /// <typeparam name="T1">Type of header key</typeparam>
     /// <typeparam name="T2">Type of value</typeparam>
     public abstract class GenericBlueprintReaderByRow<T1, T2> : BlueprintByRow<T1, T2>, IGenericBlueprintReader
-        where T2 : class
     {
         public virtual async Task DeserializeFromCsv(string rawCsv)
         {
@@ -90,13 +91,14 @@ namespace BlueprintFlow.BlueprintReader
     }
 
     // Need to be public due to reflection construction
+    [Serializable]
     public class BlueprintByRow<TRecord> : List<TRecord>, IBlueprintCollection
     {
         private readonly BlueprintRecordReader<TRecord> blueprintRecordReader;
 
         // Need to be public due to reflection construction
         public BlueprintByRow() { this.blueprintRecordReader = new BlueprintRecordReader<TRecord>(this.GetType()); }
-
+        
         public void Add(CsvDataReader inputCsv) { this.AddNotNull(this.blueprintRecordReader.GetRecord(inputCsv)); }
 
         public List<List<string>> ToRawData(bool containHeader = false)

@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
 
 public static class UIToolkitExtension
 {
-    public static T CreateInstanceInResource<T>(this object obj,string fileName = "", string path = "") where T : ScriptableObject
+    public static T CreateInstanceInResource<T>(this object obj, string fileName = "", string path = "") where T : ScriptableObject
     {
         //Create an instance of the scriptable object
         var scriptableObject = ScriptableObject.CreateInstance<T>();
@@ -74,5 +77,27 @@ public static class UIToolkitExtension
         infoFields.AddRange(privateFields.Where(t => t.GetCustomAttribute<SerializeField>() != null));
 
         return infoFields;
+    }
+
+    public static async Task<Sprite> LoadLocalSprite(this string key)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(key))
+            {
+                var sprite = await Addressables.LoadAssetAsync<Sprite>(key);
+                if (sprite != null)
+                {
+                    return sprite;
+                }
+            }
+        }
+        catch (Exception)
+        {
+            Debug.Log($"Load Sprite - Can not found any sprite with {key} in addressable groups");
+        }
+
+        key = "None_Texture";
+        return null;
     }
 }

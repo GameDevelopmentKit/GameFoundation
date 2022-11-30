@@ -5,7 +5,11 @@
         "GameFoundation.UIModule",
         "GameFoundation.Models",
         "GameFoundation.Network.Config",
-        "GameFoundation.Utilities"
+        "GameFoundation.Utilities",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "UniTask.Addressables",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"
