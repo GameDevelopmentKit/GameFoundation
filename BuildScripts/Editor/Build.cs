@@ -101,11 +101,11 @@ public static class Build
         scriptingBackend = ScriptingImplementation.Mono2x;
 
         // Get a list of targets to build
-        var plaftformTargets = platforms.Split(';');
-        BuildMNAInternal(scriptingBackend, buildOptions, plaftformTargets, outputPath, scriptingDefineSymbols);
+        var platformTargets = platforms.Split(';');
+        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols);
     }
 
-    public static void BuildMNAInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "")
+    public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "")
     {
         MNABuildTools.ResetBuildSettings();
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();

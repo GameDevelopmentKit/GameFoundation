@@ -3,81 +3,139 @@ using System.IO;
 using UnityEditor;
 using UnityEditorInternal;
 
-public static class MNABuildMenu
+public static class BuildMenu
 {
-    [MenuItem("Build/Build MNA Windows 32bit IL2CPP (Slow)")]
-    private static void BuildMNA_Win32()
+    #region Standalone
+
+    [MenuItem("Build/Standalone/build Windows 32bit IL2CPP (Slow)")]
+    private static void Build_Win32()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new string[] { Build.PlatformWin32 }, "default.exe");
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformWin32 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x86.log");
     }
 
-    [MenuItem("Build/Build MNA Windows 64bit IL2CPP (Slow)")]
-    private static void BuildMNA_Win64()
+    [MenuItem("Build/Standalone/build Windows 64bit IL2CPP (Slow)")]
+    private static void Build_Win64()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new string[] { Build.PlatformWin64 }, "default.exe");
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
 
-    [MenuItem("Build/Build MNA Windows 32bit Mono")]
-    private static void BuildMNA_Win32_Mono()
+    [MenuItem("Build/Standalone/build Windows 32bit Mono")]
+    private static void Build_Win32_Mono()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin32 }, "default.exe");
+        Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformWin32 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x86.log");
     }
 
-    [MenuItem("Build/Build MNA Windows 64bit Mono")]
-    private static void BuildMNA_Win64_Mono()
+    [MenuItem("Build/Standalone/build Windows 64bit Mono")]
+    private static void Build_Win64_Mono()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin64 }, "default.exe");
+        Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
 
-    [MenuItem("Build/Build MNA Mac Mono")]
-    private static void BuildMNA_Mac()
+    [MenuItem("Build/Standalone/build Mac Mono")]
+    private static void Build_Mac()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformOsx }, "default.app");
+        Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformOsx }, "default.app");
 
         OpenLog("Build-Client-Report.osx-x64.log");
     }
 
-    [MenuItem("Build/Build MNA All")]
-    private static void BuildMNA_All()
-    {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin32, Build.PlatformWin64, Build.PlatformOsx }, "default.app");
-    }
+    [MenuItem("Build/Standalone/build All")]
+    private static void Build_All() { Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformWin32, Build.PlatformWin64, Build.PlatformOsx }, "default.app"); }
 
-    [MenuItem("Build/Build Debug MNA Windows 64bit IL2CPP (Slow)", priority = 1100)]
-    private static void BuildMNA_DebugWin64()
+    [MenuItem("Build/Standalone/build Debug MNA Windows 64bit IL2CPP (Slow)", priority = 1100)]
+    private static void Build_DebugWin64()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging, new string[] { Build.PlatformWin64 }, "default.exe");
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging, new[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
 
-    [MenuItem("Build/Build Debug MNA (Scripts only) Windows 64bit IL2CPP (Slow)", priority = 1100)]
-    static void BuildMNA_DebugScriptsOnlyWin64()
+    [MenuItem("Build/Standalone/build Debug MNA (Scripts only) Windows 64bit IL2CPP (Slow)", priority = 1100)]
+    static void Build_DebugScriptsOnlyWin64()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging | BuildOptions.BuildScriptsOnly, new string[] { Build.PlatformWin64 }, "default.exe");
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging | BuildOptions.BuildScriptsOnly, new[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
+
+    #endregion
+
+    #region android
+
+    [MenuItem("Build/Standalone/build android IL2CPP (Slow)")]
+    private static void Build_Android_IL2CPP()
+    {
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformAndroid }, "default.apk");
+
+        OpenLog("Build-Client-Report.android.log");
+    }
+
+    [MenuItem("Build/Standalone/build android Mono")]
+    private static void Build_Android_Mono()
+    {
+        Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformAndroid }, "default.apk");
+
+        OpenLog("Build-Client-Report.android.log");
+    }
+
+    [MenuItem("Build/Standalone/build android ABB IL2CPP (Slow)")]
+    private static void Build_Android_ABB()
+    {
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformAndroid }, "default.abb");
+
+        OpenLog("Build-Client-Report.android.log");
+    }
+
+    #endregion
+
+    #region ios
+
+    // private static void Build_IOS_IL2CPP()
+    // {
+    //     Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformIOS }, "default");
+    //
+    //     OpenLog("Build-Client-Report.android.log");
+    // }
+    //
+    // [MenuItem("Build/Standalone/build android Mono")]
+    // private static void Build_IOS_Mono()
+    // {
+    //     Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformIOS }, "default");
+    //
+    //     OpenLog("Build-Client-Report.android.log");
+    // }
+    //
+    // [MenuItem("Build/Standalone/build android IL2CPP (Slow)")]
+    // private static void Build_IOS_ABB()
+    // {
+    //     Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformIOS }, "default");
+    //
+    //     OpenLog("Build-Client-Report.android.log");
+    // }
+
+    #endregion
+
 
     [MenuItem("Build/Set scripting define symbols", priority = 100)]
-    static void BuildMNA_SetScriptingDefineSymbols()
+    static void Build_SetScriptingDefineSymbols()
     {
-        Build.SetScriptingDefineSymbolInternal(BuildTargetGroup.Standalone, "GPU_INSTANCER;ODIN_INSPECTOR;ODIN_INSPECTOR_3;PHOTON_UNITY_NETWORKING;PUN_2_0_OR_NEWER;PUN_2_OR_NEWER;PUN_2_19_OR_NEWER;CT_BWF;DDNA_IOS_PUSH_NOTIFICATIONS_REMOVED");
+        Build.SetScriptingDefineSymbolInternal(BuildTargetGroup.Standalone,
+                                               "GPU_INSTANCER;ODIN_INSPECTOR;ODIN_INSPECTOR_3;PHOTON_UNITY_NETWORKING;PUN_2_0_OR_NEWER;PUN_2_OR_NEWER;PUN_2_19_OR_NEWER;CT_BWF;DDNA_IOS_PUSH_NOTIFICATIONS_REMOVED");
     }
 
     private static void OpenLog(string fileName)
     {
         if (!InternalEditorUtility.inBatchMode)
         {
-            var d = Directory.GetCurrentDirectory();
+            var d        = Directory.GetCurrentDirectory();
             var filePath = Path.GetFullPath($"../Build/Logs/{fileName}");
             if (File.Exists(filePath)) Process.Start(filePath);
         }
