@@ -8,7 +8,7 @@ public static class MNABuildMenu
     [MenuItem("Build/Build MNA Windows 32bit IL2CPP (Slow)")]
     private static void BuildMNA_Win32()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new string[] { Build.PlatformWin32 });
+        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new string[] { Build.PlatformWin32 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x86.log");
     }
@@ -16,7 +16,7 @@ public static class MNABuildMenu
     [MenuItem("Build/Build MNA Windows 64bit IL2CPP (Slow)")]
     private static void BuildMNA_Win64()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new string[] { Build.PlatformWin64 });
+        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new string[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
@@ -24,7 +24,7 @@ public static class MNABuildMenu
     [MenuItem("Build/Build MNA Windows 32bit Mono")]
     private static void BuildMNA_Win32_Mono()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin32 });
+        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin32 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x86.log");
     }
@@ -32,7 +32,7 @@ public static class MNABuildMenu
     [MenuItem("Build/Build MNA Windows 64bit Mono")]
     private static void BuildMNA_Win64_Mono()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin64 });
+        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
@@ -40,7 +40,7 @@ public static class MNABuildMenu
     [MenuItem("Build/Build MNA Mac Mono")]
     private static void BuildMNA_Mac()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformOsx });
+        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformOsx }, "default.app");
 
         OpenLog("Build-Client-Report.osx-x64.log");
     }
@@ -48,13 +48,13 @@ public static class MNABuildMenu
     [MenuItem("Build/Build MNA All")]
     private static void BuildMNA_All()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin32, Build.PlatformWin64, Build.PlatformOsx });
+        Build.BuildMNAInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new string[] { Build.PlatformWin32, Build.PlatformWin64, Build.PlatformOsx }, "default.app");
     }
 
     [MenuItem("Build/Build Debug MNA Windows 64bit IL2CPP (Slow)", priority = 1100)]
     private static void BuildMNA_DebugWin64()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging, new string[] { Build.PlatformWin64 });
+        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging, new string[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
@@ -62,7 +62,7 @@ public static class MNABuildMenu
     [MenuItem("Build/Build Debug MNA (Scripts only) Windows 64bit IL2CPP (Slow)", priority = 1100)]
     static void BuildMNA_DebugScriptsOnlyWin64()
     {
-        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging | BuildOptions.BuildScriptsOnly, new string[] { Build.PlatformWin64 });
+        Build.BuildMNAInternal(ScriptingImplementation.IL2CPP, BuildOptions.Development | BuildOptions.AllowDebugging | BuildOptions.BuildScriptsOnly, new string[] { Build.PlatformWin64 }, "default.exe");
 
         OpenLog("Build-Client-Report.win-x64.log");
     }
