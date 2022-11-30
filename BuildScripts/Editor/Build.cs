@@ -15,47 +15,35 @@ using UnityEngine;
 // ------------------------------------------------------------------------
 public static class Build
 {
-    public const string PlatformOsx   = "osx-x64";
-    public const string PlatformWin64 = "win-x64";
-    public const string PlatformWin32 = "win-x86";
-    public const string PlatformAndroid = "win-x86";
-    public const string PlatformIOS = "win-x86";
-    public const string PlatformWebGL = "win-x86";
-    
-    public class BuildTargetInfo
+    public const string PlatformOsx     = "osx-x64";
+    public const string PlatformWin64   = "win-x64";
+    public const string PlatformWin32   = "win-x86";
+    public const string PlatformAndroid = "android";
+    public const string PlatformIOS     = "ios";
+    public const string PlatformWebGL   = "webgl";
+
+    private class BuildTargetInfo
     {
-        public string Platform; // eg "win-x64"
-        public BuildTarget BuildTarget;
+        public string           Platform; // eg "win-x64"
+        public BuildTarget      BuildTarget;
         public BuildTargetGroup BuildTargetGroup;
     }
 
     private static readonly List<BuildTargetInfo> Targets = new()
                                                             {
-                                                                      new BuildTargetInfo
-                                                                      {
-                                                                          Platform = PlatformWin32, BuildTarget = BuildTarget.StandaloneWindows, BuildTargetGroup = BuildTargetGroup.Standalone
-                                                                      },
-                                                                      new BuildTargetInfo
-                                                                      {
-                                                                          Platform = PlatformWin64, BuildTarget = BuildTarget.StandaloneWindows64, BuildTargetGroup = BuildTargetGroup.Standalone
-                                                                      },
-                                                                      new BuildTargetInfo
-                                                                      {
-                                                                          Platform = PlatformOsx, BuildTarget = BuildTarget.StandaloneOSX, BuildTargetGroup = BuildTargetGroup.Standalone
-                                                                      },
-                                                                      new BuildTargetInfo
-                                                                      {
-                                                                          Platform = PlatformAndroid, BuildTarget = BuildTarget.Android, BuildTargetGroup = BuildTargetGroup.Android
-                                                                      },
-                                                                      new BuildTargetInfo
-                                                                      {
-                                                                          Platform = PlatformIOS, BuildTarget = BuildTarget.iOS, BuildTargetGroup = BuildTargetGroup.iOS
-                                                                      },
-                                                                      new BuildTargetInfo
-                                                                      {
-                                                                          Platform = PlatformWebGL, BuildTarget = BuildTarget.WebGL, BuildTargetGroup = BuildTargetGroup.WebGL
-                                                                      }
-                                                                  };
+                                                                new BuildTargetInfo
+                                                                {
+                                                                    Platform = PlatformWin32, BuildTarget = BuildTarget.StandaloneWindows, BuildTargetGroup = BuildTargetGroup.Standalone
+                                                                },
+                                                                new BuildTargetInfo
+                                                                {
+                                                                    Platform = PlatformWin64, BuildTarget = BuildTarget.StandaloneWindows64, BuildTargetGroup = BuildTargetGroup.Standalone
+                                                                },
+                                                                new BuildTargetInfo { Platform = PlatformOsx, BuildTarget = BuildTarget.StandaloneOSX, BuildTargetGroup = BuildTargetGroup.Standalone },
+                                                                new BuildTargetInfo { Platform = PlatformAndroid, BuildTarget = BuildTarget.Android, BuildTargetGroup = BuildTargetGroup.Android },
+                                                                new BuildTargetInfo { Platform = PlatformIOS, BuildTarget = BuildTarget.iOS, BuildTargetGroup = BuildTargetGroup.iOS },
+                                                                new BuildTargetInfo { Platform = PlatformWebGL, BuildTarget = BuildTarget.WebGL, BuildTargetGroup = BuildTargetGroup.WebGL }
+                                                            };
 
     static string[] SCENES = FindEnabledEditorScenes();
 
@@ -96,10 +84,6 @@ public static class Build
             }
         }
 
-        //TODO: remove it when fix il2cpp build bug
-        Debug.Log($"--------- scripting backend: {scriptingBackend} -------------");
-        scriptingBackend = ScriptingImplementation.Mono2x;
-
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
         BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols);
@@ -127,13 +111,7 @@ public static class Build
                 EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
 
             // Set up the build options
-            var buildPlayerOptions = new BuildPlayerOptions
-            {
-                scenes = SCENES,
-                locationPathName = Path.GetFullPath("../Build/Client/" + outputPath),
-                target = platform.BuildTarget,
-                options = options
-            };
+            var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath("../Build/Client/" + outputPath), target = platform.BuildTarget, options = options };
             SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
 
             // Perform the build
@@ -169,7 +147,7 @@ public static class Build
         Directory.CreateDirectory("../Build/Logs");
         var platform = Targets.SingleOrDefault(t => t.BuildTarget == report.summary.platform)?.Platform ?? "unknown";
         var filePath = $"../Build/Logs/Build-Client-Report.{platform}.log";
-        var summary = report.summary;
+        var summary  = report.summary;
         using (var file = new StreamWriter(filePath))
         {
             file.WriteLine($"Build {summary.guid} for {summary.platform}.");
@@ -240,5 +218,6 @@ public static class Build
         PlayerSettings.bundleVersion = GameVersion.Version;
     }
 
-    public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) => PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, scriptingDefineSymbols);
+    public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) =>
+        PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, scriptingDefineSymbols);
 }
