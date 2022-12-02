@@ -1,6 +1,6 @@
 namespace GameFoundation.Scripts.UIModule.Adapter
 {
-    using System.Collections;
+    using System;
     using System.Collections.Generic;
     using Com.TheFallenGames.OSA.Core;
     using Com.TheFallenGames.OSA.CustomParams;
@@ -13,7 +13,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     // There are 2 important callbacks you need to implement, apart from Start(): CreateViewsHolder() and UpdateViewsHolder()
     // See explanations below
     public class BasicListAdapter<TModel, TView, TPresenter> : OSA<BaseParamsWithPrefab, MyListItemViewsHolder>
-        where TModel : new() where TPresenter : BaseUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
+        where TPresenter : BaseUIItemPresenter<TView, TModel>, IDisposable where TView : MonoBehaviour, IUIView
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
@@ -24,11 +24,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private DiContainer diContainer;
 
         [Inject]
-        public void Constructor(DiContainer diContainer)
-        {
-            Debug.Log("Inject into BasicListAdapter");
-            this.diContainer = diContainer;
-        }
+        public void Constructor(DiContainer diContainer) { this.diContainer = diContainer; }
 
         #region OSA implementation
 
@@ -43,17 +39,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             /*
             RetrieveDataAndUpdate(500);
             */
-        }
-
-        public void SetViewAlpha(float alpha)
-        {
-            this.canvasGroup = this.GetComponent<CanvasGroup>();
-            if (this.canvasGroup == null)
-            {
-                this.canvasGroup = this.gameObject.AddComponent<CanvasGroup>();
-            }
-
-            this.canvasGroup.alpha = alpha;
         }
 
         // This is called initially, as many times as needed to fill the viewport, 
@@ -76,9 +61,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override void UpdateViewsHolder(MyListItemViewsHolder v)
         {
             var index      = v.ItemIndex;
+            if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
             var viewObject = v.root.GetComponentInChildren<TView>(true);
-            if (this.presenters.Count == index)
+            if (this.presenters.Count <= index)
             {
                 var p = this.diContainer.Instantiate<TPresenter>();
                 p.SetView(viewObject);
@@ -88,6 +74,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             else
             {
                 this.presenters[index].SetView(viewObject);
+                this.presenters[index].Dispose();
                 this.presenters[index].BindData(model);
             }
         }
@@ -99,59 +86,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        #region data manipulation
-
-        public void AddItemsAt(int index, IList<TModel> items)
-        {
-            // Commented: the below 2 lines exemplify how you can use a plain list to manage the data, instead of a DataHelper, in case you need full control
-            //YourList.InsertRange(index, items);
-            //InsertItems(index, items.Length);
-
-            this.Models.InsertItems(index, items);
-        }
-
-        public void RemoveItemsFrom(int index, int count)
-        {
-            // Commented: the below 2 lines exemplify how you can use a plain list to manage the data, instead of a DataHelper, in case you need full control
-            //YourList.RemoveRange(index, count);
-            //RemoveItems(index, count);
-
-            this.Models.RemoveItems(index, count);
-        }
-
-        public void SetItems(IList<TModel> items)
-        {
-            // Commented: the below 3 lines exemplify how you can use a plain list to manage the data, instead of a DataHelper, in case you need full control
-            //YourList.Clear();
-            //YourList.AddRange(items);
-            //ResetItems(YourList.Count);
-
-            this.Models.ResetItems(items);
-        }
-
-        #endregion
-
-
-        // Here, we're requesting <count> items from the data source
-        void RetrieveDataAndUpdate(int count) { this.StartCoroutine(this.FetchMoreItemsFromDataSourceAndUpdate(count)); }
-
-        // Retrieving <count> models from the data source and calling OnDataRetrieved after.
-        // In a real case scenario, you'd query your server, your database or whatever is your data source and call OnDataRetrieved after
-        IEnumerator FetchMoreItemsFromDataSourceAndUpdate(int count)
-        {
-            // Simulating data retrieving delay
-            yield return new WaitForSeconds(0f);
-
-            var newItems = new TModel[count];
-
-            this.OnDataRetrieved(newItems);
-        }
-
-        void OnDataRetrieved(TModel[] newItems) { this.Models.InsertItemsAtEnd(newItems); }
-
         public async void InitItemAdapter(List<TModel> modelList)
         {
-            this.Models = new SimpleDataHelper<TModel>(this);
+            this.Models     = new SimpleDataHelper<TModel>(this);
             this.presenters = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);

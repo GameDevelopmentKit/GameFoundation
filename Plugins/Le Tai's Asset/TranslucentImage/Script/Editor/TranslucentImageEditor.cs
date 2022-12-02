@@ -31,13 +31,12 @@ public class TranslucentImageEditor : ImageEditor
         brightness     = serializedObject.FindProperty("brightness");
         flatten        = serializedObject.FindProperty("flatten");
 
-        var self = serializedObject.targetObject as TranslucentImage;
+        correctShader = Shader.Find("UI/TranslucentImage");
 
+        var self = serializedObject.targetObject as TranslucentImage;
         if (self)
         {
             CheckMaterialUsedInDifferentSource(self);
-
-            correctShader = Shader.Find("UI/TranslucentImage");
             CheckCorrectShader(self);
         }
     }
@@ -81,6 +80,10 @@ public class TranslucentImageEditor : ImageEditor
                 }
 
                 EditorGUILayout.Space();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("No Translucent Image Source(s) found in current scene", MessageType.Warning);
             }
         }
 

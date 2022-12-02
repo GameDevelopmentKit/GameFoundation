@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Xml;
-using UnityEditor;
-using UnityEngine;
-using Object = UnityEngine.Object;
-
 namespace DarkTonic.MasterAudio.EditorScripts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
+    using System.Xml;
+    using UnityEditor;
+    using UnityEngine;
+    using Object = UnityEngine.Object;
+
     // ReSharper disable once CheckNamespace
     public class BulkAudioImporter : EditorWindow
     {
@@ -824,10 +824,14 @@ namespace DarkTonic.MasterAudio.EditorScripts
             var importer = (AudioImporter)AudioImporter.GetAtPath(info.FullPath);
             AudioImporterSampleSettings settings = importer.defaultSampleSettings;
 
-            importer.forceToMono = info.ForceMono;
-            importer.loadInBackground = info.LoadBG;
+            importer.forceToMono       = info.ForceMono;
+            importer.loadInBackground  = info.LoadBG;
+            #if UNITY_2022_1_OR_NEWER
             settings.preloadAudioData = info.Preload;
-            settings.loadType = info.LoadType;
+            #else
+            importer.preloadAudioData  = info.Preload;
+            #endif
+            settings.loadType          = info.LoadType;
             settings.compressionFormat = info.CompressionFormat;
             if (settings.compressionFormat == AudioCompressionFormat.Vorbis)
             {
@@ -978,7 +982,13 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                 // ReSharper disable once UseObjectOrCollectionInitializer
                 AudioImporterSampleSettings settings = importer.defaultSampleSettings;
-                var newClip = new AudioInformation(aPath, Path.GetFileNameWithoutExtension(aPath), importer.forceToMono, importer.loadInBackground, settings.preloadAudioData,
+#if UNITY_2022_1_OR_NEWER
+                var preloadAudioData = settings.preloadAudioData ;
+#else
+                var preloadAudioData = importer.preloadAudioData ;
+#endif
+                
+                var newClip = new AudioInformation(aPath, Path.GetFileNameWithoutExtension(aPath), importer.forceToMono, importer.loadInBackground, preloadAudioData,
                     settings.loadType, settings.compressionFormat, settings.quality, settings.sampleRateSetting, int.Parse(settings.sampleRateOverride.ToString()));
 
                 newClip.LastUpdated = updatedTime;

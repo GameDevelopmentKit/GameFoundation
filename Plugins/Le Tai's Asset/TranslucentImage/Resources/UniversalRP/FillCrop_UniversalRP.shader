@@ -25,10 +25,19 @@
                 minimalVertexOutput o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                half4 pos;
+                half2 uv;
 
-				o.position = v.position;
-				o.texcoord = VertexToUV(v.position.xy);
+#if PROCEDURAL_QUAD
+                GetProceduralQuad(v.vertexID, pos, uv);
+                o.position.zw = half2(0, 1);
+#else
+                pos = v.position;
+                uv = VertexToUV(v.position.xy);
+#endif
 
+                o.position = pos;
+                o.texcoord = uv;
                 return o;
             }
 

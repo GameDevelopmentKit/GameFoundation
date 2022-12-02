@@ -2,13 +2,17 @@
 
 struct minimalVertexInput
 {
-    half4 position  : POSITION;
+#if PROCEDURAL_QUAD
+    uint vertexID  : SV_VertexID;
+#else
+    half4 position : POSITION;
+#endif
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct minimalVertexOutput
 {
-    half4 position  : POSITION;
+    half4 position : POSITION;
     half2 texcoord : TEXCOORD0;
     UNITY_VERTEX_OUTPUT_STEREO
 };
@@ -27,12 +31,19 @@ float4 UnityStereoAdjustedTexelSize(float4 texelSize)
 }
 #endif
 
+void GetProceduralQuad(in uint vertexID, out float4 positionCS, out float2 uv)
+{
+    positionCS = GetQuadVertexPosition(vertexID);
+    positionCS.xy = positionCS.xy * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f);
+    uv = GetQuadTexCoord(vertexID); // * _ScaleBias.xy + _ScaleBias.zw;
+}
+
 half2 VertexToUV(half2 vertex)
 {
     half2 texcoord = (vertex + 1.0) * 0.5; // triangle vert to uv
-    #if UNITY_UV_STARTS_AT_TOP
+#if UNITY_UV_STARTS_AT_TOP
     texcoord = texcoord * half2(1.0, -1.0) + half2(0.0, 1.0);
-    #endif
+#endif
     return texcoord;
 }
 
