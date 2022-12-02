@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.BlueprintFlow.Signals
+namespace BlueprintFlow.Signals
 {
     public class LoadBlueprintDataSignal
     {

@@ -1,14 +1,14 @@
-namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
+namespace BlueprintFlow.BlueprintControlFlow
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
+    using BlueprintFlow.BlueprintReader;
+    using BlueprintFlow.Downloader;
+    using BlueprintFlow.Signals;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.BlueprintFlow.BlueprintReader;
-    using GameFoundation.Scripts.BlueprintFlow.Downloader;
-    using GameFoundation.Scripts.BlueprintFlow.Signals;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.Extension;

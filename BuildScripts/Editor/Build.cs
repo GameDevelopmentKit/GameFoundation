@@ -166,7 +166,7 @@ public static class Build
 
             file.WriteLine();
 
-            foreach (var buildFile in report.files)
+            foreach (var buildFile in report.GetFiles())
             {
                 file.WriteLine($"Role: {buildFile.role}, Size: {buildFile.size} bytes, Path: {buildFile.path}");
             }
@@ -215,7 +215,7 @@ public static class Build
     private static void SetApplicationVersion()
     {
         // Bundle version will be use for some third party like Backtrace, DeltaDNA,...
-        PlayerSettings.bundleVersion = GameVersion.Version;
+        // PlayerSettings.bundleVersion = GameVersion.Version;
     }
 
     public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) =>

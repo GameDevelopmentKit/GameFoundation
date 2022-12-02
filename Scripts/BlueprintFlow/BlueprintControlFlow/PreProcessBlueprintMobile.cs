@@ -1,10 +1,10 @@
-using System;
-using System.IO;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
-
-namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
+namespace BlueprintFlow.BlueprintControlFlow
 {
+    using System;
+    using System.IO;
+    using Cysharp.Threading.Tasks;
+    using UnityEngine;
+
     /// <summary>
     /// We need it to pre process read blueprint from mobile
     /// </summary>

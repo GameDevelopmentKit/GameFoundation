@@ -1,8 +1,8 @@
-namespace GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow
+namespace BlueprintFlow.BlueprintControlFlow
 {
-    using GameFoundation.Scripts.BlueprintFlow.BlueprintReader;
-    using GameFoundation.Scripts.BlueprintFlow.Downloader;
-    using GameFoundation.Scripts.BlueprintFlow.Signals;
+    using BlueprintFlow.BlueprintReader;
+    using BlueprintFlow.Downloader;
+    using BlueprintFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
     using Zenject;
 

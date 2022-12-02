@@ -1,8 +1,8 @@
 ﻿namespace GameFoundation.Scripts
 {
+    using BlueprintFlow.BlueprintControlFlow;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;

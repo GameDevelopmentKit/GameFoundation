@@ -6,8 +6,7 @@
         "GameFoundation.Utilities",
         "Zenject-Source",
         "Zenject-Signals",
-        "GameFoundation.Models",
-        "GameFoundation.Network.HttpServices"
+        "GameFoundation.Models"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

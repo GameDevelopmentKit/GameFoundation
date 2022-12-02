@@ -184,12 +184,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
             {
-                var spawnedObj   = pool.Spawn();
-                var transformObj = spawnedObj.transform;
-                if (parent) transformObj.SetParent(parent);
-                transformObj.localPosition = position;
-                transformObj.localRotation = rotation;
-                transformObj.localScale    = prefab.transform.localScale;
+                var spawnedObj   = pool.Spawn(parent, position, rotation);
                 this.spawnedObjToObjectPool.Add(spawnedObj, pool);
                 return spawnedObj;
             }

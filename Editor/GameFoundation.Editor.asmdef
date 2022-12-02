@@ -6,7 +6,10 @@
         "GameFoundation.Models",
         "GameFoundation.Network.Config",
         "GameFoundation.Utilities",
-        "GameFoundation.Script"
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "UniTask.Addressables",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"
