@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-public static class MNABuildTools
+public static class BuildTools
 {
     [MenuItem("Build/Tools/List Player Assemblies in Console")]
     public static void PrintAssemblyNames()
