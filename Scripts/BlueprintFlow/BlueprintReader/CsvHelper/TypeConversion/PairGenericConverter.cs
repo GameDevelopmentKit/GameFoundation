@@ -6,7 +6,7 @@ namespace GameFoundation.Scripts.BlueprintFlow.BlueprintReader.CsvHelper.TypeCon
     public class PairGenericConverter : DefaultTypeConverter
     {
         private readonly char delimiterPair;
-        public PairGenericConverter(char delimiterPair = ':') { this.delimiterPair = delimiterPair; }
+        public PairGenericConverter(char delimiterPair = '-') { this.delimiterPair = delimiterPair; }
 
 
         public override object ConvertFromString(string text, Type typeInfo)

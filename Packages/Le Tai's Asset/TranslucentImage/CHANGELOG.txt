@@ -1,5 +1,48 @@
 Changelog:
 
+v3.14.6:
+ - Fix compatibility with 2021.3.13 URP
+
+v3.14.5:
+ - Fix editor script being included in build
+ - Reorder create asset menu
+
+v3.14.4:
+ - Fix phantom windows again
+
+v3.14.3:
+ - Fix phantom windows in some Unity versions
+
+v3.14.2:
+ - Warn if Renderer Feature is missing in URP project
+
+v3.14.1:
+ - Fix some gizmo icons not showing in newer Unity versions
+
+v3.14.0:
+ - Improve compatibility with URP 13
+ 
+v3.13.0:
+ - Drop support for URP's 2D Renderer. It is too locked down and buggy at the moment
+
+v3.12.0:
+ - Improve compatibility with URP 12.1.7
+
+v3.11.0:
+ - Allow rendering before post-processing to work-around URP 2D renderer issue.
+
+v3.10.3:
+ - Fix shader compilation on GLES 2.0
+
+v3.10.2:
+ - Fix sprite blending property not applied correctly
+
+v3.10.1:
+ - Improve allocation behaviour
+
+v3.10.0:
+ - Fix Single Pass Instanced Stereo rendering
+
 v3.9.0:
  - Improve error logging to be more relevant
  - Assigning Source property on Translucent Image is now easier with automatic suggestions

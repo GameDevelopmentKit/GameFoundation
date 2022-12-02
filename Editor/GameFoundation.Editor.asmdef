@@ -5,7 +5,8 @@
         "GameFoundation.UIModule",
         "GameFoundation.Models",
         "GameFoundation.Network.Config",
-        "GameFoundation.Utilities"
+        "GameFoundation.Utilities",
+        "GameFoundation.Script"
     ],
     "includePlatforms": [
         "Editor"

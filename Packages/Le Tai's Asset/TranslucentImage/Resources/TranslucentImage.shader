@@ -103,7 +103,7 @@
                 OUT.texcoord = IN.texcoord;
                 OUT.blurTexcoord = ComputeNonStereoScreenPos(OUT.vertex);
                 #if UNITY_VERSION >= 202120 && UNITY_UV_STARTS_AT_TOP
-                if(unity_MatrixVP[1][1] < 0)
+                if(_ProjectionParams.x > 0 && unity_MatrixVP[1][1] < 0)
                     OUT.blurTexcoord.y = OUT.blurTexcoord.w - OUT.blurTexcoord.y;
                 #endif
                 OUT.extraData = IN.extraData;

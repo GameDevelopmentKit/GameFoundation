@@ -16,10 +16,9 @@ namespace LeTai.Asset.TranslucentImage.Demo
 
         void Start()
         {
-            m_FpsNextPeriod             = Time.realtimeSinceStartup + fpsMeasurePeriod;
-            m_Text                      = GetComponent<Text>();
-            display                     = m_Text.text;
-            Application.targetFrameRate = 60;
+            m_FpsNextPeriod = Time.realtimeSinceStartup + fpsMeasurePeriod;
+            m_Text          = GetComponent<Text>();
+            display         = m_Text.text;
         }
 
 
