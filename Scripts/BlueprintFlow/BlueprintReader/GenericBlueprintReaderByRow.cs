@@ -4,10 +4,8 @@ namespace BlueprintFlow.BlueprintReader
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using BlueprintFlow.BlueprintReader.Converter;
-    using GameFoundation.Scripts.Utilities.Extension;
     using Sylvan.Data.Csv;
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
 
@@ -21,9 +19,7 @@ namespace BlueprintFlow.BlueprintReader
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class NestedBlueprintAttribute : Attribute
-    {
-    }
+    public class NestedBlueprintAttribute : Attribute { }
 
 
     /// <summary>
@@ -70,9 +66,8 @@ namespace BlueprintFlow.BlueprintReader
 
         public void Add(CsvDataReader inputCsv)
         {
-            var record = this.blueprintRecordReader.GetRecord(inputCsv);
-            if (record != null)
-                this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
+            var (hasValue, record) = this.blueprintRecordReader.GetRecord(inputCsv);
+            if (hasValue) this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
         }
         public List<List<string>> ToRawData(bool containHeader = false)
         {
@@ -98,8 +93,12 @@ namespace BlueprintFlow.BlueprintReader
 
         // Need to be public due to reflection construction
         public BlueprintByRow() { this.blueprintRecordReader = new BlueprintRecordReader<TRecord>(this.GetType()); }
-        
-        public void Add(CsvDataReader inputCsv) { this.AddNotNull(this.blueprintRecordReader.GetRecord(inputCsv)); }
+
+        public void Add(CsvDataReader inputCsv)
+        {
+            var (hasValue, value) = this.blueprintRecordReader.GetRecord(inputCsv);
+            if (hasValue) this.Add(value);
+        }
 
         public List<List<string>> ToRawData(bool containHeader = false)
         {
@@ -278,6 +277,10 @@ namespace BlueprintFlow.BlueprintReader
     {
         public BlueprintRecordReader(Type blueprintType) : base(blueprintType, typeof(TRecord)) { }
 
-        public new TRecord GetRecord(CsvDataReader inputCsv) { return (TRecord)base.GetRecord(inputCsv); }
+        public new (bool, TRecord) GetRecord(CsvDataReader inputCsv)
+        {
+            var record = base.GetRecord(inputCsv);
+            return record != null ? (true, (TRecord)record) : (false, default);
+        }
     }
 }
