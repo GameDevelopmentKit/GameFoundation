@@ -113,7 +113,7 @@ public static class Build
             }
 
             // Set up the build options
-            var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform}/{outputPath}"), target = platform.BuildTarget, options = options };
+            var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options };
 
             if (!string.IsNullOrEmpty(scriptingDefineSymbols))
                 SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
