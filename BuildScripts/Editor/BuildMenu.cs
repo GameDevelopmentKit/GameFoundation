@@ -122,6 +122,26 @@ public static class BuildMenu
     // }
 
     #endregion
+    
+    #region webgl
+
+    [MenuItem("Build/WebGL/build WebGL IL2CPP (Slow)", priority = 1100)]
+    private static void Build_WebGL_IL2CPP()
+    {
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformWebGL }, "default");
+
+        OpenLog("Build-Client-Report.webgl.log");
+    }
+
+    [MenuItem("Build/WebGL/build WebGL Mono", priority = 1100)]
+    private static void Build_WebGL_Mono()
+    {
+        Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformWebGL }, "default");
+
+        OpenLog("Build-Client-Report.webgl.log");
+    }
+
+    #endregion
 
 
     [MenuItem("Build/Set scripting define symbols", priority = 100)]
