@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts
+namespace GameFoundation.BuildScripts.Runtime
 {
     public class GameVersion
     {
