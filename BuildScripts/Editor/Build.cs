@@ -47,7 +47,7 @@ public static class Build
 
     static string[] SCENES = FindEnabledEditorScenes();
 
-    public static void BuildMNAFromCommandLine()
+    public static void BuildFromCommandLine()
     {
         // Grab the CSV platforms string
         var platforms              = string.Join(";", Targets.Select(t => t.Platform));
