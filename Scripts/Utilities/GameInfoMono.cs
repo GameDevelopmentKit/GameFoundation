@@ -1,5 +1,6 @@
 ﻿namespace GameFoundation.Scripts.Utilities
 {
+    using GameFoundation.BuildScripts.Runtime;
     using TMPro;
     using UnityEngine;
 
