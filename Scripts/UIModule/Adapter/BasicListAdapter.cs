@@ -60,10 +60,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // *For the method's full description check the base implementation
         protected override void UpdateViewsHolder(MyListItemViewsHolder v)
         {
-            var index      = v.ItemIndex;
+            var index = v.ItemIndex;
+
             if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
             var viewObject = v.root.GetComponentInChildren<TView>(true);
+
             if (this.presenters.Count <= index)
             {
                 var p = this.diContainer.Instantiate<TPresenter>();
@@ -86,7 +88,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async void InitItemAdapter(List<TModel> modelList)
+        public async UniTask InitItemAdapter(List<TModel> modelList)
         {
             this.Models     = new SimpleDataHelper<TModel>(this);
             this.presenters = new List<TPresenter>();
@@ -95,7 +97,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             this.Models.InsertItems(0, modelList);
         }
     }
-
 
 // This class keeps references to an item's views.
 // Your views holder should extend BaseItemViewsHolder for ListViews and CellViewsHolder for GridViews
