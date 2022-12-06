@@ -71,7 +71,8 @@ public static class UIToolkitExtension
 
         return container;
     }
-    
+
+#if  UNITY_2022_1_OR_NEWER
     public static VisualElement CreateUIElementInspector(this SerializedProperty serializedProperty, params string[] propertiesToExclude)
     {
         var container = new VisualElement();
@@ -96,6 +97,7 @@ public static class UIToolkitExtension
 
         return container;
     }
+#endif
     
     /// <summary>
     /// Returns -1 if the property is not inside an array, otherwise returns its index inside the array
