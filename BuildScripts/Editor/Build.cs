@@ -166,7 +166,11 @@ public static class Build
 
             file.WriteLine();
 
+#if UNITY_2022_1_OR_NEWER
             foreach (var buildFile in report.GetFiles())
+#else
+            foreach (var buildFile in report.files)
+#endif
             {
                 file.WriteLine($"Role: {buildFile.role}, Size: {buildFile.size} bytes, Path: {buildFile.path}");
             }
