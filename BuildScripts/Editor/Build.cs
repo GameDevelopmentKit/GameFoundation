@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GameFoundation.Scripts;
+using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -91,7 +91,7 @@ public static class Build
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "")
     {
-        MNABuildTools.ResetBuildSettings();
+        BuildTools.ResetBuildSettings();
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
         Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray())); // Log which targets we're gonna build
 
@@ -108,11 +108,15 @@ public static class Build
 
             // If we're not in batch mode, we can do this
             if (!InternalEditorUtility.inBatchMode)
+            {
                 EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
+            }
 
             // Set up the build options
-            var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath("../Build/Client/" + outputPath), target = platform.BuildTarget, options = options };
-            SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
+            var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options };
+
+            if (!string.IsNullOrEmpty(scriptingDefineSymbols))
+                SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
 
             // Perform the build
             var buildResult = BuildPipeline.BuildPlayer(buildPlayerOptions);
@@ -219,7 +223,7 @@ public static class Build
     private static void SetApplicationVersion()
     {
         // Bundle version will be use for some third party like Backtrace, DeltaDNA,...
-        // PlayerSettings.bundleVersion = GameVersion.Version;
+        PlayerSettings.bundleVersion = GameVersion.Version;
     }
 
     public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) =>

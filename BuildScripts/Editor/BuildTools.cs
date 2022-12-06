@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-public static class MNABuildTools
+public static class BuildTools
 {
     [MenuItem("Build/Tools/List Player Assemblies in Console")]
     public static void PrintAssemblyNames()
@@ -43,11 +43,8 @@ public static class MNABuildTools
         EditorUserBuildSettings.buildScriptsOnly = false;
         EditorUserBuildSettings.buildWithDeepProfilingSupport = false;
         EditorUserBuildSettings.development = false;
-        EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
         EditorUserBuildSettings.waitForManagedDebugger = false;
         EditorUserBuildSettings.waitForPlayerConnection = false;
-        EditorUserBuildSettings.SetPlatformSettings("Standalone", "CopyPDBFiles", "false");
-        EditorUserBuildSettings.SetPlatformSettings("Standalone", "CreateSolution", "false");
     }
 
     [MenuItem("Build/Tools/Get editor user build settings")]

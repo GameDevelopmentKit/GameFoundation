@@ -122,13 +122,33 @@ public static class BuildMenu
     // }
 
     #endregion
+    
+    #region webgl
+
+    [MenuItem("Build/WebGL/build WebGL IL2CPP (Slow)", priority = 1100)]
+    private static void Build_WebGL_IL2CPP()
+    {
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformWebGL }, "default");
+
+        OpenLog("Build-Client-Report.webgl.log");
+    }
+
+    [MenuItem("Build/WebGL/build WebGL Mono", priority = 1100)]
+    private static void Build_WebGL_Mono()
+    {
+        Build.BuildInternal(ScriptingImplementation.Mono2x, BuildOptions.None, new[] { Build.PlatformWebGL }, "default");
+
+        OpenLog("Build-Client-Report.webgl.log");
+    }
+
+    #endregion
 
 
     [MenuItem("Build/Set scripting define symbols", priority = 100)]
     static void Build_SetScriptingDefineSymbols()
     {
-        Build.SetScriptingDefineSymbolInternal(BuildTargetGroup.Standalone,
-                                               "GPU_INSTANCER;ODIN_INSPECTOR;ODIN_INSPECTOR_3;PHOTON_UNITY_NETWORKING;PUN_2_0_OR_NEWER;PUN_2_OR_NEWER;PUN_2_19_OR_NEWER;CT_BWF;DDNA_IOS_PUSH_NOTIFICATIONS_REMOVED");
+        Build.SetScriptingDefineSymbolInternal(BuildTargetGroup.Android,
+                                               "TextMeshPro;ODIN_INSPECTOR;ODIN_INSPECTOR_3;EASY_MOBILE;EASY_MOBILE_PRO;EM_ADMOB;EM_URP;ADDRESSABLES_ENABLED");
     }
 
     private static void OpenLog(string fileName)
