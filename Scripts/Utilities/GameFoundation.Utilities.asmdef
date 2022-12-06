@@ -14,7 +14,8 @@
         "Zenject-Signals",
         "UniTask.Addressables",
         "Unity.ResourceManager",
-        "Unity.Addressables"
+        "Unity.Addressables",
+        "BuildScript.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

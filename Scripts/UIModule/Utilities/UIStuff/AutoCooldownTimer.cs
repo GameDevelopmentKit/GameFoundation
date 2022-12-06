@@ -31,7 +31,6 @@
             this.minDays    = minDays;
             this.minHours   = minHours;
             this.minMinutes = minMinutes;
-            this.signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
         }
 
         private void OnUpdateTimeAfterFocus(UpdateTimeAfterFocusSignal signal)
@@ -111,11 +110,20 @@
 
         public void Dispose()
         {
-            this.signalBus.Unsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
+            this.onComplete   = null;
+            this.onEveryCycle = null;
             this.observableTimer?.Dispose();
             this.pool?.Despawn(this);
         }
-        public void OnDespawned()               { this.pool = null; }
-        public void OnSpawned(IMemoryPool pool) { this.pool = pool; }
+        public void OnDespawned()
+        {
+            this.pool = null;
+            this.signalBus.Unsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
+        }
+        public void OnSpawned(IMemoryPool pool)
+        {
+            this.pool = pool; 
+            this.signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
+        }
     }
 }
