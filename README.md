@@ -32,7 +32,7 @@ Or find the `manifest.json` file in the `Packages` directory in your project and
 {
   "dependencies": {
     "com.coffee.git-dependency-resolver": "https://github.com/mob-sakai/GitDependencyResolverForUnity.git",
-    "com.myria.core-sdk": "https://github.com/GameDevelopmentKit/GameFoundation.git",
+    "com.gdk.core": "https://github.com/GameDevelopmentKit/GameFoundation.git",
     ...
   },
 }
