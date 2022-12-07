@@ -77,7 +77,6 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         public void CreateGUI()
         {
             this.taskCreateView = EditorPrefs.HasKey(TASK_CREATE_VIEW_KEY) ? JsonConvert.DeserializeObject<TaskCreateView>(EditorPrefs.GetString(TASK_CREATE_VIEW_KEY)) : new TaskCreateView();
-            Debug.Log("CreateGUI " + this.taskCreateView.PrefabAssetPath);
 
             var root       = this.rootVisualElement;
             var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/GameFoundation/Editor/Tools/ViewCreatorWizard/ViewCreatorWizard.uxml");
@@ -126,7 +125,6 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
         private void GeneratePrefab()
         {
-            Debug.Log("Start GeneratePrefab " + this.taskCreateView.PrefabAssetPath);
             var scriptType = GetTypeFromAllAssemblies(this.taskCreateView.TypeFullName);
             if (scriptType == null) return;
 
@@ -143,12 +141,10 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                 objSource = PrefabUtility.InstantiatePrefab(originalPrefab) as GameObject;
             }
 
-            Debug.Log("Middle GeneratePrefab this.taskCreateView.TypeFullName: " + this.taskCreateView.TypeFullName);
             objSource.AddComponent(scriptType);
             var prefabVariant = PrefabUtility.SaveAsPrefabAsset(objSource, this.taskCreateView.PrefabAssetPath);
            
             DestroyImmediate(objSource);
-            Debug.Log("End GeneratePrefab ");
             EditorApplication.RepaintHierarchyWindow();
             Debug.Log($"<color=green>Create prefab success! Save at: {this.taskCreateView.PrefabAssetPath}</color>");
             this.Close();
@@ -233,7 +229,6 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                 sTemplate = sTemplate.Replace("X_PRESENTER_NAME", this.inputPresenterName.value);
 
 
-                Debug.Log("InitGenerateButton " + genScriptFullPath + " |genScriptPath " + genScriptPath);
                 if (TryGenerateScript(genScriptFullPath, genScriptPath, sTemplate))
                 {
                     Debug.Log($"<color=green>Create script success! Save at: {genScriptFullPath}</color>");
@@ -244,7 +239,6 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                         TypeFullName    = $"{nameSpace}.{viewName}",
                         ViewType        = type
                     });
-                    Debug.Log("InitGenerateButton serializeObject: " + serializeObject);
                     EditorPrefs.SetString(TASK_CREATE_VIEW_KEY, serializeObject);
                 }
             };
