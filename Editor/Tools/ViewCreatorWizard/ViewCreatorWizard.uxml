@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/GameFoundation/Editor/Tools/ViewCreatorWizard/ViewCreatorWizard.uss?fileID=7433441132597879392&amp;guid=842713300e250954ea51d1849acdb407&amp;type=3#ViewCreatorWizard" />
+    <ui:ScrollView>
+        <ui:VisualElement style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+            <ui:VisualElement name="inputContainer" class="element-group">
+                <ui:Label text="Setting" display-tooltip-when-elided="true" class="label-header" />
+                <ui:DropdownField label="Type" index="-1" choices="System.Collections.Generic.List`1[System.String]" name="dropdownSettingType" />
+                <ui:Toggle label="Has Model" name="toggleSettingHasModel" />
+                <ui:TextField picking-mode="Ignore" label="Name" text="AName" name="inputSettingName" />
+                <ui:TextField picking-mode="Ignore" label="Script Path" name="inputSettingScriptPath">
+                    <ui:Button display-tooltip-when-elided="true" name="btnSettingScriptLocation" style="background-image: url(&apos;project://database/Assets/GameFoundation/Editor/Tools/ViewCreatorWizard/folder.png?fileID=2800000&amp;guid=ced5b7b7b9922b5479ed37e0b6b6a90e&amp;type=3#folder&apos;); width: 19px; -unity-background-scale-mode: stretch-to-fill;" />
+                </ui:TextField>
+                <ui:TextField picking-mode="Ignore" label="Prefab Path" name="inputSettingPrefabPath">
+                    <ui:Button display-tooltip-when-elided="true" name="btnSettingPrefabLocation" style="background-image: url(&apos;project://database/Assets/GameFoundation/Editor/Tools/ViewCreatorWizard/folder.png?fileID=2800000&amp;guid=ced5b7b7b9922b5479ed37e0b6b6a90e&amp;type=3#folder&apos;); width: 19px; -unity-background-scale-mode: stretch-to-fill;" />
+                </ui:TextField>
+            </ui:VisualElement>
+            <ui:VisualElement class="element-group">
+                <ui:Label text="MVP" display-tooltip-when-elided="true" class="label-header" />
+                <ui:TextField picking-mode="Ignore" label="Model" text="Enter a name" name="inputModelName" />
+                <ui:TextField picking-mode="Ignore" label="View" text="Enter a name" name="inputViewName" />
+                <ui:TextField picking-mode="Ignore" label="Presenter" text="Enter a name" name="inputPresenterName" />
+            </ui:VisualElement>
+            <ui:Button text="Generate" display-tooltip-when-elided="true" name="btnGenerate" style="margin-top: 10px; margin-bottom: 10px; height: 40px; -unity-font-style: bold; font-size: 14px; background-color: rgb(92, 92, 92);" />
+        </ui:VisualElement>
+    </ui:ScrollView>
+</ui:UXML>
