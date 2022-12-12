@@ -136,7 +136,7 @@ public static class Build
     /// <param name="buildTargetInfo"></param>
     private static void BuildAddressable(BuildTargetInfo buildTargetInfo)
     {
-        AddressableAssetSettings.CleanPlayerContent(AddressableAssetSettingsDefaultObject.Settings.ActivePlayerDataBuilder);
+        AddressableAssetSettings.CleanPlayerContent();
         AddressableAssetSettings.BuildPlayerContent();
     }
 
