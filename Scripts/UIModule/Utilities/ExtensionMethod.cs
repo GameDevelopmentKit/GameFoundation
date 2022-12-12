@@ -15,10 +15,11 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
     public static class ExtensionMethod
     {
-               //Remove all Button Listener On View
+        //Remove all Button Listener On View
         public static void OnRemoveButtonListener(this MonoBehaviour view)
         {
             var buttons = view.GetComponentsInChildren<Button>();
+
             foreach (var b in buttons)
             {
                 b.onClick.RemoveAllListeners();
@@ -46,6 +47,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             var presenter = instantiator.Instantiate<TPresenter>();
             await presenter.SetView(parentView);
             presenter.BindData(model);
+
             return presenter;
         }
 
@@ -56,7 +58,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             v.x                 = parentRect.rect.width;
             childRect.sizeDelta = v;
         }
-
 
         public static async void Add<TPresenter, TModel>(this List<TPresenter> listPresenter, TPresenter presenter, Transform parentView, TModel model)
             where TPresenter : IUIItemPresenter<IUIView, TModel>
@@ -70,17 +71,21 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         public static void SetTextLocalization(this TextMeshProUGUI t, string key, Color color = default)
         {
             var mechTextMeshPro = t.GetComponent<MechTextMeshPro>();
+
             if (mechTextMeshPro == null)
             {
                 Debug.Log($"{t.gameObject.name} have no MechTextPro");
+
                 return;
             }
 
             mechTextMeshPro.SetTextWithLocalization(key, color);
         }
+
         public static void SetTextLocalization(this TMP_InputField t, string key)
         {
             var mechTextMeshPro = t.textComponent.GetComponent<MechTextMeshPro>();
+
             if (mechTextMeshPro == null)
             {
                 return;
@@ -88,19 +93,24 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
             mechTextMeshPro.SetTextWithLocalization(key);
         }
-        
-                
+
         /// <summary>
         /// Utils use to initialize a screen presenter manually, and the view is already initialized on the scene
         /// </summary>
         /// <param name="container"></param>
+        /// <param name="autoBindData"></param>
         /// <typeparam name="T"> Type of screen presenter</typeparam>
-        public static void InitScreenManually<T>(this DiContainer container) where T: IScreenPresenter
+        public static void InitScreenManually<T>(this DiContainer container, bool autoBindData = false) where T : IScreenPresenter
         {
             container.Bind<T>().AsSingle().OnInstantiated<T>((context, presenter) =>
-            {
-                context.Container.Resolve<SignalBus>().Fire(new ManualInitScreenSignal() { ScreenPresenter = presenter });
-            }).NonLazy();
+                {
+                    context.Container.Resolve<SignalBus>().Fire(new ManualInitScreenSignal()
+                    {
+                        ScreenPresenter   = presenter,
+                        IncludingBindData = autoBindData
+                    });
+                })
+                .NonLazy();
         }
     }
 }
