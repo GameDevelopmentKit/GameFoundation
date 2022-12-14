@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 {
     using System.Threading.Tasks;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.LogService;
@@ -18,6 +19,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.ScreenStatus = ScreenStatus.Opened;
             this.SignalBus.Fire(new ScreenShowSignal() { ScreenPresenter  = this });
             this.SignalBus.Fire(new PopupShowedSignal() { ScreenPresenter = this });
+            // wait to end of frame then open screen view, take time to blur background capture last screen
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
             await this.View.Open();
         }
 
