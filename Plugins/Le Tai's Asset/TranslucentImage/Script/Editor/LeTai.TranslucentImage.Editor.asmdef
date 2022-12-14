@@ -2,6 +2,7 @@
     "name": "LeTai.TranslucentImage.Editor",
     "rootNamespace": "",
     "references": [
+        "LeTai.TranslucentImage",
         "LeTai.TranslucentImage.Scripts"
     ],
     "includePlatforms": [

@@ -1,5 +1,8 @@
 Changelog:
 
+v3.15.0:
+ - Fix color space mixed up. Your UIs appearance may change after this update.
+
 v3.14.6:
  - Fix compatibility with 2021.3.13 URP
 
