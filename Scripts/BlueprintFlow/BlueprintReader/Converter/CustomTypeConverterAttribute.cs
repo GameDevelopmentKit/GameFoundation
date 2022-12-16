@@ -35,7 +35,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
     /// Specifies the <see cref="TypeConverter"/> to use
     /// when converting the member to and from a CSV field.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
     public class CustomTypeConverterAttribute : Attribute
     {
         /// <summary>
