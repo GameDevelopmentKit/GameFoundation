@@ -36,6 +36,14 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 diContainer.Bind(type).AsCached().NonLazy();
             }
         }
+        
+        public static void BindInterfacesAndSelfToAllTypeDriveFrom<T>(this DiContainer diContainer)
+        {
+            foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>())
+            {
+                diContainer.BindInterfacesAndSelfTo(type).AsCached().NonLazy();
+            }
+        }
 
         private static SceneContext currentSceneContext;
         /// <summary>
