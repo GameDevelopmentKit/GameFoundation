@@ -23,9 +23,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         private DiContainer diContainer;
 
-        [Inject]
-        public void Constructor(DiContainer diContainer) { this.diContainer = diContainer; }
-
         #region OSA implementation
 
         protected override void Start()
@@ -88,10 +85,11 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async UniTask InitItemAdapter(List<TModel> modelList)
+        public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
         {
-            this.Models     = new SimpleDataHelper<TModel>(this);
-            this.presenters = new List<TPresenter>();
+            this.diContainer = diContainer;
+            this.Models      = new SimpleDataHelper<TModel>(this);
+            this.presenters  = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.Models.InsertItems(0, modelList);

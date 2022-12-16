@@ -20,9 +20,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         private DiContainer diContainer;
 
-        [Inject]
-        public void Constructor(DiContainer diContainer) { this.diContainer = diContainer; }
-
         #region GridAdapter implementation
 
         protected override void Start()
@@ -70,10 +67,11 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. 
         // For GridAdapters, only Refresh and ResetItems work for now
 
-        public async void InitItemAdapter(List<TModel> modelList)
+        public async void InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
         {
-            this.Models     = new SimpleDataHelper<TModel>(this);
-            this.presenters = new List<TPresenter>();
+            this.diContainer = diContainer;
+            this.Models      = new SimpleDataHelper<TModel>(this);
+            this.presenters  = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.Models.InsertItems(0, modelList);
