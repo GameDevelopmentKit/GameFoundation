@@ -3,6 +3,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using BlueprintFlow.BlueprintReader.Converter.TypeConversion;
     using Sylvan.Data.Csv;
 
     public static class CsvHelper
@@ -15,6 +16,16 @@ namespace BlueprintFlow.BlueprintReader.Converter
             HasHeaders = true,
             Delimiter  = ','
         };
+
+        public static void RegisterTypeConverter(Type type, ITypeConverter typeConverter)
+        {
+            TypeConverterCache.AddConverter(type, typeConverter);
+        }
+
+        public static ITypeConverter GetTypeConverter(Type type)
+        {
+            return TypeConverterCache.GetConverter(type);
+        }
 
         public static string GetField(this CsvDataReader csvReader, string name)
         {

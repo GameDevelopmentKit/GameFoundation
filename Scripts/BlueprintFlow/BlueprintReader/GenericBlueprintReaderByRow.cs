@@ -4,6 +4,7 @@ namespace BlueprintFlow.BlueprintReader
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using BlueprintFlow.BlueprintReader.Converter;
     using Sylvan.Data.Csv;
@@ -85,6 +86,7 @@ namespace BlueprintFlow.BlueprintReader
         public void CleanUp() { this.Clear(); }
     }
 
+
     // Need to be public due to reflection construction
     [Serializable]
     public class BlueprintByRow<TRecord> : List<TRecord>, IBlueprintCollection
@@ -129,6 +131,8 @@ namespace BlueprintFlow.BlueprintReader
 
         public string RequireKey;
 
+        private CustomTypeConverterAttribute customTypeConverter;
+
         public BlueprintRecordReader(Type blueprintType, Type recordType)
         {
             this.blueprintType      = blueprintType;
@@ -163,11 +167,17 @@ namespace BlueprintFlow.BlueprintReader
 
                     this.fieldAndProperties.Add(memberInfo);
                 }
+
+            this.customTypeConverter = this.recordType.GetCustomAttribute<CustomTypeConverterAttribute>();
         }
 
         public object GetRecord(CsvDataReader inputCsv)
         {
+            if (this.customTypeConverter != null)
+                return this.customTypeConverter.TypeConverter.ConvertFromCsv(inputCsv);
+
             object record = null;
+
             if (!string.IsNullOrEmpty(inputCsv.GetField(this.RequireKey)))
             {
                 record = Activator.CreateInstance(this.recordType);
