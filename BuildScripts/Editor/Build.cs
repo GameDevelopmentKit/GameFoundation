@@ -113,6 +113,7 @@ public static class Build
             }
 
             // Set up the build options
+            if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
             var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options };
 
             if (!string.IsNullOrEmpty(scriptingDefineSymbols))
