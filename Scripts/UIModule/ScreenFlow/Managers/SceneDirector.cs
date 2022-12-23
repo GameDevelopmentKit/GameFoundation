@@ -11,17 +11,20 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     /// <summary>Load, unload scenes are wrapped here </summary>
     public class SceneDirector
     {
-        private readonly SignalBus   signalBus;
+        private readonly   SignalBus   signalBus;
         protected readonly IGameAssets GameAssets;
-        public static    string      CurrentSceneName;
+        public static      string      CurrentSceneName;
         public SceneDirector(SignalBus signalBus, IGameAssets gameAssets)
         {
             this.signalBus  = signalBus;
             this.GameAssets = gameAssets;
         }
 
+        //to backup for old version
+        public UniTask LoadSingleSceneAsync(string sceneName) { return LoadSingleSceneByAddressableAsync(sceneName); }
+
         /// <summary>Load scene async by name </summary>
-        public async UniTask LoadSingleSceneAsync(string sceneName)
+        public async UniTask LoadSingleSceneByAddressableAsync(string sceneName)
         {
             this.signalBus.Fire<StartLoadingNewSceneSignal>();
             var lastScene = CurrentSceneName;
@@ -32,7 +35,18 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.signalBus.Fire<FinishLoadingNewSceneSignal>();
         }
 
-        public async UniTask LoadMultipleSceneAsync(string activesScene,params string[] sceneNames)
+        public async UniTask LoadSingleSceneBySceneManagerAsync(string sceneName)
+        {
+            this.signalBus.Fire<StartLoadingNewSceneSignal>();
+            var lastScene = CurrentSceneName;
+            CurrentSceneName = sceneName;
+            await SceneManager.LoadSceneAsync(sceneName);
+            _ = Resources.UnloadUnusedAssets();
+            this.GameAssets.UnloadUnusedAssets(lastScene);
+            this.signalBus.Fire<FinishLoadingNewSceneSignal>();
+        }
+
+        public async UniTask LoadMultipleSceneAsync(string activesScene, params string[] sceneNames)
         {
             this.signalBus.Fire<StartLoadingNewSceneSignal>();
             var lastScene = CurrentSceneName;
