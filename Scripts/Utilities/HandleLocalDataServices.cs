@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.Utilities
 {
     using System.Collections.Generic;
+    using GameFoundation.Scripts.Interfaces;
     using Newtonsoft.Json;
     using UnityEngine;
 
@@ -22,6 +23,7 @@ namespace GameFoundation.Scripts.Utilities
         public void Save<T>(T data, bool force = false) where T : class
         {
             var key = LocalDataPrefix + typeof(T).Name;
+
             if (!this.localDataCaches.ContainsKey(key))
             {
                 this.localDataCaches.Add(key, data);
@@ -39,17 +41,26 @@ namespace GameFoundation.Scripts.Utilities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T Load<T>() where T : class, new()
+        public T Load<T>() where T : class, ILocalData, new()
         {
             var key = LocalDataPrefix + typeof(T).Name;
+
             if (this.localDataCaches.TryGetValue(key, out var cache))
             {
                 return (T)cache;
             }
 
-            var json   = PlayerPrefs.GetString(key);
+            var json = PlayerPrefs.GetString(key);
+
             var result = string.IsNullOrEmpty(json) ? new T() : JsonConvert.DeserializeObject<T>(json);
+
+            if (string.IsNullOrEmpty(json))
+            {
+                result?.Init();
+            }
+
             this.localDataCaches.Add(key, result);
+
             return result;
         }
 

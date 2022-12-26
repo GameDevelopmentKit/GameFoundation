@@ -1,11 +1,12 @@
 namespace GameFoundation.Scripts.Models
 {
+    using GameFoundation.Scripts.Interfaces;
     using UniRx;
 
     /// <summary>
     /// Manage all the local data in Game
     /// </summary>
-    public partial class GameFoundationLocalData
+    public partial class GameFoundationLocalData : ILocalData
     {
         // user data
         public UserDataLogin  UserDataLogin  { get; set; } = new UserDataLogin();
@@ -13,11 +14,12 @@ namespace GameFoundation.Scripts.Models
         public BlueprintModel BlueprintModel { get; set; } = new BlueprintModel();
 
         public IndexSettingRecord IndexSettingRecord = new IndexSettingRecord();
+        public void               Init() { }
     }
 
     public class UserDataLogin
     {
-        public int  LastLogin     { get; set; }
+        public int        LastLogin     { get; set; }
         public LoginModel FacebookLogin { get; set; } = new LoginModel();
         public LoginModel GoogleLogin   { get; set; } = new LoginModel();
     }
@@ -45,10 +47,10 @@ namespace GameFoundation.Scripts.Models
 
     public class IndexSettingRecord
     {
-        public BoolReactiveProperty MasterVolume { get; set; } = new(true);
-        public BoolReactiveProperty   MuteMusic    { get; set; } = new(false);
-        public BoolReactiveProperty   MuteSound    { get; set; } = new(false);
-        public FloatReactiveProperty  MusicValue   { get; set; } = new(1);
-        public FloatReactiveProperty  SoundValue   { get; set; } = new(1);
+        public BoolReactiveProperty  MasterVolume { get; set; } = new(true);
+        public BoolReactiveProperty  MuteMusic    { get; set; } = new(false);
+        public BoolReactiveProperty  MuteSound    { get; set; } = new(false);
+        public FloatReactiveProperty MusicValue   { get; set; } = new(1);
+        public FloatReactiveProperty SoundValue   { get; set; } = new(1);
     }
 }
