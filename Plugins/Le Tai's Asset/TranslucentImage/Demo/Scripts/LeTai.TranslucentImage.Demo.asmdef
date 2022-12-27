@@ -1,9 +1,0 @@
-{
-    "name": "LeTai.TranslucentImage.Demo",
-    "references": [
-        "LeTai.TranslucentImage",
-        "LeTai.TranslucentImage.Scripts"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": []
-}
