@@ -21,7 +21,20 @@ namespace BlueprintFlow.BlueprintControlFlow
     /// </summary>
     public class BlueprintReaderManager
     {
+        #region zeject
+
+        private readonly SignalBus               signalBus;
+        private readonly ILogService             logService;
+        private readonly DiContainer             diContainer;
+        private readonly GameFoundationLocalData localData;
+        private readonly HandleLocalDataServices handleLocalDataServices;
+        private readonly BlueprintConfig         blueprintConfig;
+        private readonly BlueprintDownloader     blueprintDownloader;
+
+        #endregion
+
         private ReadBlueprintProgressSignal readBlueprintProgressSignal = new();
+
         public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer,
             GameFoundationLocalData localData, HandleLocalDataServices handleLocalDataServices, BlueprintConfig blueprintConfig, BlueprintDownloader blueprintDownloader)
         {
@@ -41,22 +54,22 @@ namespace BlueprintFlow.BlueprintControlFlow
                 //Download new blueprints version from remote
                 var progressSignal = new LoadBlueprintDataProgressSignal();
                 await this.blueprintDownloader.DownloadBlueprintAsync(url, this.blueprintConfig.BlueprintZipFilepath, (downloaded, length) =>
-                    {
-                        progressSignal.percent = downloaded / (float)length * 100f;
-                        this.signalBus.Fire(progressSignal);
-                    });
+                {
+                    progressSignal.percent = downloaded / (float)length * 100f;
+                    this.signalBus.Fire(progressSignal);
+                });
 
                 this.localData.BlueprintModel.BlueprintDownloadUrl = url;
                 this.handleLocalDataServices.Save(this.localData, true);
             }
 
             // Unzip file to memory
-            this.listRawBlueprints = await UniTask.RunOnThreadPool(this.UnzipBlueprint);
+            var listRawBlueprints = await UniTask.RunOnThreadPool(this.UnzipBlueprint);
 
             //Load all blueprints to instances
             try
             {
-                await this.ReadAllBlueprint();
+                await this.ReadAllBlueprint(listRawBlueprints);
             }
             catch (FieldDontExistInBlueprint e)
             {
@@ -95,7 +108,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             return result;
         }
 
-        private UniTask ReadAllBlueprint()
+        private UniTask ReadAllBlueprint(Dictionary<string, string> listRawBlueprints)
         {
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
@@ -111,7 +124,7 @@ namespace BlueprintFlow.BlueprintControlFlow
                 var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);
                 if (blueprintInstance != null)
                 {
-                    listReadTask.Add(UniTask.RunOnThreadPool(() => this.OpenReadBlueprint(blueprintInstance)));
+                    listReadTask.Add(UniTask.RunOnThreadPool(() => this.OpenReadBlueprint(blueprintInstance, listRawBlueprints)));
                 }
                 else
                 {
@@ -122,7 +135,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             return UniTask.WhenAll(listReadTask);
         }
 
-        private async UniTask OpenReadBlueprint(IGenericBlueprintReader blueprintReader)
+        private async UniTask OpenReadBlueprint(IGenericBlueprintReader blueprintReader, Dictionary<string, string> listRawBlueprints)
         {
             var bpAttribute = blueprintReader.GetCustomAttribute<BlueprintReaderAttribute>();
             if (bpAttribute != null)
@@ -133,8 +146,8 @@ namespace BlueprintFlow.BlueprintControlFlow
                 string rawCsv;
                 if (!bpAttribute.IsLoadFromResource)
                 {
-                    if (!this.listRawBlueprints.TryGetValue(bpAttribute.DataPath + BlueprintConfig.BlueprintFileType,
-                        out rawCsv))
+                    if (!listRawBlueprints.TryGetValue(bpAttribute.DataPath + BlueprintConfig.BlueprintFileType,
+                            out rawCsv))
                     {
                         this.logService.Warning(
                             $"[BlueprintReader] Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
@@ -179,18 +192,5 @@ namespace BlueprintFlow.BlueprintControlFlow
                     $"[BlueprintReader] Class {blueprintReader} does not have BlueprintReaderAttribute yet");
             }
         }
-
-        #region zeject
-
-        private readonly SignalBus                  signalBus;
-        private readonly ILogService                logService;
-        private readonly DiContainer                diContainer;
-        private readonly GameFoundationLocalData    localData;
-        private readonly HandleLocalDataServices    handleLocalDataServices;
-        private          Dictionary<string, string> listRawBlueprints = new();
-        private readonly BlueprintConfig            blueprintConfig;
-        private readonly BlueprintDownloader        blueprintDownloader;
-
-        #endregion
     }
 }

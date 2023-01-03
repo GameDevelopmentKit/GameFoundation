@@ -1,0 +1,18 @@
+{
+    "name": "GameFoundation.BlueprintFlow.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.Editor",
+        "GameFoundation.Models",
+        "GameFoundation.BlueprintFlow"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

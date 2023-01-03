@@ -15,6 +15,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         {
             //BindBlueprint reader for mobile
             this.Container.Bind<PreProcessBlueprintMobile>().AsCached().NonLazy();
+            this.Container.Bind<BlueprintDownloadRequest>().WhenInjectedInto<BlueprintReaderManager>();
             this.Container.Bind<BlueprintDownloader>().WhenInjectedInto<BlueprintReaderManager>();
             this.Container.Bind<BlueprintReaderManager>().AsCached();
             this.Container.Bind<BlueprintConfig>().AsCached();
