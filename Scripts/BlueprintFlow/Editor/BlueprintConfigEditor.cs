@@ -3,24 +3,23 @@
     using BlueprintFlow.BlueprintControlFlow;
     using global::Editor.GDKManager;
     using Models;
+    using UnityEditor;
     using UnityEngine.UIElements;
 
     public class BlueprintConfigEditor : BaseGameConfigEditor
     {
-        public BlueprintConfigEditor(GDKConfig gdkConfig) : base(gdkConfig)
-        {
-        }
-        public override void PreSetup()
-        {
-            this.GdkConfig.AddGameConfig(this.CreateInstanceInResource<BlueprintConfig>($"BlueprintConfig", "GameConfigs"));
-        }
-        
+        public BlueprintConfigEditor(GDKConfig gdkConfig) : base(gdkConfig) { }
+        public override void PreSetup() { this.GdkConfig.AddGameConfig(this.CreateInstanceInResource<BlueprintConfig>($"BlueprintConfig", "GameConfigs")); }
+
         public override VisualElement LoadView()
         {
-            // display network config
-            var networkConfigElement = this.Q<VisualElement>("BlueprintConfig");
-            networkConfigElement.Add(this.GdkConfig.GetGameConfig<BlueprintConfig>().CreateUIElementInspector());
-            this.Add(networkConfigElement);
+            var blueprintConfigTemplate = EditorGUIUtility.Load("Packages/com.gdk.core/Scripts/BlueprintFlow/Editor/BlueprintConfigEditor.uxml") as VisualTreeAsset;
+
+            if (blueprintConfigTemplate == null) return this;
+            var blueprintConfigVisual = blueprintConfigTemplate.CloneTree();
+            blueprintConfigVisual.Add(this.GdkConfig.GetGameConfig<BlueprintConfig>().CreateUIElementInspector());
+            this.Add(blueprintConfigVisual);
+
             return this;
         }
     }

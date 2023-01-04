@@ -1,25 +1,21 @@
 namespace BlueprintFlow.BlueprintControlFlow
 {
+    using System;
     using Models;
     using UnityEngine;
 
     /// <summary>
     /// Contains all the constants, the configuration of Blueprint control flow
     /// </summary>
+    [Serializable]
     public class BlueprintConfig : ScriptableObject, IGameConfig
     {
-        public readonly string CurrentBlueprintVersion = Application.version;
+        public string currentBlueprintVersion = "0.0.1";
+        public bool   isLoadFromResource;
+        public string fetchBlueprintUri     = "https://dqp03g2hg3.execute-api.ap-southeast-1.amazonaws.com/api/v1/projects/vampire-survivor-development/blueprints/{0}/info";
+        public string resourceBlueprintPath = "BlueprintData/";
+        public string blueprintFileType     = ".csv";
 
-        private readonly string persistentDataPath = Application.persistentDataPath;
-
-        private string BlueprintZipFilepathFormat => $"{this.persistentDataPath}/{this.BlueprintZipFilename}";
-
-        public readonly string BlueprintZipFilename = "Blueprints_v{0}.zip";
-
-        public virtual string BlueprintZipFilepath => string.Format(this.BlueprintZipFilepathFormat, this.CurrentBlueprintVersion);
-
-        public const string ResourceBlueprintPath = "BlueprintData/";
-
-        public const string BlueprintFileType = ".csv";
+        public virtual string BlueprintZipFilepath => $"{Application.persistentDataPath}/Blueprints_v{this.currentBlueprintVersion}.zip";
     }
 }
