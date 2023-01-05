@@ -1,4 +1,4 @@
-namespace BlueprintFlow.Downloader
+namespace BlueprintFlow.APIHandler
 {
     using System;
     using System.Threading.Tasks;
