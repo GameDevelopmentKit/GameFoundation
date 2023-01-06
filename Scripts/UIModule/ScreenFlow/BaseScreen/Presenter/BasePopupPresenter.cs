@@ -28,8 +28,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         {
             if (this.ScreenStatus == ScreenStatus.Closed) return;
             this.ScreenStatus = ScreenStatus.Closed;
-            this.SignalBus.Fire(new PopupHiddenSignal() { ScreenPresenter = this });
             await this.View.Close();
+            this.SignalBus.Fire(new PopupHiddenSignal() { ScreenPresenter = this });
             this.SignalBus.Fire(new ScreenCloseSignal() { ScreenPresenter = this });
             this.Dispose();
         }
