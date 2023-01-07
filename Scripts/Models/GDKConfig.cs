@@ -45,6 +45,18 @@ namespace Models
 
         #endregion
 
+        private void OnEnable() { this.Init(); }
+
+        private void Init()
+        {
+            if (this.gameConfigs == null || this.gameConfigs.Count == 0) return;
+            this.typeToGameConfig = new Dictionary<Type, IGameConfig>();
+            foreach (var gameConfig in this.gameConfigs)
+            {
+                this.typeToGameConfig.Add(gameConfig.GetType(), gameConfig);
+            }
+        }
+
         public T GetGameConfig<T>() where T : IGameConfig
         {
             if (this.typeToGameConfig.TryGetValue(typeof(T), out var result))
@@ -57,31 +69,15 @@ namespace Models
                 return default;
             }
         }
-        
+
 #if UNITY_EDITOR
         public void AddGameConfig(IGameConfig gameConfig)
         {
             if (this.gameConfigs == null) this.gameConfigs = new List<IGameConfig>();
-            
             this.gameConfigs.Add(gameConfig);
-            this.OnValidate();
         }
-        
-        public void RemoveGameConfig(IGameConfig gameConfig)
-        {
-            this.gameConfigs?.Remove(gameConfig);
-            this.OnValidate();
-        }
-        
-        private void OnValidate()
-        {
-            if (this.gameConfigs == null || this.gameConfigs.Count == 0) return;
-            this.typeToGameConfig = new Dictionary<Type, IGameConfig>();
-            foreach (var gameConfig in this.gameConfigs)
-            {
-                this.typeToGameConfig.Add(gameConfig.GetType(), gameConfig);
-            }
-        }
+
+        public void RemoveGameConfig(IGameConfig gameConfig) { this.gameConfigs?.Remove(gameConfig); }
 #endif
     }
 }

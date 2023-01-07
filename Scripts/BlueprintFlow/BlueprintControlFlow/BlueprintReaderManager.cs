@@ -119,16 +119,16 @@ namespace BlueprintFlow.BlueprintControlFlow
                 return result;
             }
 
-            using var archive       = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath);
+            using var archive = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath);
             foreach (var entry in archive.Entries)
             {
                 if (!entry.FullName.EndsWith(this.blueprintConfig.BlueprintFileType, StringComparison.OrdinalIgnoreCase))
                     continue;
-                using var streamReader = new StreamReader(entry.Open());
-                var readToEndAsync = await streamReader.ReadToEndAsync();
-                result.Add( entry.Name, readToEndAsync);
+                using var streamReader   = new StreamReader(entry.Open());
+                var       readToEndAsync = await streamReader.ReadToEndAsync();
+                result.Add(entry.Name, readToEndAsync);
             }
-            
+
             return result;
         }
 
@@ -204,7 +204,14 @@ namespace BlueprintFlow.BlueprintControlFlow
                 {
                     await blueprintReader.DeserializeFromCsv(rawCsv);
                     this.readBlueprintProgressSignal.CurrentProgress++;
-                    this.signalBus.Fire(this.readBlueprintProgressSignal);
+                    try
+                    {
+                        this.signalBus.Fire(this.readBlueprintProgressSignal);
+                    }
+                    catch (Exception e)
+                    {
+                        logService.Exception(e);
+                    }
                 }
                 else
                     this.logService.Warning($"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");

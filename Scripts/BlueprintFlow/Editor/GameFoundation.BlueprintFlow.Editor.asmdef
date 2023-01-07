@@ -6,7 +6,9 @@
         "GameFoundation.Models",
         "GameFoundation.BlueprintFlow"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
