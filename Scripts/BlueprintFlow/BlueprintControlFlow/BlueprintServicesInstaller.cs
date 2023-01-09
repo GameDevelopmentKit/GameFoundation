@@ -1,9 +1,10 @@
 namespace BlueprintFlow.BlueprintControlFlow
 {
+    using BlueprintFlow.APIHandler;
     using BlueprintFlow.BlueprintReader;
-    using BlueprintFlow.Downloader;
     using BlueprintFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
+    using Models;
     using Zenject;
 
     /// <summary>
@@ -15,9 +16,10 @@ namespace BlueprintFlow.BlueprintControlFlow
         {
             //BindBlueprint reader for mobile
             this.Container.Bind<PreProcessBlueprintMobile>().AsCached().NonLazy();
+            this.Container.Bind<FetchBlueprintInfo>().WhenInjectedInto<BlueprintReaderManager>();
             this.Container.Bind<BlueprintDownloader>().WhenInjectedInto<BlueprintReaderManager>();
             this.Container.Bind<BlueprintReaderManager>().AsCached();
-            this.Container.Bind<BlueprintConfig>().AsCached();
+            this.Container.Bind<BlueprintConfig>().FromResolveGetter<GDKConfig>(config => config.GetGameConfig<BlueprintConfig>()).AsCached();
 
             this.Container.BindAllTypeDriveFrom<IGenericBlueprintReader>();
 

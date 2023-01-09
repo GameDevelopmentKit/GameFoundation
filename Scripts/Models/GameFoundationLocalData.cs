@@ -11,7 +11,6 @@ namespace GameFoundation.Scripts.Models
         // user data
         public UserDataLogin  UserDataLogin  { get; set; } = new UserDataLogin();
         public ServerToken    ServerToken    { get; set; } = new ServerToken();
-        public BlueprintModel BlueprintModel { get; set; } = new BlueprintModel();
 
         public IndexSettingRecord IndexSettingRecord = new IndexSettingRecord();
         public void               Init() { }
@@ -39,12 +38,7 @@ namespace GameFoundation.Scripts.Models
 
         public string WalletAddress { get; set; }
     }
-
-    public class BlueprintModel
-    {
-        public string BlueprintDownloadUrl { get; set; }
-    }
-
+    
     public class IndexSettingRecord
     {
         public BoolReactiveProperty  MasterVolume { get; set; } = new(true);
