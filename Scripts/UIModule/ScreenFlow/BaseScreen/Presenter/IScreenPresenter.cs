@@ -1,7 +1,7 @@
 namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 {
     using System;
-    using System.Threading.Tasks;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
     using Zenject;
@@ -25,11 +25,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public Transform CurrentTransform { get;  }
         public void      BindData();
 
-        public Task OpenViewAsync();
-        public Task CloseViewAsync();
-        public void CloseView();
-        public void HideView();
-        public void DestroyView();
+        public UniTask OpenViewAsync();
+        public UniTask CloseViewAsync();
+        public void    CloseView();
+        public void    HideView();
+        public void    DestroyView();
 
         /// <summary>
         /// Called when the screen is overlap by another screen 
@@ -41,7 +41,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
     public interface IScreenPresenter<in TModel> : IScreenPresenter
     {
-        public Task OpenView(TModel model);
+        public UniTask OpenView(TModel model);
     }
 
     public enum ScreenStatus

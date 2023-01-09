@@ -14,7 +14,7 @@ namespace BlueprintFlow.APIHandler
         [Inject] private ILogService     logService;
         
 #if !GDK_NETWORK_ENABLE
-        public Task DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
+        public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
         {
             try
             {

@@ -11,7 +11,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     {
         public BasePopupPresenter(SignalBus signalBus) : base(signalBus) { }
 
-        public override async Task OpenViewAsync()
+        public override async UniTask OpenViewAsync()
         {
             this.BindData();
 
@@ -24,7 +24,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             await this.View.Open();
         }
 
-        public override async Task CloseViewAsync()
+        public override async UniTask CloseViewAsync()
         {
             if (this.ScreenStatus == ScreenStatus.Closed) return;
             this.ScreenStatus = ScreenStatus.Closed;
@@ -50,7 +50,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         protected BasePopupPresenter(SignalBus signalBus, ILogService logService) : base(signalBus) { this.logService = logService; }
 
-        public async Task OpenView(TModel model)
+        public async UniTask OpenView(TModel model)
         {
             if (model != null)
             {
@@ -60,7 +60,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             await this.OpenViewAsync();
         }
 
-        public override async Task OpenViewAsync()
+        public override async UniTask OpenViewAsync()
         {
             if (this.Model != null)
             {

@@ -59,7 +59,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public abstract void BindData();
 
-        public virtual async Task OpenViewAsync()
+        public virtual async UniTask OpenViewAsync()
         {
             // Always fill data for screen
             this.BindData();
@@ -70,7 +70,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             await this.View.Open();
         }
 
-        public virtual async Task CloseViewAsync()
+        public virtual async UniTask CloseViewAsync()
         {
             if (this.ScreenStatus == ScreenStatus.Closed) return;
             this.ScreenStatus = ScreenStatus.Closed;
@@ -116,7 +116,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         protected          TModel      Model;
         protected BaseScreenPresenter(SignalBus signalBus, ILogService logger) : base(signalBus) { this.Logger = logger; }
 
-        public override async Task OpenViewAsync()
+        public override async UniTask OpenViewAsync()
         {
             await base.OpenViewAsync();
             if (this.Model != null)
@@ -128,7 +128,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
                 this.Logger.Warning($"{this.GetType().Name} don't have Model!!!");
             }
         }
-        public virtual async Task OpenView(TModel model)
+        public virtual async UniTask OpenView(TModel model)
         {
             if (model != null)
             {
