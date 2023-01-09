@@ -1,8 +1,8 @@
 namespace BlueprintFlow.APIHandler
 {
     using System;
-    using System.Threading.Tasks;
     using BlueprintFlow.BlueprintControlFlow;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;
 
@@ -22,7 +22,7 @@ namespace BlueprintFlow.APIHandler
                 var       uri    = new Uri(blueprintDownloadUrl);
                 var       task   = client.DownloadFileTaskAsync(uri, filePath);
                 client.DownloadProgressChanged += (sender, args) => onDownloadProgress.Invoke(args.BytesReceived, args.TotalBytesToReceive);
-                return task;
+                return task.AsUniTask();
             }
             catch (Exception e)
             {
