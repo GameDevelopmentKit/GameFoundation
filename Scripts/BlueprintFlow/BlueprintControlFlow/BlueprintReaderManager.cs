@@ -200,17 +200,14 @@ namespace BlueprintFlow.BlueprintControlFlow
                 }
 
                 // Deserialize the raw blueprint to the blueprint reader instance
+                
                 if (!string.IsNullOrEmpty(rawCsv))
                 {
                     await blueprintReader.DeserializeFromCsv(rawCsv);
-                    this.readBlueprintProgressSignal.CurrentProgress++;
-                    try
+                    lock (this.readBlueprintProgressSignal)
                     {
+                        this.readBlueprintProgressSignal.CurrentProgress++;
                         this.signalBus.Fire(this.readBlueprintProgressSignal);
-                    }
-                    catch (Exception e)
-                    {
-                        logService.Exception(e);
                     }
                 }
                 else
