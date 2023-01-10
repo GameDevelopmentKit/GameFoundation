@@ -45,9 +45,9 @@ namespace Models
 
         #endregion
 
-        private void OnEnable() { this.Init(); }
+        private void OnEnable() { this.RefreshData(); }
 
-        private void Init()
+        private void RefreshData()
         {
             if (this.gameConfigs == null || this.gameConfigs.Count == 0) return;
             this.typeToGameConfig = new Dictionary<Type, IGameConfig>();
@@ -75,9 +75,14 @@ namespace Models
         {
             if (this.gameConfigs == null) this.gameConfigs = new List<IGameConfig>();
             this.gameConfigs.Add(gameConfig);
+            this.RefreshData();
         }
 
-        public void RemoveGameConfig(IGameConfig gameConfig) { this.gameConfigs?.Remove(gameConfig); }
+        public void RemoveGameConfig(IGameConfig gameConfig)
+        {
+            this.gameConfigs?.Remove(gameConfig);
+            this.RefreshData();
+        }
 #endif
     }
 }
