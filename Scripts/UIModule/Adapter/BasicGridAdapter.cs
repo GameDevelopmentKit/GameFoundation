@@ -67,7 +67,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. 
         // For GridAdapters, only Refresh and ResetItems work for now
 
-        public async void InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
+        public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
         {
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
