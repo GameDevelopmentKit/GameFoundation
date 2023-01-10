@@ -39,7 +39,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <summary>
         /// Close a screen on top
         /// </summary>
-        public Task CloseCurrentScreen();
+        public UniTask CloseCurrentScreen();
 
         /// <summary>
         /// Close all screen on current scene
@@ -200,7 +200,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             }
         }
 
-        public async Task CloseCurrentScreen()
+        public async UniTask CloseCurrentScreen()
         {
             if (this.activeScreens.Count > 0)
                 await this.activeScreens.Last().CloseViewAsync();

@@ -2,14 +2,14 @@ namespace BlueprintFlow.BlueprintReader
 {
     using System.IO;
     using System.Linq;
-    using System.Threading.Tasks;
     using BlueprintFlow.BlueprintReader.Converter;
+    using Cysharp.Threading.Tasks;
     using Sylvan.Data.Csv;
 
     /// <summary> An abstraction class for databases with column-based header fields </summary>
     public abstract class GenericBlueprintReaderByCol : IGenericBlueprintReader
     {
-        public async Task DeserializeFromCsv(string rawCsv)
+        public async UniTask DeserializeFromCsv(string rawCsv)
         {
             await using var csv =
                 await CsvDataReader.CreateAsync(new StringReader(rawCsv), CsvHelper.CsvDataReaderOptions);

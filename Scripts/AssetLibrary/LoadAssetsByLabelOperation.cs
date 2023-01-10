@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
+    using Cysharp.Threading.Tasks;
     using UnityEngine.AddressableAssets;
     using UnityEngine.AddressableAssets.ResourceLocators;
     using UnityEngine.ResourceManagement.AsyncOperations;
@@ -34,7 +34,7 @@
             #pragma warning restore CS4014
         }
 
-        public async Task DoTask()
+        public async UniTask DoTask()
         {
             var locationsHandle = Addressables.LoadResourceLocationsAsync(this._label);
             var locations       = await locationsHandle.Task;

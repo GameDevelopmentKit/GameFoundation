@@ -1,6 +1,6 @@
 namespace BlueprintFlow.BlueprintReader
 {
-    using System.Threading.Tasks;
+    using Cysharp.Threading.Tasks;
 
     /// <summary> Interface of database class </summary>
     public interface IGenericBlueprintReader
@@ -10,6 +10,6 @@ namespace BlueprintFlow.BlueprintReader
         /// </summary>
         /// <param name="rawCsv"></param>
         /// <returns></returns>
-        public Task DeserializeFromCsv(string rawCsv);
+        public UniTask DeserializeFromCsv(string rawCsv);
     }
 }

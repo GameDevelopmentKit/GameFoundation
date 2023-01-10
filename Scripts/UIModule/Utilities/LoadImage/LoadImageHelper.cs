@@ -60,7 +60,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         }
 
 
-        public async Task LoadSpriteFromUrl(Image imageComponent, string url, Action<Image> onLoadingIconLoaded = null)
+        public async UniTask LoadSpriteFromUrl(Image imageComponent, string url, Action<Image> onLoadingIconLoaded = null)
         {
             if (this.spriteCache.TryGetValue(url, out var sprite))
             {

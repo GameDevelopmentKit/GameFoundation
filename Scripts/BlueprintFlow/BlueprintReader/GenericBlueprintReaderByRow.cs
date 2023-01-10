@@ -5,8 +5,8 @@ namespace BlueprintFlow.BlueprintReader
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
     using BlueprintFlow.BlueprintReader.Converter;
+    using Cysharp.Threading.Tasks;
     using Sylvan.Data.Csv;
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
 
@@ -30,7 +30,7 @@ namespace BlueprintFlow.BlueprintReader
     /// <typeparam name="T2">Type of value</typeparam>
     public abstract class GenericBlueprintReaderByRow<T1, T2> : BlueprintByRow<T1, T2>, IGenericBlueprintReader
     {
-        public virtual async Task DeserializeFromCsv(string rawCsv)
+        public virtual async UniTask DeserializeFromCsv(string rawCsv)
         {
             this.CleanUp();
             await using var csv =
