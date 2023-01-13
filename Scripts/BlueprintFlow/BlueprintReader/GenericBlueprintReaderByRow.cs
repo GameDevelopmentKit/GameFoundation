@@ -8,6 +8,7 @@ namespace BlueprintFlow.BlueprintReader
     using BlueprintFlow.BlueprintReader.Converter;
     using Cysharp.Threading.Tasks;
     using Sylvan.Data.Csv;
+    using UnityEngine;
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
 
     /// <summary> Attribute used to mark the Header Key for GenericDatabaseByRow </summary>
@@ -144,7 +145,14 @@ namespace BlueprintFlow.BlueprintReader
         private void Setup()
         {
             var csvHeaderKeyAttribute =
-                (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.blueprintType, typeof(CsvHeaderKeyAttribute));
+                (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.recordType, typeof(CsvHeaderKeyAttribute));
+
+            //todo will remove later, should place all CsvHeaderKeyAttribute on record class instead of the blueprint class
+            if (csvHeaderKeyAttribute == null)
+            {
+                csvHeaderKeyAttribute = (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.blueprintType, typeof(CsvHeaderKeyAttribute));
+            }
+            
             if (csvHeaderKeyAttribute != null)
                 this.RequireKey = csvHeaderKeyAttribute.HeaderKey;
 

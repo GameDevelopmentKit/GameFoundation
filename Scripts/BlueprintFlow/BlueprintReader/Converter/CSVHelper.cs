@@ -5,6 +5,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
     using System.Linq;
     using BlueprintFlow.BlueprintReader.Converter.TypeConversion;
     using Sylvan.Data.Csv;
+    using UnityEngine;
 
     public static class CsvHelper
     {
@@ -33,8 +34,9 @@ namespace BlueprintFlow.BlueprintReader.Converter
             {
                 return csvReader.GetString(csvReader.GetOrdinal(name));
             }
-            catch (IndexOutOfRangeException e)
+            catch (Exception e)
             {
+                Debug.LogError($"GetField - {name}" + e);
                 return string.Empty;
             }
         }
