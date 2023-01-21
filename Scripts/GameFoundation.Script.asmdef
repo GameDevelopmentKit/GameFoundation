@@ -6,7 +6,6 @@
         "GameFoundation.AssetLibrary",
         "GameFoundation.BlueprintFlow",
         "GameFoundation.Models",
-        "GameFoundation.Network.Auth",
         "GameFoundation.UIModule",
         "MasterAAASound.Scripts",
         "I2Localization.Scripts",
