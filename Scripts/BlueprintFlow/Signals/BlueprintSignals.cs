@@ -6,19 +6,20 @@ namespace BlueprintFlow.Signals
         public string Hash;
     }
 
-    public class LoadBlueprintDataSuccessedSignal
+    public class LoadBlueprintDataSucceedSignal
     {
-        
     }
 
     public class LoadBlueprintDataProgressSignal
     {
-        public float percent;
+        public float Percent;
     }
     
     public class ReadBlueprintProgressSignal
     {
         public int MaxBlueprint;
         public int CurrentProgress;
+
+        public float Percent => 1f * this.CurrentProgress / this.MaxBlueprint;
     }
 }

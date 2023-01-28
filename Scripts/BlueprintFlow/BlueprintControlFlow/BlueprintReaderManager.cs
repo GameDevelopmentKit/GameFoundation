@@ -92,7 +92,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
             this.logService.Log("[BlueprintReader] All blueprint are loaded");
 
-            this.signalBus.Fire<LoadBlueprintDataSuccessedSignal>();
+            this.signalBus.Fire<LoadBlueprintDataSucceedSignal>();
         }
 
         protected virtual bool IsCachedBlueprintUpToDate(string url, string hash) =>
@@ -103,10 +103,11 @@ namespace BlueprintFlow.BlueprintControlFlow
         //Download new blueprints version from remote
         private async UniTask DownloadBlueprint(string blueprintDownloadLink)
         {
-            var progressSignal = new LoadBlueprintDataProgressSignal();
+            var progressSignal = new LoadBlueprintDataProgressSignal { Percent = 0f };
+            this.signalBus.Fire(progressSignal); //Inform that we just starting dowloading blueprint
             await this.blueprintDownloader.DownloadBlueprintAsync(blueprintDownloadLink, this.blueprintConfig.BlueprintZipFilepath, (downloaded, length) =>
             {
-                progressSignal.percent = downloaded / (float)length * 100f;
+                progressSignal.Percent = downloaded / (float)length * 100f;
                 this.signalBus.Fire(progressSignal);
             });
         }
@@ -143,6 +144,8 @@ namespace BlueprintFlow.BlueprintControlFlow
             var listReadTask    = new List<UniTask>();
             var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>();
             this.readBlueprintProgressSignal.MaxBlueprint = allDerivedTypes.Count();
+            this.readBlueprintProgressSignal.CurrentProgress = 0;
+            this.signalBus.Fire(this.readBlueprintProgressSignal); // Inform that we just start reading blueprint
             foreach (var blueprintType in allDerivedTypes)
             {
                 var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);

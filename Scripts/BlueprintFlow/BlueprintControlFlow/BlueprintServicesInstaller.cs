@@ -23,7 +23,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
             this.Container.BindAllTypeDriveFrom<IGenericBlueprintReader>();
 
-            this.Container.DeclareSignal<LoadBlueprintDataSuccessedSignal>();
+            this.Container.DeclareSignal<LoadBlueprintDataSucceedSignal>();
             this.Container.DeclareSignal<LoadBlueprintDataProgressSignal>();
             this.Container.DeclareSignal<ReadBlueprintProgressSignal>();
         }
