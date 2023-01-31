@@ -39,9 +39,9 @@ namespace Models
         [SerializeField] private string gameName;
         [SerializeField] private string gameId = "8a5ddf62-4c95-44b0-9db0-be5f8f9ef819";
 
-        [SerializeField] private List<IGameConfig> gameConfigs;
+        [SerializeField] private List<ScriptableObject> gameConfigs;
 
-        private Dictionary<Type, IGameConfig> typeToGameConfig;
+        private Dictionary<Type, ScriptableObject> typeToGameConfig;
 
         #endregion
 
@@ -50,14 +50,14 @@ namespace Models
         private void RefreshData()
         {
             if (this.gameConfigs == null || this.gameConfigs.Count == 0) return;
-            this.typeToGameConfig = new Dictionary<Type, IGameConfig>();
+            this.typeToGameConfig = new Dictionary<Type, ScriptableObject>();
             foreach (var gameConfig in this.gameConfigs)
             {
                 this.typeToGameConfig.Add(gameConfig.GetType(), gameConfig);
             }
         }
 
-        public T GetGameConfig<T>() where T : IGameConfig
+        public T GetGameConfig<T>() where T : ScriptableObject
         {
             if (this.typeToGameConfig.TryGetValue(typeof(T), out var result))
             {
@@ -71,14 +71,14 @@ namespace Models
         }
 
 #if UNITY_EDITOR
-        public void AddGameConfig(IGameConfig gameConfig)
+        public void AddGameConfig(ScriptableObject gameConfig)
         {
-            if (this.gameConfigs == null) this.gameConfigs = new List<IGameConfig>();
+            if (this.gameConfigs == null) this.gameConfigs = new List<ScriptableObject>();
             this.gameConfigs.Add(gameConfig);
             this.RefreshData();
         }
 
-        public void RemoveGameConfig(IGameConfig gameConfig)
+        public void RemoveGameConfig(ScriptableObject gameConfig)
         {
             this.gameConfigs?.Remove(gameConfig);
             this.RefreshData();

@@ -8,7 +8,7 @@ namespace BlueprintFlow.BlueprintControlFlow
     /// Contains all the constants, the configuration of Blueprint control flow
     /// </summary>
     [Serializable]
-    public class BlueprintConfig : ScriptableObject, IGameConfig
+    public class BlueprintConfig : ScriptableObject
     {
         [SerializeField] private string currentBlueprintVersion = "0.0.1";
         [SerializeField] private bool   isResourceMode;
