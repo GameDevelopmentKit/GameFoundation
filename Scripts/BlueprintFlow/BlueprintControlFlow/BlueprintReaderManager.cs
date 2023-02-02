@@ -54,6 +54,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             if (this.blueprintConfig.IsResourceMode)
             {
                 listRawBlueprints = new Dictionary<string, string>();
+                this.signalBus.Fire(new LoadBlueprintDataProgressSignal {Percent = 1f});
             }
             else
             {

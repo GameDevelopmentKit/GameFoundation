@@ -36,7 +36,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
             }
             catch (Exception e)
             {
-                Debug.LogError($"GetField - {name}" + e);
+                Debug.LogError($"GetField - {name}:"+ e);
                 return string.Empty;
             }
         }
