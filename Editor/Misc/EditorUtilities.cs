@@ -4,8 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using SystemInfo = UnityEngine.SystemInfo;
 
-namespace Editor.Misc
-{
+
 	public static class EditorUtilities {
 		#region Editors
 		[MenuItem("GDK/Utils/[Clear] PlayerPrefs", false, 10000)]
@@ -269,4 +268,4 @@ namespace Editor.Misc
 		}
 		#endregion
 	}
-}
+

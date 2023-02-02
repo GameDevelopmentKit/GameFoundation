@@ -1,5 +1,4 @@
-﻿namespace Editor.GDKManager
-{
+﻿
     using Models;
     using UnityEngine.UIElements;
 
@@ -10,4 +9,3 @@
         public abstract void          PreSetup();
         public abstract VisualElement LoadView();
     }
-}

@@ -2,8 +2,7 @@ using Models;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace Editor.GDKManager
-{
+
     public class GeneralConfigEditor : BaseGameConfigEditor
     {
         public GeneralConfigEditor(GDKConfig gdkConfig) : base(gdkConfig)
@@ -26,4 +25,4 @@ namespace Editor.GDKManager
             return this;
         }
     }
-}
+
