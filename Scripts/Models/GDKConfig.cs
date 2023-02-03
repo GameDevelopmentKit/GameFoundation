@@ -3,6 +3,7 @@ namespace Models
     using System;
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
+    using UnityEditor;
     using UnityEngine;
 
     public class GDKConfig : SerializedScriptableObject
@@ -75,12 +76,18 @@ namespace Models
         {
             if (this.gameConfigs == null) this.gameConfigs = new List<IGameConfig>();
             this.gameConfigs.Add(gameConfig);
+            EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
             this.RefreshData();
         }
 
         public void RemoveGameConfig(IGameConfig gameConfig)
         {
             this.gameConfigs?.Remove(gameConfig);
+            EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
             this.RefreshData();
         }
 #endif
