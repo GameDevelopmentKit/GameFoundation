@@ -82,18 +82,21 @@ public static class Build
                     outputPath = args[++i];
                     break;
                 case "-projectIdentifier":
-                    outputPath = args[++i];
+                    projectIdentifier = args[++i];
+                    break;
+                case "-buildAppBundle":
+                    EditorUserBuildSettings.buildAppBundle = true;
                     break;
             }
         }
 
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
-        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols);
+        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, projectIdentifier);
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
-                                     string                  projectIdentifier = "")
+                                     string                  projectIdentifier = "com.TheOneStudio.default")
     {
         BuildTools.ResetBuildSettings();
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
