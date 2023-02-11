@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build.Reporting;
 using UnityEditorInternal;
@@ -56,6 +55,7 @@ public static class Build
         var buildOptions           = BuildOptions.None;
         var scriptingDefineSymbols = string.Empty;
         var outputPath             = "template.exe";
+        var projectIdentifier      = "com.TheOneStudio.TestProject";
         for (var i = 0; i < args.Length; ++i)
         {
             switch (args[i])
@@ -81,6 +81,9 @@ public static class Build
                 case "-outputPath":
                     outputPath = args[++i];
                     break;
+                case "-projectIdentifier":
+                    outputPath = args[++i];
+                    break;
             }
         }
 
@@ -89,7 +92,8 @@ public static class Build
         BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols);
     }
 
-    public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "")
+    public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
+                                     string                  projectIdentifier = "")
     {
         BuildTools.ResetBuildSettings();
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
@@ -104,6 +108,7 @@ public static class Build
 
             PlayerSettings.SetScriptingBackend(platform.BuildTargetGroup, scriptingBackend);
             SetApplicationVersion();
+            SetupProjectInfo(platform.BuildTargetGroup, projectIdentifier);
             BuildAddressable(platform);
 
             // If we're not in batch mode, we can do this
@@ -114,7 +119,10 @@ public static class Build
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
-            var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options };
+            var buildPlayerOptions = new BuildPlayerOptions
+                                     {
+                                         scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options
+                                     };
 
             if (!string.IsNullOrEmpty(scriptingDefineSymbols))
                 SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
@@ -226,6 +234,8 @@ public static class Build
         // Bundle version will be use for some third party like Backtrace, DeltaDNA,...
         PlayerSettings.bundleVersion = GameVersion.Version;
     }
+
+    public static void SetupProjectInfo(BuildTargetGroup targetGroup, string identifier) { PlayerSettings.SetApplicationIdentifier(targetGroup, identifier); }
 
     public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) =>
         PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, scriptingDefineSymbols);
