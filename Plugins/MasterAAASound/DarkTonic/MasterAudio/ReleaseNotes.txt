@@ -1,6 +1,95 @@
-MASTER AUDIO PLUGIN - By DarkTonic, Inc. (c) 2012-2020
+MASTER AUDIO PLUGIN - By DarkTonic, Inc. (c) 2012-2022
 
 - Code by Brian Hunsaker
+
+-V 1.0.3    - Fixed CreateGroupVariationFromClip method so it adds the new Variation to the Group's list for programmatic access.
+			- Fixed bug where GlideSoundGroupByPitch wasn't working.
+			- Fixed bug where Sound Groups would not keep their mute status when muted by the Mixer Mute button.
+			- Fixed bug where Sound Groups wouldn't mute themselves on startup when Mixer Mute was on.
+			- Fixed bug where on Mirror sometimes sounds would be hear twice on the host if also a client.
+			- Fixed bug where newly created Playlist Controllers would be destroyed when entering play mode after a compile if Enter Play Mode Options was checked.
+			- Fixed bug where PlaylistEnded delegate for Playlist Controller didn't always get executed.
+			- Fixed compile errors in Bulk Audio Importer for Unity 2022.2.
+			- Caching AudioSettings.dspTime for less bugs with scheduling songs.
+			- Added Playmaker action: Master Audio Fade Out Sound Group Of Transform
+			- Added checkbox to EventSounds when firing a Custom Event, you can disable the logging of duplicate firing per frame.
+
+-V 1.0.2    - Added Playmaker Custom Action MasterAudioFadeSoundGroupOfTransform.
+			- Added Multiplayer integration with FishNet.
+			- Fixed previewing so it works in newer versions of Unity despite the PlayOneShot Unity bug.
+			- Fixed Sound Group Inspector so during runtime, moving the Group Master Volume slider adjusts the volume of any playing Variations in the Group.
+			- Fixed "All Groups" checkbox functionality for Event Sounds.
+			- Fixed bugs in Mirror Multiplayer package. Some sounds were playing twice. Others not firing sometimes.
+			- Fixed occasional wrong lookup of briefly named (clone) variations.
+			- Reverted AsmDef packages, they must be ""all platform" or the Inspectors don't show in Unity.
+			- Added Fade Sound Group Of Transform To Volume to Event Sounds.
+			- All links to documentation website and API website are now HTTPS in case your browser doesn't auto-redirect.
+
+-V 1.0.1    - Fixed export problem with MasterAudioReferenceHolder.cs
+
+Master Audio 2022 released! Version numbers reset.
+-V 1.0		- Fixed bug where Variations were not found because of name containing "Clone" for Variations with Weight > 1.
+			- Fixed bug in Unity 2021 where domain not reloading settings broke outside the editor.
+ 			- Fixed bug with calculation of "is too far away to play" Audio.
+			- Fixed bug where Group Polyphony Limit didn't work properly on certain settings.
+			- Fixed bug where after a Variation fade, changing the Master Mixer Volume would set the volume to a percentage of the original pre-fade volume.
+			- Fixed bug: Sound Group Organizer didn't copy Voices field.
+			- Fixed bug: Turning on both "Use Closest Collider Position" and "Follow Caller" for Ambient Sound would make the collider positioning not work.
+			- Fixed bug: Warming sound, if Resource File, would not disable itself after playing during warm up.
+			- Fixed bug: Previewing in edit mode would randomly stop working after 1 minute of inactivity.
+			- Fixed bug: Sound Group Organizer didn't copy any Variations past the first.
+			- Fixed bug: Occlusion would stop raycasting if occluded for more than a couple seconds. Couldn't restore non-occluded sound.
+			- Fixed allocations in Chained Loop code.
+			- Fixed warning with Multiplayer Mirror integration.
+			- Fixed bug with StreamAssets and Bulk Audio Importer (crash).
+			- Fixed bug where EventSounds OnEnable event wouldn't play a sound on first frame.
+			- Fixed bug where SongEnded event would no longer fire on PlaylistController.
+			- Fixed obscure bug with unpause on PlaylistController causing the music to stop.
+			- Fixed bug in Unity 2021 where Bulk Audio Importer spammed errors on scanning.
+			- Fixed bug in EventSounds where Playlist events wouldn't play during OnEnable. Now they play during "Start" instead if so configured, since PlaylistController is ready by then.
+			- Fixed bug where Playmaker Custom Actions would spam the Console when editor stopped or Scene unloaded sometimes.
+			- Fixed asmdef files package so that they only work in the editor.
+			- Added integration with all Opsive plugins!
+			- Changed Voices / Weight label to have a slash instead of parentheses. Clearer purpose.
+			- Changed "Song Start Time Mode" on songs in a Playlist to "Begin Song Time Mode".
+			- Added "Multiplayer Capability" checkbox to the Welcome Window, off by default. Check the box to get multiplayer versions of Event Sounds, and the MechanimState scripts.
+			- Added new asmdef packages for users using Addressables and asmdefs. The existing ones didn't compile if you turned on Addressable support.
+			- Added ability to specify a Custom Event to fire at the end of fades/pitch glides in Event Sounds for: Pitch Glide in "Play Sound", Sound Group Fade To Volume, Sound Group Glide By Pitch, Bus Fade To Volume, Bus Glide By Pitch.
+			- Added missing "Use Clip Age Priority" checkbox to Dynamic Sound Groups.
+			- Added "Section" option for "Begin Song Time Mode" for Songs in Playlist Controller. This allows you to set a loopable section of a song. You set the start and end time in seconds. No more issues identified. Issues fixed with it:
+				-There's a hiccup when you change or queue to a section loop song on gapless.
+				-Unpause with Jukebox used to work?
+				-Progress of song in Jukebox should not move during pause. 
+				-Seamless scheduling of looped track.
+				-Crossfade aborts the non-section loop song early by the length of the crossfade (I think it's scheduling the section loop clip and cutting off the old clip).
+				-Must work when queued
+				-Section loop must work on gapless
+
+Master Audio / Master Audio 2021 releases ended.
+
+-V 2020.3.8 - Fixed a bunch of unintentional allocations for zero Garbage Collection.
+			- Fixed Bus Solo logic, it was adding the same Bus without checking if it was in the list. Could result in weird behavior.
+			- Fixed Bug: Warming Group would not disable after the warming play if it's a normal Audio Clip and not Addressables / Resource.
+			- Fixed Bug: duplicate named Ambient Sound game objects would sometimes delete 1 or more of the followers and Ambient Sound script wouldn't work as a result.
+			- Moved all Master Audio custom actions for Playmaker into the Master Audio category.
+
+-V 2020.3.7 - Fixed bug: Refactored log code in Master Audio that finds no voices to play returned only conditionally.
+			- Fixed bug: Allocation fixed for Addressable delayed cleanup. 
+			- Fixed bug: Jukebox display would not select Resource File from a list of Resource files in the Playlist when it was playing. It always appeared blank.
+			- Fixed bug: Long Playlist names would not get truncated and mess up the Inspector.
+			- Fixed bug: Not-loaded Resource file played by name would cause endless loop.
+			- Fixed bug: Hitting Play with a Playlist Controller selected would cause an error when trying to display the Jukebox.
+			- Fixed bug: Telling additional synced layers of music would sometimes be off by fractions of a second. We now schedule the audio change slightly ahead which minimizes this greatly. Usually eliminates it.
+			- Fixed bug: Auto-advanced crossfade wouldn't work on WebGL when in background and frame rate goes to 1.
+			- Added "Jukebox Filter" dropdown up top in the Master Audio Inspector. The choices are "Display All" (default) and "Diplay Active" which only shows Playlist Controllers that are playing songs.
+			- Added a new checkbox on Welcome Window to enable Video player feature. Now turned off by default. Enable it if you want the Video Players feature and have Video package installed from Package Manager. 
+			- Added a gear icon in each Jukebox to select the Playlist Controller in Project View for editing.
+			- Added "Sort Alpha" button for the Playlists section.
+			- Added "Playlist Text Filter" to filter out Playlists whose name doesn't match.
+			- Added "Pause Audio Listener" and "Unpause Audio Listener" to Global Control under Event Sounds.
+			- Added "Ignore Listener Pause" checkbox (defaults to unchecked) to Playlist Controllers and Sound Groups. They will play if checked even if the Audio Listener is paused. The rest will not.
+			- Added CurrentFadeStatus property to PlaylistController, to tell you the current fading status of a FadeToVolume, if one is running (FadingIn, FadingOut, NotFading).
+			- Change to Singleton Scriptable for obscure "load all resources" code in other plugins.
 
 -V 2020.3.6 - 2nd Fix for 2D spatialize bug, for Playlist Controller as well.
 			- Bug Fix: Adding more than 1 song at a time to a Playlist and immediately pressing play, they would vanish and not be saved.
@@ -91,7 +180,7 @@ MASTER AUDIO PLUGIN - By DarkTonic, Inc. (c) 2012-2020
 -V 4.2.6    - Added a toggle for "Remove Probability-Unplayed Variations" on the Master Audio Manager screen. Defaults to "on". If you turn it off, Variations that aren't played due to failing the Probability To Play check will not be removed from the pool, so they may be played again later through another probability check. 
 			- Fixed bug where a despawned or destroyed Game Object with Ambient Sound script would stop all playing instances of the Sound Group instead of just the single voice.
 
--V 4.2.5    - Made compilation possible without having Physics3D and/or Physics2D installed. You will lose Occlusion / AmbientSound functionality and corresponding events on EventSounds depending on which you remove, but everything else will work. Check the Physics page on the documentation on how to get it compiling since you have to add a define for each missing package. Link here: http://www.dtdevtools.com/docs/masteraudio/Physics.htm
+-V 4.2.5    - Made compilation possible without having Physics3D and/or Physics2D installed. You will lose Occlusion / AmbientSound functionality and corresponding events on EventSounds depending on which you remove, but everything else will work. Check the Physics page on the documentation on how to get it compiling since you have to add a define for each missing package. Link here: https://www.dtdevtools.com/docs/masteraudio/Physics.htm
 
 -V 4.2.4	- Fixed warning: Script execution order thing with DGSC and Ambient Sound would log "missing sound group". Added a check so the warning doesn't happen. Fixed a similar bug last update but it was only half the problem.
 			- Fixed bug where re-enter mode of Ambient Sound wouldn't play anything after the first trigger enter if set to "fade in same sound".

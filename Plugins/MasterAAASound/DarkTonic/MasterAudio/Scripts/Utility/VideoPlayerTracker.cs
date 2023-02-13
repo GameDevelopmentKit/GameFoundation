@@ -1,4 +1,5 @@
-﻿#if UNITY_2019_3_OR_NEWER
+﻿/*! \cond PRIVATE */
+#if UNITY_2019_3_OR_NEWER && VIDEO_ENABLED
 using UnityEngine.Video;
 
 namespace DarkTonic.MasterAudio
@@ -29,3 +30,4 @@ namespace DarkTonic.MasterAudio
     }
 }
 #endif
+/*! \endcond */

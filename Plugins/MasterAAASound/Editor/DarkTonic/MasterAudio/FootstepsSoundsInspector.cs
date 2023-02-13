@@ -54,7 +54,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
             PopulateGroupNames(_groupNames);
 
-            DTGUIHelper.HelpHeader("http://www.dtdevtools.com/docs/masteraudio/FootstepSounds.htm");
+            DTGUIHelper.HelpHeader("https://www.dtdevtools.com/docs/masteraudio/FootstepSounds.htm");
 
             _isDirty = false;
 
@@ -202,7 +202,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     step.isExpanded = state;
                 }
 
-                DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/FootstepSounds.htm#FootstepSound");
+                DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/FootstepSounds.htm#FootstepSound");
 
                 EditorGUILayout.EndHorizontal();
 

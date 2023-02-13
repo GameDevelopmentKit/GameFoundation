@@ -103,12 +103,12 @@ namespace DarkTonic.MasterAudio {
         public MasterAudio.CustomSongStartTimeMode songStartTimeMode = MasterAudio.CustomSongStartTimeMode.Beginning;
         
         /// <summary>
-        /// If you choose Random Time for Song Start Time Node, it will start between customStartTime (min) and customStartTimeMax, randomly.
+        /// If you choose Random Time for Begin Song Time Node, it will start between customStartTime (min) and customStartTimeMax, randomly.
         /// </summary>
         public float customStartTime;
 
         /// <summary>
-        /// If you choose Random Time for Song Start Time Node, it will start between customStartTime (min) and customStartTimeMax, randomly.
+        /// If you choose Random Time for Begin Song Time Node, it will start between customStartTime (min) and customStartTimeMax, randomly.
         /// </summary>
         public float customStartTimeMax;
 
@@ -125,7 +125,17 @@ namespace DarkTonic.MasterAudio {
         /// <summary>
         /// Set this uniquely for each song as consecutive integers, used to keep track of which songs haven't played yet.
         /// </summary>
-		public int songIndex = 0; 
+		public int songIndex = 0;
+
+        /// <summary>
+        /// This is used for loopable section of a song.
+        /// </summary>
+        public float sectionStartTime = 0f;
+
+        /// <summary>
+        /// This is used for loopable section of a song.
+        /// </summary>
+        public float sectionEndTime = 0f;
 
         /// <summary>
         /// Set this to true if you are going to use songStartedCustomEvent 
@@ -174,11 +184,14 @@ namespace DarkTonic.MasterAudio {
                         return customStartTime;
                     case MasterAudio.CustomSongStartTimeMode.RandomTime:
                         return UnityEngine.Random.Range(customStartTime, customStartTimeMax);
+                    case MasterAudio.CustomSongStartTimeMode.Section:
+                        return sectionStartTime;
                 }
             }
         }
         /*! \endcond */
 
+        /*! \cond PRIVATE */
         public static MusicSetting Clone(MusicSetting mus, MasterAudio.Playlist aList) {
             var clone = new MusicSetting {
                 alias = mus.alias,
@@ -244,5 +257,6 @@ namespace DarkTonic.MasterAudio {
             return clone;
             // ReSharper restore InconsistentNaming
         }
+        /*! \endcond */
     }
 }

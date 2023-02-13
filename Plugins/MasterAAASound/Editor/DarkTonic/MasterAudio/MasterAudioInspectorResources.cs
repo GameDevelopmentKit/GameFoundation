@@ -7,7 +7,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
     public static class MasterAudioInspectorResources
     {
         public const string PrefabFolderPartialPath = "/DarkTonic/MasterAudio/Prefabs/";
-        public const string MasterAudioFolderPath = "Packages/com.gdk.core/Plugins/MasterAAASound/Editor Default Resources/MasterAudio";
+        public const string MasterAudioFolderPath = "MasterAudio";
 
         public static Texture LogoTexture = EditorGUIUtility.LoadRequired(string.Format("{0}/inspector_header_master_audio.png", MasterAudioFolderPath)) as Texture;
         public static Texture BAILogoTexture = EditorGUIUtility.LoadRequired(string.Format("{0}/inspector_header_bulk_audio_importer.png", MasterAudioFolderPath)) as Texture;

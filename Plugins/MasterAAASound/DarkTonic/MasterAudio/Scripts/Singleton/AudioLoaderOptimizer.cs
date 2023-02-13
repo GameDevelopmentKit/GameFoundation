@@ -15,7 +15,7 @@ namespace DarkTonic.MasterAudio {
 			if (clip == null) {
 				return;
 			}
-			var clipName = clip.name;
+			var clipName = clip.CachedName();
 
 			if (!PlayingGameObjectsByClipName.ContainsKey(clipName)) {
 				PlayingGameObjectsByClipName.Add(clipName, new List<GameObject> { maHolderGameObject });
@@ -34,7 +34,7 @@ namespace DarkTonic.MasterAudio {
 			if (clip == null) {
 				return;
 			}
-			var clipName = clip.name;
+			var clipName = clip.CachedName();
 
 			if (!PlayingGameObjectsByClipName.ContainsKey(clipName)) {
 				return;
@@ -53,7 +53,7 @@ namespace DarkTonic.MasterAudio {
 				return false;
 			}
 
-			return PlayingGameObjectsByClipName.ContainsKey(clip.name);
+			return PlayingGameObjectsByClipName.ContainsKey(clip.CachedName());
 		}
 	}
 }

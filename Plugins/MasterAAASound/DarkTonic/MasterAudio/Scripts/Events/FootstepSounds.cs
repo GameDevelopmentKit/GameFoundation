@@ -130,15 +130,15 @@ namespace DarkTonic.MasterAudio {
 
                 switch (soundSpawnMode) {
                     case MasterAudio.SoundSpawnLocationMode.CallerLocation:
-                        MasterAudio.PlaySound3DAtTransform(aGroup.soundType, Trans, volume, pitch, aGroup.delaySound,
+                        MasterAudio.PlaySound3DAtTransformAndForget(aGroup.soundType, Trans, volume, pitch, aGroup.delaySound,
                             variationName);
                         break;
                     case MasterAudio.SoundSpawnLocationMode.AttachToCaller:
-                        MasterAudio.PlaySound3DFollowTransform(aGroup.soundType, Trans, volume, pitch, aGroup.delaySound,
+                        MasterAudio.PlaySound3DFollowTransformAndForget(aGroup.soundType, Trans, volume, pitch, aGroup.delaySound,
                             variationName);
                         break;
                     case MasterAudio.SoundSpawnLocationMode.MasterAudioLocation:
-                        MasterAudio.PlaySound(aGroup.soundType, volume, pitch, aGroup.delaySound, variationName);
+                        MasterAudio.PlaySoundAndForget(aGroup.soundType, volume, pitch, aGroup.delaySound, variationName);
                         break;
                 }
             }

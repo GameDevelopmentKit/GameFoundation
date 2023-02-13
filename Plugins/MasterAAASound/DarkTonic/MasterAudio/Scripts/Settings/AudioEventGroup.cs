@@ -10,7 +10,9 @@ namespace DarkTonic.MasterAudio {
 		// tag / layer filters
 		// ReSharper disable InconsistentNaming
 		public bool isExpanded = true;
-		public bool allPlayersShouldHear;
+#if MULTIPLAYER_ENABLED
+		public bool multiplayerBroadcast;
+#endif
 		public bool useLayerFilter = false;
 		public bool useTagFilter = false;
 		public List<int> matchingLayers = new List<int>() { 0 };

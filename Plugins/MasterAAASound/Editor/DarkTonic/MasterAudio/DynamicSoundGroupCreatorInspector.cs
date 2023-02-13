@@ -93,7 +93,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 DTGUIHelper.ShowHeaderTexture(MasterAudioInspectorResources.LogoTexture);
             }
 
-            DTGUIHelper.HelpHeader("http://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm", "http://www.dtdevtools.com/API/masteraudio/class_dark_tonic_1_1_master_audio_1_1_dynamic_sound_group_creator.html");
+            DTGUIHelper.HelpHeader("https://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm", "https://www.dtdevtools.com/API/masteraudio/class_dark_tonic_1_1_master_audio_1_1_dynamic_sound_group_creator.html");
 
             MasterAudio.Instance = null;
             var ma = MasterAudio.SafeInstance;
@@ -352,7 +352,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 _creator.showMusicDucking = state;
             }
 
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#Ducking");
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#Ducking");
 
             EditorGUILayout.EndHorizontal();
             GUI.color = Color.white;
@@ -506,7 +506,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
 
             var applyTemplateToAll = false;
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#Mixer");
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#Mixer");
 
             EditorGUILayout.EndHorizontal();
             GUI.color = Color.white;
@@ -858,31 +858,28 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 if (indexToDelete.HasValue)
                 {
                     var groupToDelete = _groups[indexToDelete.Value];
-#if UNITY_2018_3_OR_NEWER
-                var wasDestroyed = false;
 
-                if (PrefabUtility.IsPartOfPrefabInstance(_creator)) {
-                    var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_creator);
-                    GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
+                    var wasDestroyed = false;
 
-                    var deadTrans = prefabRoot.transform.Find(groupToDelete.name);
+                    if (PrefabUtility.IsPartOfPrefabInstance(_creator)) {
+                        var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_creator);
+                        GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
-                    if (deadTrans != null) {
-                        // Destroy child objects or components on rootGO
-                        DestroyImmediate(deadTrans.gameObject); // can't undo
-                        wasDestroyed = true;
+                        var deadTrans = prefabRoot.transform.Find(groupToDelete.name);
+
+                        if (deadTrans != null) {
+                            // Destroy child objects or components on rootGO
+                            DestroyImmediate(deadTrans.gameObject); // can't undo
+                            wasDestroyed = true;
+                        } 
+
+                        PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
+                        PrefabUtility.UnloadPrefabContents(prefabRoot);
                     } 
-
-                    PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
-                    PrefabUtility.UnloadPrefabContents(prefabRoot);
-                } 
                 
-                if (!wasDestroyed) { 
-                    AudioUndoHelper.DestroyForUndo(groupToDelete.gameObject);
-                }
-#else
-                    AudioUndoHelper.DestroyForUndo(groupToDelete.gameObject);
-#endif
+                    if (!wasDestroyed) { 
+                        AudioUndoHelper.DestroyForUndo(groupToDelete.gameObject);
+                    }
                 }
 
                 EditorGUILayout.Separator();
@@ -1140,7 +1137,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 _creator.playListExpanded = state;
             }
 
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#Playlists");
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#Playlists");
 
             EditorGUILayout.EndHorizontal();
             GUI.color = Color.white;
@@ -1582,7 +1579,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                 aList.fadeOutLastSong = newFadeOut;
                             }
 
-                            var newTransType = (MasterAudio.SongFadeInPosition)EditorGUILayout.EnumPopup("Song Transition Type", aList.songTransitionType);
+                            var newTransType = (MasterAudio.SongFadeInPosition)EditorGUILayout.EnumPopup(new GUIContent("Song Transition Type", "If you choose 'New Clip From Beginning', then 'Begin Song Time Mode' for each Song will be used."), aList.songTransitionType);
                             if (newTransType != aList.songTransitionType)
                             {
                                 AudioUndoHelper.RecordObjectPropertyForUndo(ref _isDirty, _creator, "change Song Transition Type");
@@ -1727,7 +1724,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                     case MasterAudio.AudioLocation.Clip:
                                         if (aSong.clip != null)
                                         {
-                                            clipName = aSong.clip.name;
+                                            clipName = aSong.clip.CachedName();
                                         }
                                         break;
                                     case MasterAudio.AudioLocation.ResourceFile:
@@ -2141,7 +2138,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                             {
                                                 AudioUndoHelper.RecordObjectPropertyForUndo(ref _isDirty, _creator, "change Clip");
                                                 aSong.clip = newClip;
-                                                var cName = newClip == null ? "Empty" : newClip.name;
+                                                var cName = newClip == null ? "Empty" : newClip.CachedName();
                                                 aSong.songName = cName;
                                             }
                                             break;
@@ -2209,11 +2206,11 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                                             var resourceFileName = DTGUIHelper.GetResourcePath(aClip, ref unused, true);
                                                             if (string.IsNullOrEmpty(resourceFileName))
                                                             {
-                                                                resourceFileName = aClip.name;
+                                                                resourceFileName = aClip.CachedName();
                                                             }
 
                                                             aSong.resourceFileName = resourceFileName;
-                                                            aSong.songName = aClip.name;
+                                                            aSong.songName = aClip.CachedName();
                                                         }
                                                     }
                                                     Event.current.Use();
@@ -2259,12 +2256,19 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                         }
                                     }
 
-                                    if (aList.songTransitionType == MasterAudio.SongFadeInPosition.NewClipFromBeginning)
+                                    var useLastKnownPosition = aList.songTransitionType == MasterAudio.SongFadeInPosition.NewClipFromLastKnownPosition;
+
+                                    if (aList.songTransitionType == MasterAudio.SongFadeInPosition.NewClipFromBeginning || useLastKnownPosition)
                                     {
-                                        var startTimeMode = (MasterAudio.CustomSongStartTimeMode)EditorGUILayout.EnumPopup("Song Start Time Mode", aSong.songStartTimeMode);
+                                        if (useLastKnownPosition && aSong.songStartTimeMode != MasterAudio.CustomSongStartTimeMode.Beginning)
+                                        {
+                                            DTGUIHelper.ShowLargeBarAlert("In this Song Transition Type, the Begin Song Time Mode will only be used the first time a song is played.");
+                                        }
+
+                                        var startTimeMode = (MasterAudio.CustomSongStartTimeMode)EditorGUILayout.EnumPopup("Begin Song Time Mode", aSong.songStartTimeMode);
                                         if (startTimeMode != aSong.songStartTimeMode)
                                         {
-                                            AudioUndoHelper.RecordObjectPropertyForUndo(ref _isDirty, _creator, "change Song Start Time Mode");
+                                            AudioUndoHelper.RecordObjectPropertyForUndo(ref _isDirty, _creator, "change Begin Song Time Mode");
                                             aSong.songStartTimeMode = startTimeMode;
                                         }
 
@@ -2526,13 +2530,16 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                             case MasterAudio.AudioLocation.Clip:
                                                 if (previewer != null)
                                                 {
+                                                    DTGUIHelper.PlaySilentWakeUpPreview(previewer, aSong.clip);
                                                     previewer.PlayOneShot(aSong.clip, aSong.volume);
                                                 }
                                                 break;
                                             case MasterAudio.AudioLocation.ResourceFile:
                                                 if (previewer != null)
                                                 {
-                                                    previewer.PlayOneShot(Resources.Load(aSong.resourceFileName) as AudioClip, aSong.volume);
+                                                    var resClip = Resources.Load(aSong.resourceFileName) as AudioClip;
+                                                    DTGUIHelper.PlaySilentWakeUpPreview(previewer, resClip);
+                                                    previewer.PlayOneShot(resClip, aSong.volume);
                                                 }
                                                 break;
 #if ADDRESSABLES_ENABLED
@@ -2667,7 +2674,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 _creator.showCustomEvents = state;
             }
 
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#CustomEvents");
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/DynamicSoundGroupCreators.htm#CustomEvents");
             EditorGUILayout.EndHorizontal();
             GUI.color = Color.white;
 
@@ -3313,7 +3320,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 return null;
             }
 
-            var groupName = UtilStrings.TrimSpace(aClip.name);
+            var groupName = UtilStrings.TrimSpace(aClip.CachedName());
 
             var matchingGroup = _groups.Find(delegate (DynamicSoundGroup obj)
             {
@@ -3344,7 +3351,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 return;
             }
 
-            var clipName = UtilStrings.TrimSpace(aClip.name);
+            var clipName = UtilStrings.TrimSpace(aClip.CachedName());
 
             var myGroup = aGroup.GetComponent<DynamicSoundGroup>();
 
@@ -3376,7 +3383,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     var resourceFileName = DTGUIHelper.GetResourcePath(aClip, ref useLocalization);
                     if (string.IsNullOrEmpty(resourceFileName))
                     {
-                        resourceFileName = aClip.name;
+                        resourceFileName = aClip.CachedName();
                     }
 
                     dynamicVar.resourceFileName = resourceFileName;
@@ -3500,6 +3507,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     {
                         if (previewer != null)
                         {
+                            DTGUIHelper.PlaySilentWakeUpPreview(previewer, clip);
                             previewer.PlayOneShot(clip, rndVar.VarAudio.volume * aGroup.groupMasterVolume);
                         }
                     }
@@ -3511,6 +3519,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 case MasterAudio.AudioLocation.Clip:
                     if (previewer != null)
                     {
+                        DTGUIHelper.PlaySilentWakeUpPreview(previewer, rndVar.VarAudio.clip);
                         previewer.PlayOneShot(rndVar.VarAudio.clip, calcVolume);
                     }
                     break;
@@ -3674,7 +3683,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 }
                 catch
                 {
-                    Debug.Log("Could not read data from compressed sample. Skipping '" + setting.clip.name + "'.");
+                    Debug.Log("Could not read data from compressed sample. Skipping '" + setting.clip.CachedName() + "'.");
                     continue;
                 }
 
@@ -3735,7 +3744,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     mus.clip = aClip;
                     if (aClip != null)
                     {
-                        mus.songName = aClip.name;
+                        mus.songName = aClip.CachedName();
                     }
                     break;
                 case MasterAudio.AudioLocation.ResourceFile:
@@ -3743,11 +3752,11 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     var resourceFileName = DTGUIHelper.GetResourcePath(aClip, ref unused);
                     if (string.IsNullOrEmpty(resourceFileName))
                     {
-                        resourceFileName = aClip.name;
+                        resourceFileName = aClip.CachedName();
                     }
 
                     mus.resourceFileName = resourceFileName;
-                    mus.songName = aClip.name;
+                    mus.songName = aClip.CachedName();
                     break;
 #if ADDRESSABLES_ENABLED
             case MasterAudio.AudioLocation.Addressable:

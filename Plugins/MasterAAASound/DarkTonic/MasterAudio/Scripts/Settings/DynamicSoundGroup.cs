@@ -9,6 +9,7 @@ namespace DarkTonic.MasterAudio {
         // ReSharper disable InconsistentNaming
         public GameObject variationTemplate;
 
+        public bool useClipAgePriority = false;
         public bool alwaysHighestPriority = false;
         public float groupMasterVolume = 1f;
         public int retriggerPercentage = 50;
@@ -34,6 +35,8 @@ namespace DarkTonic.MasterAudio {
         public string soundPlayedCustomEvent = string.Empty;
 
         public int busIndex = -1;
+
+        public bool ignoreListenerPause = false;
 
         [Range(0f, 10f)]
         public int importance = 5;

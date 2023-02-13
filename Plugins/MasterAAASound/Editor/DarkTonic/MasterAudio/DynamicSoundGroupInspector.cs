@@ -117,7 +117,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
 
-            DTGUIHelper.HelpHeader("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm");
+            DTGUIHelper.HelpHeader("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm");
 
             var newVol = DTGUIHelper.DisplayVolumeField(_group.groupMasterVolume, DTGUIHelper.VolumeFieldType.None, MasterAudio.MixerWidthMode.Normal, 0f, true, "Group Master Volume");
             if (newVol != _group.groupMasterVolume)
@@ -165,7 +165,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             EditorGUILayout.BeginHorizontal();
             var newTargetGone = (MasterAudioGroup.TargetDespawnedBehavior)EditorGUILayout.EnumPopup("Caller Despawned Mode", _group.targetDespawnedBehavior);
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CallerDespawned");
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CallerDespawned");
             EditorGUILayout.EndHorizontal();
             if (newTargetGone != _group.targetDespawnedBehavior)
             {
@@ -196,6 +196,16 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             if (!maInScene || ma.prioritizeOnDistance)
             {
+                var newContinual = EditorGUILayout.Toggle("Use Clip Age Priority", _group.useClipAgePriority);
+                if (newContinual != _group.useClipAgePriority)
+                {
+                    AudioUndoHelper.RecordObjectPropertyForUndo(ref isDirty, _group, "toggle Use Clip Age Priority");
+                    _group.useClipAgePriority = newContinual;
+                }
+            }
+
+            if (!maInScene || ma.prioritizeOnDistance)
+            {
                 var hiPri = EditorGUILayout.Toggle("Always Highest Priority", _group.alwaysHighestPriority);
                 if (hiPri != _group.alwaysHighestPriority)
                 {
@@ -209,6 +219,13 @@ namespace DarkTonic.MasterAudio.EditorScripts
             {
                 AudioUndoHelper.RecordObjectPropertyForUndo(ref isDirty, _group, "change Comments");
                 _group.comments = newComments;
+            }
+
+            var newPausedPlay = EditorGUILayout.Toggle("Ignore Listener Pause", _group.ignoreListenerPause);
+            if (newPausedPlay != _group.ignoreListenerPause)
+            {
+                AudioUndoHelper.RecordObjectPropertyForUndo(ref isDirty, _group, "toggle Ignore Listener Pause");
+                _group.ignoreListenerPause = newPausedPlay;
             }
 
             if (_group.busIndex >= MasterAudio.HardCodedBusOptions)
@@ -416,7 +433,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             DTGUIHelper.StartGroupHeader();
             EditorGUILayout.BeginHorizontal();
             var newVarMode = (MasterAudioGroup.VariationMode)EditorGUILayout.EnumPopup("Variation Mode", _group.curVariationMode);
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#VarMode");
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#VarMode");
             EditorGUILayout.EndHorizontal();
             if (newVarMode != _group.curVariationMode)
             {
@@ -473,7 +490,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 case MasterAudioGroup.VariationMode.Normal:
                     EditorGUILayout.BeginHorizontal();
                     var newRetrigger = EditorGUILayout.IntSlider("Retrigger Percentage", _group.retriggerPercentage, 0, 100);
-                    DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Retrigger");
+                    DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Retrigger");
                     EditorGUILayout.EndHorizontal();
                     if (newRetrigger != _group.retriggerPercentage)
                     {
@@ -711,7 +728,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 GUI.contentColor = DTGUIHelper.BrightButtonColor;
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button(new GUIContent("Add 'Start' Linked Group"), EditorStyles.toolbarButton,
-                    GUILayout.Width(140)))
+                    GUILayout.Width(150)))
                 {
                     _group.childSoundGroups.Add(MasterAudio.NoGroupName);
                 }
@@ -847,7 +864,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 GUI.contentColor = DTGUIHelper.BrightButtonColor;
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button(new GUIContent("Add 'Stop' Linked Group"), EditorStyles.toolbarButton,
-                    GUILayout.Width(140)))
+                    GUILayout.Width(150)))
                 {
                     _group.endLinkedGroups.Add(MasterAudio.NoGroupName);
                 }
@@ -966,7 +983,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 EditorGUI.indentLevel = 1;
                 EditorGUILayout.BeginHorizontal();
                 var newBulk = GUILayout.Toggle(_group.copySettingsExpanded, " Bulk Edit");
-                DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CopySettings");
+                DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CopySettings");
                 EditorGUILayout.EndHorizontal();
                 if (newBulk != _group.copySettingsExpanded)
                 {
@@ -1242,11 +1259,9 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                     if (!Application.isPlaying)
                     {
-#if UNITY_2018_3_OR_NEWER
-                    if (GUILayout.Button(new GUIContent(MasterAudioInspectorResources.CopyTexture, "Click to clone Variation"), EditorStyles.toolbarButton, GUILayout.Height(16), GUILayout.Width(40))) {
-                        CloneVariation(i);
-                    }
-#endif
+                        if (GUILayout.Button(new GUIContent(MasterAudioInspectorResources.CopyTexture, "Click to clone Variation"), EditorStyles.toolbarButton, GUILayout.Height(16), GUILayout.Width(40))) {
+                            CloneVariation(i);
+                        }
                     }
 
                     var varIsDirty = false;
@@ -1264,7 +1279,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                     GUILayout.Space(4);
                     EditorGUILayout.EndHorizontal();
-                    DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Variations");
+                    DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Variations");
 
                     switch (buttonPressed)
                     {
@@ -1295,6 +1310,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                         {
                                             if (previewer != null)
                                             {
+                                                DTGUIHelper.PlaySilentWakeUpPreview(previewer, clip);
                                                 previewer.PlayOneShot(clip, calcVolume);
                                             }
                                         }
@@ -1307,6 +1323,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                 case MasterAudio.AudioLocation.Clip:
                                     if (previewer != null)
                                     {
+                                        DTGUIHelper.PlaySilentWakeUpPreview(previewer, variation.VarAudio.clip);
                                         previewer.PlayOneShot(variation.VarAudio.clip, calcVolume);
                                     }
                                     break;
@@ -1563,7 +1580,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         }
                     }
 
-                    var newWeight = EditorGUILayout.IntSlider("Voices (Weight)", variation.weight, 0, 100);
+                    var newWeight = EditorGUILayout.IntSlider("Voices / Weight", variation.weight, 0, 100);
                     if (newWeight != variation.weight)
                     {
                         if (_group.copySettingsExpanded && variation.isChecked)
@@ -1572,7 +1589,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         }
                         else
                         {
-                            AudioUndoHelper.RecordObjectPropertyForUndo(ref varIsDirty, variation, "change Voices (Weight)");
+                            AudioUndoHelper.RecordObjectPropertyForUndo(ref varIsDirty, variation, "change Voices / Weight");
                             variation.weight = newWeight;
                         }
                     }
@@ -1986,35 +2003,30 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                 if (deadVar != null)
                 {
-#if UNITY_2018_3_OR_NEWER
-                var wasDestroyed = false;
+                    var wasDestroyed = false;
 
-                if (PrefabUtility.IsPartOfPrefabInstance(_group)) {
-                    var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_group);
-                    GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
+                    if (PrefabUtility.IsPartOfPrefabInstance(_group)) {
+                        var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_group);
+                        GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
-                    var groupParent = prefabRoot.transform.Find(_group.name);
-                    if (groupParent != null) {
-                        var deadTrans = groupParent.Find(deadVar.name);
-
+                        var groupParent = prefabRoot.transform.Find(_group.name);
                         if (groupParent != null) {
-                            // Destroy child objects or components on rootGO
-                            DestroyImmediate(deadTrans.gameObject); // can't undo
-                            wasDestroyed = true;
-                        } 
-                    } 
+                            var deadTrans = groupParent.Find(deadVar.name);
 
-                    PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
-                    PrefabUtility.UnloadPrefabContents(prefabRoot);
-                } 
+                            if (groupParent != null) {
+                                // Destroy child objects or components on rootGO
+                                DestroyImmediate(deadTrans.gameObject); // can't undo
+                                wasDestroyed = true;
+                            } 
+                        } 
+
+                        PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
+                        PrefabUtility.UnloadPrefabContents(prefabRoot);
+                    } 
                 
-                if (!wasDestroyed) {
-                    AudioUndoHelper.DestroyForUndo(deadVar.gameObject);
-                }
-#else
-                    // delete variation from Hierarchy
-                    AudioUndoHelper.DestroyForUndo(deadVar.gameObject);
-#endif
+                    if (!wasDestroyed) {
+                        AudioUndoHelper.DestroyForUndo(deadVar.gameObject);
+                    }
 
                     // delete variation from list.
                     if (_group.groupVariations.Count >= deadChildIndex.Value)
@@ -2183,7 +2195,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
         {
             var useLocalization = false;
 
-            var clipName = clip.name;
+            var clipName = clip.CachedName();
 
             if (group.transform.GetChildTransform(clipName) != null)
             {
@@ -2207,7 +2219,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     var resourceFileName = DTGUIHelper.GetResourcePath(clip, ref useLocalization);
                     if (string.IsNullOrEmpty(resourceFileName))
                     {
-                        resourceFileName = clip.name;
+                        resourceFileName = clip.CachedName();
                     }
 
                     variation.resourceFileName = resourceFileName;
@@ -2800,38 +2812,36 @@ namespace DarkTonic.MasterAudio.EditorScripts
             Debug.LogWarning(changed + " Use Custom Fade(s) changed.");
         }
 
-#if UNITY_2018_3_OR_NEWER
-    private void CloneVariation(int index) {
-        var gameObj = _group.groupVariations[index].gameObject;
+        private void CloneVariation(int index) {
+            var gameObj = _group.groupVariations[index].gameObject;
 
-        if (PrefabUtility.IsPartOfPrefabInstance(_group)) {
-            var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_group);
-            GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
+            if (PrefabUtility.IsPartOfPrefabInstance(_group)) {
+                var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_group);
+                GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
-            var groupParent = prefabRoot.transform.Find(_group.name);
-            if (groupParent != null) {
-                var varTrans = groupParent.Find(gameObj.name);
+                var groupParent = prefabRoot.transform.Find(_group.name);
+                if (groupParent != null) {
+                    var varTrans = groupParent.Find(gameObj.name);
 
-                if (varTrans != null) {
-                    // Destroy child objects or components on rootGO
-                    var newVar = DTGUIHelper.DuplicateGameObject(varTrans.gameObject, groupParent.name, _group.groupVariations.Count + 1);
-                    newVar.transform.parent = groupParent;
+                    if (varTrans != null) {
+                        // Destroy child objects or components on rootGO
+                        var newVar = DTGUIHelper.DuplicateGameObject(varTrans.gameObject, groupParent.name, _group.groupVariations.Count + 1);
+                        newVar.transform.parent = groupParent;
+                    }
                 }
+
+                PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
+                PrefabUtility.UnloadPrefabContents(prefabRoot);
+            } else {
+                var dupe = DTGUIHelper.DuplicateGameObject(gameObj, _group.name, _group.groupVariations.Count + 1);
+
+                if (dupe == null) {
+                    return;
+                }
+
+                dupe.transform.parent = _group.transform;
             }
-
-            PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
-            PrefabUtility.UnloadPrefabContents(prefabRoot);
-        } else {
-            var dupe = DTGUIHelper.DuplicateGameObject(gameObj, _group.name, _group.groupVariations.Count + 1);
-
-            if (dupe == null) {
-                return;
-            }
-
-            dupe.transform.parent = _group.transform;
         }
-}
-#endif
 
         private void CopyFadeInTime(float fadeInTime)
         {

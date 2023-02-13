@@ -51,6 +51,7 @@ namespace DarkTonic.MasterAudio {
         public float minAge = 1f;
         public bool stopAfterFade = false;
 		public bool restoreVolumeAfterFade = false;
+        public bool fireCustomEventAfterFade = false;
         public TargetVolumeMode targetVolMode = TargetVolumeMode.UseSliderValue;
         public string clipName = "[None]";
         public EventSounds.VariationType variationType = EventSounds.VariationType.PlayRandom;
@@ -61,6 +62,7 @@ namespace DarkTonic.MasterAudio {
         // custom event fields
         public string theCustomEventName = string.Empty;
         // ReSharper restore InconsistentNaming
+        public bool logDupeEventFiring = true;
 
         public enum TargetVolumeMode {
             UseSliderValue,

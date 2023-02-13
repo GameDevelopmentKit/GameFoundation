@@ -55,7 +55,7 @@ public static class Build
         var buildOptions           = BuildOptions.None;
         var scriptingDefineSymbols = string.Empty;
         var outputPath             = "template.exe";
-        var projectIdentifier      = "com.TheOneStudio.TestProject";
+        var buildAppBundle         = false;
         for (var i = 0; i < args.Length; ++i)
         {
             switch (args[i])
@@ -81,24 +81,23 @@ public static class Build
                 case "-outputPath":
                     outputPath = args[++i];
                     break;
-                case "-projectIdentifier":
-                    projectIdentifier = args[++i];
-                    break;
                 case "-buildAppBundle":
-                    EditorUserBuildSettings.buildAppBundle = true;
+                    buildAppBundle = true;
                     break;
             }
         }
 
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
-        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, projectIdentifier);
+        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle);
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
-                                     string                  projectIdentifier = "com.TheOneStudio.default")
+                                     bool                    buildAppBundle = false)
     {
         BuildTools.ResetBuildSettings();
+        EditorUserBuildSettings.buildAppBundle = buildAppBundle;
+
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
         Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray())); // Log which targets we're gonna build
 
@@ -111,7 +110,6 @@ public static class Build
 
             PlayerSettings.SetScriptingBackend(platform.BuildTargetGroup, scriptingBackend);
             SetApplicationVersion();
-            SetupProjectInfo(platform.BuildTargetGroup, projectIdentifier);
             BuildAddressable(platform);
 
             // If we're not in batch mode, we can do this
@@ -237,8 +235,6 @@ public static class Build
         // Bundle version will be use for some third party like Backtrace, DeltaDNA,...
         PlayerSettings.bundleVersion = GameVersion.Version;
     }
-
-    public static void SetupProjectInfo(BuildTargetGroup targetGroup, string identifier) { PlayerSettings.SetApplicationIdentifier(targetGroup, identifier); }
 
     public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) =>
         PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, scriptingDefineSymbols);

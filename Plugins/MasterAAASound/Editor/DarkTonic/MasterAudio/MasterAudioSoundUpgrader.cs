@@ -17,9 +17,6 @@ namespace DarkTonic.MasterAudio.EditorScripts
             var window = GetWindow<MasterAudioSoundUpgrader>(false, "Upgrader");
             var height = 310;
 
-#if UNITY_2018_2_OR_NEWER
-#endif
-
             window.minSize = new Vector2(600, height);
             window.maxSize = new Vector2(600, height);
 

@@ -72,11 +72,18 @@ namespace DarkTonic.MasterAudio {
             }
 
             SoundGroupVariation variation = null;
-            if (!string.IsNullOrEmpty(variationName)) {
-                variation = grp.groupVariations.Find(delegate (SoundGroupVariation v) {
-                    return v.name == variationName;
-                });
 
+            if (!string.IsNullOrEmpty(variationName)) {
+                for (var i = 0; i < grp.groupVariations.Count; i++)
+                {
+                    var aVar = grp.groupVariations[i];
+                    if (aVar.name == variationName)
+                    {
+                        variation = aVar;
+                        break;
+                    }
+                }
+                
                 if (variation == null) {
                     Debug.LogError("Could not find Variation '" + variationName + "' in Sound Group '" + soundGroupName);
                     return null;

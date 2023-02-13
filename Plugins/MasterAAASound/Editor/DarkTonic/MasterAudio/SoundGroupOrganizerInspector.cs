@@ -33,7 +33,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 return;
             }
 
-            DTGUIHelper.HelpHeader("http://www.dtdevtools.com/docs/masteraudio/SoundGroupOrganizer.htm");
+            DTGUIHelper.HelpHeader("https://www.dtdevtools.com/docs/masteraudio/SoundGroupOrganizer.htm");
 
             _groups = ScanForGroups();
 
@@ -841,33 +841,28 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 if (indexToDelete.HasValue)
                 {
                     var groupToDelete = filteredGroups[indexToDelete.Value];
-#if UNITY_2018_3_OR_NEWER
-                var wasDestroyed = false;
+                    var wasDestroyed = false;
 
-                if (PrefabUtility.IsPartOfPrefabInstance(_organizer)) {
-                    var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_organizer);
-                    GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
+                    if (PrefabUtility.IsPartOfPrefabInstance(_organizer)) {
+                        var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_organizer);
+                        GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
-                    var deadTrans = prefabRoot.transform.Find(groupToDelete.name);
+                        var deadTrans = prefabRoot.transform.Find(groupToDelete.name);
 
-                    if (deadTrans != null) {
-                        // Destroy child objects or components on rootGO
-                        DestroyImmediate(deadTrans.gameObject); // can't undo
-                        wasDestroyed = true;
-                    }
+                        if (deadTrans != null) {
+                            // Destroy child objects or components on rootGO
+                            DestroyImmediate(deadTrans.gameObject); // can't undo
+                            wasDestroyed = true;
+                        }
 
-                    PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
-                    PrefabUtility.UnloadPrefabContents(prefabRoot);
-                } 
+                        PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
+                        PrefabUtility.UnloadPrefabContents(prefabRoot);
+                    } 
                 
-                if (!wasDestroyed) {
-                    // delete variation from Hierarchy
-                    AudioUndoHelper.DestroyForUndo(groupToDelete.gameObject);
-                }
-#else
-                    AudioUndoHelper.DestroyForUndo(groupToDelete.gameObject);
-#endif
-
+                    if (!wasDestroyed) {
+                        // delete variation from Hierarchy
+                        AudioUndoHelper.DestroyForUndo(groupToDelete.gameObject);
+                    }
                 }
 
                 if (filteredGroups.Count > 0)
@@ -1641,7 +1636,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 return null;
             }
 
-            var groupName = UtilStrings.TrimSpace(aClip.name);
+            var groupName = UtilStrings.TrimSpace(aClip.CachedName());
 
             var matchingGroup = _groups.Find(delegate (DynamicSoundGroup obj)
             {
@@ -1672,7 +1667,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 return;
             }
 
-            var clipName = UtilStrings.TrimSpace(aClip.name);
+            var clipName = UtilStrings.TrimSpace(aClip.CachedName());
 
             var myGroup = aGroup.GetComponent<DynamicSoundGroup>();
 
@@ -1704,7 +1699,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     var resourceFileName = DTGUIHelper.GetResourcePath(aClip, ref useLocalization);
                     if (string.IsNullOrEmpty(resourceFileName))
                     {
-                        resourceFileName = aClip.name;
+                        resourceFileName = aClip.CachedName();
                     }
 
                     dynamicVar.resourceFileName = resourceFileName;
@@ -1783,6 +1778,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         var clip = Resources.Load(fileName) as AudioClip;
                         if (clip != null)
                         {
+                            DTGUIHelper.PlaySilentWakeUpPreview(previewer, clip);
                             previewer.PlayOneShot(clip, rndVar.VarAudio.volume);
                         }
                         else
@@ -1794,6 +1790,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 case MasterAudio.AudioLocation.Clip:
                     if (previewer != null)
                     {
+                        DTGUIHelper.PlaySilentWakeUpPreview(previewer, rndVar.VarAudio.clip);
                         previewer.PlayOneShot(rndVar.VarAudio.clip, calcVolume);
                     }
                     break;
@@ -1959,9 +1956,9 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             var groupTrans = newGroup.transform;
 
-            foreach (var t in aGroup.groupVariations)
+            for (var i = 0; i < aGroup.transform.childCount; i++)
             {
-                var aVariation = t;
+                var aVariation = aGroup.transform.GetChild(i).GetComponent<SoundGroupVariation>();
 
                 var newVariation = (GameObject)Instantiate(_organizer.dynVariationTemplate.gameObject, groupTrans.position, Quaternion.identity);
                 newVariation.transform.parent = groupTrans;
@@ -2021,6 +2018,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 variation.isExpanded = aVariation.isExpanded;
 
                 variation.probabilityToPlay = aVariation.probabilityToPlay;
+                variation.weight = aVariation.weight;
 
                 variation.isUninterruptible = aVariation.isUninterruptible;
                 variation.importance = aVariation.importance;
@@ -2089,6 +2087,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             groupScript.limitMode = aGroup.limitMode;
             groupScript.limitPerXFrames = aGroup.limitPerXFrames;
             groupScript.minimumTimeBetween = aGroup.minimumTimeBetween;
+            groupScript.useClipAgePriority = aGroup.useClipAgePriority;
             groupScript.limitPolyphony = aGroup.limitPolyphony;
             groupScript.voiceLimitCount = aGroup.voiceLimitCount;
             groupScript.curVariationSequence = aGroup.curVariationSequence;
@@ -2124,6 +2123,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             groupScript.logSound = aGroup.logSound;
             groupScript.comments = aGroup.comments;
+            groupScript.ignoreListenerPause = aGroup.ignoreListenerPause;
             groupScript.alwaysHighestPriority = aGroup.alwaysHighestPriority;
 #if ADDRESSABLES_ENABLED
         groupScript.addressableUnusedSecondsLifespan = aGroup.addressableUnusedSecondsLifespan;
@@ -2146,20 +2146,20 @@ namespace DarkTonic.MasterAudio.EditorScripts
         // ReSharper disable once InconsistentNaming
         private void ImportMAGroup(MasterAudioGroup aGroup)
         {
-            var newGroup = CreateBlankGroup(aGroup.name);
+            var newGroup = CreateBlankGroup(aGroup.GameObjectName);
 
             var groupTrans = newGroup.transform;
 
-            foreach (var t in aGroup.groupVariations)
+            for(var i = 0; i < aGroup.transform.childCount; i++)
             {
-                var aVariation = t;
+                var aVariation = aGroup.transform.GetChild(i).GetComponent<SoundGroupVariation>();
 
                 var newVariation = (GameObject)Instantiate(_organizer.dynVariationTemplate.gameObject, groupTrans.position, Quaternion.identity);
                 newVariation.transform.parent = groupTrans;
 
                 var variation = newVariation.GetComponent<DynamicGroupVariation>();
 
-                var clipName = aVariation.name;
+                var clipName = aVariation.GameObjectName;
 
                 var aVarAudio = aVariation.GetComponent<AudioSource>();
 
@@ -2212,6 +2212,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 variation.isExpanded = aVariation.isExpanded;
 
                 variation.probabilityToPlay = aVariation.probabilityToPlay;
+                variation.weight = aVariation.weight;
 
                 variation.isUninterruptible = aVariation.isUninterruptible;
                 variation.importance = aVariation.importance;
@@ -2280,6 +2281,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             groupScript.limitMode = aGroup.limitMode;
             groupScript.limitPerXFrames = aGroup.limitPerXFrames;
             groupScript.minimumTimeBetween = aGroup.minimumTimeBetween;
+            groupScript.useClipAgePriority = aGroup.useClipAgePriority;
             groupScript.limitPolyphony = aGroup.limitPolyphony;
             groupScript.voiceLimitCount = aGroup.voiceLimitCount;
             groupScript.curVariationSequence = aGroup.curVariationSequence;
@@ -2311,6 +2313,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             groupScript.isUsingOcclusion = aGroup.isUsingOcclusion;
 
             groupScript.comments = aGroup.comments;
+            groupScript.ignoreListenerPause = aGroup.ignoreListenerPause;
             groupScript.logSound = aGroup.logSound;
             groupScript.alwaysHighestPriority = aGroup.alwaysHighestPriority;
 #if ADDRESSABLES_ENABLED
@@ -2400,6 +2403,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 variation.isExpanded = aVariation.isExpanded;
 
                 variation.probabilityToPlay = aVariation.probabilityToPlay;
+                variation.weight = aVariation.weight;
 
                 variation.isUninterruptible = aVariation.isUninterruptible;
                 variation.importance = aVariation.importance;
@@ -2468,6 +2472,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             groupScript.limitMode = aGroup.limitMode;
             groupScript.limitPerXFrames = aGroup.limitPerXFrames;
             groupScript.minimumTimeBetween = aGroup.minimumTimeBetween;
+            groupScript.useClipAgePriority = aGroup.useClipAgePriority;
             groupScript.limitPolyphony = aGroup.limitPolyphony;
             groupScript.voiceLimitCount = aGroup.voiceLimitCount;
             groupScript.curVariationSequence = aGroup.curVariationSequence;
@@ -2502,6 +2507,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             groupScript.isUsingOcclusion = aGroup.isUsingOcclusion;
 
             groupScript.comments = aGroup.comments;
+            groupScript.ignoreListenerPause = aGroup.ignoreListenerPause;
             groupScript.logSound = aGroup.logSound;
             groupScript.alwaysHighestPriority = aGroup.alwaysHighestPriority;
 #if ADDRESSABLES_ENABLED
@@ -2632,6 +2638,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 variation.isExpanded = aVariation.isExpanded;
 
                 variation.probabilityToPlay = aVariation.probabilityToPlay;
+                variation.weight = aVariation.weight;
 
                 variation.isUninterruptible = aVariation.isUninterruptible;
                 variation.importance = aVariation.importance;
@@ -2700,6 +2707,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             groupScript.limitMode = aGroup.limitMode;
             groupScript.limitPerXFrames = aGroup.limitPerXFrames;
             groupScript.minimumTimeBetween = aGroup.minimumTimeBetween;
+            groupScript.useClipAgePriority = aGroup.useClipAgePriority;
             groupScript.limitPolyphony = aGroup.limitPolyphony;
             groupScript.voiceLimitCount = aGroup.voiceLimitCount;
             groupScript.curVariationSequence = aGroup.curVariationSequence;
@@ -2737,6 +2745,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             groupScript.isUsingOcclusion = aGroup.isUsingOcclusion;
 
             groupScript.comments = aGroup.comments;
+            groupScript.ignoreListenerPause = aGroup.ignoreListenerPause;
             groupScript.logSound = aGroup.logSound;
             groupScript.alwaysHighestPriority = aGroup.alwaysHighestPriority;
 #if ADDRESSABLES_ENABLED

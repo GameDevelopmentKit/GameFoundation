@@ -222,7 +222,7 @@ namespace DarkTonic.MasterAudio {
                 MasterAudio.LogWarning("Your Ambient Sound script on Game Object '" + name + "' will not function because you have turned off the Listener Follower RigidBody in Advanced Settings.");
             }
 
-            var followerName = name + "_" + AmbientSoundGroup + "_" + UnityEngine.Random.Range(0, 9) + "_Follower";
+			var followerName = name + "_" + AmbientSoundGroup + "_Follower" + "_" + Guid.NewGuid();
             RuntimeFollower = AmbientUtil.InitAudioSourceFollower(Trans, followerName, AmbientSoundGroup, variationName, playVolume, FollowCaller, UseClosestColliderPosition, UseTopCollider, IncludeChildColliders, exitMode, exitFadeTime, reEnterMode, reEnterFadeTime);
         }
 

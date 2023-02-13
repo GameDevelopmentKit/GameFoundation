@@ -86,6 +86,7 @@ namespace DarkTonic.MasterAudio {
         private AudioLowPassFilter _lpFilter;
         private AudioReverbFilter _reverbFilter;
         private AudioChorusFilter _chorusFilter;
+        private string _objectName = string.Empty;
         private float _maxVol = 1f;
         private int _instanceId = -1;
         private bool? _audioLoops;
@@ -133,6 +134,7 @@ namespace DarkTonic.MasterAudio {
         private Coroutine _loadResourceFileCoroutine;
         private Coroutine _loadAddressableCoroutine;
         private bool _isUnloadAddressableCoroutineRunning = false;
+        private TransformFollower _ambientFollower;
 
         public class PlaySoundParams {
             public string SoundType;
@@ -196,9 +198,8 @@ namespace DarkTonic.MasterAudio {
             original_volume = VarAudio.volume;
             _audioLoops = VarAudio.loop;
             var c = VarAudio.clip; // pre-warm the clip access
-            var g = GameObj; // pre-warm the game object clip access
 
-            if (c != null || g != null || _isWarmingPlay) { } // to disable the warning for not using it.
+            if (c != null || _isWarmingPlay) { } // to disable the warning for not using it.
 
             if (VarAudio.playOnAwake) {
                 Debug.LogWarning("The 'Play on Awake' checkbox in the Variation named: '" + name +
@@ -208,6 +209,9 @@ namespace DarkTonic.MasterAudio {
 
         // ReSharper disable once UnusedMember.Local
         private void Start() {
+            var g = GameObj; // pre-warm the game object clip access
+            if (g != null) { }
+
             // this code needs to wait for cloning (for weight).
             var theParent = ParentGroup;
             if (theParent == null) {
@@ -215,9 +219,10 @@ namespace DarkTonic.MasterAudio {
                 return;
             }
 
-            var shouldDisableVariation = true;
-#if UNITY_2019_3_OR_NEWER
-            if (MasterAudio.IsVideoPlayersGroup(ParentGroup.name))
+            var shouldDisableVariation = !IsPlaying;
+
+#if UNITY_2019_3_OR_NEWER && VIDEO_ENABLED
+            if (MasterAudio.IsVideoPlayersGroup(ParentGroup.GameObjectName))
             {
                 if (audLocation != MasterAudio.AudioLocation.Clip)
                 {
@@ -268,7 +273,15 @@ namespace DarkTonic.MasterAudio {
 
             SetOcclusion();
 
+            VarAudio.ignoreListenerPause = ParentGroup.ignoreListenerPause;
+
             SpatializerHelper.TurnOnSpatializerIfEnabled(VarAudio);
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (shouldDisableVariation && _isWarmingPlay & audLocation != MasterAudio.AudioLocation.Clip)
+            {
+                shouldDisableVariation = false;
+            }
 
             if (shouldDisableVariation) {
                 DTMonoHelper.SetActive(GameObj, false); // should begin disabled
@@ -386,6 +399,7 @@ namespace DarkTonic.MasterAudio {
             LoadStatus = MasterAudio.VariationLoadStatus.None;
             _isStopRequested = false;
             _isWarmingPlay = MasterAudio.IsWarming;
+            _ambientFollower = null;
 
             MaybeCleanupFinishedDelegate();
             _hasStartedEndLinkedGroups = false;
@@ -616,7 +630,7 @@ namespace DarkTonic.MasterAudio {
             _playSndParam.VolumePercentage = volumePercentage;
 
             // SET LastVolumePercentage for the AudioInfo so a bus fade will work with respect to this value.
-            var grpInfo = MasterAudio.GetAllVariationsOfGroup(ParentGroup.name);
+            var grpInfo = MasterAudio.GetAllVariationsOfGroup(ParentGroup.GameObjectName);
             for (var i = 0; i < grpInfo.Count; i++) {
                 var aVar = grpInfo[i];
                 if (aVar.Variation != this) {
@@ -781,22 +795,22 @@ namespace DarkTonic.MasterAudio {
             }
         }
 
-        ///<summary>
-        /// This method allows you to stop the audio being played by this Variation. 
-        /// <para>
-        /// This will stop the sound immediately without respecting any fades. 
-        /// For fading out before stopping the sound: use FadeOutNow method instead 
-        /// and check "Sound Groups" under Fading Settings in the Advanced Settings section of Master Audio.
-        /// </para>
-        /// </summary>
-        /// <param name="stopEndDetection">Do not ever pass this in.</param>
-        /// <param name="skipLinked">Do not ever pass this in.</param>
+		/// <summary>
+		/// This method allows you to stop the audio being played by this Variation. 
+		/// This will stop the sound immediately without respecting any fades. 
+		/// For fading out before stopping the sound: use FadeOutNow method instead 
+		/// and check "Sound Groups" under Fading Settings in the Advanced Settings section of Master Audio.
+		/// </summary>
+		/// <param name="stopEndDetection">Do not ever pass this in.</param>
+		/// <param name="skipLinked">Do not ever pass this in.</param>
         public void Stop(bool stopEndDetection = false, bool skipLinked = false) {
-            if (MasterAudio.IsVideoPlayersGroup(ParentGroup.name))
+#if UNITY_2019_3_OR_NEWER && VIDEO_ENABLED
+            if (MasterAudio.IsVideoPlayersGroup(ParentGroup.GameObjectName)) 
             {
                 return;
             }
-            
+#endif            
+
             if (IsPlaying && !_isStopRequested) {
                 _isStopRequested = true;
             }
@@ -866,7 +880,8 @@ namespace DarkTonic.MasterAudio {
         /*! \cond PRIVATE */
         private void StopEndCleanup() {
             MaybeUnloadClip();
-            if (!_isWarmingPlay) {
+            if (!_isWarmingPlay)
+            {
                 DTMonoHelper.SetActive(GameObj, false);
             }
         }
@@ -874,7 +889,8 @@ namespace DarkTonic.MasterAudio {
         private IEnumerator WaitForLoadToUnloadClipAndDeactivate() {
             _isUnloadAddressableCoroutineRunning = true;
 
-            while (_loadStatus == MasterAudio.VariationLoadStatus.Loading) {
+            while (_loadStatus == MasterAudio.VariationLoadStatus.Loading)
+            {
                 yield return MasterAudio.EndOfFrameDelay;
             }
 
@@ -945,6 +961,21 @@ namespace DarkTonic.MasterAudio {
         }
 
         /*! \cond PRIVATE */
+        public void MoveToAmbientColliderPosition(Vector3 newPosition, TransformFollower follower)
+        {
+            Trans.position = newPosition;
+            _ambientFollower = follower;
+        }
+
+        public void UpdateAudioVariation(TransformFollower transformFollower)
+        {
+            _ambientFollower = transformFollower;
+            if (_ambientFollower != null)
+            {
+                _ambientFollower.UpdateAudioVariation(this);
+            }
+        }
+
         public bool WasTriggeredFromTransform(Transform trans) {
             if (ObjectToFollow == trans || ObjectToTriggerFrom == trans) {
                 return true;
@@ -965,6 +996,16 @@ namespace DarkTonic.MasterAudio {
             return false;
         }
         /*! \endcond */
+
+		
+        /// <summary>
+        /// This property returns you the TransformTracker component being used to position this Variation at closest collider points.
+        /// </summary>
+        public TransformFollower AmbientFollower {
+            get {
+                return _ambientFollower;
+            }
+        }
 
         /// <summary>
         /// This property returns you a lazy-loaded reference to the Unity Distortion Filter FX component.
@@ -1359,10 +1400,12 @@ namespace DarkTonic.MasterAudio {
                     return false;
                 }
 
-                if (MasterAudio.IsVideoPlayersGroup(ParentGroup.name))
+#if UNITY_2019_3_OR_NEWER && VIDEO_ENABLED
+                if (MasterAudio.IsVideoPlayersGroup(ParentGroup.GameObjectName))
                 {
                     return false;
                 }
+#endif
 
                 switch (VariationUpdater.MAThisFrame.occlusionSelectType) {
                     default:
@@ -1395,6 +1438,21 @@ namespace DarkTonic.MasterAudio {
             }
 
             this.SoundLooped(numberOfLoops);
+        }
+
+        public string GameObjectName {
+            get {
+                if (string.IsNullOrEmpty(_objectName))
+                {
+                    _objectName = name;
+                }
+
+                return _objectName;
+            }
+            set {
+                // fix it if set too early with (clone)
+                _objectName = value;
+            }
         }
 
         public void ClearSubscribers() {
