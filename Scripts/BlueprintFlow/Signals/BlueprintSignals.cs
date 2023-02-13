@@ -5,20 +5,26 @@ namespace BlueprintFlow.Signals
         public string Url;
         public string Hash;
     }
-
-    public class LoadBlueprintDataSuccessedSignal
+    
+    public interface IProgressPercent
     {
-        
+        public float Percent { get; }
     }
 
-    public class LoadBlueprintDataProgressSignal
+    public class LoadBlueprintDataSucceedSignal
     {
-        public float percent;
+    }
+
+    public class LoadBlueprintDataProgressSignal : IProgressPercent
+    {
+        public float Percent { get; set; }
     }
     
-    public class ReadBlueprintProgressSignal
+    public class ReadBlueprintProgressSignal : IProgressPercent
     {
         public int MaxBlueprint;
         public int CurrentProgress;
+
+        public float Percent => 1f * this.CurrentProgress / this.MaxBlueprint;
     }
 }
