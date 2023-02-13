@@ -34,32 +34,11 @@ namespace DarkTonic.MasterAudio {
 
         public static string SelectedSpatializer {
             get {
-#if UNITY_2017_2_OR_NEWER
                 return AudioSettings.GetSpatializerPluginName();
-#else
-                return string.Empty;
-#endif
-            }
-        }
-
-        public static bool SpatializerOptionExists {
-            get {
-#if UNITY_2017_2_OR_NEWER
-                return true;
-#else
-				return false;
-#endif
             }
         }
 
         public static void TurnOnSpatializerIfEnabled(AudioSource source) {
-            if (!SpatializerOptionExists) {
-                SetSpatializerToggleOnSource(source, false);
-                return; // no spatializer option!
-            }
-
-            // hopefully, there's a way later to detect if the option is turned on, in AudioManager!
-
             if (MasterAudio.SafeInstance == null) {
                 SetSpatializerToggleOnSource(source, false);
                 return;
@@ -80,24 +59,16 @@ namespace DarkTonic.MasterAudio {
                 return;
             }
 
-#if UNITY_2018_1_OR_NEWER
             source.spatializePostEffects = true;
-#else
-			// no spatializer post FX!
-#endif
         }
 
         private static void SetSpatializerToggleOnSource(AudioSource source, bool enabled)
         {
-#if UNITY_2017_2_OR_NEWER
             if (enabled) {
 				enabled = source.spatialBlend != 0;        
             }       
 
             source.spatialize = enabled;
-#else
-            // no spatializer!
-#endif
         }
     }
 }

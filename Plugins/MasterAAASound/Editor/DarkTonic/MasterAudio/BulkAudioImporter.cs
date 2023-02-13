@@ -64,6 +64,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             if (GUILayout.Button(new GUIContent("Scan Project"), EditorStyles.toolbarButton, GUILayout.Width(100)))
             {
                 BuildCache();
+                EditorGUILayout.EndHorizontal();
                 return;
             }
 
@@ -71,6 +72,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             if (GUILayout.Button(new GUIContent("Revert Selected"), EditorStyles.toolbarButton, GUILayout.Width(100)))
             {
                 RevertSelected();
+                EditorGUILayout.EndHorizontal();
                 return;
             }
 
@@ -78,6 +80,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             if (GUILayout.Button(new GUIContent("Apply Selected"), EditorStyles.toolbarButton, GUILayout.Width(100)))
             {
                 ApplySelected();
+                EditorGUILayout.EndHorizontal();
                 return;
             }
             GUILayout.Space(10);
@@ -826,7 +829,8 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             importer.forceToMono = info.ForceMono;
             importer.loadInBackground = info.LoadBG;
-#if UNITY_2022_1_OR_NEWER
+
+#if UNITY_2022_2_OR_NEWER
             settings.preloadAudioData = info.Preload;
 #else
             importer.preloadAudioData = info.Preload;
@@ -966,6 +970,14 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             var updatedTime = DateTime.Now.Ticks;
 
+            var localStreamingAssetsPath = Application.streamingAssetsPath;
+
+            var indexOfAssets = Application.streamingAssetsPath.IndexOf("/Assets/");
+            if (indexOfAssets > 0)
+            {
+                localStreamingAssetsPath = Application.streamingAssetsPath.Substring(indexOfAssets + 1);
+            }
+
             foreach (var aPath in filePaths)
             {
                 if (!aPath.EndsWith(".wav", StringComparison.InvariantCultureIgnoreCase)
@@ -977,17 +989,32 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     continue;
                 }
 
+                if (aPath.Contains(localStreamingAssetsPath))
+                {
+                    continue; // stream assets don't have AudioImporters
+                }
+
                 // ReSharper disable once AccessToStaticMemberViaDerivedType
-                var importer = (AudioImporter)AudioImporter.GetAtPath(aPath);
+                var importer = AudioImporter.GetAtPath(aPath) as AudioImporter;
+                if (importer == null)
+                {
+                    continue; 
+                }
 
                 // ReSharper disable once UseObjectOrCollectionInitializer
                 AudioImporterSampleSettings settings = importer.defaultSampleSettings;
-#if UNITY_2022_1_OR_NEWER
-                var preloadAudioData = settings.preloadAudioData;
+
+#if UNITY_2022_2_OR_NEWER
+                var platform = PlatformString;
+
+                var preloadAudioData = importer.GetOverrideSampleSettings(platform).preloadAudioData;
 #else
                 var preloadAudioData = importer.preloadAudioData;
 #endif
-                var newClip = new AudioInformation(aPath, Path.GetFileNameWithoutExtension(aPath), importer.forceToMono, importer.loadInBackground, preloadAudioData,
+
+
+                var newClip = new AudioInformation(aPath, Path.GetFileNameWithoutExtension(aPath), importer.forceToMono, importer.loadInBackground, 
+                    preloadAudioData,
                     settings.loadType, settings.compressionFormat, settings.quality, settings.sampleRateSetting, int.Parse(settings.sampleRateOverride.ToString()));
 
                 newClip.LastUpdated = updatedTime;
@@ -1252,5 +1279,45 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 return path;
             }
         }
+
+#if UNITY_2022_2_OR_NEWER
+        private string PlatformString {
+            get {
+                var platform = string.Empty;
+
+                switch (Application.platform) {
+                    case RuntimePlatform.IPhonePlayer:
+                        platform = "iOS";
+                        break;
+                    case RuntimePlatform.WebGLPlayer:
+                        platform = "WebPlayer";
+                        break;
+                    case RuntimePlatform.LinuxPlayer:
+                    case RuntimePlatform.LinuxServer:
+                    case RuntimePlatform.LinuxEditor:
+                    case RuntimePlatform.EmbeddedLinuxArm32:
+                    case RuntimePlatform.EmbeddedLinuxArm64:
+                    case RuntimePlatform.EmbeddedLinuxX64:
+                    case RuntimePlatform.EmbeddedLinuxX86:
+                    case RuntimePlatform.WindowsEditor:
+                    case RuntimePlatform.WindowsPlayer:
+                    case RuntimePlatform.WindowsServer:
+                        platform = "Standalone";
+                        break;
+                    case RuntimePlatform.Android:
+                        platform = "Android";
+                        break;
+                    case RuntimePlatform.PS4:
+                        platform = "PS4";
+                        break;
+                    case RuntimePlatform.XboxOne:
+                        platform = "XBoxOne";
+                        break;
+                }
+
+                return platform;
+            }
+        }
+#endif
     }
 }

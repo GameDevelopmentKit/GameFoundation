@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+#if MULTIPLAYER_ENABLED
+    using DarkTonic.MasterAudio.Multiplayer;
+#endif
 
 /*! \cond PRIVATE */
 // ReSharper disable once CheckNamespace
@@ -8,6 +11,11 @@ namespace DarkTonic.MasterAudio {
         [Tooltip("Select for event to re-fire each time animation loops without exiting state")]
         [Header("Retrigger Events Each Time Anim Loops w/o Exiting State")]
         public bool RetriggerWhenStateLoops = false;
+
+#if MULTIPLAYER_ENABLED
+        [Header("Select For Events To Be Received By All Connected Players")]
+        public bool MultiplayerBroadcast = false;
+#endif
 
         [Tooltip("Fire A Custom Event When State Is Entered")]
         [Header("Enter Custom Event")]
@@ -80,7 +88,15 @@ namespace DarkTonic.MasterAudio {
                 return;
             }
 
+#if MULTIPLAYER_ENABLED
+            if (CanTransmitToOtherPlayers) {
+                MasterAudioMultiplayerAdapter.FireCustomEvent(enterCustomEvent, _actorTrans, true);
+            } else {
+                MasterAudio.FireCustomEvent(enterCustomEvent, _actorTrans);
+            }
+#else
             MasterAudio.FireCustomEvent(enterCustomEvent, _actorTrans);
+#endif
         }
 
         // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -92,7 +108,7 @@ namespace DarkTonic.MasterAudio {
                 goto multievent;
             }
 
-            #region Timed to Anim
+#region Timed to Anim
             if (!_fireTimedEvent && RetriggerWhenStateLoops) {
                 // change back to true if "re-trigger" checked and anim has looped.
 
@@ -105,11 +121,19 @@ namespace DarkTonic.MasterAudio {
                 if (animTime > whenToFireEvent) {
                     _fireTimedEvent = false;
 
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.FireCustomEvent(timedCustomEvent, _actorTrans, true);
+                    } else {
+                        MasterAudio.FireCustomEvent(timedCustomEvent, _actorTrans);
+                    }
+#else
                     MasterAudio.FireCustomEvent(timedCustomEvent, _actorTrans);
+#endif
                 }
             }
 
-            #endregion
+#endregion
 
             multievent:
 
@@ -117,7 +141,7 @@ namespace DarkTonic.MasterAudio {
                 goto afterMulti;
             }
 
-            #region Fire Multiple Events Timed To Anim
+#region Fire Multiple Events Timed To Anim
 
             if (RetriggerWhenStateLoops) {
                 if (!_playMultiEvent1) {
@@ -154,7 +178,15 @@ namespace DarkTonic.MasterAudio {
             }
 
             _playMultiEvent1 = false;
+#if MULTIPLAYER_ENABLED
+            if (CanTransmitToOtherPlayers) {
+                MasterAudioMultiplayerAdapter.FireCustomEvent(MultiTimedEvent, _actorTrans, true);
+            } else {
+                MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+            }
+#else
             MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+#endif
 
             decideMulti2:
 
@@ -167,7 +199,15 @@ namespace DarkTonic.MasterAudio {
             }
 
             _playMultiEvent2 = false;
+#if MULTIPLAYER_ENABLED
+            if (CanTransmitToOtherPlayers) {
+                MasterAudioMultiplayerAdapter.FireCustomEvent(MultiTimedEvent, _actorTrans, true);
+            } else {
+                MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+            }
+#else
             MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+#endif
 
             decideMulti3:
 
@@ -180,7 +220,15 @@ namespace DarkTonic.MasterAudio {
             }
 
             _playMultiEvent3 = false;
+#if MULTIPLAYER_ENABLED
+            if (CanTransmitToOtherPlayers) {
+                MasterAudioMultiplayerAdapter.FireCustomEvent(MultiTimedEvent, _actorTrans, true);
+            } else {
+                MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+            }
+#else
             MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+#endif
 
             decideMulti4:
 
@@ -193,7 +241,15 @@ namespace DarkTonic.MasterAudio {
             }
 
             _playMultiEvent4 = false;
+#if MULTIPLAYER_ENABLED
+            if (CanTransmitToOtherPlayers) {
+                MasterAudioMultiplayerAdapter.FireCustomEvent(MultiTimedEvent, _actorTrans, true);
+            } else {
+                MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+            }
+#else
             MasterAudio.FireCustomEvent(MultiTimedEvent, _actorTrans);
+#endif
 
             #endregion
 
@@ -205,7 +261,15 @@ namespace DarkTonic.MasterAudio {
         // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
             if (fireExitEvent && exitCustomEvent != MasterAudio.NoGroupName && !string.IsNullOrEmpty(exitCustomEvent)) {
+#if MULTIPLAYER_ENABLED
+                if (CanTransmitToOtherPlayers) {
+                    MasterAudioMultiplayerAdapter.FireCustomEvent(exitCustomEvent, _actorTrans, true);
+                } else {
+                    MasterAudio.FireCustomEvent(exitCustomEvent, _actorTrans);
+                }
+#else
                 MasterAudio.FireCustomEvent(exitCustomEvent, _actorTrans);
+#endif
             }
 
             if (fireMultiAnimTimeEvent) {
@@ -239,6 +303,12 @@ namespace DarkTonic.MasterAudio {
 
             return _actorTrans;
         }
+
+#if MULTIPLAYER_ENABLED
+        private bool CanTransmitToOtherPlayers {
+            get { return MultiplayerBroadcast && MasterAudioMultiplayerAdapter.CanSendRPCs; }
+        }
+#endif
     }
 }
 /*! \endcond */

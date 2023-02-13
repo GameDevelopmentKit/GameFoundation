@@ -51,7 +51,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             if (maInScene)
             {
                 _groupNames = _ma.GroupNames;
-                _groupNames.Remove(_group.name);
+                _groupNames.Remove(_group.GameObjectName);
             }
 
             if (MasterAudioInspectorResources.LogoTexture != null)
@@ -92,7 +92,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 switch (buttonPressed)
                 {
                     case DTGUIHelper.DTFunctionButtons.Play:
-                        if (DTGUIHelper.IsVideoPlayersGroup(_group.name))
+                        if (DTGUIHelper.IsVideoPlayersGroup(_group.GameObjectName))
                         {
                             break;
                         }
@@ -103,7 +103,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         {
                             if (previewer != null)
                             {
-                                MasterAudio.PlaySound3DAtVector3AndForget(_group.name, previewer.transform.position);
+                                MasterAudio.PlaySound3DAtVector3AndForget(_group.GameObjectName, previewer.transform.position);
                             }
                         }
                         else
@@ -130,12 +130,15 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                     if (previewer != null)
                                     {
                                         var fileName = AudioResourceOptimizer.GetLocalizedFileName(rndVar.useLocalization, rndVar.resourceFileName);
-                                        previewer.PlayOneShot(Resources.Load(fileName) as AudioClip, calcVolume);
+                                        var resClip = Resources.Load(fileName) as AudioClip;
+                                        DTGUIHelper.PlaySilentWakeUpPreview(previewer, resClip);
+                                        previewer.PlayOneShot(resClip, calcVolume);
                                     }
                                     break;
                                 case MasterAudio.AudioLocation.Clip:
                                     if (previewer != null)
                                     {
+                                        DTGUIHelper.PlaySilentWakeUpPreview(previewer, rndVar.VarAudio.clip);
                                         previewer.PlayOneShot(rndVar.VarAudio.clip, calcVolume);
                                     }
                                     break;
@@ -151,7 +154,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     case DTGUIHelper.DTFunctionButtons.Stop:
                         if (Application.isPlaying)
                         {
-                            MasterAudio.StopAllOfSound(_group.name);
+                            MasterAudio.StopAllOfSound(_group.GameObjectName);
                         }
                         else
                         {
@@ -159,24 +162,27 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         }
                         break;
                     case DTGUIHelper.DTFunctionButtons.Pause:
-                        MasterAudio.PauseSoundGroup(_group.name);
+                        MasterAudio.PauseSoundGroup(_group.GameObjectName);
                         break;
                     case DTGUIHelper.DTFunctionButtons.Unpause:
-                        MasterAudio.UnpauseSoundGroup(_group.name);
+                        MasterAudio.UnpauseSoundGroup(_group.GameObjectName);
                         break;
                 }
             }
             EditorGUILayout.EndHorizontal();
 
-            DTGUIHelper.HelpHeader("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm");
+            DTGUIHelper.HelpHeader("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm");
 
             EditorGUILayout.BeginHorizontal();
 
             var newVol = DTGUIHelper.DisplayVolumeField(_group.groupMasterVolume, DTGUIHelper.VolumeFieldType.None, MasterAudio.MixerWidthMode.Normal, 0f, true, "Group Master Volume");
-            if (newVol != _group.groupMasterVolume)
-            {
+            if (newVol != _group.groupMasterVolume) {
                 AudioUndoHelper.RecordObjectPropertyForUndo(ref _isDirty, _group, "change Group Master Volume");
                 _group.groupMasterVolume = newVol;
+
+                if (Application.isPlaying) {
+                    MasterAudio.SetGroupVolume(_group.GameObjectName, _group.groupMasterVolume);
+                }
             }
 
             var button = DTGUIHelper.AddGroupButtons(_group, "Group");
@@ -250,7 +256,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
 #endif
 
-            var isVideoPlayersGroup = DTGUIHelper.IsVideoPlayersGroup(_group.name);
+            var isVideoPlayersGroup = DTGUIHelper.IsVideoPlayersGroup(_group.GameObjectName);
 
             if (isVideoPlayersGroup)
             {
@@ -272,7 +278,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                 EditorGUILayout.BeginHorizontal();
                 var newTargetGone = (MasterAudioGroup.TargetDespawnedBehavior)EditorGUILayout.EnumPopup("Caller Despawned Mode", _group.targetDespawnedBehavior);
-                DTGUIHelper.AddMiddleHelpIcon("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CallerDespawned");
+                DTGUIHelper.AddMiddleHelpIcon("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CallerDespawned");
                 EditorGUILayout.EndHorizontal();
                 if (newTargetGone != _group.targetDespawnedBehavior)
                 {
@@ -325,6 +331,13 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 {
                     AudioUndoHelper.RecordObjectPropertyForUndo(ref _isDirty, _group, "change Comments");
                     _group.comments = newComments;
+                }
+
+                var newPausedPlay = EditorGUILayout.Toggle("Ignore Listener Pause", _group.ignoreListenerPause);
+                if (newPausedPlay != _group.ignoreListenerPause)
+                {
+                    AudioUndoHelper.RecordObjectPropertyForUndo(ref _isDirty, _group, "toggle Ignore Listener Pause");
+                    _group.ignoreListenerPause = newPausedPlay;
                 }
 
                 var theBus = _group.BusForGroup;
@@ -558,7 +571,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 DTGUIHelper.StartGroupHeader();
                 EditorGUILayout.BeginHorizontal();
                 var newVarMode = (MasterAudioGroup.VariationMode)EditorGUILayout.EnumPopup("Variation Mode", _group.curVariationMode);
-                DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#VarMode");
+                DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#VarMode");
                 EditorGUILayout.EndHorizontal();
                 if (newVarMode != _group.curVariationMode)
                 {
@@ -574,7 +587,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     case MasterAudioGroup.VariationMode.Normal:
                         EditorGUILayout.BeginHorizontal();
                         var newRetrigger = EditorGUILayout.IntSlider("Retrigger Percentage", _group.retriggerPercentage, 0, 100);
-                        DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Retrigger");
+                        DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Retrigger");
                         EditorGUILayout.EndHorizontal();
                         if (newRetrigger != _group.retriggerPercentage)
                         {
@@ -732,7 +745,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     }
                     else
                     {
-                        GUILayout.Label("Groups to play when '" + _group.name + "' Variations start play", EditorStyles.boldLabel);
+                        GUILayout.Label("Groups to play when '" + _group.GameObjectName + "' Variations start play", EditorStyles.boldLabel);
                         if (_group.childSoundGroups.Count > 1)
                         {
                             var newType = (MasterAudio.LinkedGroupSelectionType)EditorGUILayout.EnumPopup("Linked Groups To Play", _group.linkedStartGroupSelectionType);
@@ -854,7 +867,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     GUI.contentColor = DTGUIHelper.BrightButtonColor;
                     EditorGUILayout.BeginHorizontal();
                     if (GUILayout.Button(new GUIContent("Add 'Start' Linked Group"), EditorStyles.toolbarButton,
-                        GUILayout.Width(140)))
+                        GUILayout.Width(150)))
                     {
                         _group.childSoundGroups.Add(MasterAudio.NoGroupName);
                     }
@@ -869,7 +882,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     }
                     else
                     {
-                        GUILayout.Label("Groups to play when '" + _group.name + "' Variations stop", EditorStyles.boldLabel);
+                        GUILayout.Label("Groups to play when '" + _group.GameObjectName + "' Variations stop", EditorStyles.boldLabel);
                         if (_group.endLinkedGroups.Count > 1)
                         {
                             var newType = (MasterAudio.LinkedGroupSelectionType)EditorGUILayout.EnumPopup("Linked Groups To Play", _group.linkedStopGroupSelectionType);
@@ -990,7 +1003,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     GUI.contentColor = DTGUIHelper.BrightButtonColor;
                     EditorGUILayout.BeginHorizontal();
                     if (GUILayout.Button(new GUIContent("Add 'Stop' Linked Group"), EditorStyles.toolbarButton,
-                        GUILayout.Width(140)))
+                        GUILayout.Width(150)))
                     {
                         _group.endLinkedGroups.Add(MasterAudio.NoGroupName);
                     }
@@ -1135,7 +1148,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         _group.copySettingsExpanded = newBulk;
                     }
                     GUILayout.FlexibleSpace();
-                    DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CopySettings");
+                    DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#CopySettings");
 
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.EndVertical();
@@ -1389,7 +1402,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     var variation = _group.groupVariations[i];
 
                     var state = variation.isExpanded;
-                    var text = variation.name;
+                    var text = variation.GameObjectName;
 
                     DTGUIHelper.ShowCollapsibleSection(ref state, text);
 
@@ -1438,12 +1451,10 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                     if (!Application.isPlaying)
                     {
-#if UNITY_2018_3_OR_NEWER
                         if (GUILayout.Button(new GUIContent(MasterAudioInspectorResources.CopyTexture, "Click to clone Variation"), EditorStyles.toolbarButton, GUILayout.Height(16), GUILayout.Width(40)))
                         {
                             CloneVariation(i);
                         }
-#endif
                     }
 
                     if (!isVideoPlayersGroup)
@@ -1462,7 +1473,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         switch (buttonPressed)
                         {
                             case DTGUIHelper.DTFunctionButtons.Play:
-                                if (DTGUIHelper.IsVideoPlayersGroup(_group.name))
+                                if (DTGUIHelper.IsVideoPlayersGroup(_group.GameObjectName))
                                 {
                                     break;
                                 }
@@ -1473,7 +1484,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                 {
                                     if (previewer != null)
                                     {
-                                        MasterAudio.PlaySound3DAtVector3AndForget(_group.name, previewer.transform.position, 1f, null, 0f, variation.name);
+                                        MasterAudio.PlaySound3DAtVector3AndForget(_group.GameObjectName, previewer.transform.position, 1f, null, 0f, variation.name);
                                     }
                                 }
                                 else
@@ -1497,12 +1508,15 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                             if (previewer != null)
                                             {
                                                 var fileName = AudioResourceOptimizer.GetLocalizedFileName(variation.useLocalization, variation.resourceFileName);
-                                                previewer.PlayOneShot(Resources.Load(fileName) as AudioClip, calcVolume);
+                                                var resClip = Resources.Load(fileName) as AudioClip;
+                                                DTGUIHelper.PlaySilentWakeUpPreview(previewer, resClip);
+                                                previewer.PlayOneShot(resClip, calcVolume);
                                             }
                                             break;
                                         case MasterAudio.AudioLocation.Clip:
                                             if (previewer != null)
                                             {
+                                                DTGUIHelper.PlaySilentWakeUpPreview(previewer, variation.VarAudio.clip);
                                                 previewer.PlayOneShot(variation.VarAudio.clip, calcVolume);
                                             }
                                             break;
@@ -1529,7 +1543,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         GUILayout.Space(4);
                     }
                     EditorGUILayout.EndHorizontal();
-                    DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Variations");
+                    DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroups.htm#Variations");
 
                     EditorGUILayout.EndHorizontal();
 
@@ -1610,7 +1624,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                     if (variation.VarAudio == null)
                     {
-                        DTGUIHelper.ShowRedError(string.Format("The Variation: '{0}' has no Audio Source.", variation.name));
+                        DTGUIHelper.ShowRedError(string.Format("The Variation: '{0}' has no Audio Source.", variation.GameObjectName));
                         break;
                     }
 
@@ -1671,7 +1685,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         EditorGUILayout.PropertyField(varSerialized.FindProperty(nameof(SoundGroupVariation.audioClipAddressable)), true);
                         varSerialized.ApplyModifiedProperties();
 
-                        if (!DTGUIHelper.IsAddressableTypeValid(variation.audioClipAddressable, variation.name)) {
+                        if (!DTGUIHelper.IsAddressableTypeValid(variation.audioClipAddressable, variation.GameObjectName)) {
                             variation.audioClipAddressable = null;
                             varIsDirty = true;
                         }
@@ -1714,7 +1728,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                                 var resourceFileName = DTGUIHelper.GetResourcePath(aClip, ref useLocalization);
                                                 if (string.IsNullOrEmpty(resourceFileName))
                                                 {
-                                                    resourceFileName = aClip.name;
+                                                    resourceFileName = aClip.CachedName();
                                                 }
 
                                                 variation.resourceFileName = resourceFileName;
@@ -1860,7 +1874,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                             }
                         }
 
-                        var newWeight = EditorGUILayout.IntSlider("Voices (Weight)", variation.weight, 0, 100);
+                        var newWeight = EditorGUILayout.IntSlider("Voices / Weight", variation.weight, 0, 100);
                         if (newWeight != variation.weight)
                         {
                             if (_group.copySettingsExpanded && variation.isChecked)
@@ -1869,7 +1883,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                             }
                             else
                             {
-                                AudioUndoHelper.RecordObjectPropertyForUndo(ref varIsDirty, variation, "change Voices (Weight)");
+                                AudioUndoHelper.RecordObjectPropertyForUndo(ref varIsDirty, variation, "change Voices / Weight");
                                 variation.weight = newWeight;
                             }
                         }
@@ -2290,7 +2304,6 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                 if (deadVar != null)
                 {
-#if UNITY_2018_3_OR_NEWER
                     var wasDestroyed = false;
 
                     if (PrefabUtility.IsPartOfPrefabInstance(_group))
@@ -2298,10 +2311,10 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_group);
                         GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
-                        var groupParent = prefabRoot.transform.Find(_group.name);
+                        var groupParent = prefabRoot.transform.Find(_group.GameObjectName);
                         if (groupParent != null)
                         {
-                            var deadTrans = groupParent.Find(deadVar.name);
+                            var deadTrans = groupParent.Find(deadVar.GameObjectName);
 
                             if (deadTrans != null)
                             {
@@ -2320,10 +2333,6 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         // delete variation from Hierarchy
                         AudioUndoHelper.DestroyForUndo(deadVar.gameObject);
                     }
-#else
-                    // delete variation from Hierarchy
-                    AudioUndoHelper.DestroyForUndo(deadVar.gameObject);
-#endif
 
                     // delete variation from list.
                     if (_group.groupVariations.Count >= deadChildIndex.Value)
@@ -2395,7 +2404,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
         public void CreateVariation(MasterAudioGroup group, MasterAudio ma, AudioClip clip)
         {
             var useLocalization = false;
-            var clipName = clip.name;
+            var clipName = clip.CachedName();
 
             if (group.transform.GetChildTransform(clipName) != null)
             {
@@ -2419,7 +2428,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                     var resourceFileName = DTGUIHelper.GetResourcePath(clip, ref useLocalization);
                     if (string.IsNullOrEmpty(resourceFileName))
                     {
-                        resourceFileName = clip.name;
+                        resourceFileName = clip.CachedName();
                     }
 
                     variation.resourceFileName = resourceFileName;
@@ -3193,7 +3202,6 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
         }
 
-#if UNITY_2018_3_OR_NEWER
         private void CloneVariation(int index)
         {
             var gameObj = _group.groupVariations[index].gameObject;
@@ -3203,7 +3211,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(_group);
                 GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
-                var groupParent = prefabRoot.transform.Find(_group.name);
+                var groupParent = prefabRoot.transform.Find(_group.GameObjectName);
                 if (groupParent != null)
                 {
                     var varTrans = groupParent.Find(gameObj.name);
@@ -3221,7 +3229,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
             else
             {
-                var dupe = DTGUIHelper.DuplicateGameObject(gameObj, _group.name, _group.groupVariations.Count + 1);
+                var dupe = DTGUIHelper.DuplicateGameObject(gameObj, _group.GameObjectName, _group.groupVariations.Count + 1);
 
                 if (dupe == null)
                 {
@@ -3231,7 +3239,6 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 dupe.transform.parent = _group.transform;
             }
         }
-#endif
 
         private void SetSpatialBlend()
         {

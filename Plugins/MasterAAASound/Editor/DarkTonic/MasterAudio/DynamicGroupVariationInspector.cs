@@ -87,6 +87,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                             {
                                 if (previewer != null)
                                 {
+                                    DTGUIHelper.PlaySilentWakeUpPreview(previewer, clip);
                                     previewer.PlayOneShot(clip, calcVolume);
                                 }
                             }
@@ -98,6 +99,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                         case MasterAudio.AudioLocation.Clip:
                             if (previewer != null)
                             {
+                                DTGUIHelper.PlaySilentWakeUpPreview(previewer, _variation.VarAudio.clip);
                                 previewer.PlayOneShot(_variation.VarAudio.clip, calcVolume);
                             }
                             break;
@@ -116,7 +118,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
             EditorGUILayout.EndHorizontal();
 
-            DTGUIHelper.HelpHeader("http://www.dtdevtools.com/docs/masteraudio/SoundGroupVariations.htm");
+            DTGUIHelper.HelpHeader("https://www.dtdevtools.com/docs/masteraudio/SoundGroupVariations.htm");
 
             if (!Application.isPlaying)
             {
@@ -137,7 +139,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             var oldLocation = _variation.audLocation;
             EditorGUILayout.BeginHorizontal();
             var newLocation = (MasterAudio.AudioLocation)EditorGUILayout.EnumPopup("Audio Origin", _variation.audLocation);
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroupVariations.htm#AudioOrigin");
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroupVariations.htm#AudioOrigin");
             EditorGUILayout.EndHorizontal();
 
             if (newLocation != oldLocation)
@@ -218,7 +220,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                                     newFilename = DTGUIHelper.GetResourcePath(aClip, ref useLocalization);
                                     if (string.IsNullOrEmpty(newFilename))
                                     {
-                                        newFilename = aClip.name;
+                                        newFilename = aClip.CachedName();
                                     }
 
                                     _variation.resourceFileName = newFilename;
@@ -297,12 +299,12 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
 
             EditorGUILayout.BeginHorizontal();
-            var newWeight = EditorGUILayout.IntSlider("Voices (Weight)", _variation.weight, 0, 100);
-            DTGUIHelper.AddHelpIconNoStyle("http://www.dtdevtools.com/docs/masteraudio/SoundGroupVariations.htm#Voices");
+            var newWeight = EditorGUILayout.IntSlider("Voices / Weight", _variation.weight, 0, 100);
+            DTGUIHelper.AddHelpIconNoStyle("https://www.dtdevtools.com/docs/masteraudio/SoundGroupVariations.htm#Voices");
             EditorGUILayout.EndHorizontal();
             if (newWeight != _variation.weight)
             {
-                AudioUndoHelper.RecordObjectPropertyForUndo(ref isDirty, _variation, "change Voices (Weight)");
+                AudioUndoHelper.RecordObjectPropertyForUndo(ref isDirty, _variation, "change Voices / Weight");
                 _variation.weight = newWeight;
             }
 

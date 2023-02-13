@@ -59,6 +59,15 @@ public class TransformFollower : MonoBehaviour {
         PerformTriggerExit(); // trigger exit doesn't seem to fire on same frame for pooling, when just did trigger enter same frame.
     }
 
+    /// <summary>
+    /// This gets called by SoundGroupUpdater when Chained Loop updates with a new Variation.
+    /// </summary>
+    /// <param name="newVariation"></param>
+    public void UpdateAudioVariation(SoundGroupVariation newVariation)
+    {
+        playingVariation.ActingVariation = newVariation;
+    }
+
     public void StartFollowing(Transform transToFollow, string soundType, string variationName, float volume, float trigRadius,
         bool willFollowSource, bool positionAtClosestColliderPoint,
                                bool useTopCollider, bool useChildColliders,
@@ -164,6 +173,9 @@ public class TransformFollower : MonoBehaviour {
         var hasSpecificVariation = !string.IsNullOrEmpty(_variationName);
 
         var needsResult = _positionAtClosestColliderPoint || _exitMode == MasterAudio.AmbientSoundExitMode.FadeSound;
+
+        var shouldFollowSource = _willFollowSource && !_positionAtClosestColliderPoint;
+
         if (fadingVariation != null && fadingVariation.ActingVariation != null) {
             var reEnterModeToUse = _reEnterMode;
 
@@ -185,7 +197,7 @@ public class TransformFollower : MonoBehaviour {
             }
         }
 
-        if (_willFollowSource) {
+        if (shouldFollowSource) { // no point following when we're going to set the position every closest collider position recalc.
             if (needsResult) {
                 if (hasSpecificVariation) {
                     playingVariation = MasterAudio.PlaySound3DFollowTransform(_soundType, RuntimeFollowingTransform, _playVolume, 1f, 0f, _variationName);
@@ -357,7 +369,7 @@ public class TransformFollower : MonoBehaviour {
 		Trans.position = closestPoint;
 		Trans.LookAt(MasterAudio.ListenerTrans);
 		if (playingVariation != null && playingVariation.ActingVariation != null) {
-			playingVariation.ActingVariation.transform.position = closestPoint;
+            playingVariation.ActingVariation.MoveToAmbientColliderPosition(closestPoint, this);
 		}
 		
 		_lastListenerPos = listenerPos;

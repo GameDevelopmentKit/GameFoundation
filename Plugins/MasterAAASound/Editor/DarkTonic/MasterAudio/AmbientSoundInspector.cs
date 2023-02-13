@@ -20,7 +20,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 DTGUIHelper.ShowHeaderTexture(MasterAudioInspectorResources.LogoTexture);
             }
 
-            DTGUIHelper.HelpHeader("http://www.dtdevtools.com/docs/masteraudio/AmbientSound.htm");
+            DTGUIHelper.HelpHeader("https://www.dtdevtools.com/docs/masteraudio/AmbientSound.htm");
 
             var canUse = true;
 

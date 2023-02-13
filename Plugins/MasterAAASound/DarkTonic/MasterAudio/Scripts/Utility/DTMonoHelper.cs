@@ -7,11 +7,7 @@ namespace DarkTonic.MasterAudio {
     // ReSharper disable once CheckNamespace
     public static class DTMonoHelper {
         public static Transform GetChildTransform(this Transform transParent, string childName) {
-            #if UNITY_2017_1_OR_NEWER
-                return transParent.Find(childName);
-            #else
-                return transParent.FindChild(childName);
-            #endif
+            return transParent.Find(childName);
         }
 
         /// <summary>

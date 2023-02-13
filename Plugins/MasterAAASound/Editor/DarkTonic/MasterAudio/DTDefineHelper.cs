@@ -24,18 +24,11 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
         public static HashSet<BuildTargetGroup> GetInstalledBuildTargetGroups()
         {
-#if UNITY_2018_1_OR_NEWER
-            // works properly
-#else
-            Debug.Log("Updating all build targets. Please ignore messages about build targets not installed.");
-#endif
             var result = new HashSet<BuildTargetGroup>();
             foreach (BuildTarget target in (BuildTarget[])Enum.GetValues(typeof(BuildTarget)))
             {
                 BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
-#if UNITY_2018_1_OR_NEWER
                 if (BuildPipeline.IsBuildTargetSupported(group, target))
-#endif
                 {
                     result.Add(group);
                 }

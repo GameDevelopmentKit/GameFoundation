@@ -103,7 +103,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
                 EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
                 GUILayout.Space(10);
 
-                var varName = variation.name;
+                var varName = variation.GameObjectName;
                 GUILayout.Label(varName);
 
                 GUILayout.FlexibleSpace();

@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+#if MULTIPLAYER_ENABLED
+    using DarkTonic.MasterAudio.Multiplayer;
+#endif
 
 /*! \cond PRIVATE */
 // ReSharper disable once CheckNamespace
@@ -11,6 +14,11 @@ namespace DarkTonic.MasterAudio {
         [Tooltip("Select for sounds to retrigger each time animation loops without exiting state")]
         [Header("Retrigger Sounds Each Time Anim Loops w/o Exiting State")]
         public bool RetriggerWhenStateLoops = false;
+
+#if MULTIPLAYER_ENABLED
+        [Header("Select For Sounds To Be Heard By All Connected Players")]
+        public bool MultiplayerBroadcast = false;
+#endif
 
         [Tooltip("Play a Sound Group when state is Entered")]
         [Header("Enter Sound Group")]
@@ -54,7 +62,6 @@ namespace DarkTonic.MasterAudio {
         private bool playSoundStart = true;
         private bool playSoundStop = true;
 
-
         [Tooltip("Play a Sound Group with each variation timed to the animation.  This allows you to " +
             "time your sounds to the actions in you animation.  Example: A sword swing combo where you want swoosh sounds" +
             "or character grunts timed to the acceleration phase of the sword swing.  Select the number of sounds to be played, up to 4.  " +
@@ -91,6 +98,7 @@ namespace DarkTonic.MasterAudio {
         private Transform _actorTrans;
         private int _lastRepetition = -1;
 
+        // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
             _lastRepetition = 0;
             _actorTrans = ActorTrans(animator);
@@ -100,23 +108,56 @@ namespace DarkTonic.MasterAudio {
             }
 
             var varName = GetVariationName(enterVariationName);
+            
             if (SoundFollowsObject) {
+#if MULTIPLAYER_ENABLED
+                if (CanTransmitToOtherPlayers) {
+                    if (varName == null) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(enterSoundGroup, _actorTrans);
+                    } else {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(enterSoundGroup, _actorTrans, 1f, null, 0f, varName);
+                    }
+                } else {
+                    if (varName == null) {
+                        MasterAudio.PlaySound3DFollowTransformAndForget(enterSoundGroup, _actorTrans);
+                    } else {
+                        MasterAudio.PlaySound3DFollowTransformAndForget(enterSoundGroup, _actorTrans, 1f, null, 0f, varName);
+                    }
+                }
+#else
                 if (varName == null) {
                     MasterAudio.PlaySound3DFollowTransformAndForget(enterSoundGroup, _actorTrans);
                 } else {
                     MasterAudio.PlaySound3DFollowTransformAndForget(enterSoundGroup, _actorTrans, 1f, null, 0f, varName);
                 }
+#endif
             } else {
+#if MULTIPLAYER_ENABLED
+                if (CanTransmitToOtherPlayers) {
+                    if (varName == null) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(enterSoundGroup, _actorTrans);
+                    } else {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(enterSoundGroup, _actorTrans, 1f, null, 0f, varName);
+                    }
+                } else {
+                    if (varName == null) {
+                        MasterAudio.PlaySound3DAtTransformAndForget(enterSoundGroup, _actorTrans);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(enterSoundGroup, _actorTrans, 1f, null, 0f, varName);
+                    }
+                }
+#else
                 if (varName == null) {
                     MasterAudio.PlaySound3DAtTransformAndForget(enterSoundGroup, _actorTrans);
                 } else {
                     MasterAudio.PlaySound3DAtTransformAndForget(enterSoundGroup, _actorTrans, 1f, null, 0f, varName);
                 }
+#endif
             }
-
             wasEnterSoundPlayed = true;
         }
 
+        // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
         override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
             var animRepetition = (int)stateInfo.normalizedTime;
             var animTime = stateInfo.normalizedTime - animRepetition;
@@ -125,7 +166,7 @@ namespace DarkTonic.MasterAudio {
                 goto multisounds;
             }
 
-            #region Timed to Anim
+#region Timed to Anim
 
             if (!playSoundStart && RetriggerWhenStateLoops) {
                 // change back to true if "re-trigger" checked and anim has looped.
@@ -147,15 +188,52 @@ namespace DarkTonic.MasterAudio {
                     var varName = GetVariationName(timedVariationName);
                     if (SoundFollowsObject) {
                         if (varName == null) {
+#if MULTIPLAYER_ENABLED
+                            if (CanTransmitToOtherPlayers) {
+                                MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(TimedSoundGroup, _actorTrans);
+                            } else {
+                                MasterAudio.PlaySound3DFollowTransformAndForget(TimedSoundGroup, _actorTrans);
+                            }
+#else
+                            MasterAudio.PlaySound3DFollowTransformAndForget(TimedSoundGroup, _actorTrans);
+#endif
                             MasterAudio.PlaySound3DFollowTransformAndForget(TimedSoundGroup, _actorTrans);
                         } else {
+#if MULTIPLAYER_ENABLED
+                            if (CanTransmitToOtherPlayers) {
+                                MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(TimedSoundGroup, _actorTrans, 1f,
+                                    null, 0f, varName);
+                            } else {
+                                MasterAudio.PlaySound3DFollowTransformAndForget(TimedSoundGroup, _actorTrans, 1f,
+                                    null, 0f, varName);
+                            }
+#else
                             MasterAudio.PlaySound3DFollowTransformAndForget(TimedSoundGroup, _actorTrans, 1f, null, 0f, varName);
+#endif
                         }
                     } else {
                         if (varName == null) {
+#if MULTIPLAYER_ENABLED
+                            if (CanTransmitToOtherPlayers) {
+                                MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(TimedSoundGroup, _actorTrans);
+                            } else {
+                                MasterAudio.PlaySound3DAtTransformAndForget(TimedSoundGroup, _actorTrans);
+                            }
+#else
                             MasterAudio.PlaySound3DAtTransformAndForget(TimedSoundGroup, _actorTrans);
+#endif
                         } else {
+#if MULTIPLAYER_ENABLED
+                            if (CanTransmitToOtherPlayers) {
+                                MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(TimedSoundGroup, _actorTrans, 1f, null,
+                                    0f, varName);
+                            } else {
+                                MasterAudio.PlaySound3DAtTransformAndForget(TimedSoundGroup, _actorTrans, 1f, null,
+                                    0f, varName);
+                            }
+#else
                             MasterAudio.PlaySound3DAtTransformAndForget(TimedSoundGroup, _actorTrans, 1f, null, 0f, varName);
+#endif
                         }
                     }
                 }
@@ -170,14 +248,22 @@ namespace DarkTonic.MasterAudio {
                             //Sound will stop upon exit instead of relying on animation time
                             if (animTime > whenToStopSound) {
                                 playSoundStop = false;
+#if MULTIPLAYER_ENABLED
+                                if (CanTransmitToOtherPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopSoundGroupOfTransform(_actorTrans, TimedSoundGroup);
+                                } else {
+                                    MasterAudio.StopSoundGroupOfTransform(_actorTrans, TimedSoundGroup);
+                                }
+#else
                                 MasterAudio.StopSoundGroupOfTransform(_actorTrans, TimedSoundGroup);
+#endif
                             }
                         }
                     }
                 }
             }
 
-            #endregion
+#endregion
 
             multisounds:
 
@@ -185,7 +271,7 @@ namespace DarkTonic.MasterAudio {
                 goto afterMulti;
             }
 
-            #region Play Multiple Sounds Timed To Anim
+#region Play Multiple Sounds Timed To Anim
 
             if (RetriggerWhenStateLoops) {
                 if (!playMultiSound1) {
@@ -216,85 +302,260 @@ namespace DarkTonic.MasterAudio {
 
             var multiVarName = GetVariationName(multiTimedVariationName);
 
-            if (playMultiSound1) {
-                if (animTime > whenToStartMultiSound1 && numOfMultiSoundsToPlay >= 1) {
-                    playMultiSound1 = false;
-                    if (SoundFollowsObject) {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
-                                _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
-                                _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+            if (!playMultiSound1) {
+                goto decideMulti2;
+            }
+            if (animTime < whenToStartMultiSound1 || numOfMultiSoundsToPlay < 1) {
+                goto decideMulti2;
+            }
+
+            playMultiSound1 = false;
+            if (SoundFollowsObject) {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
+                            _actorTrans);
                     } else {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
+                            _actorTrans);
                     }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
+                        _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
+                            _actorTrans, 1f, null, 0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
+                            _actorTrans, 1f, null, 0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup,
+                        _actorTrans, 1f, null, 0f, multiVarName);
+#endif
+                }
+            } else {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                        0f, multiVarName);
+#endif
                 }
             }
 
-            if (playMultiSound2) {
-                if (animTime > whenToStartMultiSound2 && numOfMultiSoundsToPlay >= 2) {
-                    playMultiSound2 = false;
-                    if (SoundFollowsObject) {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+            decideMulti2:
+
+            if (!playMultiSound2) {
+                goto decideMulti3;
+            }
+
+            if (animTime < whenToStartMultiSound2 || numOfMultiSoundsToPlay < 2) {
+                goto decideMulti3;
+            }
+
+            playMultiSound2 = false;
+            if (SoundFollowsObject) {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(
+                            MultiSoundsTimedGroup, _actorTrans);
                     } else {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
                     }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                            null, 0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                            null, 0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                        null, 0f, multiVarName);
+#endif
+                }
+            } else {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                        0f, multiVarName);
+#endif
                 }
             }
 
-            if (playMultiSound3) {
-                if (animTime > whenToStartMultiSound3 && numOfMultiSoundsToPlay >= 3) {
-                    playMultiSound3 = false;
-                    if (SoundFollowsObject) {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+            decideMulti3:
+
+            if (!playMultiSound3) {
+                goto decideMulti4;
+            }
+
+            if (animTime < whenToStartMultiSound3 || numOfMultiSoundsToPlay < 3) {
+                goto decideMulti4;
+            }
+
+            playMultiSound3 = false;
+            if (SoundFollowsObject) {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
                     } else {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
                     }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                            null, 0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                            null, 0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                        null, 0f, multiVarName);
+#endif
+                }
+            } else {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                        0f, multiVarName);
+#endif
                 }
             }
 
-            if (playMultiSound4) {
-                if (animTime > whenToStartMultiSound4 && numOfMultiSoundsToPlay >= 4) {
-                    playMultiSound4 = false;
-                    if (SoundFollowsObject) {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+            decideMulti4:
+
+            if (!playMultiSound4) {
+                goto afterMulti;
+            }
+
+            if (animTime < whenToStartMultiSound4 || numOfMultiSoundsToPlay < 4) {
+                goto afterMulti;
+            }
+
+            playMultiSound4 = false;
+            if (SoundFollowsObject) {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
                     } else {
-                        if (multiVarName == null) {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
-                        } else {
-                            MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null, 0f, multiVarName);
-                        }
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
                     }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                            null, 0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                            null, 0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DFollowTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f,
+                        null, 0f, multiVarName);
+#endif
+                }
+            } else {
+                if (multiVarName == null) {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans);
+#endif
+                } else {
+#if MULTIPLAYER_ENABLED                    
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    } else {
+                        MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                            0f, multiVarName);
+                    }
+#else
+                    MasterAudio.PlaySound3DAtTransformAndForget(MultiSoundsTimedGroup, _actorTrans, 1f, null,
+                        0f, multiVarName);
+#endif
                 }
             }
 
-            #endregion
+#endregion
 
             afterMulti:
 
@@ -303,50 +564,108 @@ namespace DarkTonic.MasterAudio {
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
             if (wasEnterSoundPlayed && stopEnterSoundOnExit) {
+#if MULTIPLAYER_ENABLED
+                if (CanTransmitToOtherPlayers) {
+                    MasterAudioMultiplayerAdapter.StopSoundGroupOfTransform(_actorTrans, enterSoundGroup);
+                } else {
+                    MasterAudio.StopSoundGroupOfTransform(_actorTrans, enterSoundGroup);
+                }
+#else
                 MasterAudio.StopSoundGroupOfTransform(_actorTrans, enterSoundGroup);
+#endif
             }
             wasEnterSoundPlayed = false;
 
-            if (playExitSound) {
+            if (playExitSound && exitSoundGroup != MasterAudio.NoGroupName && !string.IsNullOrEmpty(exitSoundGroup)) {
                 var varName = GetVariationName(exitVariationName);
 
                 if (SoundFollowsObject) {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        if (varName == null) {
+                            MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(exitSoundGroup,
+                                _actorTrans);
+                        } else {
+                            MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(exitSoundGroup,
+                                _actorTrans, 1f, null, 0, varName);
+                        }
+                    } else {
+                        if (varName == null) {
+                            MasterAudio.PlaySound3DFollowTransformAndForget(exitSoundGroup, _actorTrans);
+                        } else {
+                            MasterAudio.PlaySound3DFollowTransformAndForget(exitSoundGroup, _actorTrans, 1f, null, 0f, varName);
+                        }
+                    }
+#else
                     if (varName == null) {
                         MasterAudio.PlaySound3DFollowTransformAndForget(exitSoundGroup, _actorTrans);
                     } else {
                         MasterAudio.PlaySound3DFollowTransformAndForget(exitSoundGroup, _actorTrans, 1f, null, 0f, varName);
                     }
+#endif
                 } else {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        if (varName == null) {
+                            MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(exitSoundGroup, _actorTrans);
+                        } else {
+                            MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(exitSoundGroup, _actorTrans, 1f, null, 0f, varName);
+                        }
+                    } else {
+                        if (varName == null) {
+                            MasterAudio.PlaySound3DAtTransformAndForget(exitSoundGroup, _actorTrans);
+                        } else {
+                            MasterAudio.PlaySound3DAtTransformAndForget(exitSoundGroup, _actorTrans, 1f, null, 0f, varName);
+                        }
+                    }
+#else
                     if (varName == null) {
                         MasterAudio.PlaySound3DAtTransformAndForget(exitSoundGroup, _actorTrans);
                     } else {
                         MasterAudio.PlaySound3DAtTransformAndForget(exitSoundGroup, _actorTrans, 1f, null, 0f, varName);
                     }
+#endif
                 }
             }
 
-            #region Timed to Anim
+#region Timed to Anim
             if (playAnimTimeSound) {
                 if (stopAnimTimeSoundOnExit) {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.StopSoundGroupOfTransform(_actorTrans, TimedSoundGroup);
+                    } else {
+                        MasterAudio.StopSoundGroupOfTransform(_actorTrans, TimedSoundGroup);
+                    }
+#else
                     MasterAudio.StopSoundGroupOfTransform(_actorTrans, TimedSoundGroup);
+#endif
                 }
 
                 playSoundStart = true;
                 playSoundStop = true;
             }
-            #endregion
+#endregion
 
-            #region Play Multiple Sounds Timed To Anim
+#region Play Multiple Sounds Timed To Anim
             if (playMultiAnimTimeSounds) {
                 if (StopMultiAnimTimeSoundsOnExit) {
+#if MULTIPLAYER_ENABLED
+                    if (CanTransmitToOtherPlayers) {
+                        MasterAudioMultiplayerAdapter.StopSoundGroupOfTransform(_actorTrans, MultiSoundsTimedGroup);
+                    } else {
+                        MasterAudio.StopSoundGroupOfTransform(_actorTrans, MultiSoundsTimedGroup);
+                    }
+#else
                     MasterAudio.StopSoundGroupOfTransform(_actorTrans, MultiSoundsTimedGroup);
+#endif
                 }
                 playMultiSound1 = true;
                 playMultiSound2 = true;
                 playMultiSound3 = true;
                 playMultiSound4 = true;
             }
-            #endregion
+#endregion
         }
 
         // OnStateMove is called right after Animator.OnAnimatorMove(). Code that processes and affects root motion should be implemented here
@@ -381,6 +700,13 @@ namespace DarkTonic.MasterAudio {
 
             return varName;
         }
+
+#if MULTIPLAYER_ENABLED
+        private bool CanTransmitToOtherPlayers {
+            get { return MultiplayerBroadcast && MasterAudioMultiplayerAdapter.CanSendRPCs; }
+        }
+#endif
+    
     }
 }
 /*! \endcond */

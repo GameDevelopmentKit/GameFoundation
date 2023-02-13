@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build.Reporting;
 using UnityEditorInternal;
@@ -56,6 +55,7 @@ public static class Build
         var buildOptions           = BuildOptions.None;
         var scriptingDefineSymbols = string.Empty;
         var outputPath             = "template.exe";
+        var buildAppBundle         = false;
         for (var i = 0; i < args.Length; ++i)
         {
             switch (args[i])
@@ -81,17 +81,23 @@ public static class Build
                 case "-outputPath":
                     outputPath = args[++i];
                     break;
+                case "-buildAppBundle":
+                    buildAppBundle = true;
+                    break;
             }
         }
 
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
-        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols);
+        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle);
     }
 
-    public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "")
+    public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
+                                     bool                    buildAppBundle = false)
     {
         BuildTools.ResetBuildSettings();
+        EditorUserBuildSettings.buildAppBundle = buildAppBundle;
+
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
         Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray())); // Log which targets we're gonna build
 
@@ -114,7 +120,10 @@ public static class Build
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
-            var buildPlayerOptions = new BuildPlayerOptions { scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options };
+            var buildPlayerOptions = new BuildPlayerOptions
+                                     {
+                                         scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options
+                                     };
 
             if (!string.IsNullOrEmpty(scriptingDefineSymbols))
                 SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);

@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Audio;
+#if MULTIPLAYER_ENABLED
+    using DarkTonic.MasterAudio.Multiplayer;
+#endif
 
 // ReSharper disable once CheckNamespace
 namespace DarkTonic.MasterAudio {
@@ -18,6 +21,9 @@ namespace DarkTonic.MasterAudio {
         public bool disableSounds = false;
         public bool showPoolManager = false;
         public bool showNGUI = false;
+#if MULTIPLAYER_ENABLED
+        public bool multiplayerBroadcast = false;
+#endif        
         public AudioEvent eventToGizmo = null;
         public UnityUIVersion unityUIMode = UnityUIVersion.uGUI;
 
@@ -28,6 +34,15 @@ namespace DarkTonic.MasterAudio {
             Legacy,
             uGUI
         }
+
+#if MULTIPLAYER_ENABLED
+        /*! \cond PRIVATE */
+        public static readonly List<EventType> DisallowedMultBroadcastEventType = new List<EventType> {
+            EventType.OnSpawned,
+            EventType.OnDespawned
+        };
+        /*! \endcond */
+#endif
 
         public enum EventType {
             OnStart,
@@ -105,6 +120,12 @@ namespace DarkTonic.MasterAudio {
             FrameBased,
             TimeBased
         }
+
+#if MULTIPLAYER_ENABLED
+        public static List<MasterAudio.EventSoundFunctionType> CommandTypesExcludedFromMultiplayerBroadcast = new List<MasterAudio.EventSoundFunctionType> {
+            MasterAudio.EventSoundFunctionType.PersistentSettingsControl
+        };
+#endif
 
         public static List<string> LayerTagFilterEvents = new List<string>()
         {
@@ -265,6 +286,8 @@ namespace DarkTonic.MasterAudio {
         private Transform _trans;
         private readonly List<AudioEventGroup> _validMechanimStateChangedSounds = new List<AudioEventGroup>();
         private Animator _anim;
+        private AudioEventGroup eventsToPlayDuringStart = null;
+        private bool startHappened = false;
 
         // ReSharper disable once UnusedMember.Local
         private void Awake() {
@@ -340,6 +363,14 @@ namespace DarkTonic.MasterAudio {
             if (useStartSound) {
                 PlaySounds(startSound, EventType.OnStart);
             }
+
+            if (eventsToPlayDuringStart != null && !startHappened)
+            {
+                PlaySounds(eventsToPlayDuringStart, EventType.OnStart);
+            }
+
+            eventsToPlayDuringStart = null;
+            startHappened = true;
         }
 
         // ReSharper disable once UnusedMember.Local
@@ -390,11 +421,26 @@ namespace DarkTonic.MasterAudio {
             }
 
             if (useEnableSound) {
+                if (!startHappened) {
+                    var hasPlaylistEvent = false;
+                    for (var i = 0; i < enableSound.SoundEvents.Count; i++) {
+                        if (enableSound.SoundEvents[i].currentSoundFunctionType == MasterAudio.EventSoundFunctionType.PlaylistControl) {
+                            hasPlaylistEvent = true;
+                            break;
+                        }
+                    }
+
+                    if (hasPlaylistEvent) {
+                        eventsToPlayDuringStart = enableSound;
+                        return;
+                    }
+                }
+
                 PlaySounds(enableSound, EventType.OnEnable);
             }
         }
 
-		private void RestorePersistentSliders() {
+        private void RestorePersistentSliders() {
             // restore sliders if they are used for "Persistent" settings.
             if (!useUnitySliderChangedSound) {
                 return;
@@ -1093,9 +1139,16 @@ namespace DarkTonic.MasterAudio {
 
         /*! \cond PRIVATE */
         public AudioEventGroup GetMechanimAudioEventGroup(string stateName) {
-            return _validMechanimStateChangedSounds.Find(delegate (AudioEventGroup grp) {
-                return grp.mechanimStateName == stateName;
-            });
+            for (var i = 0; i < _validMechanimStateChangedSounds.Count; i++)
+            {
+                var aSound = _validMechanimStateChangedSounds[i];
+                if (aSound.mechanimStateName == stateName)
+                {
+                    return aSound;
+                }
+            }
+
+            return null;
         }
         /*! \endcond */
 
@@ -1190,6 +1243,17 @@ namespace DarkTonic.MasterAudio {
             return true;
         }
 
+
+#if MULTIPLAYER_ENABLED
+        private bool AllPlayersShouldHearAction(AudioEventGroup grp, EventType eType) {
+            if (DisallowedMultBroadcastEventType.Contains(eType)) {
+                return false;
+            }
+
+            return (multiplayerBroadcast || grp.multiplayerBroadcast) && MasterAudioMultiplayerAdapter.CanSendRPCs;
+        }
+#endif
+
         // ReSharper disable once FunctionComplexityOverflow
         private void PerformSingleAction(AudioEventGroup grp, AudioEvent aEvent, EventType eType) {
             if (disableSounds || MasterAudio.AppIsShuttingDown || MasterAudio.SafeInstance == null) {
@@ -1205,7 +1269,9 @@ namespace DarkTonic.MasterAudio {
             }
 
             PlaySoundResult soundPlayed = null;
-
+#if MULTIPLAYER_ENABLED
+            var willSendToAllPlayers = AllPlayersShouldHearAction(grp, eType);
+#endif
             var soundSpawnModeToUse = soundSpawnMode;
 
             if (eType == EventType.OnDisable || eType == EventType.OnDespawned) {
@@ -1229,29 +1295,84 @@ namespace DarkTonic.MasterAudio {
                     switch (soundSpawnModeToUse) {
                         case MasterAudio.SoundSpawnLocationMode.CallerLocation:
                             if (needsResult) {
+#if MULTIPLAYER_ENABLED                                
+                                if (willSendToAllPlayers) {
+                                    soundPlayed = MasterAudioMultiplayerAdapter.PlaySound3DAtTransform(sType, Trans, volume, pitch, aEvent.delaySound, variationName);
+                                } else {
+                                    soundPlayed = MasterAudio.PlaySound3DAtTransform(sType, Trans, volume, pitch,
+                                        aEvent.delaySound, variationName);
+                                }
+#else
                                 soundPlayed = MasterAudio.PlaySound3DAtTransform(sType, _trans, volume, pitch,
                                     aEvent.delaySound, variationName);
+#endif
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(sType, Trans, volume, pitch, aEvent.delaySound, variationName);
+                                } else {
+                                    MasterAudio.PlaySound3DAtTransformAndForget(sType, Trans, volume, pitch, aEvent.delaySound, variationName);
+                                }
+#else
                                 MasterAudio.PlaySound3DAtTransformAndForget(sType, _trans, volume, pitch,
                                     aEvent.delaySound, variationName);
+#endif
                             }
                             break;
                         case MasterAudio.SoundSpawnLocationMode.AttachToCaller:
                             if (needsResult) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    soundPlayed = MasterAudioMultiplayerAdapter.PlaySound3DFollowTransform(sType, Trans, volume, pitch,
+                                        aEvent.delaySound, variationName);
+                                } else {
+                                    soundPlayed = MasterAudio.PlaySound3DFollowTransform(sType, Trans, volume, pitch,
+                                        aEvent.delaySound, variationName);
+                                }
+#else
                                 soundPlayed = MasterAudio.PlaySound3DFollowTransform(sType, _trans, volume, pitch,
                                     aEvent.delaySound, variationName);
+#endif
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(sType, Trans, volume, pitch,
+                                        aEvent.delaySound, variationName);
+                                } else {
+                                    MasterAudio.PlaySound3DFollowTransformAndForget(sType, Trans, volume, pitch,
+                                        aEvent.delaySound, variationName);
+                                }
+#else
                                 MasterAudio.PlaySound3DFollowTransformAndForget(sType, _trans, volume, pitch,
                                     aEvent.delaySound, variationName);
+#endif
                             }
                             break;
                         case MasterAudio.SoundSpawnLocationMode.MasterAudioLocation:
                             if (needsResult) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    soundPlayed = MasterAudioMultiplayerAdapter.PlaySound(Trans, sType, volume, pitch, aEvent.delaySound,
+                                        variationName);
+                                } else {
+                                    soundPlayed = MasterAudio.PlaySound(sType, volume, pitch, aEvent.delaySound,
+                                        variationName);
+                                }
+#else
                                 soundPlayed = MasterAudio.PlaySound(sType, volume, pitch, aEvent.delaySound,
                                     variationName);
+#endif
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PlaySoundAndForget(Trans, sType, volume, pitch, aEvent.delaySound, variationName);
+                                } else {
+                                    MasterAudio.PlaySoundAndForget(sType, volume, pitch, aEvent.delaySound, variationName);
+                                }
+#else
                                 MasterAudio.PlaySoundAndForget(sType, volume, pitch, aEvent.delaySound,
                                     variationName);
+#endif
                             }
                             break;
                     }
@@ -1259,10 +1380,26 @@ namespace DarkTonic.MasterAudio {
                     if (soundPlayed != null && soundPlayed.ActingVariation != null && aEvent.glidePitchType != GlidePitchType.None) {
                         switch (aEvent.glidePitchType) {
                             case GlidePitchType.RaisePitch:
-                                soundPlayed.ActingVariation.GlideByPitch(aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                if (!string.IsNullOrEmpty(aEvent.theCustomEventName)) {
+                                    soundPlayed.ActingVariation.GlideByPitch(aEvent.targetGlidePitch, aEvent.pitchGlideTime, 
+                                        delegate
+                                        {
+                                            MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                        });
+                                } else {
+                                    soundPlayed.ActingVariation.GlideByPitch(aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                }
                                 break;
                             case GlidePitchType.LowerPitch:
-                                soundPlayed.ActingVariation.GlideByPitch(-aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                if (!string.IsNullOrEmpty(aEvent.theCustomEventName)) {
+                                    soundPlayed.ActingVariation.GlideByPitch(aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                        delegate
+                                        {
+                                            MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                        });
+                                } else {
+                                    soundPlayed.ActingVariation.GlideByPitch(-aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                }
                                 break;
                         }
                     }
@@ -1292,11 +1429,27 @@ namespace DarkTonic.MasterAudio {
                             break;
                         case MasterAudio.PlaylistCommand.Restart:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.RestartAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.RestartAllPlaylists();
+                                }
+#else
                                 MasterAudio.RestartAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.RestartPlaylist(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.RestartPlaylist(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.RestartPlaylist(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.Start:
@@ -1304,7 +1457,15 @@ namespace DarkTonic.MasterAudio {
                                 aEvent.playlistName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StartPlaylist(Trans, aEvent.playlistControllerName, aEvent.playlistName);
+                                } else {
+                                    MasterAudio.StartPlaylist(aEvent.playlistControllerName, aEvent.playlistName);
+                                }
+#else
                                 MasterAudio.StartPlaylist(aEvent.playlistControllerName, aEvent.playlistName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.ChangePlaylist:
@@ -1316,67 +1477,174 @@ namespace DarkTonic.MasterAudio {
                                 if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                     // don't play	
                                 } else {
+#if MULTIPLAYER_ENABLED
+                                    if (willSendToAllPlayers) {
+                                        MasterAudioMultiplayerAdapter.ChangePlaylistByName(Trans, aEvent.playlistControllerName, aEvent.playlistName, aEvent.startPlaylist);
+                                    } else {
+                                        MasterAudio.ChangePlaylistByName(aEvent.playlistControllerName,
+                                            aEvent.playlistName, aEvent.startPlaylist);
+                                    }
+#else
                                     MasterAudio.ChangePlaylistByName(aEvent.playlistControllerName,
                                         aEvent.playlistName, aEvent.startPlaylist);
+#endif
                                 }
                             }
 
                             break;
                         case MasterAudio.PlaylistCommand.StopLoopingCurrentSong:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopLoopingAllCurrentSongs(Trans);
+                                } else {
+                                    MasterAudio.StopLoopingAllCurrentSongs();
+                                }
+#else
                                 MasterAudio.StopLoopingAllCurrentSongs();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopLoopingCurrentSong(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.StopLoopingCurrentSong(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.StopLoopingCurrentSong(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.StopPlaylistAfterCurrentSong:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
-								MasterAudio.StopAllPlaylistsAfterCurrentSongs();
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopAllPlaylistsAfterCurrentSongs(Trans);
+                                } else {
+                                    MasterAudio.StopAllPlaylistsAfterCurrentSongs();
+                                }
+#else
+                                MasterAudio.StopAllPlaylistsAfterCurrentSongs();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopPlaylistAfterCurrentSong(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.StopPlaylistAfterCurrentSong(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.StopPlaylistAfterCurrentSong(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.FadeToVolume:
                             var targetVol = useSliderValue ? grp.sliderValue : aEvent.fadeVolume;
 
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadeAllPlaylistsToVolume(Trans, targetVol, aEvent.fadeTime);
+                                } else {
+                                    MasterAudio.FadeAllPlaylistsToVolume(targetVol, aEvent.fadeTime);
+                                }
+#else
                                 MasterAudio.FadeAllPlaylistsToVolume(targetVol, aEvent.fadeTime);
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadePlaylistToVolume(Trans, aEvent.playlistControllerName, targetVol,
+                                        aEvent.fadeTime);
+                                } else {
+                                    MasterAudio.FadePlaylistToVolume(aEvent.playlistControllerName, targetVol,
+                                        aEvent.fadeTime);
+                                }
+#else
                                 MasterAudio.FadePlaylistToVolume(aEvent.playlistControllerName, targetVol,
                                     aEvent.fadeTime);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.Mute:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.MuteAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.MuteAllPlaylists();
+                                }
+#else
                                 MasterAudio.MuteAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.MutePlaylist(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.MutePlaylist(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.MutePlaylist(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.Unmute:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnmuteAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.UnmuteAllPlaylists();
+                                }
+#else
                                 MasterAudio.UnmuteAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnmutePlaylist(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.UnmutePlaylist(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.UnmutePlaylist(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.ToggleMute:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.ToggleMuteAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.ToggleMuteAllPlaylists();
+                                }
+#else
                                 MasterAudio.ToggleMuteAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.ToggleMutePlaylist(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.ToggleMutePlaylist(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.ToggleMutePlaylist(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.PlaySong:
@@ -1388,9 +1656,21 @@ namespace DarkTonic.MasterAudio {
                                 if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                     // don't play	
                                 } else {
+#if MULTIPLAYER_ENABLED
+                                    if (willSendToAllPlayers) {
+                                        if (!MasterAudioMultiplayerAdapter.TriggerPlaylistClip(Trans, aEvent.playlistControllerName, aEvent.clipName)) {
+                                            soundPlayed.SoundPlayed = false;
+                                        }
+                                    } else {
+                                        if (!MasterAudio.TriggerPlaylistClip(aEvent.playlistControllerName, aEvent.clipName)) {
+                                            soundPlayed.SoundPlayed = false;
+                                        }
+                                    }
+#else
                                     if (!MasterAudio.TriggerPlaylistClip(aEvent.playlistControllerName, aEvent.clipName)) {
                                         soundPlayed.SoundPlayed = false;
                                     }
+#endif
                                 }
                             }
 
@@ -1404,7 +1684,15 @@ namespace DarkTonic.MasterAudio {
                                 if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                     // don't play	
                                 } else {
+#if MULTIPLAYER_ENABLED
+                                    if (willSendToAllPlayers) {
+                                        MasterAudioMultiplayerAdapter.QueuePlaylistClip(Trans, aEvent.playlistControllerName, aEvent.clipName);
+                                    } else {
+                                        MasterAudio.QueuePlaylistClip(aEvent.playlistControllerName, aEvent.clipName);
+                                    }
+#else
                                     MasterAudio.QueuePlaylistClip(aEvent.playlistControllerName, aEvent.clipName);
+#endif
                                     soundPlayed.SoundPlayed = true;
                                 }
                             }
@@ -1412,47 +1700,127 @@ namespace DarkTonic.MasterAudio {
                             break;
                         case MasterAudio.PlaylistCommand.PlayRandomSong:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.TriggerRandomClipAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.TriggerRandomClipAllPlaylists();
+                                }
+#else
                                 MasterAudio.TriggerRandomClipAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.TriggerRandomPlaylistClip(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.TriggerRandomPlaylistClip(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.TriggerRandomPlaylistClip(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.PlayNextSong:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.TriggerNextClipAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.TriggerNextClipAllPlaylists();
+                                }
+#else
                                 MasterAudio.TriggerNextClipAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.TriggerNextPlaylistClip(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.TriggerNextPlaylistClip(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.TriggerNextPlaylistClip(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.Pause:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PauseAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.PauseAllPlaylists();
+                                }
+#else
                                 MasterAudio.PauseAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PausePlaylist(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.PausePlaylist(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.PausePlaylist(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.Stop:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.StopAllPlaylists();
+                                }
+#else
                                 MasterAudio.StopAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopPlaylist(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.StopPlaylist(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.StopPlaylist(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                         case MasterAudio.PlaylistCommand.Resume:
                             if (aEvent.allPlaylistControllersForGroupCmd) {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnpauseAllPlaylists(Trans);
+                                } else {
+                                    MasterAudio.UnpauseAllPlaylists();
+                                }
+#else
                                 MasterAudio.UnpauseAllPlaylists();
+#endif
                             } else if (aEvent.playlistControllerName == MasterAudio.NoGroupName) {
                                 // don't play	
                             } else {
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnpausePlaylist(Trans, aEvent.playlistControllerName);
+                                } else {
+                                    MasterAudio.UnpausePlaylist(aEvent.playlistControllerName);
+                                }
+#else
                                 MasterAudio.UnpausePlaylist(aEvent.playlistControllerName);
+#endif
                             }
                             break;
                     }
@@ -1464,17 +1832,26 @@ namespace DarkTonic.MasterAudio {
                         SoundScheduled = false
                     };
 
+                    var soundTypeOverride = string.Empty;
+
                     var soundTypesForCmd = new List<string>();
-                    if (!aEvent.allSoundTypesForGroupCmd ||
-                        MasterAudio.GroupCommandsWithNoAllGroupSelector.Contains(aEvent.currentSoundGroupCommand)) {
+                    if (!aEvent.allSoundTypesForGroupCmd || MasterAudio.GroupCommandsWithNoAllGroupSelector.Contains(aEvent.currentSoundGroupCommand)) {
                         soundTypesForCmd.Add(aEvent.soundType);
                     } else {
                         soundTypesForCmd.AddRange(MasterAudio.RuntimeSoundGroupNames);
+#if MULTIPLAYER_ENABLED
+                        if (willSendToAllPlayers) {
+                            soundTypeOverride = MasterAudio.AllBusesName;
+                        }
+#endif
                     }
 
                     // ReSharper disable once ForCanBeConvertedToForeach
                     for (var i = 0; i < soundTypesForCmd.Count; i++) {
                         var soundType = soundTypesForCmd[i];
+                        if (!string.IsNullOrEmpty(soundTypeOverride)) { // for multiplayer "do all"
+                            soundType = soundTypeOverride;
+                        }
 
                         switch (aEvent.currentSoundGroupCommand) {
                             case MasterAudio.SoundGroupCommand.None:
@@ -1482,118 +1859,465 @@ namespace DarkTonic.MasterAudio {
                                 break;
                             case MasterAudio.SoundGroupCommand.ToggleSoundGroup:
                                 if (MasterAudio.IsSoundGroupPlaying(soundType)) {
+#if MULTIPLAYER_ENABLED
+                                    if (willSendToAllPlayers) {
+                                        MasterAudioMultiplayerAdapter.FadeOutAllOfSound(Trans, soundType, aEvent.fadeTime);
+                                    } else {
+                                        MasterAudio.FadeOutAllOfSound(soundType, aEvent.fadeTime);
+                                    }
+#else
                                     MasterAudio.FadeOutAllOfSound(soundType, aEvent.fadeTime);
+#endif
                                 } else {
                                     switch (soundSpawnModeToUse) {
                                         case MasterAudio.SoundSpawnLocationMode.CallerLocation:
-                                            MasterAudio.PlaySound3DAtTransformAndForget(sType, _trans, volume, pitch, aEvent.delaySound);
+#if MULTIPLAYER_ENABLED
+                                            if (willSendToAllPlayers) {
+                                                MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            } else {
+                                                MasterAudio.PlaySound3DAtTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            }
+#else
+                                            MasterAudio.PlaySound3DAtTransformAndForget(soundType, _trans, volume, pitch, aEvent.delaySound);
+#endif
                                             break;
                                         case MasterAudio.SoundSpawnLocationMode.AttachToCaller:
-                                            MasterAudio.PlaySound3DFollowTransformAndForget(sType, _trans, volume, pitch, aEvent.delaySound);
+#if MULTIPLAYER_ENABLED
+                                            if (willSendToAllPlayers) {
+                                                MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            } else {
+                                                MasterAudio.PlaySound3DFollowTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            }
+#else
+                                            MasterAudio.PlaySound3DFollowTransformAndForget(soundType, _trans, volume, pitch, aEvent.delaySound);
+#endif
                                             break;
                                         case MasterAudio.SoundSpawnLocationMode.MasterAudioLocation:
-                                            MasterAudio.PlaySoundAndForget(sType, volume, pitch, aEvent.delaySound);
+#if MULTIPLAYER_ENABLED
+                                            if (willSendToAllPlayers) {
+                                                MasterAudioMultiplayerAdapter.PlaySoundAndForget(Trans, soundType, volume, pitch, aEvent.delaySound);
+                                            } else {
+                                                MasterAudio.PlaySoundAndForget(soundType, volume, pitch, aEvent.delaySound);
+                                            }
+#else
+                                            MasterAudio.PlaySoundAndForget(soundType, volume, pitch, aEvent.delaySound);
+#endif
                                             break;
                                     }
                                 }
                                 break;
                             case MasterAudio.SoundGroupCommand.ToggleSoundGroupOfTransform:
                                 if (MasterAudio.IsTransformPlayingSoundGroup(soundType, _trans))                                 {
+#if MULTIPLAYER_ENABLED
+                                    if (willSendToAllPlayers) {
+                                        MasterAudioMultiplayerAdapter.FadeOutSoundGroupOfTransform(Trans, soundType, aEvent.fadeTime);
+                                    } else {
+                                        MasterAudio.FadeOutSoundGroupOfTransform(Trans, soundType, aEvent.fadeTime);
+                                    }
+#else
                                     MasterAudio.FadeOutSoundGroupOfTransform(_trans, soundType, aEvent.fadeTime);
+#endif
                                 } else {
                                     switch (soundSpawnModeToUse) {
                                         case MasterAudio.SoundSpawnLocationMode.CallerLocation:
-                                            MasterAudio.PlaySound3DAtTransformAndForget(sType, _trans, volume, pitch, aEvent.delaySound);
+#if MULTIPLAYER_ENABLED
+                                            if (willSendToAllPlayers) {
+                                                MasterAudioMultiplayerAdapter.PlaySound3DAtTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            } else {
+                                                MasterAudio.PlaySound3DAtTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            }
+#else
+                                            MasterAudio.PlaySound3DAtTransformAndForget(soundType, _trans, volume, pitch, aEvent.delaySound);
+#endif
                                             break;
                                         case MasterAudio.SoundSpawnLocationMode.AttachToCaller:
-                                            MasterAudio.PlaySound3DFollowTransformAndForget(sType, _trans, volume, pitch, aEvent.delaySound);
+#if MULTIPLAYER_ENABLED
+                                            if (willSendToAllPlayers) {
+                                                MasterAudioMultiplayerAdapter.PlaySound3DFollowTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            } else {
+                                                MasterAudio.PlaySound3DFollowTransformAndForget(soundType, Trans, volume, pitch, aEvent.delaySound);
+                                            }
+#else
+                                            MasterAudio.PlaySound3DFollowTransformAndForget(soundType, _trans, volume, pitch, aEvent.delaySound);
+#endif
                                             break;
                                         case MasterAudio.SoundSpawnLocationMode.MasterAudioLocation:
-                                            MasterAudio.PlaySoundAndForget(sType, volume, pitch, aEvent.delaySound);
+#if MULTIPLAYER_ENABLED
+                                            if (willSendToAllPlayers) {
+                                                MasterAudioMultiplayerAdapter.PlaySoundAndForget(Trans, soundType, volume, pitch, aEvent.delaySound);
+                                            } else {
+                                                MasterAudio.PlaySoundAndForget(soundType, volume, pitch, aEvent.delaySound);
+                                            }
+#else
+                                            MasterAudio.PlaySoundAndForget(soundType, volume, pitch, aEvent.delaySound);
+#endif
                                             break;
                                     }
                                 }
                                 break;
                             case MasterAudio.SoundGroupCommand.RefillSoundGroupPool:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.RefillSoundGroupPool(Trans, soundType);
+                                } else {
+                                    MasterAudio.RefillSoundGroupPool(soundType);
+                                }
+#else
                                 MasterAudio.RefillSoundGroupPool(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.FadeToVolume:
                                 var targetVol = useSliderValue ? grp.sliderValue : aEvent.fadeVolume;
-                                MasterAudio.FadeSoundGroupToVolume(soundType, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                var hasDelegate = aEvent.fireCustomEventAfterFade && !string.IsNullOrEmpty(aEvent.theCustomEventName);
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    if (hasDelegate) {
+                                        MasterAudioMultiplayerAdapter.FadeSoundGroupToVolume(Trans, soundType, targetVol, aEvent.fadeTime,
+                                            delegate
+                                            {
+                                                MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                            },
+                                            aEvent.stopAfterFade,
+                                            aEvent.restoreVolumeAfterFade);
+                                    } else {
+                                        MasterAudioMultiplayerAdapter.FadeSoundGroupToVolume(Trans, soundType, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                    }
+                                } else {
+                                    if (hasDelegate) {
+                                        MasterAudio.FadeSoundGroupToVolume(soundType, targetVol, aEvent.fadeTime,
+                                            delegate
+                                            {
+                                                MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                            },
+                                            aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                    } else {
+                                        MasterAudio.FadeSoundGroupToVolume(soundType, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                    }
+                                }
+#else
+                                if (hasDelegate) {
+                                    MasterAudio.FadeSoundGroupToVolume(soundType, targetVol, aEvent.fadeTime,
+                                        delegate
+                                        {
+                                            MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                        },
+                                        aEvent.stopAfterFade, 
+                                        aEvent.restoreVolumeAfterFade);
+                                } else {
+                                    MasterAudio.FadeSoundGroupToVolume(soundType, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                }
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.FadeOutAllOfSound:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadeOutAllOfSound(Trans, soundType, aEvent.fadeTime);
+                                } else {
+                                    MasterAudio.FadeOutAllOfSound(soundType, aEvent.fadeTime);
+                                }
+#else
                                 MasterAudio.FadeOutAllOfSound(soundType, aEvent.fadeTime);
+#endif
+                                break;
+                            case MasterAudio.SoundGroupCommand.FadeSoundGroupOfTransformToVolume:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadeSoundGroupOfTransformToVolume(Trans, soundType, aEvent.fadeTime, aEvent.fadeVolume);
+                                } else {
+                                    MasterAudio.FadeSoundGroupOfTransformToVolume(Trans, soundType, aEvent.fadeTime, aEvent.fadeVolume);
+                                }
+#else
+                                MasterAudio.FadeSoundGroupOfTransformToVolume(Trans, soundType, aEvent.fadeTime, aEvent.fadeVolume);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.Mute:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.MuteGroup(Trans, soundType);
+                                } else {
+                                    MasterAudio.MuteGroup(soundType);
+                                }
+#else
                                 MasterAudio.MuteGroup(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.Pause:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PauseSoundGroup(Trans, soundType);
+                                } else {
+                                    MasterAudio.PauseSoundGroup(soundType);
+                                }
+#else
                                 MasterAudio.PauseSoundGroup(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.Solo:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.SoloGroup(Trans, soundType);
+                                } else {
+                                    MasterAudio.SoloGroup(soundType);
+                                }
+#else
                                 MasterAudio.SoloGroup(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.StopAllOfSound:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopAllOfSound(Trans, soundType);
+                                } else {
+                                    MasterAudio.StopAllOfSound(soundType);
+                                }
+#else
                                 MasterAudio.StopAllOfSound(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.Unmute:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnmuteGroup(Trans, soundType);
+                                } else {
+                                    MasterAudio.UnmuteGroup(soundType);
+                                }
+#else
                                 MasterAudio.UnmuteGroup(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.Unpause:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnpauseSoundGroup(Trans, soundType);
+                                } else {
+                                    MasterAudio.UnpauseSoundGroup(soundType);
+                                }
+#else
                                 MasterAudio.UnpauseSoundGroup(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.Unsolo:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnsoloGroup(Trans, soundType);
+                                } else {
+                                    MasterAudio.UnsoloGroup(soundType);
+                                }
+#else
                                 MasterAudio.UnsoloGroup(soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.StopAllSoundsOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopAllSoundsOfTransform(Trans);
+                                } else {
+                                    MasterAudio.StopAllSoundsOfTransform(Trans);
+                                }
+#else
                                 MasterAudio.StopAllSoundsOfTransform(_trans);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.StopSoundGroupOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopSoundGroupOfTransform(Trans, soundType);
+                                } else {
+                                    MasterAudio.StopSoundGroupOfTransform(Trans, soundType);
+                                }
+#else
                                 MasterAudio.StopSoundGroupOfTransform(_trans, soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.PauseAllSoundsOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PauseAllSoundsOfTransform(Trans);
+                                } else {
+                                    MasterAudio.PauseAllSoundsOfTransform(Trans);
+                                }
+#else
                                 MasterAudio.PauseAllSoundsOfTransform(_trans);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.PauseSoundGroupOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PauseSoundGroupOfTransform(Trans, soundType);
+                                } else {
+                                    MasterAudio.PauseSoundGroupOfTransform(Trans, soundType);
+                                }
+#else
                                 MasterAudio.PauseSoundGroupOfTransform(_trans, soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.UnpauseAllSoundsOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnpauseAllSoundsOfTransform(Trans);
+                                } else {
+                                    MasterAudio.UnpauseAllSoundsOfTransform(Trans);
+                                }
+#else
                                 MasterAudio.UnpauseAllSoundsOfTransform(_trans);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.UnpauseSoundGroupOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnpauseSoundGroupOfTransform(Trans, soundType);
+                                } else {
+                                    MasterAudio.UnpauseSoundGroupOfTransform(Trans, soundType);
+                                }
+#else
                                 MasterAudio.UnpauseSoundGroupOfTransform(_trans, soundType);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.FadeOutSoundGroupOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadeOutSoundGroupOfTransform(Trans, soundType, aEvent.fadeTime);
+                                } else {
+                                    MasterAudio.FadeOutSoundGroupOfTransform(Trans, soundType, aEvent.fadeTime);
+                                }
+#else
                                 MasterAudio.FadeOutSoundGroupOfTransform(_trans, soundType, aEvent.fadeTime);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.FadeOutAllSoundsOfTransform:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadeOutAllSoundsOfTransform(Trans, aEvent.fadeTime);
+                                } else {
+                                    MasterAudio.FadeOutAllSoundsOfTransform(Trans, aEvent.fadeTime);
+                                }
+#else
                                 MasterAudio.FadeOutAllSoundsOfTransform(_trans, aEvent.fadeTime);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.RouteToBus:
                                 var busName = aEvent.busName;
                                 if (busName == MasterAudio.NoGroupName) {
                                     busName = null;
                                 }
+
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.RouteGroupToBus(Trans, soundType, busName);
+                                } else {
+                                    MasterAudio.RouteGroupToBus(soundType, busName);
+                                }
+#else
                                 MasterAudio.RouteGroupToBus(soundType, busName);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.GlideByPitch:
+                                var hasActionDelegate = !string.IsNullOrEmpty(aEvent.theCustomEventName);
+
                                 switch (aEvent.glidePitchType) {
                                     case GlidePitchType.RaisePitch:
-                                        MasterAudio.GlideSoundGroupByPitch(soundType, aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+#if MULTIPLAYER_ENABLED
+                                        if (willSendToAllPlayers) {
+                                            if (hasActionDelegate) {
+                                                MasterAudioMultiplayerAdapter.GlideSoundGroupByPitch(Trans, soundType, aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                    delegate
+                                                    {
+                                                        MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                    });
+                                            } else {
+                                                MasterAudioMultiplayerAdapter.GlideSoundGroupByPitch(Trans, soundType, aEvent.targetGlidePitch, aEvent.pitchGlideTime, null);
+                                            }
+                                        } else {
+                                            if (hasActionDelegate) {
+                                                MasterAudio.GlideSoundGroupByPitch(soundType, aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                    delegate
+                                                    {
+                                                        MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                    });
+                                            } else {
+                                                MasterAudio.GlideSoundGroupByPitch(soundType, aEvent.targetGlidePitch, aEvent.pitchGlideTime, null);
+                                            }
+                                        }
+#else
+                                        if (hasActionDelegate) {
+                                            MasterAudio.GlideSoundGroupByPitch(soundType, aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                delegate
+                                                {
+                                                    MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                                });
+                                        } else {
+                                            MasterAudio.GlideSoundGroupByPitch(soundType, aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                        }
+#endif
                                         break;
                                     case GlidePitchType.LowerPitch:
-                                        MasterAudio.GlideSoundGroupByPitch(soundType, -aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+#if MULTIPLAYER_ENABLED
+                                        if (willSendToAllPlayers) {
+                                            if (hasActionDelegate) {
+                                                MasterAudioMultiplayerAdapter.GlideSoundGroupByPitch(Trans, soundType, -aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                    delegate
+                                                    {
+                                                        MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                    });
+                                            } else {
+                                                MasterAudioMultiplayerAdapter.GlideSoundGroupByPitch(Trans, soundType, -aEvent.targetGlidePitch, aEvent.pitchGlideTime, null);
+                                            }
+                                        } else {
+                                            if (hasActionDelegate) {
+                                                MasterAudio.GlideSoundGroupByPitch(soundType, -aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                    delegate
+                                                    {
+                                                        MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                    });
+                                            } else {
+                                                MasterAudio.GlideSoundGroupByPitch(soundType, -aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                            }
+                                        }
+#else
+                                        if (hasActionDelegate) {
+                                            MasterAudio.GlideSoundGroupByPitch(soundType, -aEvent.targetGlidePitch, aEvent.pitchGlideTime, 
+                                                delegate
+                                                {
+                                                    MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                                });
+                                        } else {
+                                            MasterAudio.GlideSoundGroupByPitch(soundType, -aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                        }
+#endif
                                         break;
                                 }
 
                                 break;
                             case MasterAudio.SoundGroupCommand.StopOldSoundGroupVoices:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopOldSoundGroupVoices(Trans, soundType, aEvent.minAge);
+                                } else {
+                                    MasterAudio.StopOldSoundGroupVoices(soundType, aEvent.minAge);
+                                }
+#else
                                 MasterAudio.StopOldSoundGroupVoices(soundType, aEvent.minAge);
+#endif
                                 break;
                             case MasterAudio.SoundGroupCommand.FadeOutOldSoundGroupVoices:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadeOutOldSoundGroupVoices(Trans, soundType, aEvent.minAge, aEvent.fadeTime);
+                                } else {
+                                    MasterAudio.FadeOutOldSoundGroupVoices(soundType, aEvent.minAge, aEvent.fadeTime);
+                                }
+#else
                                 MasterAudio.FadeOutOldSoundGroupVoices(soundType, aEvent.minAge, aEvent.fadeTime);
+#endif
                                 break;
                         }
+                         
+#if MULTIPLAYER_ENABLED
+                        if (willSendToAllPlayers) {
+                            // don't continue loop, we've done everything already.
+                            break;
+                        }
+#endif
                     }
 
                     break;
@@ -1604,16 +2328,26 @@ namespace DarkTonic.MasterAudio {
                         SoundScheduled = false
                     };
 
+                    var busNameOverride = string.Empty;
+
                     var busesForCmd = new List<string>();
                     if (!aEvent.allSoundTypesForBusCmd) {
                         busesForCmd.Add(aEvent.busName);
                     } else {
                         busesForCmd.AddRange(MasterAudio.RuntimeBusNames);
+#if MULTIPLAYER_ENABLED
+                        if (willSendToAllPlayers) {
+                            busNameOverride = MasterAudio.AllBusesName;
+                        }
+#endif
                     }
 
                     // ReSharper disable once ForCanBeConvertedToForeach
                     for (var i = 0; i < busesForCmd.Count; i++) {
                         var busName = busesForCmd[i];
+                        if (!string.IsNullOrEmpty(busNameOverride)) { // for multiplayer "do all"
+                            busName = busNameOverride;
+                        }
 
                         switch (aEvent.currentBusCommand) {
                             case MasterAudio.BusCommand.None:
@@ -1621,61 +2355,282 @@ namespace DarkTonic.MasterAudio {
                                 break;
                             case MasterAudio.BusCommand.FadeToVolume:
                                 var targetVol = useSliderValue ? grp.sliderValue : aEvent.fadeVolume;
-                                MasterAudio.FadeBusToVolume(busName, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                var hasCustomEventAfter = aEvent.fireCustomEventAfterFade && !string.IsNullOrEmpty(aEvent.theCustomEventName);
+
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    if (hasCustomEventAfter) {
+                                        MasterAudioMultiplayerAdapter.FadeBusToVolume(Trans, busName, targetVol, aEvent.fadeTime,
+                                             delegate
+                                             {
+                                                 MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                             },
+                                             aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                    } else {
+                                        MasterAudioMultiplayerAdapter.FadeBusToVolume(Trans, busName, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                    }
+                                } else {
+                                    if (hasCustomEventAfter) {
+                                        MasterAudio.FadeBusToVolume(busName, targetVol, aEvent.fadeTime,
+                                             delegate
+                                             {
+                                                 MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                             },
+                                             aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                    } else {
+                                        MasterAudio.FadeBusToVolume(busName, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                    }
+                                }
+#else
+                                if (hasCustomEventAfter) {
+                                    MasterAudio.FadeBusToVolume(busName, targetVol, aEvent.fadeTime, 
+                                        delegate
+                                        {
+                                            MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                        }, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                } else {
+                                    MasterAudio.FadeBusToVolume(busName, targetVol, aEvent.fadeTime, null, aEvent.stopAfterFade, aEvent.restoreVolumeAfterFade);
+                                }
+#endif
                                 break;
                             case MasterAudio.BusCommand.GlideByPitch:
+                                var willFireCustomEventAfter = !string.IsNullOrEmpty(aEvent.theCustomEventName);
+
                                 switch (aEvent.glidePitchType) {
                                     case GlidePitchType.RaisePitch:
-                                        MasterAudio.GlideBusByPitch(busName, aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+#if MULTIPLAYER_ENABLED
+                                        if (willSendToAllPlayers) {
+                                            if (willFireCustomEventAfter) {
+                                                MasterAudioMultiplayerAdapter.GlideBusByPitch(Trans, busName, aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                     delegate
+                                                     {
+                                                         MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                     });
+                                            } else {
+                                                MasterAudioMultiplayerAdapter.GlideBusByPitch(Trans, busName, aEvent.targetGlidePitch, aEvent.pitchGlideTime, null);
+                                            }
+                                        } else {
+                                            if (willFireCustomEventAfter) {
+                                                MasterAudio.GlideBusByPitch(busName, aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                     delegate
+                                                     {
+                                                         MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                     });
+                                            } else {
+                                                MasterAudio.GlideBusByPitch(busName, aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                            }
+                                        }
+#else
+                                        if (willFireCustomEventAfter) {
+                                            MasterAudio.GlideBusByPitch(busName, aEvent.targetGlidePitch, aEvent.pitchGlideTime, 
+                                                delegate
+                                                {
+                                                    MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                                });
+                                        } else {
+                                            MasterAudio.GlideBusByPitch(busName, aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                        }
+#endif
                                         break;
                                     case GlidePitchType.LowerPitch:
-                                        MasterAudio.GlideBusByPitch(busName, -aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+#if MULTIPLAYER_ENABLED
+                                        if (willSendToAllPlayers) {
+                                            if (willFireCustomEventAfter) {
+                                                MasterAudioMultiplayerAdapter.GlideBusByPitch(Trans, busName, -aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                     delegate
+                                                     {
+                                                         MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                     });
+                                            } else {
+                                                MasterAudioMultiplayerAdapter.GlideBusByPitch(Trans, busName, -aEvent.targetGlidePitch, aEvent.pitchGlideTime, null);
+                                            }
+                                        } else {
+                                            if (willFireCustomEventAfter) {
+                                                MasterAudio.GlideBusByPitch(busName, -aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                     delegate
+                                                     {
+                                                         MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans);
+                                                     });
+                                            } else {
+                                                MasterAudio.GlideBusByPitch(busName, -aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                            }
+                                        }
+#else
+                                        if (willFireCustomEventAfter) {
+                                            MasterAudio.GlideBusByPitch(busName, -aEvent.targetGlidePitch, aEvent.pitchGlideTime,
+                                                delegate
+                                                {
+                                                    MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+                                                });
+                                        } else {
+                                            MasterAudio.GlideBusByPitch(busName, -aEvent.targetGlidePitch, aEvent.pitchGlideTime);
+                                        }
+#endif
                                         break;
                                 }
                                 break;
                             case MasterAudio.BusCommand.Pause:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PauseBus(Trans, busName);
+                                } else {
+                                    MasterAudio.PauseBus(busName);
+                                }
+#else
                                 MasterAudio.PauseBus(busName);
+#endif
                                 break;
                             case MasterAudio.BusCommand.Stop:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopBus(Trans, busName);
+                                } else {
+                                    MasterAudio.StopBus(busName);
+                                }
+#else
                                 MasterAudio.StopBus(busName);
+#endif
                                 break;
                             case MasterAudio.BusCommand.Unpause:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnpauseBus(Trans, busName);
+                                } else {
+                                    MasterAudio.UnpauseBus(busName);
+                                }
+#else
                                 MasterAudio.UnpauseBus(busName);
+#endif
                                 break;
                             case MasterAudio.BusCommand.Mute:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.MuteBus(Trans, busName);
+                                } else {
+                                    MasterAudio.MuteBus(busName);
+                                }
+#else
                                 MasterAudio.MuteBus(busName);
+#endif
                                 break;
                             case MasterAudio.BusCommand.Unmute:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnmuteBus(Trans, busName);
+                                } else {
+                                    MasterAudio.UnmuteBus(busName);
+                                }
+#else
                                 MasterAudio.UnmuteBus(busName);
+#endif
                                 break;
                             case MasterAudio.BusCommand.ToggleMute:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.ToggleMuteBus(Trans, busName);
+                                } else {
+                                    MasterAudio.ToggleMuteBus(busName);
+                                }
+#else
                                 MasterAudio.ToggleMuteBus(busName);
+#endif
                                 break;
                             case MasterAudio.BusCommand.Solo:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.SoloBus(Trans, busName);
+                                } else {
+                                    MasterAudio.SoloBus(busName);
+                                }
+#else
                                 MasterAudio.SoloBus(busName);
+#endif
                                 break;
                             case MasterAudio.BusCommand.Unsolo:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnsoloBus(Trans, busName);
+                                } else {
+                                    MasterAudio.UnsoloBus(busName);
+                                }
+#else
                                 MasterAudio.UnsoloBus(busName);
+#endif
                                 break;
-                            case MasterAudio.BusCommand.ChangePitch: 
+                            case MasterAudio.BusCommand.ChangePitch:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.ChangeBusPitch(Trans, busName, aEvent.pitch);
+                                } else {
+                                    MasterAudio.ChangeBusPitch(busName, aEvent.pitch);
+                                }
+#else
                                 MasterAudio.ChangeBusPitch(busName, aEvent.pitch);
+#endif
                                 break;
 							case MasterAudio.BusCommand.PauseBusOfTransform:
-								MasterAudio.PauseBusOfTransform(_trans, aEvent.busName);
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.PauseBusOfTransform(Trans, busName);
+                                } else {
+                                    MasterAudio.PauseBusOfTransform(Trans, aEvent.busName);
+                                }
+#else
+                                MasterAudio.PauseBusOfTransform(_trans, aEvent.busName);
+#endif
 								break;
 							case MasterAudio.BusCommand.UnpauseBusOfTransform:
-								MasterAudio.UnpauseBusOfTransform(_trans, aEvent.busName);
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.UnpauseBusOfTransform(Trans, busName);
+                                } else {
+                                    MasterAudio.UnpauseBusOfTransform(Trans, aEvent.busName);
+                                }
+#else
+                                MasterAudio.UnpauseBusOfTransform(_trans, aEvent.busName);
+#endif
 								break;
 							case MasterAudio.BusCommand.StopBusOfTransform:
-								MasterAudio.StopBusOfTransform(_trans, aEvent.busName);
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopBusOfTransform(Trans, busName);
+                                } else {
+                                    MasterAudio.StopBusOfTransform(Trans, aEvent.busName);
+                                }
+#else
+                                MasterAudio.StopBusOfTransform(_trans, aEvent.busName);
+#endif
 								break;
                             case MasterAudio.BusCommand.StopOldBusVoices:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.StopOldBusVoices(Trans, busName, aEvent.minAge);
+                                } else {
+                                    MasterAudio.StopOldBusVoices(busName, aEvent.minAge);
+                                }
+#else
                                 MasterAudio.StopOldBusVoices(busName, aEvent.minAge);
+#endif
                                 break;
                             case MasterAudio.BusCommand.FadeOutOldBusVoices:
+#if MULTIPLAYER_ENABLED
+                                if (willSendToAllPlayers) {
+                                    MasterAudioMultiplayerAdapter.FadeOutOldBusVoices(Trans, busName, aEvent.minAge, aEvent.fadeTime);
+                                } else {
+                                    MasterAudio.FadeOutOldBusVoices(busName, aEvent.minAge, aEvent.fadeTime);
+                                }
+#else
                                 MasterAudio.FadeOutOldBusVoices(busName, aEvent.minAge, aEvent.fadeTime);
+#endif
                                 break;
                             }
+
+#if MULTIPLAYER_ENABLED
+                        if (willSendToAllPlayers) {
+                            // don't continue loop, we've done everything already.
+                            break;
+                        }
+#endif
                     }
 
                     break;
@@ -1686,43 +2641,154 @@ namespace DarkTonic.MasterAudio {
                     }
                     switch (aEvent.currentCustomEventCommand) {
                         case MasterAudio.CustomEventCommand.FireEvent:
-                            MasterAudio.FireCustomEvent(aEvent.theCustomEventName, _trans);
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.FireCustomEvent(aEvent.theCustomEventName, Trans, aEvent.logDupeEventFiring);
+                            } else {
+                                MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans, aEvent.logDupeEventFiring);
+                            }
+#else
+                            MasterAudio.FireCustomEvent(aEvent.theCustomEventName, Trans, aEvent.logDupeEventFiring);
+#endif
                             break;
                     }
                     break;
                 case MasterAudio.EventSoundFunctionType.GlobalControl:
                     switch (aEvent.currentGlobalCommand) {
+                        case MasterAudio.GlobalCommand.PauseAudioListener:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.AudioListenerPause(Trans);
+                            } else {
+                                AudioListener.pause = true;
+                            }
+#else
+                            AudioListener.pause = true;
+#endif
+                            break;
+                        case MasterAudio.GlobalCommand.UnpauseAudioListener:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.AudioListenerUnpause(Trans);
+                            } else {
+                                AudioListener.pause = false;
+                            }
+#else
+                            AudioListener.pause = false;
+#endif
+                            break;
                         case MasterAudio.GlobalCommand.SetMasterMixerVolume:
                             var targetVol = useSliderValue ? grp.sliderValue : aEvent.volume;
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.SetMasterMixerVolume(Trans, targetVol);
+                            } else {
+                                MasterAudio.MasterVolumeLevel = targetVol;
+                            }
+#else
                             MasterAudio.MasterVolumeLevel = targetVol;
+#endif
                             break;
                         case MasterAudio.GlobalCommand.SetMasterPlaylistVolume:
                             var tgtVol = useSliderValue ? grp.sliderValue : aEvent.volume;
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.SetPlaylistMasterVolume(Trans, tgtVol);
+                            } else {
+                                MasterAudio.PlaylistMasterVolume = tgtVol;
+                            }
+#else
                             MasterAudio.PlaylistMasterVolume = tgtVol;
+#endif
                             break;
                         case MasterAudio.GlobalCommand.PauseMixer:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.PauseMixer(Trans);
+                            } else
+                            {
+                                MasterAudio.PauseMixer();
+                            }
+#else
                             MasterAudio.PauseMixer();
+#endif
                             break;
                         case MasterAudio.GlobalCommand.UnpauseMixer:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.UnpauseMixer(Trans);
+                            } else {
+                                MasterAudio.UnpauseMixer();
+                            }
+#else
                             MasterAudio.UnpauseMixer();
+#endif
                             break;
                         case MasterAudio.GlobalCommand.StopMixer:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.StopMixer(Trans);
+                            } else {
+                                MasterAudio.StopMixer();
+                            }
+#else
                             MasterAudio.StopMixer();
+#endif
                             break;
                         case MasterAudio.GlobalCommand.MuteEverything:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.MuteEverything(Trans);
+                            } else {
+                                MasterAudio.MuteEverything();
+                            }
+#else
                             MasterAudio.MuteEverything();
+#endif
                             break;
                         case MasterAudio.GlobalCommand.UnmuteEverything:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.UnmuteEverything(Trans);
+                            } else {
+                                MasterAudio.UnmuteEverything();
+                            }
+#else
                             MasterAudio.UnmuteEverything();
+#endif
                             break;
                         case MasterAudio.GlobalCommand.PauseEverything:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.PauseEverything(Trans);
+                            } else {
+                                MasterAudio.PauseEverything();
+                            }
+#else
                             MasterAudio.PauseEverything();
+#endif
                             break;
                         case MasterAudio.GlobalCommand.UnpauseEverything:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.UnpauseEverything(Trans);
+                            } else {
+                                MasterAudio.UnpauseEverything();
+                            }
+#else
                             MasterAudio.UnpauseEverything();
+#endif
                             break;
                         case MasterAudio.GlobalCommand.StopEverything:
+#if MULTIPLAYER_ENABLED
+                            if (willSendToAllPlayers) {
+                                MasterAudioMultiplayerAdapter.StopEverything(Trans);
+                            } else {
+                                MasterAudio.StopEverything();
+                            }
+#else
                             MasterAudio.StopEverything();
+#endif
                             break;
                     }
                     break;
@@ -2095,6 +3161,17 @@ namespace DarkTonic.MasterAudio {
 
             var handler = gameObject.AddComponent<T>();
             handler.eventSounds = this;
+        }
+
+        private Transform Trans {
+            get {
+                if (_trans != null) {
+                    return _trans;
+                }
+                _trans = transform;
+
+                return _trans;
+            }
         }
     }
 

@@ -76,7 +76,7 @@ namespace DarkTonic.MasterAudio {
                     if (loadHandle.OperationException != null) {
                         errorText = " Exception: " + loadHandle.OperationException.Message;
                     }
-                    MasterAudio.LogError("Addressable file for '" + variation.name + "' could not be located." + errorText);
+                    MasterAudio.LogError("Addressable file for '" + variation.GameObjectName + "' could not be located." + errorText);
 
                     if (failureAction != null) {
                         failureAction();
@@ -103,7 +103,7 @@ namespace DarkTonic.MasterAudio {
             }
 
             if (!AudioUtil.AudioClipWillPreload(addressableClip)) {
-                MasterAudio.LogWarning("Audio Clip for Addressable file '" + addressableClip.name + "' of Sound Group '" + variation.ParentGroup.name + "' has 'Preload Audio Data' turned off, which can cause audio glitches. Addressables should always Preload Audio Data. Please turn it on.");
+                MasterAudio.LogWarning("Audio Clip for Addressable file '" + addressableClip.CachedName() + "' of Sound Group '" + variation.ParentGroup.GameObjectName + "' has 'Preload Audio Data' turned off, which can cause audio glitches. Addressables should always Preload Audio Data. Please turn it on.");
             }
 
             variation.LoadStatus = MasterAudio.VariationLoadStatus.Loaded;
@@ -219,7 +219,7 @@ namespace DarkTonic.MasterAudio {
                     if (loadHandle.OperationException != null) {
                         errorText = " Exception: " + loadHandle.OperationException.Message;
                     }
-                    MasterAudio.LogError("Addressable file for PlaylistController '" + playlistController.name + "' could not be located." + errorText);
+                    MasterAudio.LogError("Addressable file for PlaylistController '" + playlistController.ControllerName + "' could not be located." + errorText);
                     yield break;
                 }
 
@@ -239,7 +239,7 @@ namespace DarkTonic.MasterAudio {
             }
 
             if (!AudioUtil.AudioClipWillPreload(addressableClip)) {
-                MasterAudio.LogWarning("Audio Clip for Addressable file '" + addressableClip.name + "' of Playlist Controller '" + playlistController.name + "' has 'Preload Audio Data' turned off, which can cause audio glitches. Addressables should always Preload Audio Data. Please turn it on.");
+                MasterAudio.LogWarning("Audio Clip for Addressable file '" + addressableClip.CachedName() + "' of Playlist Controller '" + playlistController.ControllerName + "' has 'Preload Audio Data' turned off, which can cause audio glitches. Addressables should always Preload Audio Data. Please turn it on.");
             }
 
             // Figure out how to detect stop before loaded, if needed

@@ -11,7 +11,7 @@ namespace DarkTonic.MasterAudio {
         public string NameOfGroup;
         public float CompletionTime;
         public bool IsActive = true;
-        public List<SoundGroupVariation> GlidingVariations;
+        public List<SoundGroupVariation> GlidingVariations = new List<SoundGroupVariation>();
 
 		// ReSharper disable once InconsistentNaming
         // ReSharper disable once RedundantNameQualifier

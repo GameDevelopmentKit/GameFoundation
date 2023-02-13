@@ -5,11 +5,7 @@ using UnityEngine;
 public static class ResonanceAudioHelper {
     public static bool ResonanceAudioOptionExists {
         get {
-#if UNITY_2018_1_OR_NEWER
             return true;
-#else
-            return false;
-#endif
         }
     }
 

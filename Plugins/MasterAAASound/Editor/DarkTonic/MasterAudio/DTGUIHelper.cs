@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-#if UNITY_2018_3_OR_NEWER
 using UnityEditor.SceneManagement;
-#endif
 using UnityEngine;
 #if ADDRESSABLES_ENABLED
-using UnityEngine.AddressableAssets;
+    using UnityEngine.AddressableAssets;
 #endif
 using Object = UnityEngine.Object;
 
@@ -294,6 +292,8 @@ namespace DarkTonic.MasterAudio.EditorScripts
             return;
         }
 
+        PlaySilentWakeUpPreview(previewer, clip);
+
         previewer.PlayOneShot(clip, volume);
     }
 #endif
@@ -441,7 +441,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
         }
 
-        public static void HelpHeader(string helpUrl, string apiUrl = "http://www.dtdevtools.com/API/masteraudio/annotated.html")
+        public static void HelpHeader(string helpUrl, string apiUrl = "https://www.dtdevtools.com/API/masteraudio/annotated.html")
         {
             EditorGUILayout.BeginHorizontal(CornerGUIStyle);
             AddHelpIconNoStyle(helpUrl);
@@ -1158,11 +1158,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             GUI.backgroundColor = OuterGroupBoxColor;
             GUILayout.BeginHorizontal();
 
-#if UNITY_2017_1_OR_NEWER
-        EditorGUILayout.BeginHorizontal("TextArea", GUILayout.MinHeight(10f));
-#else
-            EditorGUILayout.BeginHorizontal("AS TextArea", GUILayout.MinHeight(10f));
-#endif
+            EditorGUILayout.BeginHorizontal("TextArea", GUILayout.MinHeight(10f));
 
             GUILayout.BeginVertical();
             GUI.backgroundColor = Color.white;
@@ -1380,7 +1376,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             }
             else
             {
-                var grp = MasterAudio.FindGroupTransform(sType);
+                var grp = MasterAudio.FindGroupTransform(sType); 
                 if (grp == null)
                 {
                     return;
@@ -1398,6 +1394,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
 
                     if (previewer != null)
                     {
+                        previewer.Play();
                         MasterAudioInspector.StopPreviewer();
                         previewer.pitch = randPitch;
                     }
@@ -1410,14 +1407,17 @@ namespace DarkTonic.MasterAudio.EditorScripts
                             if (previewer != null)
                             {
                                 var fileName = AudioResourceOptimizer.GetLocalizedFileName(rndVar.useLocalization, rndVar.resourceFileName);
-                                previewer.PlayOneShot(Resources.Load(fileName) as AudioClip, calcVolume);
+                                var resClip = Resources.Load(fileName) as AudioClip;
+                                PlaySilentWakeUpPreview(previewer, resClip);
+                                previewer.PlayOneShot(resClip, calcVolume);
                             }
                             break;
                         case MasterAudio.AudioLocation.Clip:
                             if (previewer != null)
                             {
-                                previewer.PlayOneShot(rndVar.VarAudio.clip, calcVolume);
-                            }
+                                PlaySilentWakeUpPreview(previewer, rndVar.VarAudio.clip);
+                                rndVar.VarAudio.PlayOneShot(rndVar.VarAudio.clip, 1);
+                            } 
                             break;
 #if ADDRESSABLES_ENABLED
                     case MasterAudio.AudioLocation.Addressable:
@@ -1453,12 +1453,15 @@ namespace DarkTonic.MasterAudio.EditorScripts
                             if (previewer != null)
                             {
                                 var fileName = AudioResourceOptimizer.GetLocalizedFileName(rndVar.useLocalization, rndVar.resourceFileName);
-                                previewer.PlayOneShot(Resources.Load(fileName) as AudioClip, calcVolume);
+                                var resClip = Resources.Load(fileName) as AudioClip;
+                                PlaySilentWakeUpPreview(previewer, resClip);
+                                previewer.PlayOneShot(resClip, calcVolume);
                             }
                             break;
                         case MasterAudio.AudioLocation.Clip:
                             if (previewer != null)
                             {
+                                PlaySilentWakeUpPreview(previewer, rndVar.VarAudio.clip);
                                 previewer.PlayOneShot(rndVar.VarAudio.clip, calcVolume);
                             }
                             break;
@@ -1553,7 +1556,7 @@ namespace DarkTonic.MasterAudio.EditorScripts
             {
                 return DTFunctionButtons.Stop;
             }
-            if (ShowFindUsages("Sound Group '" + aGroup.name + "'"))
+            if (ShowFindUsages("Sound Group '" + aGroup.GameObjectName + "'"))
             {
                 return DTFunctionButtons.Find;
             }
@@ -1836,7 +1839,6 @@ namespace DarkTonic.MasterAudio.EditorScripts
             ShowRedError("Create your own prefab of this so it doesn't get overwritten the next time you update Master Audio. Do this now to be able to use this Inspector.");
         }
 
-#if UNITY_2018_3_OR_NEWER
         public static bool IsLinkedToDarkTonicPrefabFolder(Object gObject)
         {
             var path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gObject);
@@ -1851,59 +1853,46 @@ namespace DarkTonic.MasterAudio.EditorScripts
         public static bool IsPrefabInProjectView(GameObject gObject) {
             return gObject.scene.name == null;
         }
-#else
-        public static bool IsLinkedToDarkTonicPrefabFolder(Object gObject) {
-            return false;
-        }
-        public static bool IsInPrefabMode(GameObject gameObject)
-        {
-            return false;
+
+        public static void PlaySilentWakeUpPreview(AudioSource previewer, AudioClip clip) {
+            previewer.volume = 0;
+            previewer.clip = clip;
+            previewer.Play();
+            
+            previewer.Stop();
+            previewer.clip = null;
+            previewer.volume = 1;
         }
 
-        public static bool IsPrefabInProjectView(Object gObject)
-        {
-            return GetPrefabType(gObject) == PrefabType.Prefab;
-        }
-#endif
-
-#if UNITY_2018_2_OR_NEWER
         public static GameObject DuplicateGameObject(GameObject gameObj, string baseName, int? optionalCountSuffix) {
-        var prefabRoot = PrefabUtility.GetCorrespondingObjectFromSource(gameObj);
+            var prefabRoot = PrefabUtility.GetCorrespondingObjectFromSource(gameObj);
 
-        GameObject dupe;
+            GameObject dupe;
 
-        if (prefabRoot != null) {
-            dupe = (GameObject)PrefabUtility.InstantiatePrefab(prefabRoot);
-        } else {
-            // ReSharper disable RedundantCast
-            // ReSharper disable once AccessToStaticMemberViaDerivedType
-            dupe = (GameObject)GameObject.Instantiate(gameObj);
-            // ReSharper restore RedundantCast
+            if (prefabRoot != null) {
+                dupe = (GameObject)PrefabUtility.InstantiatePrefab(prefabRoot);
+            } else {
+                // ReSharper disable RedundantCast
+                // ReSharper disable once AccessToStaticMemberViaDerivedType
+                dupe = (GameObject)GameObject.Instantiate(gameObj);
+                // ReSharper restore RedundantCast
+            }
+
+            if (dupe == null) {
+                return null;
+            }
+            var newName = baseName;
+            if (optionalCountSuffix.HasValue) {
+                newName += optionalCountSuffix.Value;
+            }
+            dupe.name = newName;
+
+            return dupe;
         }
 
-        if (dupe == null) {
-            return null;
+        private static PrefabAssetType GetPrefabType(Object gObject) {
+            return PrefabUtility.GetPrefabAssetType(gObject);
         }
-        var newName = baseName;
-        if (optionalCountSuffix.HasValue) {
-            newName += optionalCountSuffix.Value;
-        }
-        dupe.name = newName;
-
-        return dupe;
-    }
-#endif
-
-#if UNITY_2018_3_OR_NEWER
-    private static PrefabAssetType GetPrefabType(Object gObject) {
-        return PrefabUtility.GetPrefabAssetType(gObject);
-    }
-#else
-        private static PrefabType GetPrefabType(Object gObject)
-        {
-            return PrefabUtility.GetPrefabType(gObject);
-        }
-#endif
 
         private static float GetPositiveUsablePitch(AudioSource source)
         {

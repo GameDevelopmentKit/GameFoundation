@@ -32,6 +32,8 @@ namespace DarkTonic.MasterAudio {
         public VariationMode curVariationMode = VariationMode.Normal;
         public bool alwaysHighestPriority = false;
 
+        public bool ignoreListenerPause = false;
+
         [Range(0f, 10f)]
         public int importance = 5;
         public bool isUninterruptible;

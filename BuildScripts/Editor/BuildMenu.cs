@@ -69,6 +69,14 @@ public static class BuildMenu
     #endregion
 
     #region android
+    
+    [MenuItem("Build/Android/build android AAB (Slow)", priority = 1100)]
+    private static void Build_Android_AAB()
+    {
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformAndroid }, "default.apk", "", true);
+
+        OpenLog("Build-Client-Report.android.log");
+    }
 
     [MenuItem("Build/Android/build android IL2CPP (Slow)", priority = 1100)]
     private static void Build_Android_IL2CPP()
