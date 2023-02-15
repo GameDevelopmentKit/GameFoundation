@@ -146,8 +146,17 @@ public static class Build
     /// <param name="buildTargetInfo"></param>
     private static void BuildAddressable(BuildTargetInfo buildTargetInfo)
     {
+        Console.WriteLine($"--------------------");
+        Console.WriteLine($"Clean addressable");
+        Console.WriteLine($"--------------------");
         AddressableAssetSettings.CleanPlayerContent();
+        Console.WriteLine($"--------------------");
+        Console.WriteLine($"Build addressable");
+        Console.WriteLine($"--------------------");
         AddressableAssetSettings.BuildPlayerContent();
+        Console.WriteLine($"--------------------");
+        Console.WriteLine($"Finish building addressable");
+        Console.WriteLine($"--------------------");
     }
 
     /// <summary>
