@@ -3,7 +3,9 @@ namespace Models
     using System;
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
+#if UNITY_EDITOR
     using UnityEditor;
+#endif
     using UnityEngine;
 
     public class GDKConfig : SerializedScriptableObject
