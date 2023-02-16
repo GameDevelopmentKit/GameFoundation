@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
+using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.Build.Pipeline.Utilities;
 using UnityEditor.Build.Reporting;
 using UnityEditorInternal;
 using UnityEngine;
@@ -150,6 +152,7 @@ public static class Build
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
         AddressableAssetSettings.CleanPlayerContent();
+        BuildCache.PurgeCache(false);
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Build addressable");
         Console.WriteLine($"--------------------");
