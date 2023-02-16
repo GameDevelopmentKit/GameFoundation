@@ -156,7 +156,14 @@ public static class Build
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Build addressable");
         Console.WriteLine($"--------------------");
-        AddressableAssetSettings.BuildPlayerContent();
+        AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
+        var success = string.IsNullOrEmpty(result.Error);
+        if (!success)
+        {
+            var errorMessage = "Addressables build error encountered: " + result.Error;
+            Debug.LogError(errorMessage);
+            throw new Exception(errorMessage);
+        }
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Finish building addressable");
         Console.WriteLine($"--------------------");
