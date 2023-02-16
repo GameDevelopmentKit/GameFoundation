@@ -9,17 +9,16 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.UIElements;
-    using Button = UnityEngine.UIElements.Button;
-    using Object = System.Object;
-    using Toggle = UnityEngine.UIElements.Toggle;
 
     public partial class ViewCreatorWizard : EditorWindow
     {
-        private const string LOG_TAG              = "GF ViewCreatorWizard: ";
-        private const string FOLDER_PATH_DEFAULT  = "Assets";
-        private const string UI_BASE_POPUP_PATH   = "Assets/GameFoundation/Prefabs/CommonUIPrefab/UIBasePopup.prefab";
-        private const string UI_BASE_SCREEN_PATH  = "Assets/GameFoundation/Prefabs/CommonUIPrefab/UIBaseScreen.prefab";
-        private const string TASK_CREATE_VIEW_KEY = "GF_TASK_CREATE_VIEW_KEY";
+        private const  string LOG_TAG              = "GF ViewCreatorWizard: ";
+        private const  string FOLDER_PATH_DEFAULT  = "Assets";
+        private const  string PackageName          = "com.gdk.core";
+        private static string UI_BASE_POPUP_PATH   = "Assets/GameFoundation/Prefabs/CommonUIPrefab/UIBasePopup.prefab";
+        private static string UI_BASE_SCREEN_PATH  = "Assets/GameFoundation/Prefabs/CommonUIPrefab/UIBaseScreen.prefab";
+        private static string ViewXml              = "Assets/GameFoundation/Editor/Tools/ViewCreatorWizard/ViewCreatorWizard.uxml";
+        private static string TASK_CREATE_VIEW_KEY = "GF_TASK_CREATE_VIEW_KEY";
 
         private TaskCreateView taskCreateView;
 
@@ -46,15 +45,32 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         [MenuItem("Assets/GameFoundation/View Creator Wizard")]
         public static void OpenWindow()
         {
+            var isAssetPath = IsAssetPath();
+
+            if (!isAssetPath)
+            {
+                ReplacePackagePath();
+            }
+
             if (!ValidateOpenWindow(out var reason))
             {
                 SceneView.lastActiveSceneView.ShowNotification(new GUIContent(reason), 1.5f);
                 Debug.Log(LOG_TAG + reason);
+
                 return;
             }
 
             var wnd = GetWindow<ViewCreatorWizard>();
             wnd.titleContent = new GUIContent("ViewCreatorWizard");
+        }
+
+        private static bool IsAssetPath() { return File.Exists($"{Application.dataPath}{UI_BASE_POPUP_PATH}"); }
+
+        private static void ReplacePackagePath()
+        {
+            UI_BASE_POPUP_PATH  = "Packages/com.gdk.core/Prefabs/CommonUIPrefab/UIBasePopup.prefab";
+            UI_BASE_SCREEN_PATH = "Packages/com.gdk.core/Prefabs/CommonUIPrefab/UIBaseScreen.prefab";
+            ViewXml             = "Packages/com.gdk.core/Editor/Tools/ViewCreatorWizard/ViewCreatorWizard.uxml";
         }
 
         private static bool ValidateOpenWindow(out string reason)
@@ -64,6 +80,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 reason = "Cannot be used in play mode";
+
                 return false;
             }
 
@@ -79,7 +96,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             this.taskCreateView = EditorPrefs.HasKey(TASK_CREATE_VIEW_KEY) ? JsonConvert.DeserializeObject<TaskCreateView>(EditorPrefs.GetString(TASK_CREATE_VIEW_KEY)) : new TaskCreateView();
 
             var root       = this.rootVisualElement;
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/GameFoundation/Editor/Tools/ViewCreatorWizard/ViewCreatorWizard.uxml");
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(ViewXml);
 
             root.Add(visualTree.Instantiate());
 
@@ -126,9 +143,11 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         private void GeneratePrefab()
         {
             var scriptType = GetTypeFromAllAssemblies(this.taskCreateView.TypeFullName);
+
             if (scriptType == null) return;
 
             GameObject objSource;
+
             if (this.taskCreateView.ViewType == ViewType.Item)
             {
                 objSource = new GameObject();
@@ -143,7 +162,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
             objSource.AddComponent(scriptType);
             var prefabVariant = PrefabUtility.SaveAsPrefabAsset(objSource, this.taskCreateView.PrefabAssetPath);
-           
+
             DestroyImmediate(objSource);
             EditorApplication.RepaintHierarchyWindow();
             Debug.Log($"<color=green>Create prefab success! Save at: {this.taskCreateView.PrefabAssetPath}</color>");
@@ -155,6 +174,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             if (File.Exists(genScriptPath))
             {
                 Debug.LogError(LOG_TAG + "File Exist! " + genScriptPath);
+
                 return false;
             }
 
@@ -167,6 +187,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                 catch
                 {
                     Debug.LogError(LOG_TAG + "Could not create directory: " + genScriptDirectoryPath);
+
                     return false;
                 }
             }
@@ -178,10 +199,12 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             catch
             {
                 Debug.LogError(LOG_TAG + "Could not create file: " + genScriptPath);
+
                 return false;
             }
 
             AssetDatabase.ImportAsset(FileUtil.GetProjectRelativePath(genScriptPath));
+
             return true;
         }
 
@@ -196,6 +219,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                 if (!Enum.TryParse(this.dropdownSettingType.value, out ViewType type))
                 {
                     Debug.LogError(LOG_TAG + "Invalid type");
+
                     return;
                 }
 
@@ -217,8 +241,10 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
                 var nameSpaceScriptPath = projectRelativeScriptPath.Replace("Assets/", ""); // Assets or Phuong/Doan
                 nameSpaceScriptPath = nameSpaceScriptPath.Replace("Assets", ""); // "" or Phuong/Doan
+
                 var genScriptPath =
                     Application.dataPath + (string.IsNullOrWhiteSpace(nameSpaceScriptPath) ? "" : ("/" + nameSpaceScriptPath)); // C:UnityProject/Assets or C:UnityProject/Assets/Phuong/Doan
+
                 var genScriptFullPath = genScriptPath + "/" + viewName + ".cs"; // C:UnityProject/Assets/PlayerItemView.cs or C:UnityProject/Assets/Phuong/Doan/PlayerItemView.cs
                 var nameSpace         = string.IsNullOrWhiteSpace(nameSpaceScriptPath) ? "A" : nameSpaceScriptPath.Replace("/", "."); // A or Phuong.Doan
                 nameSpace = nameSpace.Replace(" ", "_");
@@ -228,10 +254,10 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                 sTemplate = sTemplate.Replace("X_VIEW_NAME", viewName);
                 sTemplate = sTemplate.Replace("X_PRESENTER_NAME", this.inputPresenterName.value);
 
-
                 if (TryGenerateScript(genScriptFullPath, genScriptPath, sTemplate))
                 {
                     Debug.Log($"<color=green>Create script success! Save at: {genScriptFullPath}</color>");
+
                     var serializeObject = JsonConvert.SerializeObject(new TaskCreateView()
                     {
                         IsTaskComplete  = false,
@@ -239,6 +265,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                         TypeFullName    = $"{nameSpace}.{viewName}",
                         ViewType        = type
                     });
+
                     EditorPrefs.SetString(TASK_CREATE_VIEW_KEY, serializeObject);
                 }
             };
@@ -269,6 +296,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             btnLocation.clicked += () =>
             {
                 var path = EditorUtility.OpenFolderPanel("Choose path", FOLDER_PATH_DEFAULT, "");
+
                 if (path.Length != 0 && path.Contains("Assets"))
                 {
                     inputPath.value = FileUtil.GetProjectRelativePath(path);
@@ -298,6 +326,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             this.dropdownSettingType.RegisterValueChangedCallback(evt =>
             {
                 if (!Enum.TryParse(evt.newValue, out ViewType type)) return;
+
                 if (type == ViewType.Item && !this.toggleSettingHasModel.value)
                 {
                     this.toggleSettingHasModel.value = true;
