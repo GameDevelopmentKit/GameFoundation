@@ -93,7 +93,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
-            this.Models.InsertItems(0, modelList);
+            this.Models.ResetItems(modelList);
         }
     }
 
