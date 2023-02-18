@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "BuildScript.Runtime",
-        "Unity.Addressables.Editor"
+        "Unity.Addressables.Editor",
+        "Unity.ScriptableBuildPipeline.Editor"
     ],
     "includePlatforms": [
         "Editor"

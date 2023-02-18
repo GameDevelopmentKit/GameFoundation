@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
+using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.Build.Pipeline.Utilities;
 using UnityEditor.Build.Reporting;
-using UnityEditorInternal;
 using UnityEngine;
 
 // ------------------------------------------------------------------------
@@ -110,13 +111,9 @@ public static class Build
 
             PlayerSettings.SetScriptingBackend(platform.BuildTargetGroup, scriptingBackend);
             SetApplicationVersion();
-            BuildAddressable(platform);
 
-            // If we're not in batch mode, we can do this
-            if (!InternalEditorUtility.inBatchMode)
-            {
-                EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
-            }
+            EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
+            BuildAddressable(platform);
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
@@ -150,10 +147,18 @@ public static class Build
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
         AddressableAssetSettings.CleanPlayerContent();
+        BuildCache.PurgeCache(false);
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Build addressable");
         Console.WriteLine($"--------------------");
-        AddressableAssetSettings.BuildPlayerContent();
+        AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
+        var success = string.IsNullOrEmpty(result.Error);
+        if (!success)
+        {
+            var errorMessage = "Addressables build error encountered: " + result.Error;
+            Debug.LogError(errorMessage);
+            throw new Exception(errorMessage);
+        }
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Finish building addressable");
         Console.WriteLine($"--------------------");
