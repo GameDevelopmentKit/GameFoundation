@@ -112,13 +112,9 @@ public static class Build
 
             PlayerSettings.SetScriptingBackend(platform.BuildTargetGroup, scriptingBackend);
             SetApplicationVersion();
-            BuildAddressable(platform);
 
-            // If we're not in batch mode, we can do this
-            if (!InternalEditorUtility.inBatchMode)
-            {
-                EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
-            }
+            EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
+            BuildAddressable(platform);
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
