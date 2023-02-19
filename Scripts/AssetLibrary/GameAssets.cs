@@ -290,6 +290,9 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <param name="sceneName"> Scene Target</param>
         public void UnloadUnusedAssets(string sceneName)
         {
+            //For loading scene
+            if (string.IsNullOrEmpty(sceneName)) return;
+            
             if (!this.assetsAutoUnloadByScene.TryGetValue(sceneName, out var listAsset)) return;
             foreach (var asset in listAsset)
             {

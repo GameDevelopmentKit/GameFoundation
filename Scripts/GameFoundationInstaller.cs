@@ -41,7 +41,7 @@
 
             //Game Manager
             this.Container.Bind<HandleLocalDataServices>().AsCached().NonLazy();
-            this.Container.Bind<GameFoundationLocalData>().FromResolveGetter<HandleLocalDataServices>(services => services.Load<GameFoundationLocalData>()).AsCached();
+            this.Container.Bind<SoundSetting>().AsCached();
 
             //Player state
             this.Container.Bind<PlayerState>().AsCached();

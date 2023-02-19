@@ -2,17 +2,32 @@ namespace GameFoundation.Scripts.Utilities
 {
     using System.Collections.Generic;
     using GameFoundation.Scripts.Interfaces;
+    using GameFoundation.Scripts.Utilities.LogService;
     using Newtonsoft.Json;
     using UnityEngine;
+    using Zenject;
 
     /// <summary>
     /// Manager save Load Local data
     /// </summary>
     public class HandleLocalDataServices
     {
-        private const string LocalDataPrefix = "LD-";
+        private const    string      LocalDataPrefix = "LD-";
+
+        #region inject
+
+        private readonly DiContainer diContainer;
+        private readonly ILogService logService;
+
+        #endregion
 
         private readonly Dictionary<string, object> localDataCaches = new();
+
+        public HandleLocalDataServices(DiContainer diContainer, ILogService logService)
+        {
+            this.diContainer = diContainer;
+            this.logService  = logService;
+        }
 
         /// <summary>
         /// Save a class data to local
@@ -41,7 +56,7 @@ namespace GameFoundation.Scripts.Utilities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T Load<T>() where T : class, ILocalData, new()
+        public T Load<T>() where T : class, ILocalData
         {
             var key = LocalDataPrefix + typeof(T).Name;
 
@@ -52,11 +67,16 @@ namespace GameFoundation.Scripts.Utilities
 
             var json = PlayerPrefs.GetString(key);
 
-            var result = string.IsNullOrEmpty(json) ? new T() : JsonConvert.DeserializeObject<T>(json);
+            var isHadLocalDataAlready = !string.IsNullOrEmpty(json);
+            var result = this.diContainer.Instantiate<T>();
 
-            if (string.IsNullOrEmpty(json))
+            if (isHadLocalDataAlready)
             {
-                result?.Init();
+                JsonConvert.PopulateObject(json, result);
+            }
+            else
+            {
+                result.Init();
             }
 
             this.localDataCaches.Add(key, result);
@@ -69,10 +89,10 @@ namespace GameFoundation.Scripts.Utilities
             foreach (var localData in this.localDataCaches)
             {
                 PlayerPrefs.SetString(localData.Key, JsonConvert.SerializeObject(localData.Value));
+                this.logService.LogWithColor($"Saved {localData.Key}", Color.green);
             }
 
             PlayerPrefs.Save();
-            Debug.Log("Save Data To File");
         }
     }
 }
