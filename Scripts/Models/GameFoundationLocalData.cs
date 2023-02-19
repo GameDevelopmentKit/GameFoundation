@@ -1,45 +1,8 @@
 namespace GameFoundation.Scripts.Models
 {
-    using GameFoundation.Scripts.Interfaces;
     using UniRx;
 
-    /// <summary>
-    /// Manage all the local data in Game
-    /// </summary>
-    public partial class GameFoundationLocalData : ILocalData
-    {
-        // user data
-        public UserDataLogin  UserDataLogin  { get; set; } = new UserDataLogin();
-        public ServerToken    ServerToken    { get; set; } = new ServerToken();
-
-        public IndexSettingRecord IndexSettingRecord = new IndexSettingRecord();
-        public void               Init() { }
-    }
-
-    public class UserDataLogin
-    {
-        public int        LastLogin     { get; set; }
-        public LoginModel FacebookLogin { get; set; } = new LoginModel();
-        public LoginModel GoogleLogin   { get; set; } = new LoginModel();
-    }
-
-    public class LoginModel
-    {
-        public string UserName    { get; set; }
-        public string URLImage    { get; set; }
-        public string AccessToken { get; set; }
-    }
-
-    public class ServerToken
-    {
-        public string RefreshToken   { get; set; }
-        public long   ExpirationTime { get; set; }
-        public string JwtToken       { get; set; }
-
-        public string WalletAddress { get; set; }
-    }
-    
-    public class IndexSettingRecord
+    public class SoundSetting
     {
         public BoolReactiveProperty  MasterVolume { get; set; } = new(true);
         public BoolReactiveProperty  MuteMusic    { get; set; } = new(false);

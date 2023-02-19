@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace GameFoundation.Scripts.Utilities
+﻿namespace GameFoundation.Scripts.Utilities
 {
+    using System;
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.Models;
@@ -10,7 +9,7 @@ namespace GameFoundation.Scripts.Utilities
 
     public interface IAudioManager
     {
-        void PlaySound(string name, bool isLoop = false);
+        void PlaySound(string    name, bool isLoop = false);
         void StopAllSound(string name);
         void PlayPlayList(string playlist, bool random = false);
     }
@@ -20,16 +19,16 @@ namespace GameFoundation.Scripts.Utilities
         public static AudioManager Instance { get; private set; }
 
         private readonly PlaylistController       playlistController;
-        private readonly GameFoundationLocalData  gameFoundationLocalData;
+        private readonly SoundSetting             soundSetting;
         private readonly MasterAudio              masterAudio;
         private readonly DynamicSoundGroupCreator groupCreator;
 
         private CompositeDisposable compositeDisposable;
 
-        public AudioManager(PlaylistController playlistController, GameFoundationLocalData gameFoundationLocalData, MasterAudio masterAudio)
+        public AudioManager(PlaylistController playlistController, SoundSetting SoundSetting, MasterAudio masterAudio)
         {
             this.playlistController      = playlistController;
-            this.gameFoundationLocalData = gameFoundationLocalData;
+            this.soundSetting = SoundSetting;
             this.masterAudio             = masterAudio;
             Instance                     = this;
         }
@@ -39,17 +38,17 @@ namespace GameFoundation.Scripts.Utilities
         private async void SubscribeMasterAudio()
         {
             await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
-            this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Value = false;
-            this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Value = false;
+            this.soundSetting.MuteSound.Value = false;
+            this.soundSetting.MuteMusic.Value = false;
             this.compositeDisposable = new CompositeDisposable
-            {
-                //TODO uncomment this when we have a proper solution
-                // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-                // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-                this.gameFoundationLocalData.IndexSettingRecord.MusicValue.Subscribe(this.SetMusicValue),
-                this.gameFoundationLocalData.IndexSettingRecord.SoundValue.Subscribe(this.SetSoundValue),
-                this.gameFoundationLocalData.IndexSettingRecord.MasterVolume.Subscribe(this.SetMasterVolume)
-            };
+                                       {
+                                           //TODO uncomment this when we have a proper solution
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
+                                           this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
+                                           this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
+                                           this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
+                                       };
         }
 
         private void SetMasterVolume(bool value)

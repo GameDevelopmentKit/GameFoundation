@@ -2,7 +2,8 @@
     "name": "GameFoundation.Models",
     "rootNamespace": "",
     "references": [
-        "UniRx"
+        "UniRx",
+        "Zenject-Source"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
