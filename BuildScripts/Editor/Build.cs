@@ -147,7 +147,6 @@ public static class Build
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
         AddressableAssetSettings.CleanPlayerContent();
-        BuildCache.PurgeCache(false);
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Build addressable");
         Console.WriteLine($"--------------------");
