@@ -58,6 +58,7 @@ public static class Build
         var outputPath             = "template.exe";
         var buildAppBundle         = false;
         var optimizeSpeed          = false;
+        PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
         {
             switch (args[i])
@@ -89,7 +90,16 @@ public static class Build
                 case "-optimizeSize":
                     EditorUserBuildSettings.il2CppCodeGeneration = Il2CppCodeGeneration.OptimizeSize;
                     break;
+                case "-theOneAndroidKeyStore":
+                    PlayerSettings.Android.useCustomKeystore = true;
+                    PlayerSettings.Android.keystoreName      = "{inproject}: the1_googleplay.keystore";
+                    PlayerSettings.keystorePass              = "tothemoon";
+                    PlayerSettings.Android.keyaliasName      = "theonestudio";
+                    PlayerSettings.keyaliasPass              = "tothemoon";
+                    break;
             }
+
+            //TODO config it later, only use this for TheOneStudio
         }
 
         // Get a list of targets to build
@@ -101,7 +111,8 @@ public static class Build
                                      bool                    buildAppBundle = false)
     {
         BuildTools.ResetBuildSettings();
-        EditorUserBuildSettings.buildAppBundle       = buildAppBundle;
+        EditorUserBuildSettings.buildAppBundle = buildAppBundle;
+
 
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
         Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray())); // Log which targets we're gonna build
@@ -162,6 +173,7 @@ public static class Build
             Debug.LogError(errorMessage);
             throw new Exception(errorMessage);
         }
+
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Finish building addressable");
         Console.WriteLine($"--------------------");
