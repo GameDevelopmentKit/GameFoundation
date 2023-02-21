@@ -6,7 +6,7 @@ using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
-using UnityEditor.Build.Pipeline.Utilities;
+using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
@@ -57,6 +57,7 @@ public static class Build
         var scriptingDefineSymbols = string.Empty;
         var outputPath             = "template.exe";
         var buildAppBundle         = false;
+        var optimizeSpeed          = false;
         for (var i = 0; i < args.Length; ++i)
         {
             switch (args[i])
@@ -85,6 +86,9 @@ public static class Build
                 case "-buildAppBundle":
                     buildAppBundle = true;
                     break;
+                case "-optimizeSize":
+                    EditorUserBuildSettings.il2CppCodeGeneration = Il2CppCodeGeneration.OptimizeSize;
+                    break;
             }
         }
 
@@ -97,7 +101,7 @@ public static class Build
                                      bool                    buildAppBundle = false)
     {
         BuildTools.ResetBuildSettings();
-        EditorUserBuildSettings.buildAppBundle = buildAppBundle;
+        EditorUserBuildSettings.buildAppBundle       = buildAppBundle;
 
         var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
         Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray())); // Log which targets we're gonna build
