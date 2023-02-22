@@ -101,6 +101,13 @@ public static class BuildMenu
 
         OpenLog("Build-Client-Report.android.log");
     }
+    
+    [MenuItem("Build/Android/Setup keystore", priority = 1100)]
+    private static void Build_Setup_KeyStore()
+    {
+        Build.SetUpAndroidKeyStore();
+    }
+    
 
     #endregion
 

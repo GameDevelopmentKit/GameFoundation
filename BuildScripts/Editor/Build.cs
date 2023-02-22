@@ -91,11 +91,7 @@ public static class Build
                     EditorUserBuildSettings.il2CppCodeGeneration = Il2CppCodeGeneration.OptimizeSize;
                     break;
                 case "-theOneAndroidKeyStore":
-                    PlayerSettings.Android.useCustomKeystore = true;
-                    PlayerSettings.Android.keystoreName      = "{inproject}: the1_googleplay.keystore";
-                    PlayerSettings.keystorePass              = "tothemoon";
-                    PlayerSettings.Android.keyaliasName      = "theonestudio";
-                    PlayerSettings.keyaliasPass              = "tothemoon";
+                    SetUpAndroidKeyStore();
                     break;
             }
 
@@ -105,6 +101,16 @@ public static class Build
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
         BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle);
+    }
+
+    public static void SetUpAndroidKeyStore(string keyStoreName = "the1_googleplay.keystore", string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
+                                            string keyaliasPass = "tothemoon")
+    {
+        PlayerSettings.Android.useCustomKeystore = true;
+        PlayerSettings.Android.keystoreName      = keyStoreName;
+        PlayerSettings.keystorePass              = keyStorePass;
+        PlayerSettings.Android.keyaliasName      = keyaliasName;
+        PlayerSettings.keyaliasPass              = keyaliasPass;
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
