@@ -88,7 +88,11 @@ public static class Build
                     buildAppBundle = true;
                     break;
                 case "-optimizeSize":
+                    //TODO adds when move unity 2022
+#if UNITY_2022_1_OR_NEWER
+#else
                     EditorUserBuildSettings.il2CppCodeGeneration = Il2CppCodeGeneration.OptimizeSize;
+#endif
                     break;
                 case "-theOneAndroidKeyStore":
                     SetUpAndroidKeyStore();
