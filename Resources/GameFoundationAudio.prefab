@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1219092216096219394}
   - component: {fileID: 2755446240932856890}
+  - component: {fileID: 1875352242268650637}
   m_Layer: 2
   m_Name: GameFoundationAudio
   m_TagString: Untagged
@@ -91,14 +92,16 @@ MonoBehaviour:
   useTextGroupFilter: 0
   textGroupFilter: 
   resourceClipsPauseDoNotUnload: 0
-  playlistControllerPrefab: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+  playlistControllerPrefab: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd,
+    type: 3}
   persistBetweenScenes: 0
   shouldLogDestroys: 0
   showBusColors: 0
   showGroupImportance: 0
   areGroupsExpanded: 1
   soundGroupTemplate: {fileID: 400008, guid: 877a3a4bf0a4abf43aba41125e1d3101, type: 3}
-  soundGroupVariationTemplate: {fileID: 400000, guid: 08eea2d8c4572c7479da53cfbc14bde6, type: 3}
+  soundGroupVariationTemplate: {fileID: 400000, guid: 08eea2d8c4572c7479da53cfbc14bde6,
+    type: 3}
   groupBuses: []
   groupByBus: 1
   sortAlpha: 1
@@ -109,7 +112,8 @@ MonoBehaviour:
   showAdvancedSettings: 0
   showLocalization: 0
   showVideoPlayerSettings: 0
-  videoPlayers: []
+  useTextPlaylistFilter: 0
+  textPlaylistFilter: 
   playListExpanded: 1
   playlistsExpanded: 1
   musicSpatialBlendType: 0
@@ -151,6 +155,8 @@ MonoBehaviour:
       lastKnownTimePoint: 0
       wasLastKnownTimePointSet: 0
       songIndex: 0
+      sectionStartTime: 0
+      sectionEndTime: 0
       songStartedEventExpanded: 0
       songStartedCustomEvent: 
       songChangedEventExpanded: 0
@@ -198,6 +204,8 @@ MonoBehaviour:
       lastKnownTimePoint: 0
       wasLastKnownTimePointSet: 0
       songIndex: 0
+      sectionStartTime: 0
+      sectionEndTime: 0
       songStartedEventExpanded: 0
       songStartedCustomEvent: 
       songChangedEventExpanded: 0
@@ -245,6 +253,8 @@ MonoBehaviour:
       lastKnownTimePoint: 0
       wasLastKnownTimePointSet: 0
       songIndex: 0
+      sectionStartTime: 0
+      sectionEndTime: 0
       songStartedEventExpanded: 0
       songStartedCustomEvent: 
       songChangedEventExpanded: 0
@@ -319,6 +329,7 @@ MonoBehaviour:
   _masterPlaylistVolume: 1
   showGroupSelect: 0
   hideGroupsWithNoActiveVars: 0
+  jukeBoxDisplayMode: 0
   logPerfExpanded: 1
   willWarm: 1
   mixerSettingsExpanded: 0
@@ -336,3 +347,15 @@ MonoBehaviour:
     ProspectiveName: '[Uncategorized]'
   frames: 0
   showUnityMixerGroupAssignment: 1
+--- !u!114 &1875352242268650637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7112192500610688337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 532fbbdec6a94f6b9b51ff857a3eb64c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
