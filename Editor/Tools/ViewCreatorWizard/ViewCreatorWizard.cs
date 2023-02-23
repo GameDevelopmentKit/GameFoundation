@@ -45,12 +45,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         [MenuItem("Assets/GameFoundation/View Creator Wizard")]
         public static void OpenWindow()
         {
-            var isAssetPath = IsAssetPath();
-
-            if (!isAssetPath)
-            {
-                ReplacePackagePath();
-            }
+            ReplacePackagePath();
 
             if (!ValidateOpenWindow(out var reason))
             {
@@ -68,6 +63,12 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
         private static void ReplacePackagePath()
         {
+            var isAssetPath = IsAssetPath();
+
+            if (isAssetPath)
+            {
+              return;
+            }
             UI_BASE_POPUP_PATH  = "Packages/com.gdk.core/Prefabs/CommonUIPrefab/UIBasePopup.prefab";
             UI_BASE_SCREEN_PATH = "Packages/com.gdk.core/Prefabs/CommonUIPrefab/UIBaseScreen.prefab";
             ViewXml             = "Packages/com.gdk.core/Editor/Tools/ViewCreatorWizard/ViewCreatorWizard.uxml";
@@ -93,6 +94,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
         public void CreateGUI()
         {
+            ReplacePackagePath();
             this.taskCreateView = EditorPrefs.HasKey(TASK_CREATE_VIEW_KEY) ? JsonConvert.DeserializeObject<TaskCreateView>(EditorPrefs.GetString(TASK_CREATE_VIEW_KEY)) : new TaskCreateView();
 
             var root       = this.rootVisualElement;
