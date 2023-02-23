@@ -23,13 +23,13 @@
             SignalBusInstaller.Install(this.Container);
 
             this.Container.Bind<GDKConfig>().FromResource("GameConfigs/GDKConfig").AsSingle().NonLazy();
-            
+
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
             //CreateMasterAudio
             this.Container.Bind<PlaylistController>().FromComponentInNewPrefabResource("GameFoundationPlaylistController").AsCached().NonLazy();
-            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("GameFoundationAudio").AsCached().NonLazy();
+            this.Container.Bind<AudioController>().FromComponentInNewPrefabResource("GameFoundationAudio").AsCached().NonLazy();
             this.Container.BindInterfacesTo<AudioManager>().AsCached().NonLazy();
 
             //Localization services
@@ -48,7 +48,7 @@
 
             //Genarate fps
             this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
-            
+
             //Helper
             this.Container.Bind<LoadImageHelper>().AsCached();
 
