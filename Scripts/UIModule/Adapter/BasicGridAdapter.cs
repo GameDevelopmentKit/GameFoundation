@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System.Collections.Generic;
+    using Com.TheFallenGames.OSA.Core;
     using Com.TheFallenGames.OSA.CustomAdapters.GridView;
     using Com.TheFallenGames.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
@@ -76,6 +77,22 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
+        }
+        
+        /// <summary>
+        /// We need this because the original method only update to  this.VisibleItemsCount - 1
+        /// </summary>
+        /// <exception cref="OSAException"></exception>
+        public void ForceUpdateFullVisibleItems()
+        {
+            var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
+            if (twinPassScheduledBefore)
+                throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
+
+            for (var i = 0; i < this.presenters.Count; i++)
+            {
+                this.ForceUpdateViewsHolderIfVisible(i);
+            }
         }
     }
 

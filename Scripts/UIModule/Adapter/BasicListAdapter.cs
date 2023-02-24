@@ -95,6 +95,22 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
+        
+        /// <summary>
+        /// We need this because the original method only update to  this.VisibleItemsCount - 1
+        /// </summary>
+        /// <exception cref="OSAException"></exception>
+        public void ForceUpdateFullVisibleItems()
+        {
+            var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
+            if (twinPassScheduledBefore)
+                throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
+
+            for (var i = 0; i < this.presenters.Count; i++)
+            {
+                this.ForceUpdateViewsHolderIfVisible(i);
+            }
+        }
     }
 
 // This class keeps references to an item's views.
