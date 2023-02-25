@@ -272,7 +272,8 @@ public static class Build
     private static void SetApplicationVersion()
     {
         // Bundle version will be use for some third party like Backtrace, DeltaDNA,...
-        PlayerSettings.bundleVersion = GameVersion.Version;
+        PlayerSettings.bundleVersion             = GameVersion.Version;
+        PlayerSettings.Android.bundleVersionCode = GameVersion.BuildNumber;
     }
 
     public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) =>
