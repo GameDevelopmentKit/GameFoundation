@@ -5,7 +5,6 @@ namespace GameFoundation.Scripts.Utilities
     using GameFoundation.Scripts.Utilities.LogService;
     using Newtonsoft.Json;
     using UnityEngine;
-    using Zenject;
 
     /// <summary>
     /// Manager save Load Local data
@@ -16,18 +15,13 @@ namespace GameFoundation.Scripts.Utilities
 
         #region inject
 
-        private readonly DiContainer diContainer;
         private readonly ILogService logService;
 
         #endregion
 
         private readonly Dictionary<string, object> localDataCaches = new();
 
-        public HandleLocalDataServices(DiContainer diContainer, ILogService logService)
-        {
-            this.diContainer = diContainer;
-            this.logService  = logService;
-        }
+        public HandleLocalDataServices(ILogService logService) { this.logService = logService; }
 
         /// <summary>
         /// Save a class data to local
@@ -56,7 +50,7 @@ namespace GameFoundation.Scripts.Utilities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T Load<T>() where T : class, ILocalData
+        public T Load<T>() where T : class, ILocalData, new()
         {
             var key = LocalDataPrefix + typeof(T).Name;
 
@@ -67,16 +61,11 @@ namespace GameFoundation.Scripts.Utilities
 
             var json = PlayerPrefs.GetString(key);
 
-            var isHadLocalDataAlready = !string.IsNullOrEmpty(json);
-            var result = this.diContainer.Instantiate<T>();
+            var result = string.IsNullOrEmpty(json) ? new T() : JsonConvert.DeserializeObject<T>(json);
 
-            if (isHadLocalDataAlready)
+            if (string.IsNullOrEmpty(json))
             {
-                JsonConvert.PopulateObject(json, result);
-            }
-            else
-            {
-                result.Init();
+                result?.Init();
             }
 
             this.localDataCaches.Add(key, result);
@@ -93,6 +82,7 @@ namespace GameFoundation.Scripts.Utilities
             }
 
             PlayerPrefs.Save();
+            Debug.Log("Save Data To File");
         }
     }
 }
