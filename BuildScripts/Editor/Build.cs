@@ -135,6 +135,7 @@ public static class Build
             Console.WriteLine($"----------{new string('-', platform.Platform.Length)}");
 
             PlayerSettings.SetScriptingBackend(platform.BuildTargetGroup, scriptingBackend);
+            SpecificActionForEachPlatform(platform);
             SetApplicationVersion();
 
             EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
@@ -160,6 +161,23 @@ public static class Build
 
         Console.WriteLine(new string('=', 80));
         Console.WriteLine();
+    }
+
+    private static void SpecificActionForEachPlatform(BuildTargetInfo platform)
+    {
+        switch (platform.BuildTarget)
+            {
+                case BuildTarget.iOS:
+                    break;
+                case BuildTarget.Android:
+                    //Change build architecture to ARMv7 and ARM64
+                    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+                    break;
+                case BuildTarget.WebGL:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
     }
 
     /// <summary>
