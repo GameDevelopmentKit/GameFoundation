@@ -8,6 +8,7 @@
     using GameFoundation.Scripts.Models;
     using UniRx;
     using UnityEngine;
+    using UnityEngine.AddressableAssets;
     using Zenject;
     using Object = UnityEngine.Object;
 
@@ -22,6 +23,7 @@
         private          PlaylistController        playlistController;
         private          MasterAudio               masterAudio;
         private          CompositeDisposable       compositeDisposable;
+        private          DynamicSoundGroupCreator  soundGroupCreator;
 
         private GameObject soundGroup;
 
@@ -62,6 +64,7 @@
             await this.CreatePlayList(this.masterAaaSoundMasterModel.ListPlaylists);
             this.masterAudio        = this.diContainer.InstantiatePrefabResourceForComponent<MasterAudio>("GameFoundationAudio");
             this.playlistController = this.diContainer.InstantiatePrefabResourceForComponent<PlaylistController>("GameFoundationPlaylistController");
+            this.soundGroupCreator.CreateItems();
         }
 
         private async UniTask PrepareDataForSoundGroup(List<SfxSoundModel> listSoundModels)
@@ -71,7 +74,7 @@
 
             foreach (var model in listSoundModels)
             {
-                var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(model.SoundAddress);
+                var audioClip = await Addressables.LoadAssetAsync<AudioClip>(model.SoundAddress);
                 //Create sound clip
                 var soundClipObj      = new GameObject();
                 var dynamicSoundGroup = soundClipObj.AddComponent<DynamicSoundGroup>();
@@ -88,14 +91,15 @@
                 dynamicSoundGroupVariation.weight      = model.Weight;
                 dynamicSoundGroup.groupMasterVolume    = model.Volume;
                 //set Reference
-                dynamicSoundGroupVariation.VarAudio.clip = audioClip;
+                dynamicSoundGroupVariation.VarAudio.clip        = audioClip;
+                dynamicSoundGroupVariation.VarAudio.playOnAwake = false;
             }
         }
 
         private async UniTask CreatePlayList(List<MasterAaaSoundPlayList> listPlaylists)
         {
             this.soundGroup.AddComponent<DynamicSoundGroupCreator>().enabled = false;
-            var dynamicSoundGroupCreator = this.soundGroup.GetComponent<DynamicSoundGroupCreator>();
+            this.soundGroupCreator                                           = this.soundGroup.GetComponent<DynamicSoundGroupCreator>();
 
             foreach (var playList in listPlaylists)
             {
@@ -106,7 +110,7 @@
 
                 foreach (var soundClipModel in playList.ListSound)
                 {
-                    var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(soundClipModel.SoundAddress);
+                    var audioClip = await Addressables.LoadAssetAsync<AudioClip>(soundClipModel.SoundAddress);
 
                     p.MusicSettings.Add(new MusicSetting()
                     {
@@ -117,10 +121,10 @@
                     });
                 }
 
-                dynamicSoundGroupCreator.musicPlaylists.Add(p);
+                this.soundGroupCreator.musicPlaylists.Add(p);
             }
 
-            dynamicSoundGroupCreator.enabled = true;
+            this.soundGroupCreator.enabled = true;
             Object.DontDestroyOnLoad(this.soundGroup);
         }
 
@@ -159,7 +163,7 @@
 
         #region HandleSound
 
-        public void PlaySound(string name, bool isLoop = false) => MasterAudio.PlaySound(name, isChaining: isLoop);
+        public void PlaySound(string name, bool isLoop = false) { MasterAudio.PlaySound(name, isChaining: isLoop); }
 
         public void StopAllSound(string name) => MasterAudio.StopAllOfSound(name);
 
