@@ -91,16 +91,14 @@ MonoBehaviour:
   useTextGroupFilter: 0
   textGroupFilter: 
   resourceClipsPauseDoNotUnload: 0
-  playlistControllerPrefab: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd,
-    type: 3}
+  playlistControllerPrefab: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
   persistBetweenScenes: 0
   shouldLogDestroys: 0
   showBusColors: 0
   showGroupImportance: 0
   areGroupsExpanded: 1
   soundGroupTemplate: {fileID: 400008, guid: 877a3a4bf0a4abf43aba41125e1d3101, type: 3}
-  soundGroupVariationTemplate: {fileID: 400000, guid: 08eea2d8c4572c7479da53cfbc14bde6,
-    type: 3}
+  soundGroupVariationTemplate: {fileID: 400000, guid: 08eea2d8c4572c7479da53cfbc14bde6, type: 3}
   groupBuses: []
   groupByBus: 1
   sortAlpha: 1
@@ -111,8 +109,7 @@ MonoBehaviour:
   showAdvancedSettings: 0
   showLocalization: 0
   showVideoPlayerSettings: 0
-  useTextPlaylistFilter: 0
-  textPlaylistFilter: 
+  videoPlayers: []
   playListExpanded: 1
   playlistsExpanded: 1
   musicSpatialBlendType: 0
@@ -123,7 +120,148 @@ MonoBehaviour:
   defaultGroupPlayType: 0
   newGroupSpatialType: 1
   newGroupSpatialBlend: 1
-  musicPlaylists: []
+  musicPlaylists:
+  - isExpanded: 0
+    playlistName: LoadingBackground
+    songTransitionType: 1
+    MusicSettings:
+    - alias: 
+      audLocation: 2
+      clip: {fileID: 0}
+      songName: 01
+      resourceFileName: 
+      audioClipAddressable:
+        m_AssetGUID: 2bf4a9f5534bc714ea337a3846d33bca
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 1
+      volume: 1
+      pitch: 1
+      isExpanded: 1
+      isLoop: 1
+      isChecked: 1
+      metadataStringValues: []
+      metadataBoolValues: []
+      metadataIntValues: []
+      metadataFloatValues: []
+      metadataExpanded: 1
+      songStartTimeMode: 0
+      customStartTime: 0
+      customStartTimeMax: 0
+      lastKnownTimePoint: 0
+      wasLastKnownTimePointSet: 0
+      songIndex: 0
+      songStartedEventExpanded: 0
+      songStartedCustomEvent: 
+      songChangedEventExpanded: 0
+      songChangedCustomEvent: 
+    bulkLocationMode: 2
+    crossfadeMode: 0
+    crossFadeTime: 1
+    fadeInFirstSong: 0
+    fadeOutLastSong: 0
+    bulkEditMode: 0
+    isTemporary: 0
+    showMetadata: 0
+    songMetadataProps: []
+    newMetadataPropName: PropertyName
+    newMetadataPropType: 1
+    newMetadataPropRequired: 1
+    newMetadataPropCanHaveMult: 0
+  - isExpanded: 0
+    playlistName: Mainscene
+    songTransitionType: 1
+    MusicSettings:
+    - alias: 
+      audLocation: 2
+      clip: {fileID: 0}
+      songName: 02
+      resourceFileName: 
+      audioClipAddressable:
+        m_AssetGUID: f7f2d7d68fa034441b15fe8d2b75dacb
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 1
+      volume: 1
+      pitch: 1
+      isExpanded: 1
+      isLoop: 1
+      isChecked: 1
+      metadataStringValues: []
+      metadataBoolValues: []
+      metadataIntValues: []
+      metadataFloatValues: []
+      metadataExpanded: 1
+      songStartTimeMode: 0
+      customStartTime: 0
+      customStartTimeMax: 0
+      lastKnownTimePoint: 0
+      wasLastKnownTimePointSet: 0
+      songIndex: 0
+      songStartedEventExpanded: 0
+      songStartedCustomEvent: 
+      songChangedEventExpanded: 0
+      songChangedCustomEvent: 
+    bulkLocationMode: 2
+    crossfadeMode: 0
+    crossFadeTime: 1
+    fadeInFirstSong: 0
+    fadeOutLastSong: 0
+    bulkEditMode: 0
+    isTemporary: 0
+    showMetadata: 0
+    songMetadataProps: []
+    newMetadataPropName: PropertyName
+    newMetadataPropType: 1
+    newMetadataPropRequired: 1
+    newMetadataPropCanHaveMult: 0
+  - isExpanded: 1
+    playlistName: BattleScene
+    songTransitionType: 1
+    MusicSettings:
+    - alias: 
+      audLocation: 2
+      clip: {fileID: 0}
+      songName: 
+      resourceFileName: 
+      audioClipAddressable:
+        m_AssetGUID: a6a778af9ce2b3940961d60ad9ddce20
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 1
+      volume: 1
+      pitch: 1
+      isExpanded: 1
+      isLoop: 0
+      isChecked: 1
+      metadataStringValues: []
+      metadataBoolValues: []
+      metadataIntValues: []
+      metadataFloatValues: []
+      metadataExpanded: 1
+      songStartTimeMode: 0
+      customStartTime: 0
+      customStartTimeMax: 0
+      lastKnownTimePoint: 0
+      wasLastKnownTimePointSet: 0
+      songIndex: 0
+      songStartedEventExpanded: 0
+      songStartedCustomEvent: 
+      songChangedEventExpanded: 0
+      songChangedCustomEvent: 
+    bulkLocationMode: 2
+    crossfadeMode: 0
+    crossFadeTime: 1
+    fadeInFirstSong: 0
+    fadeOutLastSong: 0
+    bulkEditMode: 0
+    isTemporary: 0
+    showMetadata: 0
+    songMetadataProps: []
+    newMetadataPropName: PropertyName
+    newMetadataPropType: 1
+    newMetadataPropRequired: 1
+    newMetadataPropCanHaveMult: 0
   _masterAudioVolume: 1
   vrSettingsExpanded: 0
   useSpatializer: 0
@@ -181,7 +319,6 @@ MonoBehaviour:
   _masterPlaylistVolume: 1
   showGroupSelect: 0
   hideGroupsWithNoActiveVars: 0
-  jukeBoxDisplayMode: 0
   logPerfExpanded: 1
   willWarm: 1
   mixerSettingsExpanded: 0

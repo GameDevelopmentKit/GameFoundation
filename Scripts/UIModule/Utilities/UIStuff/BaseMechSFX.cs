@@ -1,29 +1,26 @@
+using UnityEngine;
+
 namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 {
-    using global::Utilities.SoundServices;
-    using UnityEngine;
+    using GameFoundation.Scripts.Utilities;
 
     [DisallowMultipleComponent]
-    public class BaseSFX : MonoBehaviour
+    public class BaseMechSFX : MonoBehaviour
     {
         [SerializeField] protected string sfxName;
-
-        [Header("For Tool Set sfx")] [SerializeField]
-        private Object obj;
+    
+        [Header("For Tool Set sfx")]
+        [SerializeField] private Object obj;
 
         protected void OnPlaySfx()
         {
             if (string.IsNullOrEmpty(this.sfxName))
             {
                 Debug.LogError(this.gameObject.name + " missing sfx");
-
                 return;
             }
-#if USE_OLD_MASTERAUDIO
+
             AudioManager.Instance.PlaySound(this.sfxName);
-#else
-            MasterAAASoundWrapper.Instance.PlaySound(this.sfxName);
-#endif
         }
 
         /// <summary>
