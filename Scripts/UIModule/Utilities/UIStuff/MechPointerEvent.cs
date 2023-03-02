@@ -2,7 +2,7 @@ using UnityEngine.EventSystems;
 
 namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 {
-    public class MechPointerEvent : BaseMechSFX,IPointerEnterHandler
+    public class PointerEvent : BaseSFX,IPointerEnterHandler
     {
         public void OnPointerEnter(PointerEventData eventData)
         {
