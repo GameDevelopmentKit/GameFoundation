@@ -5,19 +5,19 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
     using UnityEngine.EventSystems;
     using UnityEngine.UI;
 
-    [RequireComponent(typeof(Button))]
+    [RequireComponent(typeof(UnityEngine.UI.Button))]
     [RequireComponent(typeof(DisallowMultipleComponent))]
-    public class MechButton : BaseMechSFX, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+    public class Button : BaseSFX, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
-        [SerializeField] private List<GameObject> defaultParticles, appearParticles, hoverParticles, pressParticles;
-        private                  bool             isActiveHover;
-        private                  Button           btn;
-        public                   Button           Btn => this.btn;
+        [SerializeField] private List<GameObject>      defaultParticles, appearParticles, hoverParticles, pressParticles;
+        private                  bool                  isActiveHover;
+        private                  UnityEngine.UI.Button btn;
+        public                   UnityEngine.UI.Button Btn => this.btn;
 
         private void Awake()
         {
             this.sfxName       = "btn_team_menu_select";
-            this.btn           = this.GetComponent<Button>();
+            this.btn           = this.GetComponent<UnityEngine.UI.Button>();
             this.isActiveHover = false;
         }
 
@@ -34,7 +34,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (!this.isActiveHover) return;
-            if (!this.GetComponent<Button>().interactable) return;
+            if (!this.GetComponent<UnityEngine.UI.Button>().interactable) return;
             if (this.hoverParticles.Count <= 0) return;
             foreach (var hoverParticle in this.hoverParticles)
             {

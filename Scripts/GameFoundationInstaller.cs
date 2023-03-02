@@ -1,7 +1,6 @@
 ﻿namespace GameFoundation.Scripts
 {
     using BlueprintFlow.BlueprintControlFlow;
-    using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
@@ -23,15 +22,16 @@
             SignalBusInstaller.Install(this.Container);
 
             this.Container.Bind<GDKConfig>().FromResource("GameConfigs/GDKConfig").AsSingle().NonLazy();
-            
+
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
             //CreateMasterAudio
+#if USE_OLD_MASTERAUDIO
             this.Container.Bind<PlaylistController>().FromComponentInNewPrefabResource("GameFoundationPlaylistController").AsCached().NonLazy();
             this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("GameFoundationAudio").AsCached().NonLazy();
             this.Container.BindInterfacesTo<AudioManager>().AsCached().NonLazy();
-
+#endif
             //Localization services
             this.Container.Bind<SetLanguage>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
             this.Container.Bind<LocalizationService>().AsCached().NonLazy();
@@ -48,7 +48,7 @@
 
             //Genarate fps
             this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
-            
+
             //Helper
             this.Container.Bind<LoadImageHelper>().AsCached();
 

@@ -10,7 +10,8 @@
         "MasterAAASound.Scripts",
         "I2Localization.Scripts",
         "Zenject-Source",
-        "Zenject-Signals"
+        "Zenject-Signals",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
