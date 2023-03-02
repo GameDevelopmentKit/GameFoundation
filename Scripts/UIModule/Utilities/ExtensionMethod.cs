@@ -12,7 +12,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities
     using UnityEngine;
     using UnityEngine.UI;
     using Zenject;
-    using Button = UnityEngine.UI.Button;
 
     public static class ExtensionMethod
     {
