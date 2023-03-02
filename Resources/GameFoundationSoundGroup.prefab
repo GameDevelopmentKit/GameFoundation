@@ -54,7 +54,7 @@ MonoBehaviour:
   removeGroupsOnSceneChange: 1
   reUseMode: 0
   showCustomEvents: 0
-  bulkVariationMode: 2
+  bulkVariationMode: 0
   customEventsToCreate: []
   customEventCategories:
   - CatName: '[Uncategorized]'
