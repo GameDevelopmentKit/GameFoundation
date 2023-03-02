@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     using GameFoundation.Scripts.UIModule.Utilities;
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.LogService;
+    using global::Utilities.SoundServices;
     using TMPro;
     using UnityEngine;
     using UnityEngine.UI;

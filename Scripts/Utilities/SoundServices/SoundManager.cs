@@ -4,33 +4,26 @@
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.Models;
+    using global::Utilities.SoundServices;
     using UniRx;
     using Zenject;
 
-    public interface IAudioManager
-    {
-        void PlaySound(string name, bool isLoop = false);
-        void StopAllSound(string name);
-        void PlayPlayList(string playlist, bool random = false);
-        void StopPlayList(string playlist);
-        void StopAllPlayList();
-    }
-
+    [Obsolete("Please use MasterAAASoundWrapper instead")]
     public class AudioManager : IAudioManager, IInitializable, IDisposable
     {
         public static AudioManager Instance { get; private set; }
 
         private readonly PlaylistController playlistController;
-        private readonly AudioController    audioController;
+        private readonly MasterAudio        masterAudio;
 
         private readonly SoundSetting soundSetting;
 
         private CompositeDisposable compositeDisposable;
 
-        public AudioManager(PlaylistController playlistController, AudioController audioController, SoundSetting soundSetting)
+        public AudioManager(PlaylistController playlistController, MasterAudio masterAudio, SoundSetting soundSetting)
         {
             this.playlistController = playlistController;
-            this.audioController    = audioController;
+            this.masterAudio        = masterAudio;
             this.soundSetting       = soundSetting;
             Instance                = this;
         }
@@ -78,7 +71,7 @@
 
         protected virtual void SetSoundValue(float value)
         {
-            var groups = this.audioController.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
+            var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
 
             foreach (var transform in groups)
             {
