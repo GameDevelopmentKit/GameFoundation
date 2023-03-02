@@ -8,7 +8,6 @@
     using GameFoundation.Scripts.Models;
     using UniRx;
     using UnityEngine;
-    using UnityEngine.AddressableAssets;
     using Zenject;
     using Object = UnityEngine.Object;
 
@@ -85,13 +84,11 @@
                 soundVariant.transform.SetParent(soundClipObj.transform);
                 var dynamicSoundGroupVariation = soundVariant.AddComponent<DynamicGroupVariation>();
                 dynamicSoundGroup.groupVariations.Add(dynamicSoundGroupVariation);
-                dynamicSoundGroupVariation.audLocation = MasterAudio.AudioLocation.Addressable;
+                dynamicSoundGroupVariation.audLocation = MasterAudio.AudioLocation.Clip;
                 dynamicSoundGroupVariation.weight      = model.Weight;
                 dynamicSoundGroup.groupMasterVolume    = model.Volume;
                 //set Reference
-                var assetRef = new AssetReference();
-                assetRef.SetEditorAsset(audioClip);
-                dynamicSoundGroupVariation.audioClipAddressable = assetRef;
+                dynamicSoundGroupVariation.VarAudio.clip = audioClip;
             }
         }
 
@@ -110,15 +107,13 @@
                 foreach (var soundClipModel in playList.ListSound)
                 {
                     var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(soundClipModel.SoundAddress);
-                    var assetRef  = new AssetReference();
-                    assetRef.SetEditorAsset(audioClip);
 
                     p.MusicSettings.Add(new MusicSetting()
                     {
-                        audLocation          = MasterAudio.AudioLocation.Addressable,
-                        audioClipAddressable = assetRef,
-                        volume               = soundClipModel.Volume,
-                        isLoop               = soundClipModel.IsLoop
+                        audLocation = MasterAudio.AudioLocation.Clip,
+                        clip        = audioClip,
+                        volume      = soundClipModel.Volume,
+                        isLoop      = soundClipModel.IsLoop
                     });
                 }
 
