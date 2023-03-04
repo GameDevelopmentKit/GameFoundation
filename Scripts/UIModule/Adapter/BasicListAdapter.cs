@@ -2,11 +2,13 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Com.TheFallenGames.OSA.Core;
     using Com.TheFallenGames.OSA.CustomParams;
     using Com.TheFallenGames.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
+    using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
     using Zenject;
 
@@ -20,6 +22,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private SimpleDataHelper<TModel> Models { get; set; }
         private CanvasGroup              canvasGroup;
         private List<TPresenter>         presenters;
+        private HashSet<TView>           calledOnViewReadySet = new();
 
         private DiContainer diContainer;
 
@@ -55,24 +58,29 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
         // *For the method's full description check the base implementation
-        protected override void UpdateViewsHolder(MyListItemViewsHolder v)
+        protected override void UpdateViewsHolder(MyListItemViewsHolder viewHolder)
         {
-            var index = v.ItemIndex;
+            var index = viewHolder.ItemIndex;
 
             if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
-            var viewObject = v.root.GetComponentInChildren<TView>(true);
+            var tView = viewHolder.root.GetComponentInChildren<TView>(true);
 
             if (this.presenters.Count <= index)
             {
-                var p = this.diContainer.Instantiate<TPresenter>();
-                p.SetView(viewObject);
-                p.BindData(model);
-                this.presenters.Add(p);
+                var presenter = this.diContainer.Instantiate<TPresenter>();
+                presenter.SetView(tView);
+                if (!this.calledOnViewReadySet.Contains(tView))
+                {
+                    presenter.OnViewReady();
+                    this.calledOnViewReadySet.Add(tView);
+                }
+                presenter.BindData(model);
+                this.presenters.Add(presenter);
             }
             else
             {
-                this.presenters[index].SetView(viewObject);
+                this.presenters[index].SetView(tView);
                 this.presenters[index].Dispose();
                 this.presenters[index].BindData(model);
             }

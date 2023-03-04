@@ -2,10 +2,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Com.TheFallenGames.OSA.Core;
     using Com.TheFallenGames.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
+    using GameFoundation.Scripts.UIModule.Utilities;
     using UnityEngine;
     using Zenject;
 
@@ -22,6 +24,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private SimpleDataHelper<TModel>  models;
         private List<BaseItemViewsHolder> viewsHolders;
         private List<TPresenter>          presenters;
+        private HashSet<TView>            calledOnViewReadySet = new();
 
         private DiContainer diContainer;
 
@@ -55,9 +58,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
         // *For the method's full description check the base implementation
-        protected override void UpdateViewsHolder(BaseItemViewsHolder vh)
+        protected override void UpdateViewsHolder(BaseItemViewsHolder viewHolder)
         {
-            var index = vh.ItemIndex;
+            var index = viewHolder.ItemIndex;
             if (this.models.Count <= index || index < 0) return;
 
             for (var i = this.presenters.Count; i <= index; ++i)
@@ -66,17 +69,22 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             }
 
             var model     = this.models[index];
-            var view      = vh.root.GetComponentInChildren<TView>(true);
+            var tView      = viewHolder.root.GetComponentInChildren<TView>(true);
             var presenter = this.presenters[index];
 
-            presenter.SetView(view);
+            presenter.SetView(tView);
+            if (!this.calledOnViewReadySet.Contains(tView))
+            {
+                presenter.OnViewReady();
+                this.calledOnViewReadySet.Add(tView);
+            }
             presenter.Dispose();
             presenter.BindData(model);
 
-            if (this.Parameters.PrefabControlsDefaultItemSize && !this.viewsHolders.Contains(vh))
+            if (this.Parameters.PrefabControlsDefaultItemSize && !this.viewsHolders.Contains(viewHolder))
             {
                 this.RequestChangeItemSizeAndUpdateLayout(index, this.Parameters.ItemSizes[model.PrefabIndex]);
-                this.viewsHolders.Add(vh);
+                this.viewsHolders.Add(viewHolder);
             }
         }
 

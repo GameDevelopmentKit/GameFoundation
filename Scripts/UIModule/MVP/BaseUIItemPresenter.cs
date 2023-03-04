@@ -89,6 +89,7 @@
 
     public abstract class BaseUIItemPresenter<TView, TModel> : BaseUIItemPresenter<TView>, IUIItemPresenter<TView, TModel>, IDisposable where TView : MonoBehaviour, IUIView
     {
+        public virtual  void OnViewReady() { }
         public abstract void BindData(TModel      param);
         protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets) { }
         public virtual void Dispose() { }
