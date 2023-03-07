@@ -42,7 +42,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
                 }
 
                 this.updateTimeAfterFocusSignal.MinimizeTime = intervalTimeMinimize.TotalSeconds;
-                //this.signalBus.Fire(this.updateTimeAfterFocusSignal); // temporary disable this function, re-active later when game specs require
+                this.signalBus.Fire(this.updateTimeAfterFocusSignal); // temporary disable this function, re-active later when game specs require
             }
         }
 

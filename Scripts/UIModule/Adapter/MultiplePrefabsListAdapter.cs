@@ -18,10 +18,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        private CanvasGroup               canvasGroup;
-        private SimpleDataHelper<TModel>  models;
-        private List<BaseItemViewsHolder> viewsHolders;
-        private List<TPresenter>          presenters;
+        private CanvasGroup              canvasGroup;
+        private SimpleDataHelper<TModel> models;
+        private List<TPresenter>         presenters;
 
         private DiContainer diContainer;
 
@@ -58,32 +57,30 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override void UpdateViewsHolder(BaseItemViewsHolder vh)
         {
             var index = vh.ItemIndex;
+
             if (this.models.Count <= index || index < 0) return;
 
-            for (var i = this.presenters.Count; i <= index; ++i)
+            var model = this.models[index];
+            var view  = vh.root.GetComponentInChildren<TView>(true);
+
+            if (this.presenters.Count <= index)
             {
-                this.presenters.Add(this.diContainer.Instantiate(this.models[i].PresenterType) as TPresenter);
+                var presenter = this.diContainer.Instantiate(this.models[index].PresenterType) as TPresenter;
+                presenter.SetView(view);
+                presenter.BindData(model);
+                this.presenters.Add(presenter);
             }
-
-            var model     = this.models[index];
-            var view      = vh.root.GetComponentInChildren<TView>(true);
-            var presenter = this.presenters[index];
-
-            presenter.SetView(view);
-            presenter.Dispose();
-            presenter.BindData(model);
-
-            if (this.Parameters.PrefabControlsDefaultItemSize && !this.viewsHolders.Contains(vh))
+            else
             {
-                this.RequestChangeItemSizeAndUpdateLayout(index, this.Parameters.ItemSizes[model.PrefabIndex]);
-                this.viewsHolders.Add(vh);
+                this.presenters[index].SetView(view);
+                this.presenters[index].Dispose();
+                this.presenters[index].BindData(model);
             }
         }
 
         protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _)
         {
             return this.models[vh.ItemIndex].PresenterType == this.models[itemIndex].PresenterType;
-            return vh.ItemIndex == itemIndex;
         }
 
         #endregion
@@ -95,14 +92,19 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> models, DiContainer diContainer)
         {
-            this.diContainer  = diContainer;
-            this.models       = new SimpleDataHelper<TModel>(this);
-            this.viewsHolders = new List<BaseItemViewsHolder>();
-            this.presenters   = new List<TPresenter>();
+            this.diContainer = diContainer;
+            this.models      = new SimpleDataHelper<TModel>(this);
+            this.presenters  = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
-            this.ResetItems(0);
-            this.models.InsertItems(0, models);
+            this.models.ResetItems(models);
+            if (this.Parameters.PrefabControlsDefaultItemSize)
+            {
+                for (var i = 0; i < models.Count; ++i)
+                {
+                    this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabIndex]);
+                }
+            }
         }
     }
 
@@ -127,7 +129,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
     public abstract class MultiplePrefabsModel
     {
-        public int  PrefabIndex   { get; set; }
-        public Type PresenterType { get; set; }
+        public abstract int  PrefabIndex   { get; }
+        public abstract Type PresenterType { get; }
     }
 }
