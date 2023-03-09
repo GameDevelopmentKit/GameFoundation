@@ -64,6 +64,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public Transform CurrentOverlayRoot { get; set; }
 
         /// <summary>
+        /// Get root canvas of all screen, use to disable UI for creative purpose
+        /// </summary>
+        public RootUICanvas RootUICanvas { get; set; }
+
+        /// <summary>
         /// Current screen shown on top.
         /// </summary>
         public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; }
@@ -126,9 +131,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #region Implement IScreenManager
 
-        public Transform CurrentRootScreen  { get; set; }
-        public Transform CurrentHiddenRoot  { get; set; }
-        public Transform CurrentOverlayRoot { get; set; }
+        public Transform    CurrentRootScreen  { get; set; }
+        public Transform    CurrentHiddenRoot  { get; set; }
+        public Transform    CurrentOverlayRoot { get; set; }
+        public RootUICanvas RootUICanvas       { get; set; }
 
         public async UniTask<T> OpenScreen<T>() where T : IScreenPresenter
         {

@@ -19,6 +19,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         {
             //todo this should be setup automatically
             if(this.rootUICanvas == null) return;
+            this.screenManager.RootUICanvas       = this.rootUICanvas;
             this.screenManager.CurrentRootScreen  = this.rootUICanvas.RootUIShowTransform;
             this.screenManager.CurrentHiddenRoot  = this.rootUICanvas.RootUIClosedTransform;
             this.screenManager.CurrentOverlayRoot = this.rootUICanvas.RootUIOverlayTransform;
