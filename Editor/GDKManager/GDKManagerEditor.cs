@@ -15,7 +15,7 @@ public class GDKManagerEditor : EditorWindow
     private VisualElement configPanel;
 
 
-    private List<BaseGameConfigEditor> listGameConfigEditors = new List<BaseGameConfigEditor>();
+    private List<IGameConfigEditor> listGameConfigEditors = new();
 
     [MenuItem("GDK/GDKManager")]
     public static void ShowExample()
@@ -32,43 +32,42 @@ public class GDKManagerEditor : EditorWindow
         this.initPanel   = this.rootVisualElement.Q<VisualElement>("InitPanel");
         this.configPanel = this.rootVisualElement.Q<VisualElement>("ConfigPanel");
         var sdkConfig = Resources.Load<GDKConfig>("GameConfigs/GDKConfig");
-        if (sdkConfig == null)
+        if (sdkConfig != null)
+        {
+            this.LoadSDKConfig(sdkConfig);
+            this.DisplaySDKConfig();
+        }
+        else
         {
             this.configPanel.SetActive(false);
             this.initPanel.SetActive(true);
             this.initPanel.Q<Button>("btnInit").clicked += this.OnInitSdkSO;
         }
-        else
-        {
-            foreach (var gameConfigEditorType in ReflectionUtils.GetAllDerivedTypes<BaseGameConfigEditor>())
-            {
-                var gameConfigEditor = (BaseGameConfigEditor)Activator.CreateInstance(gameConfigEditorType, new object[]{sdkConfig});
-                this.listGameConfigEditors.Add(gameConfigEditor);
-            }
-            
-            this.DisplaySDKConfig();
-        }
     }
-    
+
     /// <summary>
     /// Create new SDK Config scriptable object
     /// </summary>
     private void OnInitSdkSO()
     {
         var newSdkConfig = this.CreateInstanceInResource<GDKConfig>(nameof(GDKConfig), "GameConfigs");
-        foreach (var gameConfigEditorType in ReflectionUtils.GetAllDerivedTypes<BaseGameConfigEditor>())
-        {
-            var gameConfigEditor = (BaseGameConfigEditor)Activator.CreateInstance(gameConfigEditorType, new object[]{newSdkConfig});
-            gameConfigEditor.PreSetup();
-            this.listGameConfigEditors.Add(gameConfigEditor);
-        }
-        
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-
+        this.LoadSDKConfig(newSdkConfig);
         this.DisplaySDKConfig();
     }
-    
+
+    private void LoadSDKConfig(GDKConfig gdkConfig)
+    {
+        foreach (var gameConfigEditorType in ReflectionUtils.GetAllDerivedTypes<IGameConfigEditor>())
+        {
+            var gameConfigEditor = (IGameConfigEditor)Activator.CreateInstance(gameConfigEditorType);
+            gameConfigEditor.InitConfig(gdkConfig);
+            this.listGameConfigEditors.Add(gameConfigEditor);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+    }
+
     private void DisplaySDKConfig()
     {
         this.configPanel.SetActive(true);
