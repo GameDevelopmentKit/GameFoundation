@@ -99,8 +99,6 @@ public static class Build
                     EditorUserBuildSettings.il2CppCodeGeneration = Il2CppCodeGeneration.OptimizeSize;
 #endif
                     break;
-                case "-theOneAndroidKeyStore":
-                    break;
                 case "-packageName":
                     packageName = args[++i];
                     break;
