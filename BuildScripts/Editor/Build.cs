@@ -59,6 +59,10 @@ public static class Build
         var buildAppBundle         = false;
         var optimizeSpeed          = false;
         var packageName            = "";
+        var keyStoreFileName       = "the1_googleplay.keystore";
+        var keyStoreAliasName      = "theonestudio";
+        var keyStorePassword       = "tothemoon";
+        var keyStoreAliasPassword  = "tothemoon";
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
         {
@@ -96,11 +100,27 @@ public static class Build
 #endif
                     break;
                 case "-theOneAndroidKeyStore":
-                    SetUpAndroidKeyStore();
                     break;
                 case "-packageName":
                     packageName = args[++i];
                     break;
+                case "-keyStoreFileName":
+                    keyStoreFileName = args[++i];
+                    break;
+                case "-keyStorePassword":
+                    keyStorePassword = args[++i];
+                    break;
+                case "-keyStoreAliasName":
+                    keyStoreAliasName = args[++i];
+                    break;
+                case "-keyStoreAliasPassword":
+                    keyStoreAliasPassword = args[++i];
+                    break;
+            }
+
+            if (buildAppBundle)
+            {
+                SetUpAndroidKeyStore(keyStoreFileName, keyStorePassword, keyStoreAliasName, keyStoreAliasPassword);
             }
 
             //TODO config it later, only use this for TheOneStudio
@@ -111,18 +131,18 @@ public static class Build
         BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle, packageName);
     }
 
-    public static void SetUpAndroidKeyStore(string keyStoreName = "the1_googleplay.keystore", string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
-                                            string keyaliasPass = "tothemoon")
+    public static void SetUpAndroidKeyStore(string keyStoreFileName = "the1_googleplay.keystore", string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
+                                            string keyaliasPass     = "tothemoon")
     {
         PlayerSettings.Android.useCustomKeystore = true;
-        PlayerSettings.Android.keystoreName      = keyStoreName;
+        PlayerSettings.Android.keystoreName      = keyStoreFileName;
         PlayerSettings.keystorePass              = keyStorePass;
         PlayerSettings.Android.keyaliasName      = keyaliasName;
         PlayerSettings.keyaliasPass              = keyaliasPass;
     }
 
-    public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
-                                     bool                    buildAppBundle = false, string packageName = "")
+    public static void BuildInternal(ScriptingImplementation scriptingBackend,       BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
+                                     bool                    buildAppBundle = false, string       packageName = "")
     {
         BuildTools.ResetBuildSettings();
         EditorUserBuildSettings.buildAppBundle = buildAppBundle;
@@ -174,18 +194,18 @@ public static class Build
     private static void SpecificActionForEachPlatform(BuildTargetInfo platform)
     {
         switch (platform.BuildTarget)
-            {
-                case BuildTarget.iOS:
-                    break;
-                case BuildTarget.Android:
-                    //Change build architecture to ARMv7 and ARM64
-                    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
-                    break;
-                case BuildTarget.WebGL:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+        {
+            case BuildTarget.iOS:
+                break;
+            case BuildTarget.Android:
+                //Change build architecture to ARMv7 and ARM64
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+                break;
+            case BuildTarget.WebGL:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     /// <summary>
