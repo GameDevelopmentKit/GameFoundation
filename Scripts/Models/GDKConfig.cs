@@ -73,6 +73,10 @@ namespace Models
             }
         }
 
+        public bool HasGameConfig<T>() where T : IGameConfig { return HasGameConfig(typeof(T)); }
+
+        public bool HasGameConfig(Type type) { return this.typeToGameConfig != null && this.typeToGameConfig.ContainsKey(type); }
+
 #if UNITY_EDITOR
         public void AddGameConfig(IGameConfig gameConfig)
         {
