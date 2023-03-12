@@ -58,6 +58,7 @@ public static class Build
         var outputPath             = "template.exe";
         var buildAppBundle         = false;
         var optimizeSpeed          = false;
+        var packageName            = "";
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
         {
@@ -97,6 +98,9 @@ public static class Build
                 case "-theOneAndroidKeyStore":
                     SetUpAndroidKeyStore();
                     break;
+                case "-packageName":
+                    packageName = args[++i];
+                    break;
             }
 
             //TODO config it later, only use this for TheOneStudio
@@ -104,7 +108,7 @@ public static class Build
 
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
-        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle);
+        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle, packageName);
     }
 
     public static void SetUpAndroidKeyStore(string keyStoreName = "the1_googleplay.keystore", string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
@@ -118,7 +122,7 @@ public static class Build
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
-                                     bool                    buildAppBundle = false)
+                                     bool                    buildAppBundle = false, string packageName = "")
     {
         BuildTools.ResetBuildSettings();
         EditorUserBuildSettings.buildAppBundle = buildAppBundle;
@@ -135,6 +139,10 @@ public static class Build
             Console.WriteLine($"----------{new string('-', platform.Platform.Length)}");
 
             PlayerSettings.SetScriptingBackend(platform.BuildTargetGroup, scriptingBackend);
+            if (!string.IsNullOrEmpty(packageName))
+            {
+                PlayerSettings.SetApplicationIdentifier(platform.BuildTargetGroup, packageName);
+            }
             SpecificActionForEachPlatform(platform);
             SetApplicationVersion();
 
