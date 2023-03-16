@@ -161,6 +161,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             if (nextScreen != null)
             {
+                nextScreen.SetViewParent(this.CheckPopupIsOverlay(nextScreen) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
                 await nextScreen.OpenView(model);
 
                 return nextScreen;
