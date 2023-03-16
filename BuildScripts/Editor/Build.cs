@@ -197,11 +197,6 @@ public static class Build
             case BuildTarget.iOS:
                 break;
             case BuildTarget.Android:
-                //Need for android build when import google adsmob
-#if EM_ADMOB
-                PlayerSettings.Android.minifyRelease = true;
-                PlayerSettings.Android.minifyDebug   = true;
-#endif
                 //Change build architecture to ARMv7 and ARM64
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 break;
