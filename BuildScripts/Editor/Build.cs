@@ -8,6 +8,7 @@ using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 // ------------------------------------------------------------------------
@@ -198,6 +199,9 @@ public static class Build
                 break;
             case BuildTarget.Android:
                 //Change build architecture to ARMv7 and ARM64
+                PlayerSettings.Android.minifyWithR8        = true;
+                PlayerSettings.Android.minifyRelease       = true;
+                PlayerSettings.Android.minifyDebug         = true;
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 break;
             case BuildTarget.WebGL:
