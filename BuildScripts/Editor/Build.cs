@@ -124,7 +124,7 @@ public static class Build
 
             //TODO config it later, only use this for TheOneStudio
         }
-
+        PlayerSettings.SplashScreen.showUnityLogo = false;
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
         BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle, packageName);
