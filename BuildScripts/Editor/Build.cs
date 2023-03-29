@@ -202,6 +202,7 @@ public static class Build
                 PlayerSettings.Android.minifyWithR8        = true;
                 PlayerSettings.Android.minifyRelease       = true;
                 PlayerSettings.Android.minifyDebug         = true;
+                PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 break;
             case BuildTarget.WebGL:
