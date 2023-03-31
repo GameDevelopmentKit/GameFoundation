@@ -57,7 +57,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public Transform GetViewParent()  { return this.View.RectTransform.parent; }
         public Transform CurrentTransform => this.View.RectTransform;
 
-        public abstract void BindData();
+        public abstract UniTask BindData();
 
         public virtual async UniTask OpenViewAsync()
         {
@@ -138,7 +138,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             await this.OpenViewAsync();
         }
 
-        public sealed override void BindData() { }
+        public sealed override UniTask BindData() { return UniTask.CompletedTask; }
 
         public abstract void BindData(TModel screenModel);
     }

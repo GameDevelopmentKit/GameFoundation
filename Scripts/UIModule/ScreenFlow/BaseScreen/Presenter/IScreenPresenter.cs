@@ -23,7 +23,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public Transform GetViewParent();
 
         public Transform CurrentTransform { get;  }
-        public void      BindData();
+        public UniTask      BindData();
 
         public UniTask OpenViewAsync();
         public UniTask CloseViewAsync();
