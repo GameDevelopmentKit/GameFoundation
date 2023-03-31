@@ -94,6 +94,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 this.ForceUpdateViewsHolderIfVisible(i);
             }
         }
+
+        public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
     }
 
     // This class keeps references to an item's views.
