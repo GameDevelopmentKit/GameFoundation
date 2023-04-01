@@ -120,6 +120,11 @@ public static class Build
             if (buildAppBundle)
             {
                 SetUpAndroidKeyStore(keyStoreFileName, keyStorePassword, keyStoreAliasName, keyStoreAliasPassword);
+                EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Debugging;
+            }
+            else
+            {
+                EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
             }
 
             //TODO config it later, only use this for TheOneStudio
