@@ -118,7 +118,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public override async UniTask OpenViewAsync()
         {
-            await base.OpenViewAsync();
             if (this.Model != null)
             {
                 this.BindData(this.Model);
@@ -127,6 +126,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             {
                 this.Logger.Warning($"{this.GetType().Name} don't have Model!!!");
             }
+            await base.OpenViewAsync();
         }
         public virtual async UniTask OpenView(TModel model)
         {
