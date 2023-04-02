@@ -72,6 +72,14 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
+            
+            if (this.presenters != null)
+            {
+                foreach (var baseUIItemPresenter in this.presenters)
+                {
+                    baseUIItemPresenter.Dispose();
+                } 
+            }
             this.presenters  = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
