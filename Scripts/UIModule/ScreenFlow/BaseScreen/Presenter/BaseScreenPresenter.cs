@@ -79,7 +79,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.Dispose();
         }
 
-        public virtual void CloseView() { _ = this.CloseViewAsync(); }
+        public virtual async void CloseView() { await this.CloseViewAsync(); }
 
         public virtual void HideView()
         {
