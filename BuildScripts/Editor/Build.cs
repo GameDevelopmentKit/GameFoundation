@@ -116,6 +116,12 @@ public static class Build
                     keyStoreAliasPassword = args[++i];
                     break;
             }
+            
+#if PRODUCTION
+            PlayerSettings.SetStackTraceLogType(LogType.Assert,  StackTraceLogType.None);
+            PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
+            PlayerSettings.SetStackTraceLogType(LogType.Log,     StackTraceLogType.None);
+#endif
 
             if (buildAppBundle)
             {
