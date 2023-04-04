@@ -46,7 +46,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override BaseItemViewsHolder CreateViewsHolder(int itemIndex)
         {
             var vh = new BaseItemViewsHolder();
-            vh.Init(this.Parameters.ItemPrefabs[this.models[itemIndex].PrefabIndex], this.Parameters.Content, itemIndex);
+            vh.Init(this.Parameters.ItemPrefabs[this.models[itemIndex].PrefabName], this.Parameters.Content, itemIndex);
             return vh;
         }
 
@@ -99,12 +99,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.models.ResetItems(models);
-            if (this.Parameters.PrefabControlsDefaultItemSize)
+            for (var i = 0; i < models.Count; ++i)
             {
-                for (var i = 0; i < models.Count; ++i)
-                {
-                    this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabIndex]);
-                }
+                this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
             }
         }
     }
@@ -112,25 +109,27 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     [Serializable]
     public class MultiplePrefabsParams : BaseParams
     {
-        public List<RectTransform> ItemPrefabs;
-        public bool                PrefabControlsDefaultItemSize = true;
-        public List<float>         ItemSizes { get; set; }
+        [SerializeField] private List<RectTransform> itemPrefabs;
+        [SerializeField] private bool                prefabControlsDefaultItemSize = true;
+
+        public readonly Dictionary<string, RectTransform> ItemPrefabs = new();
+        public readonly Dictionary<string, float>         ItemSizes   = new();
 
         public override void InitIfNeeded(IOSA iAdapter)
         {
             base.InitIfNeeded(iAdapter);
-            this.ItemSizes = new List<float>();
-            foreach (var itemPrefab in this.ItemPrefabs)
+            foreach (var itemPrefab in this.itemPrefabs)
             {
                 this.AssertValidWidthHeight(itemPrefab);
-                this.ItemSizes.Add(itemPrefab.rect.height);
+                this.ItemPrefabs[itemPrefab.name] = itemPrefab;
+                this.ItemSizes[itemPrefab.name]   = this.prefabControlsDefaultItemSize ? itemPrefab.rect.height : this.DefaultItemSize;
             }
         }
     }
 
     public abstract class MultiplePrefabsModel
     {
-        public abstract int  PrefabIndex   { get; }
-        public abstract Type PresenterType { get; }
+        public abstract string PrefabName    { get; }
+        public abstract Type   PresenterType { get; }
     }
 }
