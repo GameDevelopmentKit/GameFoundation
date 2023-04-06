@@ -9,9 +9,13 @@
 
     public interface IAudioManager
     {
-        void PlaySound(string    name, bool isLoop = false);
+        void PlaySound(string name, bool isLoop = false);
         void StopAllSound(string name);
         void PlayPlayList(string playlist, bool random = false);
+        void StopPlayList(string playlist);
+        void StopAllPlayList();
+        void PauseEverything();
+        void ResumeEverything();
     }
 
     public class AudioManager : IAudioManager, IInitializable, IDisposable
@@ -27,10 +31,10 @@
 
         public AudioManager(PlaylistController playlistController, SoundSetting SoundSetting, MasterAudio masterAudio)
         {
-            this.playlistController      = playlistController;
-            this.soundSetting = SoundSetting;
-            this.masterAudio             = masterAudio;
-            Instance                     = this;
+            this.playlistController = playlistController;
+            this.soundSetting       = SoundSetting;
+            this.masterAudio        = masterAudio;
+            Instance                = this;
         }
 
         public void Initialize() { this.SubscribeMasterAudio(); }
@@ -40,21 +44,23 @@
             await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
             this.soundSetting.MuteSound.Value = false;
             this.soundSetting.MuteMusic.Value = false;
+
             this.compositeDisposable = new CompositeDisposable
-                                       {
-                                           //TODO uncomment this when we have a proper solution
-                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-                                           this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-                                           this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-                                           this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
-                                       };
+            {
+                //TODO uncomment this when we have a proper solution
+                // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
+                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
+                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
+                this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
+            };
         }
 
         private void SetMasterVolume(bool value)
         {
             var finalValue = value ? 1 : 0;
             MasterAudio.MasterVolumeLevel = finalValue;
+
             if (value)
             {
                 MasterAudio.UnmuteAllPlaylists();
@@ -75,9 +81,17 @@
             MasterAudio.StartPlaylist(playlist);
         }
 
+        public void StopPlayList(string playlist) { MasterAudio.StopPlaylist(playlist); }
+        public void StopAllPlayList()             { MasterAudio.StopAllPlaylists(); }
+
+        public void PauseEverything() { MasterAudio.PauseEverything(); }
+
+        public void ResumeEverything() { MasterAudio.UnpauseEverything(); }
+
         public virtual void CheckToMuteSound(bool isMute)
         {
             var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
+
             foreach (var transform in groups)
             {
                 transform.groupMasterVolume = isMute ? 0 : 1;
@@ -99,6 +113,7 @@
         protected virtual void SetSoundValue(float value)
         {
             var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
+
             foreach (var transform in groups)
             {
                 transform.groupMasterVolume = value;
