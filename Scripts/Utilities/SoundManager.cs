@@ -82,11 +82,20 @@
         }
 
         public void StopPlayList(string playlist) { MasterAudio.StopPlaylist(playlist); }
-        public void StopAllPlayList()             { MasterAudio.StopAllPlaylists(); }
 
-        public void PauseEverything() { MasterAudio.PauseEverything(); }
+        public void StopAllPlayList() { MasterAudio.StopAllPlaylists(); }
 
-        public void ResumeEverything() { MasterAudio.UnpauseEverything(); }
+        public async void PauseEverything()
+        {
+            await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
+            MasterAudio.PauseEverything();
+        }
+
+        public async void ResumeEverything()
+        {
+            await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
+            MasterAudio.UnpauseEverything();
+        }
 
         public virtual void CheckToMuteSound(bool isMute)
         {
