@@ -21,7 +21,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
         private void OnApplicationPause(bool pauseStatus)
         {
             this.applicationPauseSignal.PauseStatus = pauseStatus;
-            // this.signalBus.Fire(this.applicationPauseSignal); // Active this signal later, when need
+            this.signalBus.Fire(this.applicationPauseSignal); // Active this signal later, when need
 
             if (pauseStatus)
             {
