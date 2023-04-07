@@ -13,7 +13,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public override async UniTask OpenViewAsync()
         {
-            this.BindData();
+            await this.BindData();
 
             if (this.ScreenStatus == ScreenStatus.Opened) return;
             this.ScreenStatus = ScreenStatus.Opened;
@@ -64,7 +64,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         {
             if (this.Model != null)
             {
-                this.BindData(this.Model);
+                await this.BindData(this.Model);
             }
             else
             {
