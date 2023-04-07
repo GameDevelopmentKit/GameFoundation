@@ -9,7 +9,7 @@
 
     public interface IAudioManager
     {
-        void PlaySound(string name, bool isLoop = false);
+        void PlaySound(string    name, bool isLoop = false);
         void StopAllSound(string name);
         void PlayPlayList(string playlist, bool random = false);
         void StopPlayList(string playlist);
@@ -46,14 +46,14 @@
             this.soundSetting.MuteMusic.Value = false;
 
             this.compositeDisposable = new CompositeDisposable
-            {
-                //TODO uncomment this when we have a proper solution
-                // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-                // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-                this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
-            };
+                                       {
+                                           //TODO uncomment this when we have a proper solution
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
+                                           this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
+                                           this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
+                                           this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
+                                       };
         }
 
         private void SetMasterVolume(bool value)
@@ -85,16 +85,19 @@
 
         public void StopAllPlayList() { MasterAudio.StopAllPlaylists(); }
 
-        public async void PauseEverything()
+        public void PauseEverything()
         {
-            await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
-            MasterAudio.PauseEverything();
+            if (this.playlistController.ControllerIsReady)
+            {
+                MasterAudio.PauseEverything();
+            }
         }
-
-        public async void ResumeEverything()
+        public void ResumeEverything()
         {
-            await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
-            MasterAudio.UnpauseEverything();
+            if (this.playlistController.ControllerIsReady)
+            {
+                MasterAudio.UnpauseEverything();
+            }
         }
 
         public virtual void CheckToMuteSound(bool isMute)
