@@ -16,9 +16,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
     {
         public RectTransform RectTransform { get; }
         public bool          IsReadyToUse  { get; }
-        public UniTask          Open();
-        public UniTask          Close();
+        public UniTask       Open();
+        public UniTask       Close();
         public void          Hide();
+        public void          Show();
+
 
         public void DestroySelf();
 

@@ -76,6 +76,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public sealed override UniTask BindData() { return UniTask.CompletedTask; }
 
-        public abstract void BindData(TModel popupModel);
+        public abstract UniTask BindData(TModel popupModel);
     }
 }

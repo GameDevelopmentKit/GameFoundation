@@ -83,6 +83,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
             this.ViewDidClose?.Invoke();
         }
         public void Hide() { this.UpdateAlpha(0); }
+        public void Show() { this.UpdateAlpha(1); }
 
         public void DestroySelf() { Destroy(this.gameObject); }
 

@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.UIModule.CommonScreen
 {
     using System;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.Utilities;
@@ -42,11 +43,12 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         private readonly IAudioManager audioManager;
         public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioManager audioManager) : base(signalBus, logService) { this.audioManager = audioManager; }
 
-        public override void BindData(NotificationPopupModel popupPopupModel)
+        public override UniTask BindData(NotificationPopupModel popupPopupModel)
         {
             this.Init();
             this.SetNotificationContent();
             this.SwitchMode();
+            return UniTask.CompletedTask;
         }
 
         private void Init()
