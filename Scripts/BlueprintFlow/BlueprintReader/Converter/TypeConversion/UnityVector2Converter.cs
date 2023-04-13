@@ -21,5 +21,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
             return null;
         }
+
+        public override string ConvertToString(object value, Type typeInfo)
+        {
+            var vector = (Vector2)value;
+            return $"{vector.x},{vector.y}";
+        }
     }
 }
