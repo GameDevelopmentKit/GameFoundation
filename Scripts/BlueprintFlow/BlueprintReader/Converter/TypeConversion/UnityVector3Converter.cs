@@ -6,7 +6,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     public class UnityVector3Converter : DefaultTypeConverter
     {
         private readonly char delimiter;
-        public UnityVector3Converter(char delimiter = ',') { this.delimiter = delimiter; }
+        public UnityVector3Converter(char delimiter = '|') { this.delimiter = delimiter; }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
@@ -26,7 +26,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         public override string ConvertToString(object value, Type typeInfo)
         {
             var vector = (Vector3)value;
-            return $"{vector.x},{vector.y},{vector.z}";
+            return string.Join(this.delimiter, $"{vector.x}", $"{vector.y}", $"{vector.z}");
         }
     }
 }
