@@ -5,6 +5,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using UnityEngine;
+    using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
     using Zenject;
 
@@ -21,18 +22,19 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         }
 
         //to backup for old version
-        public UniTask LoadSingleSceneAsync(string sceneName) { return LoadSingleSceneByAddressableAsync(sceneName); }
+        public UniTask<SceneInstance> LoadSingleSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true) { return this.LoadSingleSceneByAddressableAsync(sceneName, loadMode, activeOnLoad); }
 
         /// <summary>Load scene async by name </summary>
-        public async UniTask LoadSingleSceneByAddressableAsync(string sceneName)
+        private async UniTask<SceneInstance> LoadSingleSceneByAddressableAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
         {
             this.signalBus.Fire<StartLoadingNewSceneSignal>();
             var lastScene = CurrentSceneName;
             CurrentSceneName = sceneName;
-            await this.GameAssets.LoadSceneAsync(sceneName);
+            var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName, loadMode, activeOnLoad);
             _ = Resources.UnloadUnusedAssets();
             this.GameAssets.UnloadUnusedAssets(lastScene);
             this.signalBus.Fire<FinishLoadingNewSceneSignal>();
+            return screenInstance;
         }
 
         public async UniTask LoadSingleSceneBySceneManagerAsync(string sceneName)
