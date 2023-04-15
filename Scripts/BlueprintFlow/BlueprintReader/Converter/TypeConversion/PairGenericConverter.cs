@@ -6,7 +6,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     public class PairGenericConverter : DefaultTypeConverter
     {
         private readonly char delimiterPair;
-        public PairGenericConverter(char delimiterPair = '-') { this.delimiterPair = delimiterPair; }
+        public PairGenericConverter(char delimiterPair = ':') { this.delimiterPair = delimiterPair; }
 
 
         public override object ConvertFromString(string text, Type typeInfo)
@@ -34,7 +34,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         {
             var item1Type   = typeInfo.GetGenericArguments()[0];
             var item2Type   = typeInfo.GetGenericArguments()[1];
-            var keyPairType = typeof(Tuple<,,>).MakeGenericType(item1Type, item2Type);
+            var keyPairType = typeof(Tuple<,>).MakeGenericType(item1Type, item2Type);
 
             var item1Converter = CsvHelper.TypeConverterCache.GetConverter(item1Type);
             var item2Converter = CsvHelper.TypeConverterCache.GetConverter(item2Type);
