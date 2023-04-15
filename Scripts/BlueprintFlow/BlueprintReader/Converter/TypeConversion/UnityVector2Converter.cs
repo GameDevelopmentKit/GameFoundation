@@ -25,7 +25,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         public override string ConvertToString(object value, Type typeInfo)
         {
             var vector = (Vector2)value;
-            return string.Join(this.delimiter, $"{vector.x}", $"{vector.y}");
+            return $"{vector.x}{this.delimiter}{vector.y}";
         }
     }
 }
