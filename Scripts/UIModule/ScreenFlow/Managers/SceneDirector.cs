@@ -25,7 +25,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public UniTask<SceneInstance> LoadSingleSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true) { return this.LoadSingleSceneByAddressableAsync(sceneName, loadMode, activeOnLoad); }
 
         /// <summary>Load scene async by name </summary>
-        private async UniTask<SceneInstance> LoadSingleSceneByAddressableAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
+        public async UniTask<SceneInstance> LoadSingleSceneByAddressableAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
         {
             this.signalBus.Fire<StartLoadingNewSceneSignal>();
             var lastScene = CurrentSceneName;
