@@ -89,14 +89,14 @@
         {
             if (this.playlistController.ControllerIsReady)
             {
-                MasterAudio.PauseEverything();
+                MasterAudio.MuteEverything();
             }
         }
         public void ResumeEverything()
         {
             if (this.playlistController.ControllerIsReady)
             {
-                MasterAudio.UnpauseEverything();
+                MasterAudio.UnmuteEverything();
             }
         }
 
