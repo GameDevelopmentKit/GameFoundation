@@ -64,6 +64,9 @@ public static class Build
         var keyStoreAliasName      = "theonestudio";
         var keyStorePassword       = "tothemoon";
         var keyStoreAliasPassword  = "tothemoon";
+        var iosTargetOSVersion     = "12.0";
+        var iosSigningTeamId       = "";
+        
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
         {
@@ -115,6 +118,12 @@ public static class Build
                 case "-keyStoreAliasPassword":
                     keyStoreAliasPassword = args[++i];
                     break;
+                case "-iosTargetOSVersion":
+                    iosTargetOSVersion = args[++i];
+                    break;
+                case "-iosSigningTeamId":
+                    iosSigningTeamId = args[++i];
+                    break;
             }
             
 #if PRODUCTION
@@ -132,6 +141,8 @@ public static class Build
             {
                 EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
             }
+            
+            SetupIos(iosSigningTeamId, iosTargetOSVersion);
 
             //TODO config it later, only use this for TheOneStudio
         }
@@ -139,6 +150,12 @@ public static class Build
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
         BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle, packageName);
+    }
+    
+    public static void SetupIos(string teamId, string targetOSVersion)
+    {
+        PlayerSettings.iOS.appleDeveloperTeamID        = teamId;
+        PlayerSettings.iOS.targetOSVersionString       = targetOSVersion;
     }
 
     public static void SetUpAndroidKeyStore(string keyStoreFileName = "the1_googleplay.keystore", string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
@@ -207,6 +224,7 @@ public static class Build
         switch (platform.BuildTarget)
         {
             case BuildTarget.iOS:
+                PlayerSettings.iOS.appleEnableAutomaticSigning = true;
                 break;
             case BuildTarget.Android:
                 //Change build architecture to ARMv7 and ARM64
