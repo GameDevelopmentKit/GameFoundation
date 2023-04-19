@@ -47,6 +47,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public void CloseAllScreen();
 
         /// <summary>
+        /// Close all screen on current scene async
+        /// </summary>
+        public UniTask CloseAllScreenAsync();
+
+        /// <summary>
         /// Cleanup/ destroy all screen on current scene
         /// </summary>
         public void CleanUpAllScreen();
@@ -225,6 +230,23 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
+        }
+
+        public async UniTask CloseAllScreenAsync()
+        {
+            var tasks= new List<UniTask>();
+            var cacheActiveScreens = this.activeScreens.ToList();
+            this.activeScreens.Clear();
+
+            foreach (var screen in cacheActiveScreens)
+            {
+                tasks.Add(screen.CloseViewAsync());
+            }
+
+            this.CurrentActiveScreen.Value = null;
+            this.previousActiveScreen      = null;
+            
+            await UniTask.WhenAll(tasks);
         }
 
         public void CleanUpAllScreen()
