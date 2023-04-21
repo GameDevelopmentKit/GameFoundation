@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.Utilities
 {
+    using System;
     using System.Collections.Generic;
     using GameFoundation.Scripts.Interfaces;
     using GameFoundation.Scripts.Utilities.LogService;
@@ -11,7 +12,7 @@ namespace GameFoundation.Scripts.Utilities
     /// </summary>
     public class HandleLocalDataServices
     {
-        private const    string      LocalDataPrefix = "LD-";
+        private const string LocalDataPrefix = "LD-";
 
         #region inject
 
@@ -66,6 +67,28 @@ namespace GameFoundation.Scripts.Utilities
             if (string.IsNullOrEmpty(json))
             {
                 result?.Init();
+            }
+
+            this.localDataCaches.Add(key, result);
+
+            return result;
+        }
+
+        public object Load(Type localDataType)
+        {
+            var key = LocalDataPrefix + localDataType.Name;
+
+            if (this.localDataCaches.TryGetValue(key, out var cache))
+            {
+                return cache;
+            }
+
+            var json   = PlayerPrefs.GetString(key);
+            var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(localDataType) : JsonConvert.DeserializeObject(json, localDataType);
+
+            if (string.IsNullOrEmpty(json))
+            {
+                result?.GetType().GetMethod("Init")?.Invoke(result, null);
             }
 
             this.localDataCaches.Add(key, result);
