@@ -5,7 +5,6 @@ namespace BlueprintFlow.BlueprintControlFlow
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
-    using System.Threading.Tasks;
     using BlueprintFlow.APIHandler;
     using BlueprintFlow.BlueprintReader;
     using BlueprintFlow.Signals;
@@ -71,7 +70,12 @@ namespace BlueprintFlow.BlueprintControlFlow
                     this.handleLocalDataServices.Save(newBlueprintInfo, true);
 
                     // Unzip file to memory
+#if !UNITY_WEBGL
                     listRawBlueprints = await UniTask.RunOnThreadPool(this.UnzipBlueprint);
+
+#else
+                    listRawBlueprints = await UniTask.Create(this.UnzipBlueprint);
+#endif
                 }
             }
 
@@ -152,7 +156,11 @@ namespace BlueprintFlow.BlueprintControlFlow
                 var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);
                 if (blueprintInstance != null)
                 {
+#if !UNITY_WEBGL
                     listReadTask.Add(UniTask.RunOnThreadPool(() => this.OpenReadBlueprint(blueprintInstance, listRawBlueprints)));
+#else
+                    listReadTask.Add(UniTask.Create(() => this.OpenReadBlueprint(blueprintInstance, listRawBlueprints)));
+#endif
                 }
                 else
                 {
@@ -199,7 +207,9 @@ namespace BlueprintFlow.BlueprintControlFlow
                         this.logService.Exception(e);
                     }
 
+#if !UNITY_WEBGL
                     await UniTask.SwitchToThreadPool();
+#endif
                     return result;
                 }
 
