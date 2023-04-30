@@ -235,6 +235,10 @@ public static class Build
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 break;
             case BuildTarget.WebGL:
+                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
+                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Gzip;
+                PlayerSettings.WebGL.decompressionFallback = true;
+                PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
