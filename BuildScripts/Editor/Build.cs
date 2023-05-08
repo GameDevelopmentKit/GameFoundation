@@ -236,7 +236,7 @@ public static class Build
                 break;
             case BuildTarget.WebGL:
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
-                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Gzip;
+                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = true;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
                 break;
