@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 // ------------------------------------------------------------------------
@@ -249,8 +249,9 @@ public static class Build
     /// Clean Addressable before build and init FMOD
     /// </summary>
     /// <param name="buildTargetInfo"></param>
-    private static void BuildAddressable(BuildTargetInfo buildTargetInfo)
+    private static async void BuildAddressable(BuildTargetInfo buildTargetInfo)
     {
+        await UniTask.WaitUntil(() => !EditorApplication.isCompiling);
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
