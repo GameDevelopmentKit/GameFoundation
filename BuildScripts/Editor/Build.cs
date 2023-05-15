@@ -168,7 +168,7 @@ public static class Build
         PlayerSettings.keyaliasPass              = keyaliasPass;
     }
 
-    public static void BuildInternal(ScriptingImplementation scriptingBackend,       BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
+    public static async void BuildInternal(ScriptingImplementation scriptingBackend,       BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
                                      bool                    buildAppBundle = false, string       packageName = "")
     {
         BuildTools.ResetBuildSettings();
@@ -195,7 +195,7 @@ public static class Build
             SetApplicationVersion();
 
             EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
-            BuildAddressable(platform);
+            await BuildAddressable(platform);
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
@@ -249,7 +249,7 @@ public static class Build
     /// Clean Addressable before build and init FMOD
     /// </summary>
     /// <param name="buildTargetInfo"></param>
-    private static async void BuildAddressable(BuildTargetInfo buildTargetInfo)
+    private static async UniTask BuildAddressable(BuildTargetInfo buildTargetInfo)
     {
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
