@@ -251,7 +251,6 @@ public static class Build
     /// <param name="buildTargetInfo"></param>
     private static async void BuildAddressable(BuildTargetInfo buildTargetInfo)
     {
-        await UniTask.WaitUntil(() => !EditorApplication.isCompiling);
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
@@ -259,6 +258,7 @@ public static class Build
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Build addressable");
         Console.WriteLine($"--------------------");
+        await UniTask.WaitUntil(() => !EditorApplication.isCompiling);
         AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
         var success = string.IsNullOrEmpty(result.Error);
         if (!success)
