@@ -195,7 +195,7 @@ public static class Build
             SetApplicationVersion();
 
             EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
-            await BuildAddressable(platform);
+            BuildAddressable(platform);
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
@@ -249,7 +249,7 @@ public static class Build
     /// Clean Addressable before build and init FMOD
     /// </summary>
     /// <param name="buildTargetInfo"></param>
-    private static async UniTask BuildAddressable(BuildTargetInfo buildTargetInfo)
+    private static void BuildAddressable(BuildTargetInfo buildTargetInfo)
     {
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
@@ -258,7 +258,6 @@ public static class Build
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Build addressable");
         Console.WriteLine($"--------------------");
-        await UniTask.WaitUntil(() => !EditorApplication.isCompiling);
         AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
         var success = string.IsNullOrEmpty(result.Error);
         if (!success)
