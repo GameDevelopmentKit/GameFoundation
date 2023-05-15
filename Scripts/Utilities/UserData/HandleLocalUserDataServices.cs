@@ -3,9 +3,9 @@ namespace GameFoundation.Scripts.Utilities.UserData
     using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
 
-    public class LocalHandleUserDataServices : BaseHandleUserDataServices
+    public class HandleLocalUserDataServices : BaseHandleUserDataServices
     {
-        public LocalHandleUserDataServices(ILogService logService) : base(logService)
+        public HandleLocalUserDataServices(ILogService logService) : base(logService)
         {
         }
 
