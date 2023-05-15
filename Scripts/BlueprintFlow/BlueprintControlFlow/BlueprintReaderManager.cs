@@ -9,9 +9,9 @@ namespace BlueprintFlow.BlueprintControlFlow
     using BlueprintFlow.BlueprintReader;
     using BlueprintFlow.Signals;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
+    using GameFoundation.Scripts.Utilities.UserData;
     using UnityEngine;
     using Zenject;
 
@@ -25,7 +25,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         private readonly SignalBus               signalBus;
         private readonly ILogService             logService;
         private readonly DiContainer             diContainer;
-        private readonly HandleLocalDataServices handleLocalDataServices;
+        private readonly IHandleUserDataServices handleUserDataServices;
         private readonly BlueprintConfig         blueprintConfig;
         private readonly FetchBlueprintInfo      fetchBlueprintInfo;
         private readonly BlueprintDownloader     blueprintDownloader;
@@ -34,13 +34,13 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         private readonly ReadBlueprintProgressSignal readBlueprintProgressSignal = new();
 
-        public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer, HandleLocalDataServices handleLocalDataServices, BlueprintConfig blueprintConfig,
+        public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer, IHandleUserDataServices handleUserDataServices, BlueprintConfig blueprintConfig,
             FetchBlueprintInfo fetchBlueprintInfo, BlueprintDownloader blueprintDownloader)
         {
             this.signalBus               = signalBus;
             this.logService              = logService;
             this.diContainer             = diContainer;
-            this.handleLocalDataServices = handleLocalDataServices;
+            this.handleUserDataServices = handleUserDataServices;
             this.blueprintConfig         = blueprintConfig;
             this.fetchBlueprintInfo      = fetchBlueprintInfo;
             this.blueprintDownloader     = blueprintDownloader;
@@ -67,7 +67,7 @@ namespace BlueprintFlow.BlueprintControlFlow
                 if (File.Exists(this.blueprintConfig.BlueprintZipFilepath))
                 {
                     // Save blueprint info to local
-                    this.handleLocalDataServices.Save(newBlueprintInfo, true);
+                    this.handleUserDataServices.Save(newBlueprintInfo, true);
 
                     // Unzip file to memory
 #if !UNITY_WEBGL
@@ -101,7 +101,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         }
 
         protected virtual bool IsCachedBlueprintUpToDate(string url, string hash) =>
-            this.handleLocalDataServices.Load<BlueprintInfoData>().Url == url &&
+            this.handleUserDataServices.Load<BlueprintInfoData>().Url == url &&
             MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
 
 
