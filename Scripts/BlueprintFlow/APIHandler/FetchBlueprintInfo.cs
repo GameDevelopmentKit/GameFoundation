@@ -36,7 +36,7 @@ namespace BlueprintFlow.APIHandler
     using System.Net;
     using System.Threading.Tasks;
     using GameFoundation.Scripts.Interfaces;
-    using GameFoundation.Scripts.Utilities;
+    using GameFoundation.Scripts.Utilities.UserData;
     using Newtonsoft.Json;
     using UnityEngine;
 
@@ -50,8 +50,8 @@ namespace BlueprintFlow.APIHandler
 
     public class FetchBlueprintInfo
     {
-        private readonly HandleLocalDataServices handleLocalDataServices;
-        public FetchBlueprintInfo(HandleLocalDataServices handleLocalDataServices) { this.handleLocalDataServices = handleLocalDataServices; }
+        private readonly IHandleUserDataServices handleUserDataServices;
+        public FetchBlueprintInfo(IHandleUserDataServices handleUserDataServices) { this.handleUserDataServices = handleUserDataServices; }
         public async Task<BlueprintInfoData> GetBlueprintInfo(string fetchUri)
         {
             try
@@ -68,7 +68,7 @@ namespace BlueprintFlow.APIHandler
             {
                 //if fetch info fails get info from local
                 Debug.LogException(e);
-                return this.handleLocalDataServices.Load<BlueprintInfoData>();
+                return this.handleUserDataServices.Load<BlueprintInfoData>();
             }
         }
     }

@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
     using System;
+    using GameFoundation.Scripts.Utilities.UserData;
     using UnityEngine;
     using Zenject;
 
@@ -8,7 +9,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
     public class MinimizeAppService : MonoBehaviour
     {
         [Inject] private SignalBus               signalBus;
-        [Inject] private HandleLocalDataServices localDataServices;
+        [Inject] private IHandleUserDataServices handleUserDataServices;
 
         private readonly ApplicationPauseSignal     applicationPauseSignal     = new ApplicationPauseSignal(false);
         private readonly UpdateTimeAfterFocusSignal updateTimeAfterFocusSignal = new UpdateTimeAfterFocusSignal();
@@ -28,7 +29,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
                 this.timeBeforeAppPause = DateTime.Now;
 
                 // save local data to storage
-                this.localDataServices.StoreAllToLocal();
+                this.handleUserDataServices.SaveAll();
             }
             else
             {
@@ -46,6 +47,6 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
             }
         }
 
-        private void OnApplicationQuit() { this.localDataServices.StoreAllToLocal(); }
+        private void OnApplicationQuit() { this.handleUserDataServices.SaveAll(); }
     }
 }

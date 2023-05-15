@@ -12,6 +12,7 @@
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
+    using GameFoundation.Scripts.Utilities.UserData;
     using global::Models;
     using I2.Loc;
     using Zenject;
@@ -23,7 +24,7 @@
             SignalBusInstaller.Install(this.Container);
 
             this.Container.Bind<GDKConfig>().FromResource("GameConfigs/GDKConfig").AsSingle().NonLazy();
-            
+
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
@@ -40,15 +41,15 @@
             this.Container.Bind<ILogService>().To<LogService>().AsSingle().NonLazy();
 
             //Game Manager
-            this.Container.Bind<HandleLocalDataServices>().AsCached().NonLazy();
-            this.Container.Bind<SoundSetting>().FromResolveGetter<HandleLocalDataServices>(services => services.Load<SoundSetting>()).AsCached();
+            this.Container.Bind<IHandleUserDataServices>().To<HandleLocalUserDataServices>().AsCached().NonLazy();
+            this.Container.Bind<SoundSetting>().FromResolveGetter<IHandleUserDataServices>(services => services.Load<SoundSetting>()).AsCached();
 
             //Player state
             this.Container.Bind<PlayerState>().AsCached();
 
             //Genarate fps
             this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
-            
+
             //Helper
             this.Container.Bind<LoadImageHelper>().AsCached();
 
