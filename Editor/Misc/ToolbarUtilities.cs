@@ -4,10 +4,11 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
-    using UnityEngine;
     using UnityEditor;
     using UnityEditor.SceneManagement;
+    using UnityEngine;
     using UnityEngine.UIElements;
+    using Object = UnityEngine.Object;
 
     [Serializable]
     public enum ToolbarZone
@@ -36,10 +37,11 @@
         {
             if (_toolbar == null)
             {
-                Assembly editorAssembly = typeof(UnityEditor.Editor).Assembly;
+                Assembly editorAssembly = typeof(Editor).Assembly;
 
-                UnityEngine.Object[] toolbars = UnityEngine.Resources.FindObjectsOfTypeAll(editorAssembly.GetType("UnityEditor.Toolbar"));
+                Object[] toolbars = Resources.FindObjectsOfTypeAll(editorAssembly.GetType("UnityEditor.Toolbar"));
                 _toolbar = toolbars.Length > 0 ? (ScriptableObject)toolbars[0] : null;
+
                 if (_toolbar != null)
                 {
                     var root    = _toolbar.GetType().GetField("m_Root", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -50,6 +52,7 @@
                     void RegisterCallback(string root, Action cb)
                     {
                         var toolbarZone = mRoot.Q(root);
+
                         if (toolbarZone != null)
                         {
                             var parent = new VisualElement()
@@ -60,6 +63,7 @@
                                     flexDirection = FlexDirection.Row,
                                 }
                             };
+
                             var container = new IMGUIContainer();
                             container.onGUIHandler += () => { cb?.Invoke(); };
                             parent.Add(container);
@@ -77,6 +81,7 @@
                 string folderName   = Application.dataPath + "/Scenes";
                 var    dirInfo      = new DirectoryInfo(folderName);
                 var    allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
+
                 foreach (var fileInfo in allFileInfos)
                 {
                     var fullPath  = fileInfo.FullName.Replace(@"\", "/");
@@ -85,6 +90,9 @@
                     scenePaths.Add(scenePath);
                     sceneNames.Add(Path.GetFileNameWithoutExtension(scenePath));
                 }
+
+                //Add more SceneExtend Folder
+                SceneToolBarExtend.Instance.AddMoreSceneExtend(scenePaths, sceneNames);
 
                 _scenePaths = scenePaths.ToArray();
                 _sceneNames = sceneNames.ToArray();
@@ -104,11 +112,13 @@
                         if (sceneName == _sceneNames[i])
                         {
                             sceneIndex = i;
+
                             break;
                         }
                     }
 
                     int newSceneIndex = EditorGUILayout.Popup(sceneIndex, _sceneNames, GUILayout.Width(200.0f));
+
                     if (newSceneIndex != sceneIndex)
                     {
                         if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
