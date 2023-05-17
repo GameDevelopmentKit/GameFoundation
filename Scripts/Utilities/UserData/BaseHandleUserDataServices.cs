@@ -10,7 +10,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
     public abstract class BaseHandleUserDataServices : IHandleUserDataServices
     {
-        private const string UserDataPrefix = "UD-";
+        public const string UserDataPrefix = "UD-";
 
         private readonly ILogService                logService;
         private readonly Dictionary<string, object> userDataCache = new();
