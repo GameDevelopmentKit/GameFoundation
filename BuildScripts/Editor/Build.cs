@@ -239,7 +239,6 @@ public static class Build
                 PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = false;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
-                PlayerSettings.WebGL.threadsSupport        = true;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
