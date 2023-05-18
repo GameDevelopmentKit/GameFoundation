@@ -236,9 +236,10 @@ public static class Build
                 break;
             case BuildTarget.WebGL:
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
-                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Gzip; // Disable compression for FBInstant game
-                PlayerSettings.WebGL.decompressionFallback = true;
+                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.decompressionFallback = false;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
+                PlayerSettings.WebGL.threadsSupport        = true;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
