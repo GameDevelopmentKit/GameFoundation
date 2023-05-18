@@ -58,7 +58,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             else
             {
                 var newBlueprintInfo = await this.fetchBlueprintInfo.GetBlueprintInfo(this.blueprintConfig.FetchBlueprintUri);
-                if (!this.IsCachedBlueprintUpToDate(newBlueprintInfo.Url, newBlueprintInfo.Hash))
+                if (!await this.IsCachedBlueprintUpToDate(newBlueprintInfo.Url, newBlueprintInfo.Hash))
                 {
                     await this.DownloadBlueprint(newBlueprintInfo.Url);
                 }
@@ -100,8 +100,8 @@ namespace BlueprintFlow.BlueprintControlFlow
             this.signalBus.Fire<LoadBlueprintDataSucceedSignal>();
         }
 
-        protected virtual bool IsCachedBlueprintUpToDate(string url, string hash) =>
-            this.handleUserDataServices.Load<BlueprintInfoData>().Url == url &&
+        protected virtual async UniTask<bool> IsCachedBlueprintUpToDate(string url, string hash) =>
+            (await this.handleUserDataServices.Load<BlueprintInfoData>()).Url == url &&
             MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
 
 

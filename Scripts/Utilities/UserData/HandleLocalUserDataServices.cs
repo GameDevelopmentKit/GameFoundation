@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.Utilities.UserData
 {
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
 
@@ -9,15 +10,16 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
         }
 
-        protected override void SaveJson(string key, string json)
+        protected override UniTask SaveJson(string key, string json)
         {
             PlayerPrefs.SetString(key, json);
             PlayerPrefs.Save();
+            return UniTask.CompletedTask;
         }
 
-        protected override string LoadJson(string key)
+        protected override UniTask<string> LoadJson(string key)
         {
-            return PlayerPrefs.GetString(key);
+            return UniTask.FromResult(PlayerPrefs.GetString(key));
         }
     }
 }
