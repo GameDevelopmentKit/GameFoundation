@@ -22,6 +22,13 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 .Where(p => type.IsAssignableFrom(p) && p.IsClass && !p.IsAbstract);
         }
 
+        public static void CopyTo<T>(this T from, T to)
+        {
+            foreach (var fieldInfo in typeof(T).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+            {
+                fieldInfo.SetValue(to, fieldInfo.GetValue(from));
+            }
+        }
 
         public static IEnumerable<Type> GetTypesSafely(Assembly assembly)
         {
