@@ -68,7 +68,7 @@ namespace BlueprintFlow.APIHandler
             {
                 //if fetch info fails get info from local
                 Debug.LogException(e);
-                return this.handleUserDataServices.Load<BlueprintInfoData>();
+                return await this.handleUserDataServices.Load<BlueprintInfoData>();
             }
         }
     }

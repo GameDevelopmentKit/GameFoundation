@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.Utilities.UserData
 {
     using System;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Interfaces;
 
     public interface IHandleUserDataServices
@@ -11,17 +12,17 @@ namespace GameFoundation.Scripts.Utilities.UserData
         /// <param name="data">class data</param>
         /// <param name="force"> if true, save data immediately to local</param>
         /// <typeparam name="T"> type of class</typeparam>
-        public void Save<T>(T data, bool force = false) where T : class;
+        public UniTask Save<T>(T data, bool force = false) where T : class, ILocalData;
 
         /// <summary>
         /// Load data from local
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T Load<T>() where T : class, ILocalData, new();
+        public UniTask<T> Load<T>() where T : class, ILocalData, new();
 
-        public object Load(Type localDataType);
+        public UniTask<ILocalData> Load(Type localDataType);
 
-        public void SaveAll();
+        public UniTask SaveAll();
     }
 }

@@ -5,6 +5,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Utilities.Utils;
 
     public static class ListExtensions
@@ -828,6 +829,12 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             if (dictionary.ContainsKey(key)) return dictionary[key];
             dictionary.Add(key, valueFunc());
+            return dictionary[key];
+        }
+
+        public static async UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFunc)
+        {
+            if (!dictionary.ContainsKey(key)) dictionary.Add(key, await valueFunc());
             return dictionary[key];
         }
     }
