@@ -19,9 +19,9 @@ namespace GameFoundation.Scripts.Utilities.UserData
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public UniTask<T> Load<T>() where T : class, ILocalData, new();
+        public UniTask<T> Load<T>() where T : class, ILocalData;
 
-        public UniTask<ILocalData> Load(Type localDataType);
+        public UniTask<ILocalData[]> Load(params Type[] types);
 
         public UniTask SaveAll();
     }

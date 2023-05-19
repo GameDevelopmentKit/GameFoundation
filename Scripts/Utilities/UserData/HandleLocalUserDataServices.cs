@@ -1,7 +1,9 @@
 namespace GameFoundation.Scripts.Utilities.UserData
 {
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Utilities.LogService;
+    using Sirenix.Utilities;
     using UnityEngine;
 
     public class HandleLocalUserDataServices : BaseHandleUserDataServices
@@ -10,16 +12,16 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
         }
 
-        protected override UniTask SaveJson(string key, string json)
+        protected override UniTask SaveJsons(params (string key, string json)[] values)
         {
-            PlayerPrefs.SetString(key, json);
+            values.ForEach(value => PlayerPrefs.SetString(value.key, value.json));
             PlayerPrefs.Save();
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask<string> LoadJson(string key)
+        protected override UniTask<string[]> LoadJsons(params string[] keys)
         {
-            return UniTask.FromResult(PlayerPrefs.GetString(key));
+            return UniTask.FromResult(keys.Select(PlayerPrefs.GetString).ToArray());
         }
     }
 }

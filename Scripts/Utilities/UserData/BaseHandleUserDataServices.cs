@@ -2,16 +2,20 @@ namespace GameFoundation.Scripts.Utilities.UserData
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Interfaces;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
+    using GameFoundation.Scripts.Utilities.Utils;
     using Newtonsoft.Json;
     using UnityEngine;
 
     public abstract class BaseHandleUserDataServices : IHandleUserDataServices
     {
         public const string UserDataPrefix = "LD-";
+
+        private static string KeyOf(Type type) => UserDataPrefix + type.Name;
 
         private readonly ILogService                    logService;
         private readonly Dictionary<string, ILocalData> userDataCache = new();
@@ -23,7 +27,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         public async UniTask Save<T>(T data, bool force = false) where T : class, ILocalData
         {
-            var key = UserDataPrefix + typeof(T).Name;
+            var key = KeyOf(typeof(T));
 
             if (!this.userDataCache.ContainsKey(key))
             {
@@ -32,70 +36,53 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
             if (!force) return;
 
-            await this.SaveJson(key, JsonConvert.SerializeObject(data));
+            await this.SaveJsons((key, JsonConvert.SerializeObject(data)));
             this.logService.LogWithColor($"Saved {key}", Color.green);
         }
 
-        public async UniTask<T> Load<T>() where T : class, ILocalData, new()
+        public async UniTask<T> Load<T>() where T : class, ILocalData
         {
-            var key = UserDataPrefix + typeof(T).Name;
-
-            return (T)await this.userDataCache.GetOrAdd(key, async () =>
-            {
-                var json   = await this.LoadJson(key);
-                var result = string.IsNullOrEmpty(json) ? new() : JsonConvert.DeserializeObject<T>(json);
-
-                if (result is not ILocalData localData)
-                {
-                    this.logService.Error($"Failed to load local data {key}");
-                    return null;
-                }
-
-                if (string.IsNullOrEmpty(json))
-                {
-                    localData.Init();
-                }
-
-                return localData;
-            });
+            return (T)(await this.Load(typeof(T)))[0];
         }
 
-        public async UniTask<ILocalData> Load(Type type)
+        public async UniTask<ILocalData[]> Load(params Type[] types)
         {
-            var key = UserDataPrefix + type.Name;
+            var keys = types.Select(KeyOf).ToArray();
 
-            return await this.userDataCache.GetOrAdd(key, async () =>
+            return IterTools.Zip(types, keys, await this.LoadJsons(keys), (type, key, json) =>
             {
-                var json   = await this.LoadJson(key);
-                var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type);
-
-                if (result is not ILocalData localData)
+                return this.userDataCache.GetOrAdd(key, () =>
                 {
-                    this.logService.Error($"Failed to load local data {key}");
-                    return null;
-                }
+                    var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type);
 
-                if (string.IsNullOrEmpty(json))
-                {
-                    localData.Init();
-                }
+                    if (result is not ILocalData data)
+                    {
+                        this.logService.Error($"Failed to load data {key}");
+                        return null;
+                    }
 
-                return localData;
-            });
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        data.Init();
+                    }
+
+                    this.logService.LogWithColor($"Loaded {key}", Color.green);
+                    return data;
+                });
+            }).ToArray();
         }
 
         public async UniTask SaveAll()
         {
-            foreach (var (key, value) in this.userDataCache)
+            await this.SaveJsons(this.userDataCache.Select(value =>
             {
-                await this.SaveJson(key, JsonConvert.SerializeObject(value));
-                this.logService.LogWithColor($"Saved {key}", Color.green);
-            }
-
-            Debug.Log("User data saved");
+                this.logService.LogWithColor($"Saved {value.Key}", Color.green);
+                return (value.Key, JsonConvert.SerializeObject(value.Value));
+            }).ToArray());
+            this.logService.LogWithColor("Saved all data", Color.green);
         }
 
-        protected abstract UniTask         SaveJson(string key, string json);
-        protected abstract UniTask<string> LoadJson(string key);
+        protected abstract UniTask           SaveJsons(params (string key, string json)[] values);
+        protected abstract UniTask<string[]> LoadJsons(params string[] keys);
     }
 }
