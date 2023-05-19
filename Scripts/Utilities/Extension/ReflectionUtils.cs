@@ -22,11 +22,17 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 .Where(p => type.IsAssignableFrom(p) && p.IsClass && !p.IsAbstract);
         }
 
-        public static void CopyTo<T>(this T from, T to)
+        public static void CopyTo(this object from, object to)
         {
-            foreach (var fieldInfo in typeof(T).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+            var fromFieldInfos = from.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            var toFieldInfos   = to.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            foreach (var fromField in fromFieldInfos)
             {
-                fieldInfo.SetValue(to, fieldInfo.GetValue(from));
+                var toField = toFieldInfos.FirstOrDefault(field => field.Name == fromField.Name && field.FieldType == fromField.FieldType);
+                if (toField != null)
+                {
+                    toField.SetValue(to, fromField.GetValue(from));
+                }
             }
         }
 
