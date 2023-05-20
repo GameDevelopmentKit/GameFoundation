@@ -15,7 +15,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
     {
         public const string UserDataPrefix = "LD-";
 
-        private static string KeyOf(Type type) => UserDataPrefix + type.Name;
+        public static string KeyOf(Type type) => UserDataPrefix + type.Name;
 
         private readonly ILogService                    logService;
         private readonly Dictionary<string, ILocalData> userDataCache = new();
