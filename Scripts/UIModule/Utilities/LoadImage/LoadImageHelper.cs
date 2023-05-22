@@ -2,7 +2,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using DG.Tweening;
     using GameFoundation.Scripts.AssetLibrary;
@@ -38,7 +37,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         }
 
         private bool inValidKey;
-        public async Task<Sprite> LoadLocalSprite(object key)
+        public async UniTask<Sprite> LoadLocalSprite(object key)
         {
             try
             {
@@ -91,7 +90,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
             imageComponent.DOFade(originAlpha, 0.5f);
         }
 
-        public async Task<Sprite> LoadSpriteFromUrl(string url)
+        public async UniTask<Sprite> LoadSpriteFromUrl(string url)
         {
             if (this.spriteCache.TryGetValue(url, out var sprite)) return sprite;
             sprite = await this.DownloadSpriteInternal(url);
@@ -108,7 +107,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
             }
         }
 
-        private async Task<Sprite> DownloadSpriteInternal(string url)
+        private async UniTask<Sprite> DownloadSpriteInternal(string url)
         {
             var texture = await this.LoadTextureFromUrl(url);
             if (texture == null) return null;
@@ -121,7 +120,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
             return sprite;
         }
 
-        public async Task<Texture> LoadTextureFromUrl(string url)
+        public async UniTask<Texture> LoadTextureFromUrl(string url)
         {
             if (this.textureCache.TryGetValue(url, out var texture)) return texture;
             texture = await this.DownloadTextureFromUrlInternal(url);
@@ -140,7 +139,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
             return texture;
         }
 
-        private async Task<Texture> DownloadTextureFromUrlInternal(string url)
+        private async UniTask<Texture> DownloadTextureFromUrlInternal(string url)
         {
             try
             {
