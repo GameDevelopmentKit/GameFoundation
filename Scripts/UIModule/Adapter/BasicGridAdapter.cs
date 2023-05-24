@@ -104,6 +104,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         }
 
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
+        
+        public List<TPresenter> GetPresenters() => this.presenters;
     }
 
     // This class keeps references to an item's views.
