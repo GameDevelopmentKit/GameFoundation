@@ -177,6 +177,11 @@ namespace BlueprintFlow.BlueprintReader.Converter
                 return this.GetConverter(type);
             }
 
+            if (type.IsGenericType && this.typeConverters.TryGetValue(type.GetGenericTypeDefinition(), out var converter))
+            {
+                return converter;
+            }
+
             // A specific IEnumerable converter doesn't exist.
             if (typeof(IEnumerable).IsAssignableFrom(type)) return new EnumerableConverter();
 
@@ -211,6 +216,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
             this.AddConverter(typeof(uint), new UInt32Converter());
             this.AddConverter(typeof(ulong), new UInt64Converter());
             this.AddConverter(typeof(Uri), new UriConverter());
+            this.AddConverter(typeof(ReadOnlyCollection<>), new ReadonlyCollectionConverter());
         }
     }
 }
