@@ -4,6 +4,7 @@
     using Cysharp.Threading.Tasks;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.Models;
+    using GameFoundation.Scripts.Utilities.UserData;
     using UniRx;
     using Zenject;
 
@@ -22,6 +23,7 @@
     {
         public static AudioManager Instance { get; private set; }
 
+        private readonly SignalBus                signalBus;
         private readonly PlaylistController       playlistController;
         private readonly SoundSetting             soundSetting;
         private readonly MasterAudio              masterAudio;
@@ -29,15 +31,16 @@
 
         private CompositeDisposable compositeDisposable;
 
-        public AudioManager(PlaylistController playlistController, SoundSetting SoundSetting, MasterAudio masterAudio)
+        public AudioManager(SignalBus signalBus, PlaylistController playlistController, SoundSetting SoundSetting, MasterAudio masterAudio)
         {
+            this.signalBus          = signalBus;
             this.playlistController = playlistController;
             this.soundSetting       = SoundSetting;
             this.masterAudio        = masterAudio;
             Instance                = this;
         }
 
-        public void Initialize() { this.SubscribeMasterAudio(); }
+        public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
 
         private async void SubscribeMasterAudio()
         {
