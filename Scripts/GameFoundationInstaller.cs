@@ -42,6 +42,7 @@
 
             //Game Manager
             this.Container.Bind<IHandleUserDataServices>().To<HandleLocalUserDataServices>().AsCached();
+            this.Container.DeclareSignal<UserDataLoadedSignal>();
 
             //Player state
             this.Container.Bind<PlayerState>().AsCached();
