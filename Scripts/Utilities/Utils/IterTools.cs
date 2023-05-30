@@ -7,6 +7,16 @@ namespace GameFoundation.Scripts.Utilities.Utils
 
     public static class IterTools
     {
+        public static IEnumerable<TResult> Zip<TFirst, TSecond, TResult>(IEnumerable<TFirst> first, IEnumerable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
+        {
+            using var e1 = first.GetEnumerator();
+            using var e2 = second.GetEnumerator();
+            while (e1.MoveNext() && e2.MoveNext())
+            {
+                yield return resultSelector(e1.Current, e2.Current);
+            }
+        }
+
         public static IEnumerable<TResult> Zip<TFirst, TSecond, TThird, TResult>(IEnumerable<TFirst> first, IEnumerable<TSecond> second, IEnumerable<TThird> third, Func<TFirst, TSecond, TThird, TResult> resultSelector)
         {
             using var e1 = first.GetEnumerator();

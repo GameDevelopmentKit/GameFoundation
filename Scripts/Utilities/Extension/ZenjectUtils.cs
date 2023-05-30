@@ -1,19 +1,19 @@
 namespace GameFoundation.Scripts.Utilities.Extension
 {
+    using System;
     using System.Linq;
-    using UnityEngine;
     using Zenject;
+    using Object = UnityEngine.Object;
 
     public static class ZenjectUtils
     {
-        
         /// <summary>Create factory with  </summary>
         public static void BindIFactoryForAllDriveTypeFromPool<T>(this DiContainer container)
         {
             var bindMemoryPoolMethod = container.GetType().GetMethods().First(methodInfo => methodInfo.Name.Equals("BindIFactory") && methodInfo.GetGenericArguments().Length == 1);
             var fromPoolableMemoryPoolMethod = typeof(FactoryFromBinder0Extensions).GetMethods()
                                                                                    .First(methodInfo => methodInfo.Name.Equals("FromPoolableMemoryPool") &&
-                                                                                                        methodInfo.GetGenericArguments().Length == 1     && methodInfo.GetParameters().Length == 1);
+                                                                                                        methodInfo.GetGenericArguments().Length == 1 && methodInfo.GetParameters().Length == 1);
 
             // Bind pool for all http request
             var allDriveType = ReflectionUtils.GetAllDerivedTypes<T>();
@@ -23,12 +23,13 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 fromPoolableMemoryPoolMethod.MakeGenericMethod(type).Invoke(null, new[] { factoryToChoiceIdBinder });
             }
         }
-        
+
         /// <summary>
         /// Binding all class type that inherited <paramref name="T"/>
         /// </summary>
         /// <param name="diContainer"></param>
         /// <typeparam name="T"></typeparam>
+        [Obsolete("Use BindAllDerivedTypes instead")]
         public static void BindAllTypeDriveFrom<T>(this DiContainer diContainer)
         {
             foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>())
@@ -36,7 +37,25 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 diContainer.Bind(type).AsCached().NonLazy();
             }
         }
-        
+
+        /// <summary>
+        /// Bind all class type that derive from <typeparamref name="T"/>
+        /// </summary>
+        public static void BindAllDerivedTypes<T>(this DiContainer container, bool nonLazy = false, bool sameAssembly = false)
+        {
+            foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>(sameAssembly))
+            {
+                if (nonLazy)
+                {
+                    container.Bind(type).AsCached().NonLazy();
+                }
+                else
+                {
+                    container.Bind(type).AsCached();
+                }
+            }
+        }
+
         public static void BindInterfacesAndSelfToAllTypeDriveFrom<T>(this DiContainer diContainer)
         {
             foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>())
@@ -46,16 +65,17 @@ namespace GameFoundation.Scripts.Utilities.Extension
         }
 
         private static SceneContext currentSceneContext;
+
         /// <summary>
         /// Get DiContainer from Scene context in the current active scene
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static  DiContainer GetCurrentContainer(this object obj)
+        public static DiContainer GetCurrentContainer(this object obj)
         {
-            return  GetCurrentContainer();
+            return GetCurrentContainer();
         }
-        
+
         public static DiContainer GetCurrentContainer()
         {
             if (currentSceneContext == null)
