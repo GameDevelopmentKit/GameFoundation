@@ -3,16 +3,22 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
+    using Zenject;
     using Object = UnityEngine.Object;
 
     public sealed class ObjectPoolManager
     {
-        private readonly IGameAssets       gameAssets;
+        #region inject
+
+        private readonly IGameAssets gameAssets;
+        private readonly DiContainer diContainer;
+
+        #endregion
+        
         public static    ObjectPoolManager Instance { get; private set; }
 
         private readonly List<GameObject>                   tempList               = new List<GameObject>();
@@ -23,10 +29,11 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private readonly Dictionary<GameObject, string> mapPrefabToKey     = new Dictionary<GameObject, string>();
 
         private GameObject defaultRoot;
-        public ObjectPoolManager(IGameAssets gameAssets)
+        public ObjectPoolManager(IGameAssets gameAssets, DiContainer diContainer)
         {
-            this.gameAssets = gameAssets;
-            Instance        = this;
+            this.gameAssets  = gameAssets;
+            this.diContainer = diContainer;
+            Instance         = this;
         }
 
         #region Pool
@@ -40,6 +47,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool)) return pool;
 
             pool = new GameObject($"[Pool] {prefab.name}", typeof(ObjectPool)).GetComponent<ObjectPool>();
+            
             pool.transform.SetParent(this.ChooseRoot(root).transform, false);
             this.prefabToObjectPool.Add(prefab, pool);
 
@@ -147,7 +155,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         #region Load prefab in bundle
 
-        public async Task<ObjectPool> CreatePool(string prefabName, int initialPoolSize, GameObject root)
+        public async UniTask<ObjectPool> CreatePool(string prefabName, int initialPoolSize, GameObject root)
         {
             var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
 
@@ -160,7 +168,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             return this.CreatePool(prefab, initialPoolSize, root);
         }
 
-        public async Task<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
+        public async UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
             var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
 
@@ -215,15 +223,15 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public T Spawn<T>(T prefab) where T : Component => this.Spawn(prefab.gameObject, null, Vector3.zero, Quaternion.identity).GetComponent<T>();
 
-        public Task<GameObject> Spawn(string prefabName, Transform parent) => this.Spawn(prefabName, parent, Vector3.zero, Quaternion.identity);
+        public UniTask<GameObject> Spawn(string prefabName, Transform parent) => this.Spawn(prefabName, parent, Vector3.zero, Quaternion.identity);
 
-        public Task<GameObject> Spawn(string prefabName, Vector3 position) => this.Spawn(prefabName, null, position, Quaternion.identity);
+        public UniTask<GameObject> Spawn(string prefabName, Vector3 position) => this.Spawn(prefabName, null, position, Quaternion.identity);
 
-        public Task<GameObject> Spawn(string prefabName, Transform parent, Vector3 position) => this.Spawn(prefabName, parent, position, Quaternion.identity);
+        public UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position) => this.Spawn(prefabName, parent, position, Quaternion.identity);
 
-        public Task<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation) => this.Spawn(prefabName, null, position, rotation);
+        public UniTask<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation) => this.Spawn(prefabName, null, position, rotation);
 
-        public Task<GameObject> Spawn(string prefabName) => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
+        public UniTask<GameObject> Spawn(string prefabName) => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
 
         #endregion
 

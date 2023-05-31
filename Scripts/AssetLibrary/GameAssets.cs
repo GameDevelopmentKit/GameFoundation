@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.AssetLibrary
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
+    using DG.DemiEditor;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
@@ -80,14 +81,12 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         void ReleaseAsset(AssetReference assetReference);
         /// <summary>
-        /// Instantiate async a GameObject by AssetReference
+        /// Instantiate async a GameObject by key
         /// </summary>
-        UniTask<GameObject> InstantiateGameObject(AssetReference assetReference);
-        /// <summary>
-        /// Destroys all instantiated instances of <paramref name="aRef"/>
-        /// </summary>
-        void DestroyAllInstances(AssetReference aRef);
+        UniTask<GameObject> InstantiateAsync(object key, Vector3 position, Quaternion rotation, Transform parent = null, bool trackHandle = true);
 
+        public bool DestroyGameObject(GameObject gameObject);
+        
         Dictionary<object, AsyncOperationHandle> GetLoadingAssets();
     }
 
@@ -116,11 +115,6 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         private readonly Dictionary<string, List<object>> assetsAutoUnloadByScene = new Dictionary<string, List<object>>();
 
-        /// <summary>
-        /// Cache all objects that instantiated by GameAssets
-        /// </summary>
-        private readonly Dictionary<object, List<GameObject>> instantiatedObjects = new Dictionary<object, List<GameObject>>(10);
-
         private void CheckRuntimeKey(object key) { }
 
         private void CheckRuntimeKey(AssetReference aRef)
@@ -145,11 +139,11 @@ namespace GameFoundation.Scripts.AssetLibrary
         {
             try
             {
-                if (cachedSource.ContainsKey(key))
-                    return cachedSource[key].Convert<T>();
+                if (cachedSource.TryGetValue(key, out var value))
+                    return value.Convert<T>();
 
-                if (this.loadingAssets.ContainsKey(key))
-                    return this.loadingAssets[key].Convert<T>();
+                if (this.loadingAssets.TryGetValue(key, out var asset))
+                    return asset.Convert<T>();
 
                 var handler = handlerFunc.Invoke();
                 this.loadingAssets.Add(key, handler);
@@ -390,8 +384,6 @@ namespace GameFoundation.Scripts.AssetLibrary
             {
                 Debug.LogError($"[GameAssets] Unable to Release {key}");
             }
-
-            this.DestroyAllInstances(key);
         }
 
         /// <summary>
@@ -413,68 +405,17 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <summary>
         /// Instantiate async a GameObject by AssetReference
         /// </summary>
-        public async UniTask<GameObject> InstantiateGameObject(AssetReference assetReference)
+        public async UniTask<GameObject> InstantiateAsync(object key, Vector3 position, Quaternion rotation, Transform parent = null, bool trackHandle = true)
         {
-            var key = assetReference.RuntimeKey;
-
-            var prefab = await this.LoadAssetAsync<GameObject>(assetReference);
-
-            var instance = Object.Instantiate(prefab);
-
-            //Track Instance
-            if (!this.instantiatedObjects.ContainsKey(key))
-                this.instantiatedObjects.Add(key, new List<GameObject>(20));
-            this.instantiatedObjects[key].Add(instance);
-
-            instance.AddComponent<AddressableLink>().Link(assetReference);
-            return instance;
+            return await Addressables.InstantiateAsync(key, position, rotation, parent, trackHandle);
         }
-
+        
         /// <summary>
-        /// Destroys all instantiated instances of <paramref name="aRef"/>
+        /// Destroy game object and decrease ref count of assets
         /// </summary>
-        public void DestroyAllInstances(AssetReference aRef)
+        public bool DestroyGameObject(GameObject gameObject)
         {
-            this.CheckRuntimeKey(aRef);
-
-            if (!this.instantiatedObjects.ContainsKey(aRef.RuntimeKey))
-            {
-                Debug.LogWarning($"{nameof(AssetReference)} '{aRef}' has not been instantiated. 0 Instances destroyed.");
-                return;
-            }
-
-            this.DestroyAllInstances(aRef.RuntimeKey);
-        }
-
-        private void DestroyAllInstances(object key)
-        {
-            if (!this.instantiatedObjects.ContainsKey(key))
-            {
-                Debug.LogWarning($"'{key}' has not been instantiated. 0 Instances destroyed.");
-                return;
-            }
-
-            var instanceList = this.instantiatedObjects[key];
-            foreach (var instance in instanceList)
-            {
-                this.DestroyInternal(instance);
-            }
-
-            this.instantiatedObjects[key].Clear();
-            this.instantiatedObjects.Remove(key);
-        }
-
-        private void DestroyInternal(Object obj)
-        {
-            var c = obj as Component;
-            if (c != null)
-                Object.Destroy(c.gameObject);
-            else
-            {
-                var go = obj as GameObject;
-                if (go)
-                    Object.Destroy(go);
-            }
+            return Addressables.ReleaseInstance(gameObject);
         }
 
         #endregion
