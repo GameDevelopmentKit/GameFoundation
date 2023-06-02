@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Cysharp.Threading.Tasks;
 using GameFoundation.BuildScripts.Runtime;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Build;
@@ -31,20 +30,31 @@ public static class Build
     }
 
     private static readonly List<BuildTargetInfo> Targets = new()
-                                                            {
-                                                                new BuildTargetInfo
-                                                                {
-                                                                    Platform = PlatformWin32, BuildTarget = BuildTarget.StandaloneWindows, BuildTargetGroup = BuildTargetGroup.Standalone
-                                                                },
-                                                                new BuildTargetInfo
-                                                                {
-                                                                    Platform = PlatformWin64, BuildTarget = BuildTarget.StandaloneWindows64, BuildTargetGroup = BuildTargetGroup.Standalone
-                                                                },
-                                                                new BuildTargetInfo { Platform = PlatformOsx, BuildTarget = BuildTarget.StandaloneOSX, BuildTargetGroup = BuildTargetGroup.Standalone },
-                                                                new BuildTargetInfo { Platform = PlatformAndroid, BuildTarget = BuildTarget.Android, BuildTargetGroup = BuildTargetGroup.Android },
-                                                                new BuildTargetInfo { Platform = PlatformIOS, BuildTarget = BuildTarget.iOS, BuildTargetGroup = BuildTargetGroup.iOS },
-                                                                new BuildTargetInfo { Platform = PlatformWebGL, BuildTarget = BuildTarget.WebGL, BuildTargetGroup = BuildTargetGroup.WebGL }
-                                                            };
+    {
+        new BuildTargetInfo
+        {
+            Platform         = PlatformWin32, BuildTarget = BuildTarget.StandaloneWindows,
+            BuildTargetGroup = BuildTargetGroup.Standalone
+        },
+        new BuildTargetInfo
+        {
+            Platform         = PlatformWin64, BuildTarget = BuildTarget.StandaloneWindows64,
+            BuildTargetGroup = BuildTargetGroup.Standalone
+        },
+        new BuildTargetInfo
+        {
+            Platform         = PlatformOsx, BuildTarget = BuildTarget.StandaloneOSX,
+            BuildTargetGroup = BuildTargetGroup.Standalone
+        },
+        new BuildTargetInfo
+        {
+            Platform = PlatformAndroid, BuildTarget = BuildTarget.Android, BuildTargetGroup = BuildTargetGroup.Android
+        },
+        new BuildTargetInfo
+            { Platform = PlatformIOS, BuildTarget = BuildTarget.iOS, BuildTargetGroup = BuildTargetGroup.iOS },
+        new BuildTargetInfo
+            { Platform = PlatformWebGL, BuildTarget = BuildTarget.WebGL, BuildTargetGroup = BuildTargetGroup.WebGL }
+    };
 
     static string[] SCENES = FindEnabledEditorScenes();
 
@@ -66,7 +76,7 @@ public static class Build
         var keyStoreAliasPassword  = "tothemoon";
         var iosTargetOSVersion     = "12.0";
         var iosSigningTeamId       = "";
-        
+
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
         {
@@ -77,11 +87,11 @@ public static class Build
                     break;
                 case "-scriptingBackend":
                     scriptingBackend = args[++i].ToLowerInvariant() switch
-                                       {
-                                           "il2cpp" => ScriptingImplementation.IL2CPP,
-                                           "mono"   => ScriptingImplementation.Mono2x,
-                                           _        => throw new Exception("Unknown scripting backend")
-                                       };
+                    {
+                        "il2cpp" => ScriptingImplementation.IL2CPP,
+                        "mono" => ScriptingImplementation.Mono2x,
+                        _ => throw new Exception("Unknown scripting backend")
+                    };
 
                     break;
                 case "-development":
@@ -125,7 +135,7 @@ public static class Build
                     iosSigningTeamId = args[++i];
                     break;
             }
-            
+
 #if PRODUCTION
             PlayerSettings.SetStackTraceLogType(LogType.Assert,  StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
@@ -141,25 +151,28 @@ public static class Build
             {
                 EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
             }
-            
+
             SetupIos(iosSigningTeamId, iosTargetOSVersion);
 
             //TODO config it later, only use this for TheOneStudio
         }
+
         PlayerSettings.SplashScreen.showUnityLogo = false;
         // Get a list of targets to build
         var platformTargets = platforms.Split(';');
-        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols, buildAppBundle, packageName);
-    }
-    
-    public static void SetupIos(string teamId, string targetOSVersion)
-    {
-        PlayerSettings.iOS.appleDeveloperTeamID        = teamId;
-        PlayerSettings.iOS.targetOSVersionString       = targetOSVersion;
+        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols,
+            buildAppBundle, packageName);
     }
 
-    public static void SetUpAndroidKeyStore(string keyStoreFileName = "the1_googleplay.keystore", string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
-                                            string keyaliasPass     = "tothemoon")
+    public static void SetupIos(string teamId, string targetOSVersion)
+    {
+        PlayerSettings.iOS.appleDeveloperTeamID  = teamId;
+        PlayerSettings.iOS.targetOSVersionString = targetOSVersion;
+    }
+
+    public static void SetUpAndroidKeyStore(string keyStoreFileName = "the1_googleplay.keystore",
+        string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
+        string keyaliasPass = "tothemoon")
     {
         PlayerSettings.Android.useCustomKeystore = true;
         PlayerSettings.Android.keystoreName      = keyStoreFileName;
@@ -168,15 +181,20 @@ public static class Build
         PlayerSettings.keyaliasPass              = keyaliasPass;
     }
 
-    public static async void BuildInternal(ScriptingImplementation scriptingBackend,       BuildOptions options, IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
-                                     bool                    buildAppBundle = false, string       packageName = "")
+    public static async void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
+        IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
+        bool buildAppBundle = false, string packageName = "")
     {
         BuildTools.ResetBuildSettings();
         EditorUserBuildSettings.buildAppBundle = buildAppBundle;
 
 
-        var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText)).ToArray();
-        Console.WriteLine("Building Targets: " + string.Join(", ", platforms.Select(target => target.Platform).ToArray())); // Log which targets we're gonna build
+        var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText))
+            .ToArray();
+        Console.WriteLine("Building Targets: " +
+                          string.Join(", ",
+                              platforms.Select(target => target.Platform)
+                                  .ToArray())); // Log which targets we're gonna build
 
         var errors = false;
         foreach (var platform in platforms)
@@ -198,11 +216,15 @@ public static class Build
             BuildAddressable(platform);
 
             // Set up the build options
-            if (platform.Platform.Equals(PlatformWebGL)) options &= ~BuildOptions.Development; // can't build development for webgl, it make the build larger and cant gzip
+            if (platform.Platform.Equals(PlatformWebGL))
+                options &= ~BuildOptions
+                    .Development; // can't build development for webgl, it make the build larger and cant gzip
             var buildPlayerOptions = new BuildPlayerOptions
-                                     {
-                                         scenes = SCENES, locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"), target = platform.BuildTarget, options = options
-                                     };
+            {
+                scenes           = SCENES,
+                locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"),
+                target           = platform.BuildTarget, options = options
+            };
 
             if (!string.IsNullOrEmpty(scriptingDefineSymbols))
                 SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
@@ -228,17 +250,19 @@ public static class Build
                 break;
             case BuildTarget.Android:
                 //Change build architecture to ARMv7 and ARM64
-                PlayerSettings.Android.minifyWithR8        = true;
-                PlayerSettings.Android.minifyRelease       = true;
-                PlayerSettings.Android.minifyDebug         = true;
+                PlayerSettings.Android.minifyWithR8  = true;
+                PlayerSettings.Android.minifyRelease = true;
+                PlayerSettings.Android.minifyDebug   = true;
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 break;
             case BuildTarget.WebGL:
-                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
-                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithoutStacktrace;
+                PlayerSettings.WebGL.compressionFormat =
+                    WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = true; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
+                PlayerSettings.WebGL.memorySize            = 512;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -276,7 +300,8 @@ public static class Build
     /// Find all active sences in build setting.
     /// </summary>
     /// <returns></returns>
-    private static string[] FindEnabledEditorScenes() => (from scene in EditorBuildSettings.scenes where scene.enabled select scene.path).ToArray();
+    private static string[] FindEnabledEditorScenes() =>
+        (from scene in EditorBuildSettings.scenes where scene.enabled select scene.path).ToArray();
 
     private static void WriteReport(BuildReport report)
     {
@@ -287,10 +312,12 @@ public static class Build
         using (var file = new StreamWriter(filePath))
         {
             file.WriteLine($"Build {summary.guid} for {summary.platform}.");
-            file.WriteLine($"Build began at {summary.buildStartedAt} and ended at {summary.buildEndedAt}. Total {summary.totalTime}.");
+            file.WriteLine(
+                $"Build began at {summary.buildStartedAt} and ended at {summary.buildEndedAt}. Total {summary.totalTime}.");
             file.WriteLine($"Build options: {summary.options}");
             file.WriteLine($"Build output to: {summary.outputPath}");
-            file.WriteLine($"Build result: {summary.result} ({summary.totalWarnings} warnings, {summary.totalErrors} errors).");
+            file.WriteLine(
+                $"Build result: {summary.result} ({summary.totalWarnings} warnings, {summary.totalErrors} errors).");
             file.WriteLine($"Build size: {summary.totalSize}");
 
             file.WriteLine();
@@ -341,12 +368,12 @@ public static class Build
     private static string Prefix(LogType type) =>
         type switch
         {
-            LogType.Assert    => "A",
-            LogType.Error     => "E",
+            LogType.Assert => "A",
+            LogType.Error => "E",
             LogType.Exception => "X",
-            LogType.Log       => "L",
-            LogType.Warning   => "W",
-            _                 => "????"
+            LogType.Log => "L",
+            LogType.Warning => "W",
+            _ => "????"
         };
 
     /// <summary>
@@ -359,6 +386,7 @@ public static class Build
         PlayerSettings.Android.bundleVersionCode = GameVersion.BuildNumber;
     }
 
-    public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbols) =>
+    public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup,
+        string scriptingDefineSymbols) =>
         PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, scriptingDefineSymbols);
 }
