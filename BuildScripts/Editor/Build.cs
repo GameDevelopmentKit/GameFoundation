@@ -262,7 +262,6 @@ public static class Build
                     WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = true; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
-                PlayerSettings.WebGL.memorySize            = 512;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
