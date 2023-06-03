@@ -257,6 +257,7 @@ public static class Build
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
                 break;
             case BuildTarget.WebGL:
+                PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithoutStacktrace;
                 PlayerSettings.WebGL.compressionFormat =
                     WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
