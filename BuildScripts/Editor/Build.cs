@@ -264,8 +264,13 @@ public static class Build
                 break;
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
+#if FB_INSTANT
+                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.decompressionFallback = false; // Disable compression for FBInstant game
+#else
                 PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli; // Disable compression for FBInstant game
-                PlayerSettings.WebGL.decompressionFallback = true; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.decompressionFallback = true; /
+#endif
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
                 PlayerSettings.WebGL.initialMemorySize     = 256;
                 PlayerSettings.WebGL.dataCaching           = true;
