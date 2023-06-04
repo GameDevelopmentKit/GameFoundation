@@ -259,7 +259,7 @@ public static class Build
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithoutStacktrace;
-                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = true; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
                 PlayerSettings.WebGL.initialMemorySize     = 256;
