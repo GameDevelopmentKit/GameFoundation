@@ -56,7 +56,9 @@ public static class Build
             { Platform = PlatformWebGL, BuildTarget = BuildTarget.WebGL, BuildTargetGroup = BuildTargetGroup.WebGL }
     };
 
-    static string[] SCENES = FindEnabledEditorScenes();
+    private static string[] SCENES           = FindEnabledEditorScenes();
+    private static bool     OptimizeBuildSie = false;
+
 
     public static void BuildFromCommandLine()
     {
@@ -68,7 +70,6 @@ public static class Build
         var scriptingDefineSymbols = string.Empty;
         var outputPath             = "template.exe";
         var buildAppBundle         = false;
-        var optimizeSpeed          = false;
         var packageName            = "";
         var keyStoreFileName       = "the1_googleplay.keystore";
         var keyStoreAliasName      = "theonestudio";
@@ -107,11 +108,7 @@ public static class Build
                     buildAppBundle = true;
                     break;
                 case "-optimizeSize":
-                    //TODO adds when move unity 2022
-#if UNITY_2022_1_OR_NEWER
-#else
-                    EditorUserBuildSettings.il2CppCodeGeneration = Il2CppCodeGeneration.OptimizeSize;
-#endif
+                    OptimizeBuildSie = true;
                     break;
                 case "-packageName":
                     packageName = args[++i];
@@ -181,7 +178,7 @@ public static class Build
         PlayerSettings.keyaliasPass              = keyaliasPass;
     }
 
-    public static async void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
+    public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
         IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
         bool buildAppBundle = false, string packageName = "")
     {
@@ -243,18 +240,27 @@ public static class Build
 
     private static void SpecificActionForEachPlatform(BuildTargetInfo platform)
     {
+        var il2CppCodeGeneration = OptimizeBuildSie ? Il2CppCodeGeneration.OptimizeSize : Il2CppCodeGeneration.OptimizeSpeed;
+#if !UNITY_2022_1_OR_NEWER
+        EditorUserBuildSettings.il2CppCodeGeneration = il2CppCodeGeneration;
+#endif
         switch (platform.BuildTarget)
         {
             case BuildTarget.iOS:
                 PlayerSettings.iOS.appleEnableAutomaticSigning = true;
                 break;
             case BuildTarget.Android:
-                //Change build architecture to ARMv7 and ARM64
+                //Change build architecture to ARMv7 and ARM6
+#if !UNITY_2022_1_OR_NEWER
                 PlayerSettings.Android.minifyWithR8  = true;
+#endif
                 PlayerSettings.Android.minifyRelease = true;
                 PlayerSettings.Android.minifyDebug   = true;
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+#if UNITY_2022_1_OR_NEWER
+                PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.Android, il2CppCodeGeneration);
+#endif
                 break;
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
@@ -264,11 +270,14 @@ public static class Build
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
                 PlayerSettings.WebGL.initialMemorySize     = 256;
                 PlayerSettings.WebGL.dataCaching           = true;
-                #if FB_INSTANT_PRODUCTION
+#if FB_INSTANT_PRODUCTION
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
-                #else
+#else
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithStacktrace;
-                #endif
+#endif
+#if UNITY_2022_1_OR_NEWER
+                PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, il2CppCodeGeneration);
+#endif
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -292,7 +301,7 @@ public static class Build
         var success = string.IsNullOrEmpty(result.Error);
         if (!success)
         {
-            var errorMessage = "Addressables build error encountered: " + result.Error;
+            var errorMessage = "Addressable build error encountered: " + result.Error;
             Debug.LogError(errorMessage);
             throw new Exception(errorMessage);
         }
