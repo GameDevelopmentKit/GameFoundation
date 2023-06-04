@@ -265,17 +265,17 @@ public static class Build
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.Low);
                 PlayerSettings.WebGL.decompressionFallback = true;
+                PlayerSettings.runInBackground             = false;
+                PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
+                PlayerSettings.WebGL.initialMemorySize     = 256;
+                PlayerSettings.WebGL.dataCaching           = true;
+                PlayerSettings.WebGL.showDiagnostics       = true;
+                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
 #if FB_INSTANT
                 PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
 #else
                 PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli; // Disable compression for FBInstant game
 #endif
-                PlayerSettings.WebGL.powerPreference   = WebGLPowerPreference.Default;
-                PlayerSettings.WebGL.initialMemorySize = 256;
-                PlayerSettings.WebGL.dataCaching       = true;
-                
-                PlayerSettings.WebGL.showDiagnostics  = true;
-                PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithoutStacktrace;
 #if FB_INSTANT_PRODUCTION
                 PlayerSettings.WebGL.showDiagnostics  = false;
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
