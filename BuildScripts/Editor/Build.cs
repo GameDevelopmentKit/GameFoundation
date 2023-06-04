@@ -265,7 +265,7 @@ public static class Build
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithoutStacktrace;
-                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = true; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
                 PlayerSettings.WebGL.initialMemorySize     = 256;
@@ -274,6 +274,7 @@ public static class Build
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
 #else
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.FullWithStacktrace;
+                PlayerSettings.WebGL.showDiagnostics  = true;
 #endif
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, il2CppCodeGeneration);
