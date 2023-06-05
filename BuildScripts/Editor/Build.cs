@@ -264,9 +264,9 @@ public static class Build
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.Low);
                 PlayerSettings.WebGL.decompressionFallback = false;
-                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Brotli; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.runInBackground             = false;
-                PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
+                PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
                 PlayerSettings.WebGL.dataCaching           = true;
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
 #if UNITY_2022_1_OR_NEWER
