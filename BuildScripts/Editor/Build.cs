@@ -264,14 +264,15 @@ public static class Build
                 break;
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.Low);
-                PlayerSettings.WebGL.decompressionFallback = true;
+                PlayerSettings.WebGL.decompressionFallback = false;
+                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Brotli; // Disable compression for FBInstant game
                 PlayerSettings.runInBackground             = false;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
                 PlayerSettings.WebGL.dataCaching           = true;
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 256;
-
+                PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, il2CppCodeGeneration);
 #if FB_INSTANT_PRODUCTION
                 PlayerSettings.WebGL.showDiagnostics = false;
 #else
@@ -279,16 +280,6 @@ public static class Build
 #endif // FB_INSTANT_PRODUCTION
 
 #endif // UNITY_2022_1_OR_NEWER
-
-#if FB_INSTANT
-                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
-#else
-                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli; // Disable compression for FBInstant game
-#endif
-
-#if UNITY_2022_1_OR_NEWER
-                PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, il2CppCodeGeneration);
-#endif
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
