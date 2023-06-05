@@ -206,6 +206,8 @@ public static class Build
                 PlayerSettings.SetApplicationIdentifier(platform.BuildTargetGroup, packageName);
             }
 
+            if (!string.IsNullOrEmpty(scriptingDefineSymbols))
+                SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
             SpecificActionForEachPlatform(platform);
             SetApplicationVersion();
 
@@ -222,9 +224,6 @@ public static class Build
                 locationPathName = Path.GetFullPath($"../Build/Client/{platform.Platform}/{outputPath}"),
                 target           = platform.BuildTarget, options = options
             };
-
-            if (!string.IsNullOrEmpty(scriptingDefineSymbols))
-                SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
 
             // Perform the build
             var buildResult = BuildPipeline.BuildPlayer(buildPlayerOptions);
