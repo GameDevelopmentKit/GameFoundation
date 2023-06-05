@@ -263,7 +263,7 @@ public static class Build
                 break;
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.Low);
-                PlayerSettings.WebGL.decompressionFallback = false;
+                PlayerSettings.WebGL.decompressionFallback = true;
                 PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.runInBackground             = false;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.HighPerformance;
