@@ -267,9 +267,11 @@ public static class Build
                 PlayerSettings.WebGL.decompressionFallback = true;
                 PlayerSettings.runInBackground             = false;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
-                PlayerSettings.WebGL.initialMemorySize     = 256;
                 PlayerSettings.WebGL.dataCaching           = true;
+#if UNITY_2022_1_OR_NEWER
+                PlayerSettings.WebGL.initialMemorySize     = 256;
                 PlayerSettings.WebGL.showDiagnostics       = true;
+#endif
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
 #if FB_INSTANT
                 PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
