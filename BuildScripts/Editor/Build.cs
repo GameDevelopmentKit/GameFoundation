@@ -277,9 +277,11 @@ public static class Build
         switch (platform.BuildTarget)
         {
             case BuildTarget.iOS:
+                EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
                 PlayerSettings.iOS.appleEnableAutomaticSigning = true;
                 break;
             case BuildTarget.Android:
+                EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
                 //Change build architecture to ARMv7 and ARM6
 #if !UNITY_2022_1_OR_NEWER
                 PlayerSettings.Android.minifyWithR8  = true;
@@ -293,6 +295,7 @@ public static class Build
 #endif
                 break;
             case BuildTarget.WebGL:
+                EditorUserBuildSettings.webGLBuildSubtarget = WebGLTextureSubtarget.ASTC;
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.Low);
                 PlayerSettings.WebGL.decompressionFallback = true;
                 PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
