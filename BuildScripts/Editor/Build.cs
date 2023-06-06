@@ -60,14 +60,52 @@ public static class Build
     private static bool     OptimizeBuildSie = false;
 
 
+    private static BuildTargetInfo[] GetBuildTargetInfoFromString(string platforms)
+    {
+        return platforms.Split(';').Select(platformText => Targets.Single(t => t.Platform == platformText))
+            .ToArray();
+    }
+    
+    private static BuildTargetInfo[] GetBuildTargetInfoFromString(IEnumerable<string> platforms)
+    {
+        return platforms.Select(platformText => Targets.Single(t => t.Platform == platformText))
+            .ToArray();
+    }
+    
+    public static void SetScriptingDefineSymbols()
+    {
+        var args                   = Environment.GetCommandLineArgs();
+        var platforms              = string.Join(";", Targets.Select(t => t.Platform));
+        var scriptingDefineSymbols = string.Empty;
+
+        for (var i = 0; i < args.Length; ++i)
+        {
+            switch (args[i])
+            {
+                case "-platforms":
+                    platforms = args[++i];
+                    break;
+                case "-scriptingDefineSymbols":
+                    scriptingDefineSymbols = args[++i];
+                    break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(scriptingDefineSymbols)) return;
+        
+        foreach (var buildTargetInfo in GetBuildTargetInfoFromString(platforms))
+        {
+            SetScriptingDefineSymbolInternal(buildTargetInfo.BuildTargetGroup, scriptingDefineSymbols);
+        }
+    }
+
     public static void BuildFromCommandLine()
     {
         // Grab the CSV platforms string
-        var platforms              = string.Join(";", Targets.Select(t => t.Platform));
+        var platforms = string.Join(";", Targets.Select(t => t.Platform));
         var scriptingBackend       = ScriptingImplementation.Mono2x;
         var args                   = Environment.GetCommandLineArgs();
         var buildOptions           = BuildOptions.None;
-        var scriptingDefineSymbols = string.Empty;
         var outputPath             = "template.exe";
         var buildAppBundle         = false;
         var packageName            = "";
@@ -98,9 +136,7 @@ public static class Build
                 case "-development":
                     buildOptions |= BuildOptions.Development;
                     break;
-                case "-scriptingDefineSymbols":
-                    scriptingDefineSymbols = args[++i];
-                    break;
+                
                 case "-outputPath":
                     outputPath = args[++i];
                     break;
@@ -156,8 +192,7 @@ public static class Build
 
         PlayerSettings.SplashScreen.showUnityLogo = false;
         // Get a list of targets to build
-        var platformTargets = platforms.Split(';');
-        BuildInternal(scriptingBackend, buildOptions, platformTargets, outputPath, scriptingDefineSymbols,
+        BuildInternal(scriptingBackend, buildOptions, platforms.Split(";"), outputPath,
             buildAppBundle, packageName);
     }
 
@@ -179,22 +214,20 @@ public static class Build
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
-        IEnumerable<string> platformTargets, string outputPath, string scriptingDefineSymbols = "",
+        IEnumerable<string> platforms, string outputPath,
         bool buildAppBundle = false, string packageName = "")
     {
         BuildTools.ResetBuildSettings();
         EditorUserBuildSettings.buildAppBundle = buildAppBundle;
 
-
-        var platforms = platformTargets.Select(platformText => Targets.Single(t => t.Platform == platformText))
-            .ToArray();
+        var buildTargetInfos = GetBuildTargetInfoFromString(platforms);
         Console.WriteLine("Building Targets: " +
                           string.Join(", ",
-                              platforms.Select(target => target.Platform)
+                              buildTargetInfos.Select(target => target.Platform)
                                   .ToArray())); // Log which targets we're gonna build
 
         var errors = false;
-        foreach (var platform in platforms)
+        foreach (var platform in buildTargetInfos)
         {
             Console.WriteLine($"----------{new string('-', platform.Platform.Length)}");
             Console.WriteLine($"Building: {platform.Platform}");
@@ -206,8 +239,6 @@ public static class Build
                 PlayerSettings.SetApplicationIdentifier(platform.BuildTargetGroup, packageName);
             }
 
-            if (!string.IsNullOrEmpty(scriptingDefineSymbols))
-                SetScriptingDefineSymbolInternal(platform.BuildTargetGroup, scriptingDefineSymbols);
             SpecificActionForEachPlatform(platform);
             SetApplicationVersion();
 
@@ -275,7 +306,7 @@ public static class Build
 #if FB_INSTANT_PRODUCTION
                 PlayerSettings.WebGL.showDiagnostics = false;
 #else
-                PlayerSettings.WebGL.showDiagnostics = false;
+                PlayerSettings.WebGL.showDiagnostics = true;
 #endif // FB_INSTANT_PRODUCTION
 
 #endif // UNITY_2022_1_OR_NEWER

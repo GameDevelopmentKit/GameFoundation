@@ -73,7 +73,7 @@ public static class BuildMenu
     [MenuItem("Build/Android/build android AAB (Slow)", priority = 1100)]
     private static void Build_Android_AAB()
     {
-        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformAndroid }, "default.aab", "", true);
+        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformAndroid }, "default.aab", true);
 
         OpenLog("Build-Client-Report.android.log");
     }
