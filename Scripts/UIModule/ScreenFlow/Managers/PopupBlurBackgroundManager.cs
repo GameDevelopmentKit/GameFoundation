@@ -6,7 +6,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using System.Reflection;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using LeTai.Asset.TranslucentImage;
     using UnityEngine;
     using UnityEngine.UI;
     using Zenject;
@@ -18,7 +17,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     {
         [SerializeField] private Image                  blurImage;
         [SerializeField] private Button                 btnClose;
-        [SerializeField] private TranslucentImageSource translucentImageSource;
 
         private IScreenPresenter currentPopup;
         private Coroutine        showImageCoroutine;
@@ -93,13 +91,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private IEnumerator ShowImageInternal()
         {
             this.blurImage.enabled              = false;
-            this.translucentImageSource.enabled = true;
-            // First, disable the blur image so that we can see the UI behind it.
-            // Then enable TranslucentImageSource and wait until end of frame for the camera to render the UI and TranslucentImageSource can capture it.
-            // Finally, disable TranslucentImageSource because we have what we want now and re-enable the blur image.
             yield return new WaitForEndOfFrame();
 
-            this.translucentImageSource.enabled = false;
             this.blurImage.enabled              = true;
             this.signalBus.Fire<PopupBlurBgShowedSignal>();
         }
