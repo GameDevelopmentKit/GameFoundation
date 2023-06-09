@@ -191,7 +191,7 @@ public class TimelinePlayableWizard : EditorWindow
         playableName = EditorGUILayout.TextField(m_PlayableNameContent, playableName);
 
         var  playableNameNotEmpty  = !string.IsNullOrEmpty(this.playableName);
-        bool playableNameFormatted = false;
+        bool playableNameFormatted = CodeGenerator.IsValidLanguageIndependentIdentifier(playableName);
         if (!playableNameNotEmpty || !playableNameFormatted)
         {
             EditorGUILayout.HelpBox(
@@ -579,7 +579,7 @@ public class TimelinePlayableWizard : EditorWindow
             if (variables[i].GUI(usableTypes))
                 indexToRemove = i;
 
-            // if (!CodeGenerator.IsValidLanguageIndependentIdentifier(variables[i].name)) allNamesValid = false;
+            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(variables[i].name)) allNamesValid = false;
         }
 
         if (indexToRemove != -1)
