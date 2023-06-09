@@ -303,12 +303,12 @@ public static class Build
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 32;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, il2CppCodeGeneration);
-// #if FB_INSTANT
-//                 PlayerSettings.WebGL.showDiagnostics  = false;
-//                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
-// #else
-//                 PlayerSettings.WebGL.showDiagnostics = true;
-// #endif // FB_INSTANT
+#if FB_INSTANT
+                PlayerSettings.WebGL.showDiagnostics  = false;
+                PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
+#else
+                PlayerSettings.WebGL.showDiagnostics = true;
+#endif // FB_INSTANT
 
 #endif // UNITY_2022_1_OR_NEWER
                 break;
