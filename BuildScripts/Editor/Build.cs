@@ -293,7 +293,7 @@ public static class Build
 #endif
                 break;
             case BuildTarget.WebGL:
-                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.Low);
+                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                  PlayerSettings.WebGL.decompressionFallback = true;
                  PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                  PlayerSettings.runInBackground             = false;
@@ -307,7 +307,7 @@ public static class Build
                 PlayerSettings.WebGL.showDiagnostics  = false;
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
 #else
-                PlayerSettings.WebGL.showDiagnostics = true;
+                // PlayerSettings.WebGL.showDiagnostics = true;
 #endif // FB_INSTANT
 
 #endif // UNITY_2022_1_OR_NEWER
