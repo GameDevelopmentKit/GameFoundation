@@ -302,7 +302,7 @@ public static class Build
                 PlayerSettings.runInBackground             = false;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
                 PlayerSettings.WebGL.dataCaching           = true;
-                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
+                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 64;
 #if FB_INSTANT
