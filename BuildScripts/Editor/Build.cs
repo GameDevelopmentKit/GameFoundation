@@ -296,7 +296,7 @@ public static class Build
             case BuildTarget.WebGL:
                 UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
-                PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
+                PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.Low);
                 PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = false; // Disable compression for FBInstant game
                 PlayerSettings.runInBackground             = false;
