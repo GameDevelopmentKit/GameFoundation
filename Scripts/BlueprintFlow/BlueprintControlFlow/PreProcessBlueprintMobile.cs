@@ -24,26 +24,6 @@ namespace BlueprintFlow.BlueprintControlFlow
 #endif
         }
 
-        [Obsolete]
-        private async UniTask<byte[]> LoadStreamingAssetFromWindow(string filename)
-        {
-            var filePath = $"{Application.dataPath}/StreamingAssets/{filename}";
-            Debug.Log($"Load blueprint {filePath}");
-            var www = new WWW(filePath);
-            await www;
-            return www.bytes;
-        }
-
-        [Obsolete]
-        private async UniTask<byte[]> LoadStreamingAssetMobile(string fileName)
-        {
-            //Read blueprint Data from stream Assets
-            var filePath = "jar:file://" + Application.dataPath + "!/assets/" + fileName;
-            var www      = new WWW(filePath);
-            await www;
-            return www.bytes;
-        }
-
         private UniTask MoveBlueprintToDevice(string fileName, byte[] data)
         {
             Debug.Log($"Move Blueprint To {Application.persistentDataPath + "/" + fileName}");
