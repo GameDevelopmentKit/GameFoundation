@@ -6,7 +6,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.UIModule.CommonScreen;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
@@ -393,15 +392,15 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             }
             else
             {
-                Debug.Log("Show popup confirm quit app");
-
-                _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
-                {
-                    Content        = "Do you really want to quit?",
-                    Title          = "Are you sure?",
-                    Type           = NotificationType.Option,
-                    OkNoticeAction = this.QuitApplication,
-                });
+                // Debug.Log("Show popup confirm quit app");
+                //
+                // _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
+                // {
+                //     Content        = "Do you really want to quit?",
+                //     Title          = "Are you sure?",
+                //     Type           = NotificationType.Option,
+                //     OkNoticeAction = this.QuitApplication,
+                // });
             }
         }
 

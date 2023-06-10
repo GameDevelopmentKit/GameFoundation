@@ -14,7 +14,6 @@
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
     using global::Models;
-    using I2.Loc;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
@@ -34,7 +33,6 @@
             this.Container.BindInterfacesTo<AudioManager>().AsCached().NonLazy();
 
             //Localization services
-            this.Container.Bind<SetLanguage>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
             this.Container.Bind<LocalizationService>().AsCached().NonLazy();
 
             //Service
