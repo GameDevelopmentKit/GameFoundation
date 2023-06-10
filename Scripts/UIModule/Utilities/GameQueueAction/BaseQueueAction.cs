@@ -1,7 +1,7 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System;
-    using UniRx;
+    // using UniRx;
     using Zenject;
 
     public class BaseQueueAction : IGameQueueAction
@@ -33,14 +33,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         {
             this.OnExecute?.Invoke(this);
             this.isExecuting = true;
-            if (this.delay > 0)
-            {
-                Observable.Timer(TimeSpan.FromSeconds(this.delay)).Subscribe(l => { this.Action(); });
-            }
-            else
-            {
+            // if (this.delay > 0)
+            // {
+                // Observable.Timer(TimeSpan.FromSeconds(this.delay)).Subscribe(l => { this.Action(); });
+            // }
+            // else
+            // {
                 this.Action();
-            }
+            // }
         }
 
         protected virtual void Action() { this.OnStart?.Invoke(this); }

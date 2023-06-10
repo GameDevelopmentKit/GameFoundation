@@ -2,9 +2,9 @@
 {
     using System;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
-    using UniRx;
+    // using UniRx;
     using Zenject;
-    using ObservableExtensions = UniRx.ObservableExtensions;
+    // using ObservableExtensions = UniRx.ObservableExtensions;
 
     /// <summary>
     /// A timer cooldown by cycle automatically, mainly use for UI
@@ -55,31 +55,31 @@
 
             var currentCycle = this.GetCycleByTime(this.currentCooldownTime);
 //        Debug.Log("Create count down with depth = " + Depth);
-            this.observableTimer = ObservableExtensions.Subscribe(Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(currentCycle)), _ =>
-                {
-                    // Debug.Log($"count down = {cooldownTime} - depth = {Depth}");
-                    this.onEveryCycle?.Invoke(this.currentCooldownTime);
-                    if (this.currentCooldownTime <= 0)
-                    {
-                        this.onComplete?.Invoke();
-                        this.Dispose();
-                        return;
-                    }
-
-                    if (currentCycle != 1)
-                    {
-                        var nextCycle = this.GetCycleByTime(this.currentCooldownTime);
-
-                        if (nextCycle != currentCycle)
-                        {
-                            this.observableTimer?.Dispose();
-                            this.CountDown(this.currentCooldownTime, this.onEveryCycle, this.onComplete, depth + 1);
-                            return;
-                        }
-                    }
-
-                    this.currentCooldownTime -= currentCycle;
-                });
+            // this.observableTimer = ObservableExtensions.Subscribe(Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(currentCycle)), _ =>
+            //     {
+            //         // Debug.Log($"count down = {cooldownTime} - depth = {Depth}");
+            //         this.onEveryCycle?.Invoke(this.currentCooldownTime);
+            //         if (this.currentCooldownTime <= 0)
+            //         {
+            //             this.onComplete?.Invoke();
+            //             this.Dispose();
+            //             return;
+            //         }
+            //
+            //         if (currentCycle != 1)
+            //         {
+            //             var nextCycle = this.GetCycleByTime(this.currentCooldownTime);
+            //
+            //             if (nextCycle != currentCycle)
+            //             {
+            //                 this.observableTimer?.Dispose();
+            //                 this.CountDown(this.currentCooldownTime, this.onEveryCycle, this.onComplete, depth + 1);
+            //                 return;
+            //             }
+            //         }
+            //
+            //         this.currentCooldownTime -= currentCycle;
+            //     });
 
             return this;
         }
@@ -120,7 +120,7 @@
             this.pool = null;
             this.signalBus.Unsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
         }
-        public void OnSpawned(IMemoryPool pool)
+        public void OnSpawned(IMemoryPool xpool)
         {
             this.pool = pool; 
             this.signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
