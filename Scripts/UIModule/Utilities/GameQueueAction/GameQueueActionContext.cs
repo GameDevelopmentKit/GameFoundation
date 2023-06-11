@@ -57,7 +57,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         private string GetCurrentLocation(string location)
         {
-            return string.IsNullOrEmpty(location) ? this.screenManager.CurrentActiveScreen.ScreenId : location;
+            return string.IsNullOrEmpty(location) ? this.screenManager.CurrentActiveScreen.Value.ScreenId : location;
         }
 
         public IGameQueueAction AddTimelineToQueueAction<T>(T timeline, string actionId, string location) where T : PlayableDirector

@@ -5,6 +5,7 @@
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities.UserData;
+    using UniRx;
     using Zenject;
 
     public interface IAudioManager
@@ -28,7 +29,7 @@
         private readonly MasterAudio              masterAudio;
         private readonly DynamicSoundGroupCreator groupCreator;
 
-        // private CompositeDisposable compositeDisposable;
+        private CompositeDisposable compositeDisposable;
 
         public AudioManager(SignalBus signalBus, PlaylistController playlistController, SoundSetting SoundSetting, MasterAudio masterAudio)
         {
@@ -44,18 +45,18 @@
         private async void SubscribeMasterAudio()
         {
             await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
-            this.soundSetting.IsMuteSound = false;
-            this.soundSetting.IsMuteMusic = false;
+            this.soundSetting.MuteSound.Value = false;
+            this.soundSetting.MuteMusic.Value = false;
 
-            // this.compositeDisposable = new CompositeDisposable
-            //                            {
-            //                                //TODO uncomment this when we have a proper solution
-            //                                // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-            //                                // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-            //                                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-            //                                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-            //                                this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
-            //                            };
+            this.compositeDisposable = new CompositeDisposable
+                                       {
+                                           //TODO uncomment this when we have a proper solution
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
+                                           this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
+                                           this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
+                                           this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
+                                       };
         }
 
         private void SetMasterVolume(bool value)
@@ -136,9 +137,6 @@
 
         protected virtual void SetMusicValue(float value) { MasterAudio.PlaylistMasterVolume = value; }
 
-        public void Dispose()
-        {
-            // this.compositeDisposable.Dispose();
-        }
+        public void Dispose() { this.compositeDisposable.Dispose(); }
     }
 }

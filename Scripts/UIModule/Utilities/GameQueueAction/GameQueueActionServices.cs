@@ -3,8 +3,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     using System.Collections.Generic;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
+    using UniRx;
     using Zenject;
 
     public class GameQueueActionServices
@@ -25,15 +25,15 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.screenManager = screenManager;
             this.signalBus     = signalBus;
             Instance           = this;
-            this.signalBus.Subscribe<ScreenShowSignal>(this.OnStartAtLocation);
+            this.screenManager.CurrentActiveScreen.Subscribe(this.OnStartAtLocation);
         }
-        private void OnStartAtLocation(ScreenShowSignal obj)
+        private void OnStartAtLocation(IScreenPresenter currentScreen)
         {
-            this.curLocation = obj.ScreenPresenter == null ? string.Empty : obj.ScreenPresenter.ScreenId;
+            this.curLocation = currentScreen == null ? string.Empty : currentScreen.ScreenId;
             this.isDequeuing = false;
             if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0) return;
             this.isDequeuing = true;
-            // Observable.TimerFrame(1, FrameCountType.EndOfFrame).ObserveOnMainThread().Subscribe(l => { this.Dequeue(listAction); });
+            Observable.TimerFrame(1, FrameCountType.EndOfFrame).ObserveOnMainThread().Subscribe(l => { this.Dequeue(listAction); });
         }
 
         public bool Insert(string location, IGameQueueAction action, int index = -1)
@@ -76,7 +76,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
                 if (location == this.curLocation && !this.isDequeuing)
                 {
-                    this.OnStartAtLocation(new ScreenShowSignal(){ScreenPresenter = this.screenManager.CurrentActiveScreen});
+                    this.OnStartAtLocation(this.screenManager.CurrentActiveScreen.Value);
                 }
             }
 

@@ -11,7 +11,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
-    // using UniRx;
+    using UniRx;
     using UnityEditor;
     using UnityEngine;
     using Zenject;
@@ -75,7 +75,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <summary>
         /// Current screen shown on top.
         /// </summary>
-        public IScreenPresenter CurrentActiveScreen { get; }
+        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; }
     }
 
     public class ScreenManager : MonoBehaviour, IScreenManager, IDisposable
@@ -90,7 +90,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <summary>
         /// Current screen shown on top.
         /// </summary>
-        public IScreenPresenter CurrentActiveScreen { get; private set; } = null;
+        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; private set; } = new ReactiveProperty<IScreenPresenter>();
 
         private IScreenPresenter previousActiveScreen;
 
@@ -227,7 +227,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 screen.CloseViewAsync();
             }
 
-            this.CurrentActiveScreen = null;
+            this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
         }
 
@@ -242,7 +242,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 tasks.Add(screen.CloseViewAsync());
             }
 
-            this.CurrentActiveScreen = null;
+            this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
             
             await UniTask.WhenAll(tasks);
@@ -251,7 +251,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public void CleanUpAllScreen()
         {
             this.activeScreens.Clear();
-            this.CurrentActiveScreen = null;
+            this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
 
             foreach (var screen in this.typeToLoadedScreenPresenter)
@@ -277,10 +277,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private void OnShowScreen(ScreenShowSignal signal)
         {
-            this.previousActiveScreen      = this.CurrentActiveScreen;
-            this.CurrentActiveScreen = signal.ScreenPresenter;
+            this.previousActiveScreen      = this.CurrentActiveScreen.Value;
+            this.CurrentActiveScreen.Value = signal.ScreenPresenter;
 
-            this.CurrentActiveScreen.SetViewParent(this.CheckPopupIsOverlay(this.CurrentActiveScreen) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
+            this.CurrentActiveScreen.Value.SetViewParent(this.CheckPopupIsOverlay(this.CurrentActiveScreen.Value) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
 
             // if show the screen that already in the active screens list, remove current one in list and add it to the last of list
             if (this.activeScreens.Contains(signal.ScreenPresenter))
@@ -288,9 +288,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.activeScreens.Add(signal.ScreenPresenter);
 
-            if (this.previousActiveScreen != null && this.previousActiveScreen != this.CurrentActiveScreen)
+            if (this.previousActiveScreen != null && this.previousActiveScreen != this.CurrentActiveScreen.Value)
             {
-                if (this.CurrentActiveScreen.IsClosePrevious)
+                if (this.CurrentActiveScreen.Value.IsClosePrevious)
                 {
                     this.previousActiveScreen.CloseViewAsync();
                     this.previousActiveScreen = null;
@@ -300,7 +300,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     this.previousActiveScreen.OnOverlap();
 
                     //With the current screen is popup, the previous screen will be hide after the blur background is shown
-                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen))
+                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen.Value))
                         this.previousActiveScreen.HideView();
                 }
             }
@@ -313,7 +313,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             if (this.activeScreens.LastOrDefault() == closeScreenPresenter)
             {
                 // If close the screen on the top, will be open again the behind screen if available
-                this.CurrentActiveScreen = null;
+                this.CurrentActiveScreen.Value = null;
                 this.activeScreens.Remove(closeScreenPresenter);
 
                 if (this.activeScreens.Count > 0)
