@@ -301,7 +301,7 @@ public static class Build
                   PlayerSettings.WebGL.dataCaching           = true;
                  PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithoutStacktrace;
 #if UNITY_2022_1_OR_NEWER
-                PlayerSettings.WebGL.initialMemorySize = 32;
+                //PlayerSettings.WebGL.initialMemorySize = 32;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, il2CppCodeGeneration);
 #if FB_INSTANT
                 PlayerSettings.WebGL.showDiagnostics  = false;
