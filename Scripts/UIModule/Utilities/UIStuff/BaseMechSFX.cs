@@ -20,7 +20,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
                 return;
             }
 
-            AudioManager.Instance.PlaySound(this.sfxName);
+            AudioService.Instance.PlaySound(this.sfxName);
         }
 
         /// <summary>

@@ -7,8 +7,6 @@
         "GameFoundation.BlueprintFlow",
         "GameFoundation.Models",
         "GameFoundation.UIModule",
-        "MasterAAASound.Scripts",
-        "I2Localization.Scripts",
         "Zenject-Source",
         "Zenject-Signals"
     ],
