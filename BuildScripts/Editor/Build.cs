@@ -305,6 +305,8 @@ public static class Build
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 64;
+                PlayerSettings.WebGL.memoryGrowthMode  = WebGLMemoryGrowthMode.Linear;
+                PlayerSettings.WebGL.linearMemoryGrowthStep = 16;
 #if FB_INSTANT_PRODUCTION
                 PlayerSettings.WebGL.showDiagnostics = false;
 #else
