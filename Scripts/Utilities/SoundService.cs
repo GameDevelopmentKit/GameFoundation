@@ -8,6 +8,7 @@
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
+    using UniRx;
     using UnityEngine;
     using Zenject;
 
@@ -31,7 +32,7 @@
         private readonly IGameAssets       gameAssets;
         private readonly ObjectPoolManager objectPoolManager;
         
-        // private CompositeDisposable compositeDisposable;
+        private CompositeDisposable compositeDisposable;
 
         public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets, ObjectPoolManager objectPoolManager)
         {
@@ -49,18 +50,18 @@
 
         private async void SubscribeMasterAudio()
         {
-            this.soundSetting.IsMuteSound = false;
-            this.soundSetting.IsMuteMusic = false;
+            this.soundSetting.MuteSound.Value = false;
+            this.soundSetting.MuteMusic.Value = false;
 
-            // this.compositeDisposable = new CompositeDisposable
-            //                            {
-            //                                //TODO uncomment this when we have a proper solution
-            //                                // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-            //                                // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-            //                                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-            //                                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-            //                                this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
-            //                            };
+            this.compositeDisposable = new CompositeDisposable
+                                       {
+                                           //TODO uncomment this when we have a proper solution
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
+                                           this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
+                                           this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
+                                           this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
+                                       };
         }
 
         private void SetMasterVolume(bool value)
