@@ -1,6 +1,7 @@
 ﻿namespace GameFoundation.Scripts
 {
     using BlueprintFlow.BlueprintControlFlow;
+    using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
@@ -27,7 +28,9 @@
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
             //CreateMasterAudio
-            this.Container.BindInterfacesTo<AudioService>().AsCached().NonLazy();
+            this.Container.Bind<PlaylistController>().FromComponentInNewPrefabResource("GameFoundationPlaylistController").AsCached().NonLazy();
+            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("GameFoundationAudio").AsCached().NonLazy();
+            this.Container.BindInterfacesTo<AudioManager>().AsCached().NonLazy();
 
             //Localization services
             this.Container.Bind<LocalizationService>().AsCached().NonLazy();

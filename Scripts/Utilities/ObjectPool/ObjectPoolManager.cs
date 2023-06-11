@@ -18,8 +18,8 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private readonly DiContainer diContainer;
 
         #endregion
-
-        public static ObjectPoolManager Instance { get; private set; }
+        
+        public static    ObjectPoolManager Instance { get; private set; }
 
         private readonly List<GameObject>                   tempList               = new List<GameObject>();
         private readonly Dictionary<GameObject, ObjectPool> prefabToObjectPool     = new Dictionary<GameObject, ObjectPool>();
@@ -47,7 +47,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool)) return pool;
 
             pool = new GameObject($"[Pool] {prefab.name}", typeof(ObjectPool)).GetComponent<ObjectPool>();
-
+            
             pool.transform.SetParent(this.ChooseRoot(root).transform, false);
             this.prefabToObjectPool.Add(prefab, pool);
 
@@ -192,7 +192,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
             {
-                var spawnedObj = pool.Spawn(parent, position, rotation);
+                var spawnedObj   = pool.Spawn(parent, position, rotation);
                 this.spawnedObjToObjectPool.Add(spawnedObj, pool);
                 return spawnedObj;
             }
@@ -231,8 +231,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public UniTask<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation) => this.Spawn(prefabName, null, position, rotation);
 
-        public       UniTask<GameObject> Spawn(string prefabName)                        => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
-        public async UniTask<T>          Spawn<T>(string prefabName) where T : Component => (await this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity)).GetComponent<T>();
+        public UniTask<GameObject> Spawn(string prefabName) => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
 
         #endregion
 
