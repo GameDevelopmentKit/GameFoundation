@@ -67,16 +67,8 @@
         private void SetMasterVolume(bool value)
         {
             var finalValue = value ? 1 : 0;
-            // MasterAudio.MasterVolumeLevel = finalValue;
-
-            if (value)
-            {
-                // MasterAudio.UnmuteAllPlaylists();
-            }
-            else
-            {
-                // MasterAudio.MuteAllPlaylists();
-            }   
+            SoundManager.MusicVolume = finalValue;
+            SoundManager.SoundVolume = finalValue;
         }
 
         private UniTask<AudioSource> GetAudioSource() => this.objectPoolManager.Spawn<AudioSource>("AudioSource");
@@ -127,46 +119,19 @@
             SoundManager.ResumeAll();
         }
 
-        public virtual void CheckToMuteSound(bool isMute)
-        {
-            // var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
-
-            // foreach (var transform in groups)
-            // {
-                // transform.groupMasterVolume = isMute ? 0 : 1;
-            // }
-        }
-
-        public virtual void CheckToMuteMusic(bool value)
-        {
-            // if (value)
-            // {
-                // MasterAudio.MuteAllPlaylists();
-            // }
-            // else
-            // {
-                // MasterAudio.UnmuteAllPlaylists();
-            // }
-        }
-
         protected virtual void SetSoundValue(float value)
         {
-            // var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
-
-            // foreach (var transform in groups)
-            // {
-                // transform.groupMasterVolume = value;
-            // }
+            SoundManager.SoundVolume = value;
         }
 
         protected virtual void SetMusicValue(float value)
         {
-            // MasterAudio.PlaylistMasterVolume = value;
+            SoundManager.MusicVolume = value;
         }
 
         public void Dispose()
         {
-            // this.compositeDisposable.Dispose();
+            this.compositeDisposable.Dispose();
         }
     }
 }
