@@ -25,6 +25,7 @@
 
     public class AudioService : IAudioService, IInitializable, IDisposable
     {
+        public static string       AudioSourceKey = "AudioSource";
         public static AudioService Instance { get; private set; }
 
         private readonly SignalBus         signalBus;
@@ -71,7 +72,7 @@
             SoundManager.SoundVolume = finalValue;
         }
 
-        private UniTask<AudioSource> GetAudioSource() => this.objectPoolManager.Spawn<AudioSource>("AudioSource");
+        private UniTask<AudioSource> GetAudioSource() => this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
 
         public virtual async void PlaySound(string name, bool isLoop = false)
         {
