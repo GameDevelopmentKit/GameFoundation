@@ -90,6 +90,8 @@
         private Dictionary<string, AudioSource> PlayListToAudioSource { get; set; } = new();
         public virtual async void PlayPlayList(string playlist, bool random = false)
         {
+            if(this.PlayListToAudioSource.ContainsKey(playlist)) return;
+            
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(playlist);
             var audioSource = await this.GetAudioSource();
             audioSource.clip = audioClip;
