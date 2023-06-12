@@ -8,6 +8,7 @@ using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEditor.Compilation;
 using UnityEditor.WebGL;
 using UnityEngine;
 
@@ -97,6 +98,7 @@ public static class Build
         foreach (var buildTargetInfo in GetBuildTargetInfoFromString(platforms))
         {
             SetScriptingDefineSymbolInternal(buildTargetInfo.BuildTargetGroup, scriptingDefineSymbols);
+            CompilationPipeline.RequestScriptCompilation();
             SpecificActionForEachPlatform(buildTargetInfo);
         }
     }
