@@ -97,6 +97,7 @@ public static class Build
         foreach (var buildTargetInfo in GetBuildTargetInfoFromString(platforms))
         {
             SetScriptingDefineSymbolInternal(buildTargetInfo.BuildTargetGroup, scriptingDefineSymbols);
+            SpecificActionForEachPlatform(buildTargetInfo);
         }
     }
 
@@ -271,6 +272,7 @@ public static class Build
 
     private static void SpecificActionForEachPlatform(BuildTargetInfo platform)
     {
+        Console.WriteLine($"----------Setup build setting for specific platform----------");
         var il2CppCodeGeneration = OptimizeBuildSie ? Il2CppCodeGeneration.OptimizeSize : Il2CppCodeGeneration.OptimizeSpeed;
 #if !UNITY_2022_1_OR_NEWER
         EditorUserBuildSettings.il2CppCodeGeneration = il2CppCodeGeneration;
@@ -294,6 +296,7 @@ public static class Build
 #endif
                 break;
             case BuildTarget.WebGL:
+                Console.WriteLine($"----------Setup build setting for Webgl platform----------");
                 UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
@@ -308,6 +311,7 @@ public static class Build
                 PlayerSettings.WebGL.memoryGrowthMode  = WebGLMemoryGrowthMode.Linear;
                 PlayerSettings.WebGL.linearMemoryGrowthStep = 8;
 #if FB_INSTANT_PRODUCTION
+                Console.WriteLine($"----------Setup build setting for FB_INSTANT_PRODUCTION platform----------");
                 PlayerSettings.WebGL.showDiagnostics = false;
 #else
                 PlayerSettings.WebGL.showDiagnostics = true;
