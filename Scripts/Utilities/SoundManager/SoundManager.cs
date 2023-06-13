@@ -317,7 +317,7 @@ namespace DigitalRuby.SoundManagerNamespace
                 needsInitialize = false;
                 root = new GameObject();
                 root.name = "DigitalRubySoundManager";
-                root.hideFlags = HideFlags.HideAndDontSave;
+                // root.hideFlags = HideFlags.HideAndDontSave;
                 instance = root.AddComponent<SoundManager>();
                 GameObject.DontDestroyOnLoad(root);
             }
