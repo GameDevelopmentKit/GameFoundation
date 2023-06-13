@@ -6,6 +6,7 @@
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
+    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
     using UniRx;
@@ -15,9 +16,9 @@
     public interface IAudioService
     {
         void PlaySound(string    name, bool isLoop = false);
-        void StopAllSound(string name);
-        void PlayPlayList(string playlist, bool random = false);
-        void StopPlayList(string playlist);
+        void StopAllSound();
+        void PlayPlayList(string musicName, bool random = false);
+        void StopPlayList(string musicName);
         void StopAllPlayList();
         void PauseEverything();
         void ResumeEverything();
@@ -32,15 +33,19 @@
         private readonly SoundSetting      soundSetting;
         private readonly IGameAssets       gameAssets;
         private readonly ObjectPoolManager objectPoolManager;
-        
-        private CompositeDisposable compositeDisposable;
+        private readonly ILogService       logService;
 
-        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets, ObjectPoolManager objectPoolManager)
+        private CompositeDisposable             compositeDisposable;
+        private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
+        private Dictionary<string, AudioSource> MusicNameToAudioSource { get; } = new();
+
+        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets, ObjectPoolManager objectPoolManager, ILogService logService)
         {
             this.signalBus         = signalBus;
             this.soundSetting      = SoundSetting;
             this.gameAssets        = gameAssets;
             this.objectPoolManager = objectPoolManager;
+            this.logService        = logService;
             Instance               = this;
         }
 
@@ -78,39 +83,63 @@
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
-            audioSource.PlayOneShotMusicManaged(audioClip);
-            await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
-            audioSource.Recycle();
+            if (isLoop)
+            {
+                if (this.loopingSoundNameToSources.ContainsKey(name))
+                {
+                    this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
+                    return;
+                }
+                audioSource.clip = audioClip;
+                audioSource.PlayLoopingSoundManaged();
+                this.loopingSoundNameToSources.Add(name, audioSource);
+            }
+            else
+            {
+                audioSource.PlayOneShotMusicManaged(audioClip);
+                await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
+                audioSource.Recycle();  
+            }
         }
 
-        public void StopAllSound(string name)
+        public void StopAllSound()
         {
-            SoundManager.PauseAll();
-        }
-
-        private Dictionary<string, AudioSource> PlayListToAudioSource { get; set; } = new();
-        public virtual async void PlayPlayList(string playlist, bool random = false)
-        {
-            if(this.PlayListToAudioSource.ContainsKey(playlist)) return;
+            SoundManager.StopAll();
             
-            var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(playlist);
+            foreach (var audioSource in this.loopingSoundNameToSources.Values)
+            {
+                audioSource.gameObject.Recycle();
+            }
+            this.loopingSoundNameToSources.Clear();
+        }
+
+        public virtual async void PlayPlayList(string musicName, bool random = false)
+        {
+            if(this.MusicNameToAudioSource.ContainsKey(musicName)) return;
+            
+            var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
             var audioSource = await this.GetAudioSource();
             audioSource.clip = audioClip;
-            this.PlayListToAudioSource.Add(playlist, audioSource);
+            this.MusicNameToAudioSource.Add(musicName, audioSource);
             audioSource.PlayLoopingMusicManaged();
         }
 
-        public void StopPlayList(string playlist)
+        public void StopPlayList(string musicName)
         {
-            SoundManager.StopLoopingMusic(this.PlayListToAudioSource[playlist]);
+            var audioSource = this.MusicNameToAudioSource[musicName];
+            SoundManager.StopLoopingMusic(audioSource);
+            audioSource.gameObject.Recycle();
+            this.MusicNameToAudioSource.Remove(musicName);
         }
 
         public void StopAllPlayList()
         {
-            foreach (var audioSource in this.PlayListToAudioSource.Values)
+            foreach (var audioSource in this.MusicNameToAudioSource.Values)
             {
                 SoundManager.StopLoopingMusic(audioSource);
+                audioSource.gameObject.Recycle();
             }
+            this.MusicNameToAudioSource.Clear();
         }
 
         public void PauseEverything()
