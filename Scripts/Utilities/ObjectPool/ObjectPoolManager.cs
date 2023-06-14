@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
     using Zenject;
     using Object = UnityEngine.Object;
@@ -16,6 +17,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         private readonly IGameAssets gameAssets;
         private readonly DiContainer diContainer;
+        private readonly ILogService logService;
 
         #endregion
 
@@ -29,10 +31,12 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private readonly Dictionary<GameObject, string> mapPrefabToKey     = new Dictionary<GameObject, string>();
 
         private GameObject defaultRoot;
-        public ObjectPoolManager(IGameAssets gameAssets, DiContainer diContainer)
+
+        public ObjectPoolManager(IGameAssets gameAssets, DiContainer diContainer, ILogService logService)
         {
             this.gameAssets  = gameAssets;
             this.diContainer = diContainer;
+            this.logService  = logService;
             Instance         = this;
         }
 
@@ -248,7 +252,8 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             }
             else
             {
-                throw new Exception($"Can't recycle object {obj.Path()}, maybe you already recycled it!");
+                // throw new Exception($"Can't recycle object {obj.Path()}, maybe you already recycled it!");
+                this.logService.LogWithColor($"Can't recycle object {obj.Path()}, maybe you already recycled it!", Color.yellow);
             }
         }
 
