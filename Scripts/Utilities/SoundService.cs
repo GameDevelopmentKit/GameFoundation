@@ -84,7 +84,7 @@
             }
             else
             {
-                audioSource.PlayOneShotMusicManaged(audioClip);
+                audioSource.PlayOneShotSoundManaged(audioClip);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();  
             }
