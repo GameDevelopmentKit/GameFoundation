@@ -17,6 +17,7 @@
     {
         void PlaySound(string    name, bool isLoop = false);
         void StopAllSound();
+        void StopAll();
         void PlayPlayList(string musicName, bool random = false);
         void StopPlayList(string musicName);
         void StopAllPlayList();
@@ -92,13 +93,20 @@
 
         public void StopAllSound()
         {
-            SoundManager.StopAll();
+            SoundManager.StopAllLoopingSounds();
+            SoundManager.StopAllNonLoopingSounds();
             
             foreach (var audioSource in this.loopingSoundNameToSources.Values)
             {
                 audioSource.gameObject.Recycle();
             }
             this.loopingSoundNameToSources.Clear();
+        }
+
+        public void StopAll()
+        {
+            this.StopAllSound();
+            this.StopAllPlayList();
         }
 
         public virtual async void PlayPlayList(string musicName, bool random = false)
@@ -122,9 +130,9 @@
 
         public void StopAllPlayList()
         {
+            SoundManager.StopAllLoopingMusics();
             foreach (var audioSource in this.MusicNameToAudioSource.Values)
             {
-                SoundManager.StopLoopingMusic(audioSource);
                 audioSource.gameObject.Recycle();
             }
             this.MusicNameToAudioSource.Clear();

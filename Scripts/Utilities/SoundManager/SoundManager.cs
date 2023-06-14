@@ -357,7 +357,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
                 Debug.LogWarningFormat("Reloaded level, new sound manager persist tag: {0}", persistTag);
 
-                StopNonLoopingSounds();
+                StopAllNonLoopingSounds();
                 StopLoopingListOnLevelLoad(sounds);
                 StopLoopingListOnLevelLoad(music);
                 soundsOneShot.Clear();
@@ -654,11 +654,12 @@ namespace DigitalRuby.SoundManagerNamespace
         public static void StopAll()
         {
             StopAllLoopingSounds();
-            StopNonLoopingSounds();
+            StopAllNonLoopingSounds();
+            StopAllLoopingMusics();
         }
 
         /// <summary>
-        /// Stop all looping sounds and music. Music one shots and non-looping sounds are not stopped.
+        /// Stop all looping sounds. Non-looping sounds are not stopped.
         /// </summary>
         public static void StopAllLoopingSounds()
         {
@@ -666,6 +667,13 @@ namespace DigitalRuby.SoundManagerNamespace
             {
                 s.Stop();
             }
+        }
+
+        /// <summary>
+        /// Stop all musics. 
+        /// </summary>
+        public static void StopAllLoopingMusics()
+        {
             foreach (LoopingAudioSource s in music)
             {
                 s.Stop();
@@ -675,7 +683,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <summary>
         /// Stop all non-looping sounds. Looping sounds and looping music are not stopped.
         /// </summary>
-        public static void StopNonLoopingSounds()
+        public static void StopAllNonLoopingSounds()
         {
             foreach (AudioSource s in musicOneShot)
             {
