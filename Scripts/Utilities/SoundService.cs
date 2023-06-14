@@ -56,25 +56,13 @@
 
         private async void SubscribeMasterAudio()
         {
-            this.soundSetting.MuteSound.Value = false;
-            this.soundSetting.MuteMusic.Value = false;
-
             this.compositeDisposable = new CompositeDisposable
                                        {
-                                           //TODO uncomment this when we have a proper solution
-                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
                                            this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
                                            this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-                                           this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
                                        };
-        }
-
-        private void SetMasterVolume(bool value)
-        {
-            var finalValue = value ? 1 : 0;
-            SoundManager.MusicVolume = finalValue;
-            SoundManager.SoundVolume = finalValue;
+            SoundManager.MusicVolume = this.soundSetting.MusicValue.Value;
+            SoundManager.SoundVolume = this.soundSetting.SoundValue.Value;
         }
 
         private UniTask<AudioSource> GetAudioSource() => this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
