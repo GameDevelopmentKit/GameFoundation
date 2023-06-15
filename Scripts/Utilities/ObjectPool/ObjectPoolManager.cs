@@ -279,13 +279,13 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             }
         }
 
-        public void RecycleAll()
-        {
-            this.tempList.AddRange(this.spawnedObjToObjectPool.Keys);
-            for (int i = 0; i < this.tempList.Count; ++i)
-                this.Recycle(this.tempList[i]);
-            this.tempList.Clear();
-        }
+        // public void RecycleAll()
+        // {
+        //     this.tempList.AddRange(this.spawnedObjToObjectPool.Keys);
+        //     for (int i = 0; i < this.tempList.Count; ++i)
+        //         this.Recycle(this.tempList[i]);
+        //     this.tempList.Clear();
+        // }
 
         public void RecycleAll<T>(T prefab) where T : Component { this.RecycleAll(prefab.gameObject); }
 
