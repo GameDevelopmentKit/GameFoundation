@@ -4,7 +4,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
-    using UnityEngine.Rendering.Universal;
+    // using UnityEngine.Rendering.Universal;
 
     /// <summary>
     /// Manage camera stack between scenes for URP.
@@ -35,8 +35,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             }
             else
             {
-                var cameraData = this.curCamera.GetUniversalAdditionalCameraData();
-                cameraData.renderType = CameraRenderType.Overlay;
+                // var cameraData = this.curCamera.GetUniversalAdditionalCameraData();
+                // cameraData.renderType = CameraRenderType.Overlay;
                 if (baseCamera != null)
                     baseCamera.AddToCameraStack(this);
             }
@@ -109,10 +109,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         {
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
 
-            var cameraData = this.curCamera.GetUniversalAdditionalCameraData();
-            cameraData.cameraStack.Clear();
-            foreach (var cameraStacker in CameraStackers)
-                cameraData.cameraStack.Add(cameraStacker.curCamera);
+            // var cameraData = this.curCamera.GetUniversalAdditionalCameraData();
+            // cameraData.cameraStack.Clear();
+            // foreach (var cameraStacker in CameraStackers)
+                // cameraData.cameraStack.Add(cameraStacker.curCamera);
 
             // Debug.Break();
         }
