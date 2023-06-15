@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
+using Unity.CodeEditor;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
@@ -99,6 +100,7 @@ public static class Build
         {
             SetScriptingDefineSymbolInternal(buildTargetInfo.BuildTargetGroup, scriptingDefineSymbols);
             CompilationPipeline.RequestScriptCompilation();
+            CodeEditor.Editor.CurrentCodeEditor.SyncAll();
             SpecificActionForEachPlatform(buildTargetInfo);
         }
     }
@@ -308,17 +310,16 @@ public static class Build
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
                 PlayerSettings.WebGL.dataCaching           = true;
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
-                PlayerSettings.WebGL.showDiagnostics       = false;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 64;
                 PlayerSettings.WebGL.memoryGrowthMode  = WebGLMemoryGrowthMode.Linear;
                 PlayerSettings.WebGL.linearMemoryGrowthStep = 8;
-// #if FB_INSTANT_PRODUCTION
-//                 Console.WriteLine($"----------Setup build setting for FB_INSTANT_PRODUCTION platform----------");
-//                 PlayerSettings.WebGL.showDiagnostics = false;
-// #else
-//                 PlayerSettings.WebGL.showDiagnostics = true;
-// #endif // FB_INSTANT
+#if FB_INSTANT_PRODUCTION
+                Console.WriteLine($"----------Setup build setting for FB_INSTANT_PRODUCTION platform----------");
+                PlayerSettings.WebGL.showDiagnostics = false;
+#else
+                PlayerSettings.WebGL.showDiagnostics = true;
+#endif // FB_INSTANT_PRODUCTION
 
 #endif // UNITY_2022_1_OR_NEWER
                 break;
