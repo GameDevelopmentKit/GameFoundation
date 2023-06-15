@@ -308,16 +308,17 @@ public static class Build
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
                 PlayerSettings.WebGL.dataCaching           = true;
                 PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
+                PlayerSettings.WebGL.showDiagnostics       = false;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 64;
                 PlayerSettings.WebGL.memoryGrowthMode  = WebGLMemoryGrowthMode.Linear;
                 PlayerSettings.WebGL.linearMemoryGrowthStep = 8;
-#if FB_INSTANT_PRODUCTION
-                Console.WriteLine($"----------Setup build setting for FB_INSTANT_PRODUCTION platform----------");
-                PlayerSettings.WebGL.showDiagnostics = false;
-#else
-                PlayerSettings.WebGL.showDiagnostics = true;
-#endif // FB_INSTANT
+// #if FB_INSTANT_PRODUCTION
+//                 Console.WriteLine($"----------Setup build setting for FB_INSTANT_PRODUCTION platform----------");
+//                 PlayerSettings.WebGL.showDiagnostics = false;
+// #else
+//                 PlayerSettings.WebGL.showDiagnostics = true;
+// #endif // FB_INSTANT
 
 #endif // UNITY_2022_1_OR_NEWER
                 break;
