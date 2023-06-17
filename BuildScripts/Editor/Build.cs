@@ -309,7 +309,12 @@ public static class Build
                 PlayerSettings.runInBackground             = false;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
                 PlayerSettings.WebGL.dataCaching           = true;
-                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;
+                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.None;
+                PlayerSettings.SetStackTraceLogType(LogType.Error, StackTraceLogType.Full);
+                PlayerSettings.SetStackTraceLogType(LogType.Assert, StackTraceLogType.Full);
+                PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.Full);
+                PlayerSettings.SetStackTraceLogType(LogType.Log, StackTraceLogType.Full);
+                PlayerSettings.SetStackTraceLogType(LogType.Exception, StackTraceLogType.Full);
 
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize      = 64;
