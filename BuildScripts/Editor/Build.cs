@@ -323,7 +323,7 @@ public static class Build
                 PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
                 PlayerSettings.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
                 PlayerSettings.SetStackTraceLogType(LogType.Exception, StackTraceLogType.None);
-                PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
+                // PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
 #else
                 PlayerSettings.WebGL.showDiagnostics = true;
 #endif // FB_INSTANT_PRODUCTION
