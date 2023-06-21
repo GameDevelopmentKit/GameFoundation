@@ -8,6 +8,7 @@ using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEditor.WebGL;
 using UnityEngine;
 
 // ------------------------------------------------------------------------
