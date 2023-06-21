@@ -40,8 +40,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     [PopupInfo("UIPopupNotice", isEnableBlur: true, isCloseWhenTapOutside: false, isOverlay: true)]
     public class NotificationPopupPresenter : BasePopupPresenter<NotificationPopupUIView, NotificationPopupModel>
     {
-        private readonly IAudioManager audioManager;
-        public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioManager audioManager) : base(signalBus, logService) { this.audioManager = audioManager; }
+        private readonly IAudioService audioManager;
+        public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioService audioManager) : base(signalBus, logService) { this.audioManager = audioManager; }
 
         public override UniTask BindData(NotificationPopupModel popupPopupModel)
         {

@@ -231,7 +231,10 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public UniTask<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation) => this.Spawn(prefabName, null, position, rotation);
 
-        public UniTask<GameObject> Spawn(string prefabName) => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
+        public       UniTask<GameObject> Spawn(string prefabName)                        => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
+        
+        public async UniTask<T>          Spawn<T>(string prefabName) where T : Component => (await this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity)).GetComponent<T>();
+
 
         #endregion
 
