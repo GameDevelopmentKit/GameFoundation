@@ -8,7 +8,6 @@ using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-using UnityEditor.WebGL;
 using UnityEngine;
 
 // ------------------------------------------------------------------------
@@ -66,13 +65,13 @@ public static class Build
         return platforms.Split(';').Select(platformText => Targets.Single(t => t.Platform == platformText))
             .ToArray();
     }
-    
+
     private static BuildTargetInfo[] GetBuildTargetInfoFromString(IEnumerable<string> platforms)
     {
         return platforms.Select(platformText => Targets.Single(t => t.Platform == platformText))
             .ToArray();
     }
-    
+
     public static void SetScriptingDefineSymbols()
     {
         var args                   = Environment.GetCommandLineArgs();
@@ -93,7 +92,7 @@ public static class Build
         }
 
         if (string.IsNullOrEmpty(scriptingDefineSymbols)) return;
-        
+
         foreach (var buildTargetInfo in GetBuildTargetInfoFromString(platforms))
         {
             SetScriptingDefineSymbolInternal(buildTargetInfo.BuildTargetGroup, scriptingDefineSymbols);
@@ -103,19 +102,19 @@ public static class Build
     public static void BuildFromCommandLine()
     {
         // Grab the CSV platforms string
-        var platforms = string.Join(";", Targets.Select(t => t.Platform));
-        var scriptingBackend       = ScriptingImplementation.Mono2x;
-        var args                   = Environment.GetCommandLineArgs();
-        var buildOptions           = BuildOptions.None;
-        var outputPath             = "template.exe";
-        var buildAppBundle         = false;
-        var packageName            = "";
-        var keyStoreFileName       = "the1_googleplay.keystore";
-        var keyStoreAliasName      = "theonestudio";
-        var keyStorePassword       = "tothemoon";
-        var keyStoreAliasPassword  = "tothemoon";
-        var iosTargetOSVersion     = "12.0";
-        var iosSigningTeamId       = "";
+        var platforms             = string.Join(";", Targets.Select(t => t.Platform));
+        var scriptingBackend      = ScriptingImplementation.Mono2x;
+        var args                  = Environment.GetCommandLineArgs();
+        var buildOptions          = BuildOptions.None;
+        var outputPath            = "template.exe";
+        var buildAppBundle        = false;
+        var packageName           = "";
+        var keyStoreFileName      = "the1_googleplay.keystore";
+        var keyStoreAliasName     = "theonestudio";
+        var keyStorePassword      = "tothemoon";
+        var keyStoreAliasPassword = "tothemoon";
+        var iosTargetOSVersion    = "12.0";
+        var iosSigningTeamId      = "";
 
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
@@ -137,7 +136,7 @@ public static class Build
                 case "-development":
                     buildOptions |= BuildOptions.Development;
                     break;
-                
+
                 case "-outputPath":
                     outputPath = args[++i];
                     break;
@@ -171,9 +170,9 @@ public static class Build
             }
 
 #if PRODUCTION
-            PlayerSettings.SetStackTraceLogType(LogType.Assert,  StackTraceLogType.None);
+            PlayerSettings.SetStackTraceLogType(LogType.Assert, StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
-            PlayerSettings.SetStackTraceLogType(LogType.Log,     StackTraceLogType.None);
+            PlayerSettings.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
 #endif
 
             if (buildAppBundle)
@@ -283,7 +282,7 @@ public static class Build
             case BuildTarget.Android:
                 //Change build architecture to ARMv7 and ARM6
 #if !UNITY_2022_1_OR_NEWER
-                PlayerSettings.Android.minifyWithR8  = true;
+                PlayerSettings.Android.minifyWithR8 = true;
 #endif
                 PlayerSettings.Android.minifyRelease = true;
                 PlayerSettings.Android.minifyDebug   = true;
@@ -305,7 +304,7 @@ public static class Build
                 PlayerSettings.WebGL.initialMemorySize = 64;
                 UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
-                PlayerSettings.WebGL.showDiagnostics       = false;
+                PlayerSettings.WebGL.showDiagnostics = false;
 #if FB_INSTANT
                 PlayerSettings.WebGL.showDiagnostics = false;
 #else
