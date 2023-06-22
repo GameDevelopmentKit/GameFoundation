@@ -294,7 +294,7 @@ public static class Build
                 break;
             case BuildTarget.WebGL:
 #if UNITY_2022_1_OR_NEWER
-                UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
+                //UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
                 PlayerSettings.WebGL.showDiagnostics       = false;
 #endif
