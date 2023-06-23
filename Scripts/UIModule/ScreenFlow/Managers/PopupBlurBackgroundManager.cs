@@ -16,7 +16,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     /// </summary>
     public class PopupBlurBackgroundManager : MonoBehaviour
     {
-        [SerializeField] private Image blurImage;
+        // [SerializeField] private Image blurImage;
 
         [SerializeField] private Button btnClose;
         // [SerializeField] private TranslucentImageSource translucentImageSource;
@@ -59,7 +59,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 this.ShowImage(false);
                 this.btnClose.gameObject.SetActive(false);
                 this.currentPopup = null;
-                this.blurImage.transform.SetParent(null, false);
+                // this.blurImage.transform.SetParent(null, false);
             }
         }
 
@@ -69,8 +69,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var popupInfo = this.GetPopupInfo(this.currentPopup);
             this.ShowImage(popupInfo.IsEnableBlur);
             this.btnClose.gameObject.SetActive(popupInfo.IsCloseWhenTapOutside);
-            this.blurImage.transform.SetParent(this.currentPopup.CurrentTransform, false);
-            this.blurImage.rectTransform.SetAsFirstSibling();
+            // this.blurImage.transform.SetParent(this.currentPopup.CurrentTransform, false);
+            // this.blurImage.rectTransform.SetAsFirstSibling();
         }
 
         private void ShowImage(bool enable)
@@ -80,7 +80,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             if (!enable)
             {
-                this.blurImage.enabled = false;
+                // this.blurImage.enabled = false;
                 return;
             }
 
@@ -97,7 +97,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             yield return new WaitForEndOfFrame();
 
             // this.translucentImageSource.enabled = false;
-            this.blurImage.enabled = true;
+            // this.blurImage.enabled = true;
             this.signalBus.Fire<PopupBlurBgShowedSignal>();
         }
 
