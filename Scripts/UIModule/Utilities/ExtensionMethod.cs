@@ -67,33 +67,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             listPresenter.Add(presenter);
         }
 
-        //mechText extension
-        public static void SetTextLocalization(this TextMeshProUGUI t, string key, Color color = default)
-        {
-            var mechTextMeshPro = t.GetComponent<MechTextMeshPro>();
-
-            if (mechTextMeshPro == null)
-            {
-                Debug.Log($"{t.gameObject.name} have no MechTextPro");
-
-                return;
-            }
-
-            mechTextMeshPro.SetTextWithLocalization(key, color);
-        }
-
-        public static void SetTextLocalization(this TMP_InputField t, string key)
-        {
-            var mechTextMeshPro = t.textComponent.GetComponent<MechTextMeshPro>();
-
-            if (mechTextMeshPro == null)
-            {
-                return;
-            }
-
-            mechTextMeshPro.SetTextWithLocalization(key);
-        }
-
         /// <summary>
         /// Utils use to initialize a screen presenter manually, and the view is already initialized on the scene
         /// </summary>

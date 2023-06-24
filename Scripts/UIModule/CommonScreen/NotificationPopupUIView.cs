@@ -88,8 +88,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void SetNotificationContent()
         {
-            this.View.TxtTitle.SetTextLocalization(this.Model.Title);
-            this.View.TxtContent.SetTextLocalization(this.Model.Content);
+            this.View.TxtTitle.text = this.Model.Title;
+            this.View.TxtContent.text = this.Model.Content;
         }
 
         public override void Dispose()
