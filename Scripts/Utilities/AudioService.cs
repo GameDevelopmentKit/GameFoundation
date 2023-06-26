@@ -122,6 +122,7 @@
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.StopLoopingMusicManaged();
+            this.MusicAudioSource.clip = null;
             this.MusicAudioSource.Recycle();
             this.MusicAudioSource = null;
         }
