@@ -63,7 +63,13 @@
             SoundManager.SoundVolume = this.soundSetting.SoundValue.Value;
         }
 
-        private UniTask<AudioSource> GetAudioSource() => this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
+        private async UniTask<AudioSource> GetAudioSource()
+        {
+            var audioSource = await this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
+            audioSource.clip   = null;
+            audioSource.volume = 1;
+            return audioSource;
+        }
 
         public virtual async void PlaySound(string name, bool isLoop = false)
         {
