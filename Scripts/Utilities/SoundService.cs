@@ -66,6 +66,7 @@
         private async UniTask<AudioSource> GetAudioSource()
         {
             var audioSource = await this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
+            await UniTask.DelayFrame(1);
             audioSource.clip   = null;
             audioSource.volume = 1;
             return audioSource;
