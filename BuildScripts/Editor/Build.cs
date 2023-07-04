@@ -212,11 +212,11 @@ public static class Build
         Console.WriteLine($"keystore alias name: {keyaliasName}");
         Console.WriteLine($"keystore alias pass: {keyaliasPass}");
 
-        PlayerSettings.Android.useCustomKeystore = true;
         PlayerSettings.Android.keystoreName      = keyStoreFileName;
         PlayerSettings.keystorePass              = keyStorePass;
         PlayerSettings.Android.keyaliasName      = keyaliasName;
         PlayerSettings.keyaliasPass              = keyaliasPass;
+        PlayerSettings.Android.useCustomKeystore = true;
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
