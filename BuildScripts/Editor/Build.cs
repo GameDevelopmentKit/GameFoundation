@@ -207,6 +207,12 @@ public static class Build
         string keyStorePass = "tothemoon", string keyaliasName = "theonestudio",
         string keyaliasPass = "tothemoon")
     {
+        Console.WriteLine("-----Setup android keystore-----");
+        Console.WriteLine($"keystore file name: {keyStoreFileName}");
+        Console.WriteLine($"keystore file pass: {keyStorePass}");
+        Console.WriteLine($"keystore alias name: {keyaliasName}");
+        Console.WriteLine($"keystore alias pass: {keyaliasPass}");
+
         PlayerSettings.Android.useCustomKeystore = true;
         PlayerSettings.Android.keystoreName      = keyStoreFileName;
         PlayerSettings.keystorePass              = keyStorePass;
