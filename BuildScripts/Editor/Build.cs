@@ -169,27 +169,26 @@ public static class Build
                     iosSigningTeamId = args[++i];
                     break;
             }
-
+        }
+        
+        
 #if PRODUCTION
             PlayerSettings.SetStackTraceLogType(LogType.Assert,  StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Log,     StackTraceLogType.None);
 #endif
-
-            if (buildAppBundle)
-            {
-                SetUpAndroidKeyStore(keyStoreFileName, keyStorePassword, keyStoreAliasName, keyStoreAliasPassword);
-                EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Debugging;
-            }
-            else
-            {
-                EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
-            }
-
-            SetupIos(iosSigningTeamId, iosTargetOSVersion);
-
-            //TODO config it later, only use this for TheOneStudio
+        
+        if (buildAppBundle)
+        {
+            SetUpAndroidKeyStore(keyStoreFileName, keyStorePassword, keyStoreAliasName, keyStoreAliasPassword);
+            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Debugging;
         }
+        else
+        {
+            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
+        }
+
+        SetupIos(iosSigningTeamId, iosTargetOSVersion);
 
         PlayerSettings.SplashScreen.showUnityLogo = false;
         // Get a list of targets to build
