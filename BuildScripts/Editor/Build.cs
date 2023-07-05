@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
+using Unity.CodeEditor;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEditor.Compilation;
 using UnityEditor.WebGL;
 using UnityEngine;
 
@@ -97,6 +99,8 @@ public static class Build
         foreach (var buildTargetInfo in GetBuildTargetInfoFromString(platforms))
         {
             SetScriptingDefineSymbolInternal(buildTargetInfo.BuildTargetGroup, scriptingDefineSymbols);
+            CompilationPipeline.RequestScriptCompilation();
+            CodeEditor.Editor.CurrentCodeEditor.SyncAll();
         }
     }
 
@@ -217,6 +221,7 @@ public static class Build
         PlayerSettings.Android.keystorePass      = keyStorePass;
         PlayerSettings.Android.keyaliasName      = keyaliasName;
         PlayerSettings.Android.keyaliasPass      = keyaliasPass;
+        CodeEditor.Editor.CurrentCodeEditor.SyncAll();
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
