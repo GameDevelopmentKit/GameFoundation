@@ -221,7 +221,7 @@ public static class Build
         PlayerSettings.Android.keystorePass      = keyStorePass;
         PlayerSettings.Android.keyaliasName      = keyaliasName;
         PlayerSettings.Android.keyaliasPass      = keyaliasPass;
-        CodeEditor.Editor.CurrentCodeEditor.SyncAll();
+        Console.WriteLine("-----Setup android keystore finished-----");
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
