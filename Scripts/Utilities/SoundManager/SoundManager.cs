@@ -186,7 +186,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="clip">Clip</param>
         public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip)
         {
-            SoundManager.PlayOneShotSound(source, clip, 1.0f);
+            SoundManager.PlayOneShotSound(source, clip, source.volume);
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source to play</param>
         public static void PlayLoopingMusicManaged(this AudioSource source)
         {
-            SoundManager.PlayLoopingMusic(source, 1.0f, 1.0f, false);
+            SoundManager.PlayLoopingMusic(source, source.volume, 1.0f, false);
         }
 
         /// <summary>

@@ -15,10 +15,10 @@
 
     public interface IAudioService
     {
-        void PlaySound(string name, bool isLoop = false);
+        void PlaySound(string name, bool isLoop = false, float volume = 1);
         void StopAllSound();
         void StopAll();
-        void PlayPlayList(string musicName, bool random = false);
+        void PlayPlayList(string musicName, bool random = false, float volume = 1);
         void StopPlayList();
         void StopAllPlayList();
         void PauseEverything();
@@ -72,10 +72,11 @@
             return audioSource;
         }
 
-        public virtual async void PlaySound(string name, bool isLoop = false)
+        public virtual async void PlaySound(string name, bool isLoop = false, float volume = 1)
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
+            audioSource.volume = volume;
             if (isLoop)
             {
                 if (this.loopingSoundNameToSources.ContainsKey(name))
@@ -115,12 +116,13 @@
             this.StopAllPlayList();
         }
 
-        public virtual async void PlayPlayList(string musicName, bool random = false)
+        public virtual async void PlayPlayList(string musicName, bool random = false, float volume = 1)
         {
             this.StopPlayList();
 
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
             this.MusicAudioSource      = await this.GetAudioSource();
+            this.MusicAudioSource.volume = volume;
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged();
         }
