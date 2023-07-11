@@ -52,14 +52,14 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             pool.transform.SetParent(this.ChooseRoot(root).transform, false);
             this.prefabToObjectPool.Add(prefab, pool);
 
-            var list = new Stack<GameObject>();
+            var list = new List<GameObject>(initialPoolSize);
             if (initialPoolSize > 0)
             {
                 while (list.Count < initialPoolSize)
                 {
                     var obj = Object.Instantiate(prefab, pool.transform);
                     obj.SetActive(false);
-                    list.Push(obj);
+                    list.Add(obj);
                 }
             }
 

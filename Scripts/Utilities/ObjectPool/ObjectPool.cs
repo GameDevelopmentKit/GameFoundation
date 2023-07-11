@@ -5,35 +5,35 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
     public class ObjectPool : MonoBehaviour
     {
-        public GameObject        prefab;
-        public Stack<GameObject> pooledObjects  = new Stack<GameObject>();
-        public List<GameObject>  spawnedObjects = new List<GameObject>();
+        public GameObject       prefab;
+        public List<GameObject> pooledObjects  = new List<GameObject>();
+        public List<GameObject> spawnedObjects = new List<GameObject>();
 
         private bool isDestroying;
         public GameObject Spawn(Transform parent, Vector3 position, Quaternion rotation)
         {
-            GameObject obj                = null;
-            var        pooledObjectsCount = this.pooledObjects.Count;
-
-            while (obj == null && pooledObjectsCount > 0)
+            GameObject obj;
+            if (this.pooledObjects.Count == 0)
             {
-                obj = this.pooledObjects.Pop();
-            }
-
-            if (obj != null)
-            {
-                var transformObj = obj.transform;
-                transformObj.localPosition = position;
-                transformObj.localRotation = rotation;
-                transformObj.localScale    = this.prefab.transform.localScale;
-                obj.SetActive(true);
+                obj = Instantiate(this.prefab, position, rotation, this.transform);
             }
             else
             {
-                obj = Instantiate(this.prefab, position, rotation);
+                int index = this.pooledObjects.Count - 1;
+                obj = this.pooledObjects[index];
+                this.pooledObjects.RemoveAt(index);
+
+                var transformObj = obj.transform;
+                transformObj.SetLocalPositionAndRotation(position, rotation);
+                transformObj.localRotation = rotation;
+                obj.SetActive(true);
             }
 
-            obj.transform.SetParent(parent ? parent : this.transform);
+            if (!ReferenceEquals(parent, null) && parent != obj.transform.parent)
+            {
+                obj.transform.SetParent(parent);
+            }
+
             // this.spawnedObjects.Add(obj);
             return obj;
         }
@@ -41,10 +41,10 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         public void Recycle(GameObject obj)
         {
             if (!obj) return;
-            this.pooledObjects.Push(obj);
+            this.pooledObjects.Add(obj);
             // this.spawnedObjects.Remove(obj);
             obj.SetActive(false);
-            if (!this.isDestroying)
+            if (!this.isDestroying && obj.transform.parent != this.transform)
                 obj.transform.SetParent(this.transform);
         }
 
