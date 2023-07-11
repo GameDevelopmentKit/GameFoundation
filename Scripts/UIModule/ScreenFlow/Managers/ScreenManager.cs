@@ -102,15 +102,20 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private RootUICanvas rootUICanvas;
         private ILogService  logService;
         private IGameAssets  gameAssets;
+        private bool         enableBackToClose = true;
 
         #endregion
 
         [Inject]
         public void Init(SignalBus signalBusParam, ILogService logServiceParam, IGameAssets gameAssetsParam)
         {
-            this.signalBus  = signalBusParam;
-            this.logService = logServiceParam;
-            this.gameAssets = gameAssetsParam;
+            this.signalBus    = signalBusParam;
+            this.logService   = logServiceParam;
+            this.gameAssets   = gameAssetsParam;
+
+#if DISABLE_BACK_TO_CLOSE_SCREEN
+            this.enableBackToClose = false;
+#endif
 
             this.activeScreens               = new List<IScreenPresenter>();
             this.typeToLoadedScreenPresenter = new Dictionary<Type, IScreenPresenter>();
@@ -384,7 +389,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private void Update()
         {
             // back button flow
-            if (!Input.GetKeyDown(KeyCode.Escape)) return;
+            if (!Input.GetKeyDown(KeyCode.Escape) || !this.enableBackToClose) return;
 
             if (this.activeScreens.Count > 1)
             {
