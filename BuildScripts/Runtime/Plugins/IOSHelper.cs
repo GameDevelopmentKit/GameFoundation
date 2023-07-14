@@ -39,11 +39,7 @@ public class IOSHelper {
     }
 
     public static bool IsNotificationEnabled() {
-#if UNITY_IOS
-        return UnityEngine.iOS.NotificationServices.enabledNotificationTypes != NotificationType.None;
-#else
         return false;
-#endif
     }
 
     public static string GetRecentNotificationData() {
