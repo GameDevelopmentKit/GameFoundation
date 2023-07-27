@@ -116,6 +116,10 @@ namespace BuildScripts.Editor
 
             pbxProject.AddBuildProperty(mainTargetGuid, "OTHER_LDFLAGS", "-lxml2"); // Add '-lxml2' of facebook to "Other Linker Flags"
             pbxProject.SetBuildProperty(mainTargetGuid, "ARCHS", "arm64");
+            
+            pbxProject.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");      // Disable Unity Framework Target
+            pbxProject.SetBuildProperty(testTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");      // Disable Unity Framework Target
+            pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO"); // Disable Unity Framework Target
         }
     }
 }
