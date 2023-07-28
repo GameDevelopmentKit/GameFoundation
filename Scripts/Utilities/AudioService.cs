@@ -137,10 +137,17 @@
         {
             this.StopPlayList();
         }
-
-        public void PauseEverything()  { SoundManager.PauseAll(); }
-        public void ResumeEverything() { SoundManager.ResumeAll(); }
-
+        public void PauseEverything()
+        {
+            SoundManager.PauseAll();
+            AudioListener.pause = true;
+        }
+        
+        public void ResumeEverything()
+        {
+            AudioListener.pause = false;
+            SoundManager.ResumeAll();
+        }
         protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
         protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
