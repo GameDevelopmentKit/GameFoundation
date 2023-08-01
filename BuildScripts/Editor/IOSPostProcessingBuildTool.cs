@@ -59,8 +59,9 @@ namespace BuildScripts.Editor
             var mainTargetGuid      = pbxProject.GetUnityMainTargetGuid();
             var testTargetGuid      = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
             var frameworkTargetGuid = pbxProject.GetUnityFrameworkTargetGuid();
+            var projectGuid         = pbxProject.ProjectGuid();
 
-            SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, frameworkTargetGuid);
+            SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, frameworkTargetGuid, projectGuid);
 
             File.WriteAllText(projectPath, pbxProject.WriteToString());
         }
@@ -103,11 +104,13 @@ namespace BuildScripts.Editor
             // }
         }
 
-        private static void SetProjectConfig(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid)
+        private static void SetProjectConfig(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
         {
-            pbxProject.SetBuildProperty(mainTargetGuid, "ENABLE_BITCODE", "NO");      // disable bitcode by default, reduce app size
-            pbxProject.SetBuildProperty(testTargetGuid, "ENABLE_BITCODE", "NO");      // disable bitcode by default, reduce app size
-            pbxProject.SetBuildProperty(frameworkTargetGuid, "ENABLE_BITCODE", "NO"); // disable bitcode by default, reduce app size
+            // disable bitcode by default, reduce app size
+            pbxProject.SetBuildProperty(mainTargetGuid, "ENABLE_BITCODE", "NO");      
+            pbxProject.SetBuildProperty(testTargetGuid, "ENABLE_BITCODE", "NO");     
+            pbxProject.SetBuildProperty(frameworkTargetGuid, "ENABLE_BITCODE", "NO"); 
+            pbxProject.SetBuildProperty(projectGuid, "ENABLE_BITCODE", "NO"); 
 
             pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.PushNotifications);  // turn on push notification
             pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.InAppPurchase);      // turn on IAP IOS
@@ -117,9 +120,11 @@ namespace BuildScripts.Editor
             pbxProject.AddBuildProperty(mainTargetGuid, "OTHER_LDFLAGS", "-lxml2"); // Add '-lxml2' of facebook to "Other Linker Flags"
             pbxProject.SetBuildProperty(mainTargetGuid, "ARCHS", "arm64");
             
-            pbxProject.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");      // Disable Unity Framework Target
-            pbxProject.SetBuildProperty(testTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");      // Disable Unity Framework Target
-            pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO"); // Disable Unity Framework Target
+            // Disable Unity Framework Target
+            pbxProject.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");      
+            pbxProject.SetBuildProperty(testTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");     
+            pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO"); 
+            pbxProject.SetBuildProperty(projectGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO"); 
         }
     }
 }
