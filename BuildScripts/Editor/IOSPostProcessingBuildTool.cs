@@ -112,8 +112,6 @@ namespace BuildScripts.Editor
             pbxProject.SetBuildProperty(frameworkTargetGuid, "ENABLE_BITCODE", "NO"); 
             pbxProject.SetBuildProperty(projectGuid, "ENABLE_BITCODE", "NO"); 
 
-            pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.PushNotifications);  // turn on push notification
-            pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.InAppPurchase);      // turn on IAP IOS
             pbxProject.AddFrameworkToProject(mainTargetGuid, "iAd.framework", false);       // for Appsflyer tracking search ads
             pbxProject.AddFrameworkToProject(mainTargetGuid, "AdSupport.framework", false); // Add framework for (iron source mediation)
 
