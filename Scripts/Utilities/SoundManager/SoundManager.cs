@@ -95,13 +95,17 @@ namespace DigitalRuby.SoundManagerNamespace
         {
             if (AudioSource != null)
             {
-                AudioSource.volume = startVolume = (AudioSource.isPlaying ? AudioSource.volume : 0.0f);
-                AudioSource.loop = true;
-                currentMultiplier = startMultiplier;
+                var audioSourceVolume              = (this.AudioSource.isPlaying ? this.AudioSource.volume : 0.0f);
+            #if UNITY_IOS
+                audioSourceVolume = 1;
+            #endif
+                AudioSource.volume   = startVolume = audioSourceVolume;
+                AudioSource.loop     = true;
+                currentMultiplier    = startMultiplier;
                 OriginalTargetVolume = targetVolume;
-                TargetVolume = targetVolume;
-                Stopping = false;
-                timestamp = 0.0f;
+                TargetVolume         = targetVolume;
+                Stopping             = false;
+                timestamp            = 0.0f;
                 if (!AudioSource.isPlaying)
                 {
                     AudioSource.Play();
