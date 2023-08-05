@@ -254,7 +254,7 @@ public static class Build
             SetApplicationVersion();
 
             EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
-            BuildAddressable(platform);
+            BuildAddressable();
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL))
@@ -332,8 +332,7 @@ public static class Build
     /// <summary>
     /// Clean Addressable before build and init FMOD
     /// </summary>
-    /// <param name="buildTargetInfo"></param>
-    private static void BuildAddressable(BuildTargetInfo buildTargetInfo)
+    public static void BuildAddressable()
     {
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");

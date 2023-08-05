@@ -157,6 +157,13 @@ public static class BuildMenu
     }
 
     #endregion
+    
+    [MenuItem("Build/Addressable/build_fresh", priority = 1100)]
+    private static void Build_Addressable_fresh()
+    {
+        Build.BuildAddressable();
+    }
+
 
 
     [MenuItem("Build/Set scripting define symbols", priority = 100)]
