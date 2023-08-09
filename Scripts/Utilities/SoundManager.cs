@@ -10,7 +10,7 @@
 
     public interface IAudioManager
     {
-        void PlaySound(string    name, bool isLoop = false);
+        void PlaySound(string name, bool isLoop = false);
         void StopAllSound(string name);
         void PlayPlayList(string playlist, bool random = false);
         void StopPlayList(string playlist);
@@ -136,6 +136,8 @@
         }
 
         protected virtual void SetMusicValue(float value) { MasterAudio.PlaylistMasterVolume = value; }
+
+        public virtual void FadeMusicValue(float value, float fadeTime = 0.1f) { MasterAudio.FadeAllPlaylistsToVolume(value, fadeTime); }
 
         public void Dispose() { this.compositeDisposable.Dispose(); }
     }
