@@ -32,8 +32,8 @@
 
         void OnGUI()
         {
-            string text = string.Concat((this.deltaTime * 1000.0f).ToString("0.0"), " ms (", (1.0f / this.deltaTime).ToString("0."), " fps)");
-            GUI.Label(rect, text, style);
+            //string text = string.Concat((this.deltaTime * 1000.0f).ToString("0.0"), " ms (", (1.0f / this.deltaTime).ToString("0."), " fps)");
+            //GUI.Label(rect, text, style);
         }
     }
 }
