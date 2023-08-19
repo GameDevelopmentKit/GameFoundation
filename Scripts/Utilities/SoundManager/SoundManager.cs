@@ -299,6 +299,21 @@ namespace DigitalRuby.SoundManagerNamespace
         private static float musicVolume = 1.0f;
         private static bool updated;
         private static bool pauseSoundsOnApplicationPause = true;
+        
+        [RuntimeInitializeOnLoadMethod]
+        static void RunOnRuntimeInitialized()
+        {
+            persistTag      = 0;
+            needsInitialize = true;
+            music.Clear();           
+            musicOneShot.Clear();   
+            sounds.Clear();        
+            persistedSounds.Clear();
+            soundsOneShot.Clear();
+            soundVolume                   = 1.0f;
+            musicVolume                   = 1.0f;
+            pauseSoundsOnApplicationPause = true;
+        }
 
         /// <summary>
         /// Maximum number of the same audio clip to play at once
