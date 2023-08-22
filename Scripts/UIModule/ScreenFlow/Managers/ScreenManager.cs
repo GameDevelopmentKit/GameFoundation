@@ -109,13 +109,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         [Inject]
         public void Init(SignalBus signalBusParam, ILogService logServiceParam, IGameAssets gameAssetsParam)
         {
-            this.signalBus    = signalBusParam;
-            this.logService   = logServiceParam;
-            this.gameAssets   = gameAssetsParam;
-
-#if DISABLE_BACK_TO_CLOSE_SCREEN
-            this.enableBackToClose = false;
-#endif
+            this.signalBus  = signalBusParam;
+            this.logService = logServiceParam;
+            this.gameAssets = gameAssetsParam;
 
             this.activeScreens               = new List<IScreenPresenter>();
             this.typeToLoadedScreenPresenter = new Dictionary<Type, IScreenPresenter>();
@@ -138,6 +134,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.signalBus.Unsubscribe<ScreenSelfDestroyedSignal>(this.OnDestroyScreen);
             this.signalBus.Unsubscribe<PopupBlurBgShowedSignal>(this.OnPopupBlurBgShowed);
         }
+
+        public void DisableBackToClose() { this.enableBackToClose = false; }
 
         #region Implement IScreenManager
 
@@ -239,7 +237,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         public async UniTask CloseAllScreenAsync()
         {
-            var tasks= new List<UniTask>();
+            var tasks              = new List<UniTask>();
             var cacheActiveScreens = this.activeScreens.ToList();
             this.activeScreens.Clear();
 
@@ -250,7 +248,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
-            
+
             await UniTask.WhenAll(tasks);
         }
 
