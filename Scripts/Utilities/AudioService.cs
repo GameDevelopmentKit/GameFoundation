@@ -52,7 +52,7 @@
 
         public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
 
-        private async void SubscribeMasterAudio()
+        private void SubscribeMasterAudio()
         {
             this.compositeDisposable = new CompositeDisposable
             {
