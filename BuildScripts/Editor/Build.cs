@@ -303,6 +303,7 @@ public static class Build
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.Android, il2CppCodeGeneration);
 #endif
                 break;
+#if UNITY_WEBGL
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
@@ -324,6 +325,7 @@ public static class Build
 
 #endif // UNITY_2022_1_OR_NEWER
                 break;
+#endif //UNITY_WEBGL
             default:
                 throw new ArgumentOutOfRangeException();
         }
