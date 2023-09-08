@@ -103,12 +103,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                     baseUIItemPresenter.Dispose();
                 } 
             }
-            this.presenters  = models.Select(model =>
-            {
-                var presenter = this.diContainer.Instantiate(model.PresenterType) as TPresenter;
-                presenter.BindData(model);
-                return presenter;
-            }).ToList();
+            this.presenters  = models.Select(model => this.diContainer.Instantiate(model.PresenterType) as TPresenter).ToList();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);

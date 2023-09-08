@@ -105,12 +105,7 @@
 
         public virtual void CheckToMuteSound(bool isMute)
         {
-            var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
-
-            foreach (var transform in groups)
-            {
-                transform.groupMasterVolume = isMute ? 0 : 1;
-            }
+            MasterAudio.MixerMuted      = isMute;
         }
 
         public virtual void CheckToMuteMusic(bool value)
