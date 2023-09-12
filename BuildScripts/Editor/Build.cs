@@ -10,7 +10,9 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Compilation;
+#if UNITY_WEBGL
 using UnityEditor.WebGL;
+#endif
 using UnityEngine;
 
 // ------------------------------------------------------------------------
