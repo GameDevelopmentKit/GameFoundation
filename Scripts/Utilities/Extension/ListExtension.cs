@@ -18,7 +18,7 @@
                 {
                     randomIndex = Random.Range(0, seedData.Count);
                 } while (marked.Contains(randomIndex));
-                
+
                 marked.Add(randomIndex);
                 result.Add(seedData[randomIndex]);
             }
@@ -37,32 +37,59 @@
             return result;
         }
 
-        public static T RandomElement<T>(this IList<T> list) { return list[Random.Range(0, list.Count)]; }
+        public static T RandomElement<T>(this IList<T> list)
+        {
+            return list[Random.Range(0, list.Count)];
+        }
 
-        public static T PickRandom<T>(this IEnumerable<T> source) { return source.PickRandom(1).Single(); }
+        public static T PickRandomOrDefault<T>(this IEnumerable<T> source, T defaultValue = default)
+        {
+            return source.PickRandomOrDefault(1).First();
+        }
 
-        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, int count) { return source.ShuffleSource().Take(count); }
+        public static IEnumerable<T> PickRandomOrDefault<T>(this IEnumerable<T> source, int count, T defaultValue = default)
+        {
+            var src = source.ToArray();
+
+            return src
+                   .Union(count > src.Length ? Enumerable.Repeat(defaultValue, count - src.Length) : Enumerable.Empty<T>())
+                   .ShuffleSource()
+                   .Take(count);
+        }
+
+        public static T PickRandom<T>(this IEnumerable<T> source)
+        {
+            return source.PickRandom(1).Single();
+        }
+
+        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, int count)
+        {
+            return source.ShuffleSource().Take(count);
+        }
 
         public static IEnumerable<T> ShuffleSource<T>(this IEnumerable<T> source)
         {
             return source.OrderBy(x => Guid.NewGuid());
         }
-       
-        public static void TryInsert<T>(this List<T> list, T item, int index) {
-            if (index >= 0 && index < list.Count) {
+
+        public static void TryInsert<T>(this List<T> list, T item, int index)
+        {
+            if (index >= 0 && index < list.Count)
+            {
                 list.Insert(index, item);
             }
-            else {
+            else
+            {
                 list.Add(item);
             }
         }
-        
+
         public static bool TryGetItem<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource item, out int index)
         {
             if (source == null)
-                throw new ArgumentNullException(nameof (source));
+                throw new ArgumentNullException(nameof(source));
             if (predicate == null)
-                throw new ArgumentNullException(nameof (predicate));
+                throw new ArgumentNullException(nameof(predicate));
             index = 0;
             foreach (TSource source1 in source)
             {
@@ -71,6 +98,7 @@
                     item = source1;
                     return true;
                 }
+
                 index++;
             }
 
