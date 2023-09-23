@@ -97,6 +97,9 @@ namespace BuildScripts.Editor
                 item.SetString("SKAdNetworkIdentifier", $"{skNetwork}.skadnetwork"); //ironSource
             }
 
+            // bypass Provide Export Compliance in Appstore Connect
+            rootDict.SetBoolean("ITSAppUsesNonExemptEncryption", false);
+
             // allow insecure http IOS
             // try
             // {
