@@ -13,7 +13,7 @@
         // Use this for initialization
         private void Start()
         {
-#if !DEVELOPMENT_BUILD && !UNITY_EDITOR && !SHOW_FPS
+#if !SHOW_FPS
             this.gameObject.SetActive(false);
 #endif
             Init();
