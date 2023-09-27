@@ -15,6 +15,7 @@
 
     public interface IAudioService
     {
+        void PlaySound(string name, AudioSource sender, bool isLoop = false);
         void PlaySound(string name, bool isLoop = false);
         void StopAllSound();
         void StopAll();
@@ -71,6 +72,28 @@
             return audioSource;
         }
 
+        public virtual async void PlaySound(string name, AudioSource sender, bool isLoop = false)
+        {
+            var audioClip     = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            if (isLoop)
+            {
+                if (this.loopingSoundNameToSources.ContainsKey(name))
+                {
+                    this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
+                    return;
+                }
+            
+                sender.clip = audioClip;
+                sender.PlayLoopingSoundManaged();
+                this.loopingSoundNameToSources.Add(name, sender);
+            }
+            else
+            {
+                sender.PlayOneShotSoundManaged(audioClip);
+                await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
+            }
+        }
+
         public virtual async void PlaySound(string name, bool isLoop = false)
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
@@ -94,7 +117,8 @@
                 audioSource.Recycle();
             }
         }
-
+        
+        
         public void StopAllSound()
         {
             SoundManager.StopAllLoopingSounds();
