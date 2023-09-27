@@ -15,7 +15,7 @@
 
     public interface IAudioService
     {
-        void PlaySound(string name, AudioSource sender, bool isLoop = false);
+        void PlaySound(string name, AudioSource sender);
         void PlaySound(string name, bool isLoop = false);
         void StopAllSound();
         void StopAll();
@@ -41,7 +41,8 @@
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
-        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets, ObjectPoolManager objectPoolManager, ILogService logService)
+        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets,
+            ObjectPoolManager objectPoolManager, ILogService logService)
         {
             this.signalBus         = signalBus;
             this.soundSetting      = SoundSetting;
@@ -72,26 +73,11 @@
             return audioSource;
         }
 
-        public virtual async void PlaySound(string name, AudioSource sender, bool isLoop = false)
+        public virtual async void PlaySound(string name, AudioSource sender)
         {
-            var audioClip     = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
-            if (isLoop)
-            {
-                if (this.loopingSoundNameToSources.ContainsKey(name))
-                {
-                    this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
-                    return;
-                }
-            
-                sender.clip = audioClip;
-                sender.PlayLoopingSoundManaged();
-                this.loopingSoundNameToSources.Add(name, sender);
-            }
-            else
-            {
-                sender.PlayOneShotSoundManaged(audioClip);
-                await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
-            }
+            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            sender.clip = audioClip;
+            sender.PlayOneShotSoundManaged(audioClip);
         }
 
         public virtual async void PlaySound(string name, bool isLoop = false)
@@ -117,8 +103,7 @@
                 audioSource.Recycle();
             }
         }
-        
-        
+
         public void StopAllSound()
         {
             SoundManager.StopAllLoopingSounds();
@@ -157,21 +142,20 @@
             this.MusicAudioSource = null;
         }
 
-        public void StopAllPlayList()
-        {
-            this.StopPlayList();
-        }
+        public void StopAllPlayList() { this.StopPlayList(); }
+
         public void PauseEverything()
         {
             SoundManager.PauseAll();
             AudioListener.pause = true;
         }
-        
+
         public void ResumeEverything()
         {
             AudioListener.pause = false;
             SoundManager.ResumeAll();
         }
+
         protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
         protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
