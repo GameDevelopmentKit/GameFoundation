@@ -15,6 +15,7 @@
 
     public interface IAudioService
     {
+        void PlaySound(string name, AudioSource sender);
         void PlaySound(string name, bool isLoop = false);
         void StopAllSound();
         void StopAll();
@@ -40,7 +41,8 @@
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
-        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets, ObjectPoolManager objectPoolManager, ILogService logService)
+        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets,
+            ObjectPoolManager objectPoolManager, ILogService logService)
         {
             this.signalBus         = signalBus;
             this.soundSetting      = SoundSetting;
@@ -69,6 +71,12 @@
             audioSource.clip   = null;
             audioSource.volume = 1;
             return audioSource;
+        }
+
+        public virtual async void PlaySound(string name, AudioSource sender)
+        {
+            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            sender.PlayOneShotSoundManaged(audioClip);
         }
 
         public virtual async void PlaySound(string name, bool isLoop = false)
@@ -133,21 +141,20 @@
             this.MusicAudioSource = null;
         }
 
-        public void StopAllPlayList()
-        {
-            this.StopPlayList();
-        }
+        public void StopAllPlayList() { this.StopPlayList(); }
+
         public void PauseEverything()
         {
             SoundManager.PauseAll();
             AudioListener.pause = true;
         }
-        
+
         public void ResumeEverything()
         {
             AudioListener.pause = false;
             SoundManager.ResumeAll();
         }
+
         protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
         protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
