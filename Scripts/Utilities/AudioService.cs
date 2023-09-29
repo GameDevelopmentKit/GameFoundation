@@ -16,10 +16,10 @@
     public interface IAudioService
     {
         void PlaySound(string name, AudioSource sender);
-        void PlaySound(string name, bool isLoop = false);
+        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
         void StopAllSound();
         void StopAll();
-        void PlayPlayList(string musicName, bool random = false);
+        void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void StopPlayList();
         void StopAllPlayList();
         void PauseEverything();
@@ -79,7 +79,7 @@
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async void PlaySound(string name, bool isLoop = false)
+        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f)
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
@@ -92,7 +92,7 @@
                 }
 
                 audioSource.clip = audioClip;
-                audioSource.PlayLoopingSoundManaged();
+                audioSource.PlayLoopingSoundManaged(volumeScale, fadeSeconds);
                 this.loopingSoundNameToSources.Add(name, audioSource);
             }
             else
@@ -122,14 +122,21 @@
             this.StopAllPlayList();
         }
 
-        public virtual async void PlayPlayList(string musicName, bool random = false)
+        /// <summary>
+        /// Play a music track and loop it until stopped, using the global music volume as a modifier
+        /// </summary>
+        /// <param name="source">Audio source to play</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
+        /// <param name="persist">Whether to persist the looping music between scene changes</param>
+        public virtual async void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
             this.StopPlayList();
 
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
-            this.MusicAudioSource.PlayLoopingMusicManaged();
+            this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
         public void StopPlayList()
