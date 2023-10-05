@@ -307,10 +307,10 @@ public static class Build
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = false; // Disable compression for FBInstant game
-                PlayerSettings.runInBackground             = false;
+                PlayerSettings.runInBackground             = true;
                 PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
                 PlayerSettings.WebGL.dataCaching           = true;
-                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.None;
+                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.FullWithStacktrace;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 64;
                 UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
