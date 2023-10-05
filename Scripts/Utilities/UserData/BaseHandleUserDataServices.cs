@@ -17,6 +17,11 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         public static string KeyOf(Type type) => UserDataPrefix + type.Name;
 
+        private static readonly JsonSerializerSettings JsonSetting = new()
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+        };
+
         private readonly ILogService                    logService;
         private readonly Dictionary<string, ILocalData> userDataCache = new();
 
@@ -36,7 +41,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
             if (!force) return;
 
-            await this.SaveJsons((key, JsonConvert.SerializeObject(data)));
+            await this.SaveJsons((key, JsonConvert.SerializeObject(data, JsonSetting)));
             this.logService.LogWithColor($"Saved {key}", Color.green);
         }
 
@@ -53,7 +58,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
             {
                 return this.userDataCache.GetOrAdd(key, () =>
                 {
-                    var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type);
+                    var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type, JsonSetting);
 
                     if (result is not ILocalData data)
                     {
@@ -77,12 +82,13 @@ namespace GameFoundation.Scripts.Utilities.UserData
             await this.SaveJsons(this.userDataCache.Select(value =>
             {
                 this.logService.LogWithColor($"Saved {value.Key}", Color.green);
-                return (value.Key, JsonConvert.SerializeObject(value.Value));
+                return (value.Key, JsonConvert.SerializeObject(value.Value, JsonSetting));
             }).ToArray());
             this.logService.LogWithColor("Saved all data", Color.green);
         }
 
-        protected abstract UniTask           SaveJsons(params (string key, string json)[] values);
+        protected abstract UniTask SaveJsons(params (string key, string json)[] values);
+
         protected abstract UniTask<string[]> LoadJsons(params string[] keys);
     }
 }
