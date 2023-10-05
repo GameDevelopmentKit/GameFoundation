@@ -13,12 +13,17 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// </summary>
     public class DefaultTypeConverter : ITypeConverter
     {
+        private static readonly JsonSerializerSettings JsonSetting = new()
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+        };
+
         /// <inheritdoc />
         public virtual object ConvertFromString(string text, Type typeInfo)
         {
             try
             {
-                return JsonConvert.DeserializeObject(text, typeInfo);
+                return JsonConvert.DeserializeObject(text, typeInfo, JsonSetting);
             }
             catch (Exception)
             {
@@ -34,7 +39,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         public virtual string ConvertToString(object value, Type typeInfo)
         {
             if (value == null) return string.Empty;
-            return JsonConvert.SerializeObject(value);
+            return JsonConvert.SerializeObject(value, JsonSetting);
         }
     }
 }
