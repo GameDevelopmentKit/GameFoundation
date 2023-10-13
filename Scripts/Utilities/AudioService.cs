@@ -129,14 +129,16 @@
         /// <param name="volumeScale">Additional volume scale</param>
         /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
-        public virtual async void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        public virtual void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
-            this.StopPlayList();
-
-            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
-            this.MusicAudioSource      = await this.GetAudioSource();
-            this.MusicAudioSource.clip = audioClip;
-            this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
+            UniTask.Void(async () =>
+            {
+                this.StopPlayList();
+                var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
+                this.MusicAudioSource      = await this.GetAudioSource();
+                this.MusicAudioSource.clip = audioClip;
+                this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
+            });
         }
 
         public void StopPlayList()
