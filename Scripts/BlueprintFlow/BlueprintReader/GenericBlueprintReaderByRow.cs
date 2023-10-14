@@ -124,11 +124,11 @@ namespace BlueprintFlow.BlueprintReader
         private readonly Type blueprintType;
         private readonly Type recordType;
 
-        private readonly List<MemberInfo> fieldAndProperties;
-        private          List<MemberInfo> blueprintCollectionMemberInfos;
+        private readonly List<MemberInfo>                              fieldAndProperties;
+        private          List<MemberInfo>                              blueprintCollectionMemberInfos;
+        private          Dictionary<MemberInfo, BlueprintRecordReader> nestedMemberInfoToRecordReader;
 
-        private List<IBlueprintCollection>                    listBlueprintCollections;
-        private Dictionary<MemberInfo, BlueprintRecordReader> nestedMemberInfoToRecordReader;
+        private List<IBlueprintCollection> listBlueprintCollections;
 
         public string RequireKey;
 
@@ -152,7 +152,7 @@ namespace BlueprintFlow.BlueprintReader
             {
                 csvHeaderKeyAttribute = (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.blueprintType, typeof(CsvHeaderKeyAttribute));
             }
-            
+
             if (csvHeaderKeyAttribute != null)
                 this.RequireKey = csvHeaderKeyAttribute.HeaderKey;
 
@@ -227,6 +227,16 @@ namespace BlueprintFlow.BlueprintReader
                     foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
                     {
                         nestedMemberInfo.SetValue(record, recordReader.GetRecord(inputCsv));
+                    }
+                }
+            }
+            else
+            {
+                if (this.nestedMemberInfoToRecordReader != null)
+                {
+                    foreach (var (_, recordReader) in this.nestedMemberInfoToRecordReader)
+                    {
+                        recordReader.GetRecord(inputCsv);
                     }
                 }
             }
