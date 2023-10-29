@@ -39,5 +39,20 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var      weekIndex = (int)(span.TotalDays / 7);
             return weekIndex;
         }
+        
+        public static int GetTotalWeeksOfMonth(int year, int month)
+        {
+            var ci = System.Globalization.CultureInfo.CurrentCulture;
+
+            // First day of the month
+            var firstDay = new DateTime(year, month, 1);
+            // Last day of the month
+            var lastDay = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+
+            var firstWeek = ci.Calendar.GetWeekOfYear(firstDay, ci.DateTimeFormat.CalendarWeekRule, ci.DateTimeFormat.FirstDayOfWeek);
+            var lastWeek  = ci.Calendar.GetWeekOfYear(lastDay, ci.DateTimeFormat.CalendarWeekRule, ci.DateTimeFormat.FirstDayOfWeek);
+
+            return (lastWeek - firstWeek) + 1;
+        }
     }
 }
