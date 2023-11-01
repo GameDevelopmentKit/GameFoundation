@@ -20,6 +20,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
         private static readonly JsonSerializerSettings JsonSetting = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         };
 
         private readonly ILogService                    logService;
