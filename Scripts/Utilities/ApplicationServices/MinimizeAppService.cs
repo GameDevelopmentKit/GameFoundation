@@ -11,8 +11,9 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
         [Inject] private SignalBus               signalBus;
         [Inject] private IHandleUserDataServices handleUserDataServices;
 
-        private readonly ApplicationPauseSignal     applicationPauseSignal     = new ApplicationPauseSignal(false);
-        private readonly UpdateTimeAfterFocusSignal updateTimeAfterFocusSignal = new UpdateTimeAfterFocusSignal();
+        private readonly ApplicationPauseSignal     applicationPauseSignal     = new(false);
+        private readonly ApplicationQuitSignal      applicationQuitSignal      = new();
+        private readonly UpdateTimeAfterFocusSignal updateTimeAfterFocusSignal = new();
 
         private DateTime timeBeforeAppPause = DateTime.Now;
 
@@ -47,6 +48,10 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
             }
         }
 
-        private void OnApplicationQuit() { this.handleUserDataServices.SaveAll(); }
+        private void OnApplicationQuit()
+        {
+            this.signalBus.Fire(this.applicationQuitSignal);
+            this.handleUserDataServices.SaveAll();
+        }
     }
 }

@@ -8,6 +8,7 @@
         {
             this.Container.Bind<MinimizeAppService>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
             this.Container.DeclareSignal<ApplicationPauseSignal>();
+            this.Container.DeclareSignal<ApplicationQuitSignal>();
             this.Container.DeclareSignal<UpdateTimeAfterFocusSignal>();
         }
     }
