@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GameFoundation.BuildScripts.Runtime;
+using BuildScripts.Runtime;
 using Unity.CodeEditor;
 using UnityEditor;
 using UnityEditor.AddressableAssets.Build;

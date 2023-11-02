@@ -2,6 +2,7 @@ namespace Models
 {
     using System;
     using System.Collections.Generic;
+    using BuildScripts.Runtime.ConstantValues;
     using Sirenix.OdinInspector;
 #if UNITY_EDITOR
     using UnityEditor;
@@ -48,7 +49,11 @@ namespace Models
 
         #endregion
 
-        private void OnEnable() { this.RefreshData(); }
+        private void OnEnable()
+        {
+            this.RefreshData();
+            ConstantValuesHelper.Init();
+        }
 
         private void RefreshData()
         {

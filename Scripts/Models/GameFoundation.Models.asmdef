@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "UniRx",
-        "Zenject-Source"
+        "Zenject-Source",
+        "BuildScript.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
