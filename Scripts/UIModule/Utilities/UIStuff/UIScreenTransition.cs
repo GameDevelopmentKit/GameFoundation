@@ -21,7 +21,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void Awake()
         {
-            this.eventSystem   = EventSystem.current;
+            this.eventSystem                   = EventSystem.current;
+            this.introAnimation.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
+            this.outroAnimation.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
             if (!this.introAnimation.playableAsset)
                 Debug.LogWarning($"Intro Animation for {this.gameObject.name} is not available", this);
             else
