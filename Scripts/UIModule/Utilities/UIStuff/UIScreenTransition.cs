@@ -13,6 +13,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         [Tooltip("if lockInput = true, disable event system while anim is running and otherwise.")]
         [SerializeField] private bool             lockInput = true;
 
+        public DirectorUpdateMode DirectorUpdateMode = DirectorUpdateMode.UnscaledGameTime;
+
         private EventSystem             eventSystem;
         private UniTaskCompletionSource animationTask;
         
@@ -22,8 +24,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         private void Awake()
         {
             this.eventSystem                   = EventSystem.current;
-            this.introAnimation.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
-            this.outroAnimation.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
+            this.introAnimation.timeUpdateMode = this.DirectorUpdateMode;
+            this.outroAnimation.timeUpdateMode = this.DirectorUpdateMode;
             if (!this.introAnimation.playableAsset)
                 Debug.LogWarning($"Intro Animation for {this.gameObject.name} is not available", this);
             else
