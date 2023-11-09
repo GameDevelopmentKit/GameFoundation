@@ -3,6 +3,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;

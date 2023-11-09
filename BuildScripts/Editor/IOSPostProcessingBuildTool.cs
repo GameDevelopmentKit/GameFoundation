@@ -109,12 +109,12 @@ namespace BuildScripts.Editor
             pbxProject.SetBuildProperty(testTargetGuid, "ENABLE_BITCODE", "NO");      // disable bitcode by default, reduce app size
             pbxProject.SetBuildProperty(frameworkTargetGuid, "ENABLE_BITCODE", "NO"); // disable bitcode by default, reduce app size
 
-            //pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.PushNotifications);  // turn on push notification
-            //pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.InAppPurchase);      // turn on IAP IOS
-            //pbxProject.AddFrameworkToProject(mainTargetGuid, "iAd.framework", false);       // for Appsflyer tracking search ads
-            //pbxProject.AddFrameworkToProject(mainTargetGuid, "AdSupport.framework", false); // Add framework for (iron source mediation)
+            pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.PushNotifications);  // turn on push notification
+            pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.InAppPurchase);      // turn on IAP IOS
+            pbxProject.AddFrameworkToProject(mainTargetGuid, "iAd.framework", false);       // for Appsflyer tracking search ads
+            pbxProject.AddFrameworkToProject(mainTargetGuid, "AdSupport.framework", false); // Add framework for (iron source mediation)
 
-            //pbxProject.AddBuildProperty(mainTargetGuid, "OTHER_LDFLAGS", "-lxml2"); // Add '-lxml2' of facebook to "Other Linker Flags"
+            pbxProject.AddBuildProperty(mainTargetGuid, "OTHER_LDFLAGS", "-lxml2"); // Add '-lxml2' of facebook to "Other Linker Flags"
             pbxProject.SetBuildProperty(mainTargetGuid, "ARCHS", "arm64");
         }
     }
