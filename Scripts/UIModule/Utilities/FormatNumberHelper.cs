@@ -5,7 +5,7 @@
 
     public static class FormatNumberHelper
     {
-        public static string ConvertToTimeElapsed(this object obj, long endTime, long startTime)
+        public static string ConvertToTimeElapsed(long totalSecond)
         {
             const string minuteLow  = "minute";
             const string minuteLows = "minutes";
@@ -15,8 +15,7 @@
             const string dayLow     = "day";
             const string dayLows    = "days";
 
-            var currentTime = obj.CurrentTimeSecond();
-            var elapsedTime = TimeSpan.FromSeconds(currentTime - (endTime));
+            var elapsedTime = TimeSpan.FromSeconds(totalSecond);
 
             return elapsedTime.TotalHours switch
             {
@@ -25,10 +24,15 @@
                 _ => $"{elapsedTime.ToString("%d")} {(Math.Abs(elapsedTime.TotalDays - 1) < 1f ? dayLow : dayLows)} {ago}"
             };
         }
-
-        public static void SetTimeRemain(this TextMeshProUGUI txtCoolDown, long currentTime, long nextTimeRemain)
+        
+        public static string ConvertToTimeElapsed(DateTime endTime)
         {
-            var remainTime = nextTimeRemain - currentTime;
+            return ConvertToTimeElapsed((long)(endTime - DateTime.UtcNow).TotalSeconds);
+        }
+        
+        public static void SetTimeRemain(this TextMeshProUGUI txtCoolDown, long currentTime, long endTime)
+        {
+            var remainTime = endTime - currentTime;
             var hours      = TimeSpan.FromMilliseconds(remainTime).Hours;
             var minuses    = TimeSpan.FromMilliseconds(remainTime).Minutes;
             var second     = TimeSpan.FromMilliseconds(remainTime).Seconds;
@@ -91,10 +95,6 @@
             txt.text = originstring + s;
         }
 
-        public static string ConvertSecondToTime(this long second, bool useSemiColon = true, bool space = false) => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
-
-        public static string ConvertSecondToShortTime(this long second, bool useSemiColon = true) => TimeSpan.FromSeconds(second).ToShortTimeString(useSemiColon);
-
         public static string ToTimeString(this TimeSpan timeSpan, bool useSemiColon = false, bool space = false)
         {
             if (timeSpan.Days >= 1)
@@ -106,18 +106,18 @@
             return useSemiColon ? (space ? timeSpan.ToString(@"mm\:\ ss") : timeSpan.ToString(@"mm\:ss")) : (space ? timeSpan.ToString(@"mm\m\ ss\s") : timeSpan.ToString(@"mm\mss\s"));
         }
 
-        public static string ToShortTimeString(this TimeSpan timeSpan, bool useSemiColon = false)
+        public static string ToShortTimeString(this TimeSpan timeSpan)
         {
             if (timeSpan.Days >= 1)
-                return useSemiColon ? timeSpan.ToString(@"dd") : timeSpan.ToString(@"dd\d");
+                return timeSpan.Days > 1 ? $"{timeSpan.Days} days" : $"{timeSpan.Days} day";
 
             if (timeSpan.Hours >= 1)
-                return useSemiColon ? timeSpan.ToString(@"hh") : timeSpan.ToString(@"hh\h");
+                return timeSpan.Hours > 1 ? $"{timeSpan.Hours} hours" : $"{timeSpan.Hours} hour";
 
             if (timeSpan.Minutes >= 1)
-                return useSemiColon ? timeSpan.ToString(@"mm") : timeSpan.ToString(@"mm\m");
+                return timeSpan.Minutes > 1 ? $"{timeSpan.Minutes} minutes" : $"{timeSpan.Minutes} minute";
 
-            return useSemiColon ? timeSpan.ToString(@"ss") : timeSpan.ToString(@"ss\s");
+            return timeSpan.Seconds > 1 ? $"{timeSpan.Seconds} seconds" : $"{timeSpan.Seconds} second";
         }
     }
 
@@ -142,10 +142,10 @@
             }
         }
 
-        private static readonly DateTime Jan1St1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime Jan1St1970 = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        public static long CurrentTimeMillis(this object obj) { return (long)((DateTime.UtcNow - Jan1St1970).TotalMilliseconds); }
+        public static long CurrentTimeMillis() { return (long)((DateTime.UtcNow - Jan1St1970).TotalMilliseconds); }
 
-        public static long CurrentTimeSecond(this object obj) { return (long)((DateTime.UtcNow - Jan1St1970).TotalSeconds); }
+        public static long CurrentTimeSecond() { return (long)((DateTime.UtcNow - Jan1St1970).TotalSeconds); }
     }
 }
