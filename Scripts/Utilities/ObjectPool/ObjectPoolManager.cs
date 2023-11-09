@@ -3,10 +3,12 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
+    using UnityEngine.ResourceManagement.AsyncOperations;
     using Zenject;
     using Object = UnityEngine.Object;
 
@@ -51,7 +53,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             pool.transform.SetParent(this.ChooseRoot(root).transform, false);
             this.prefabToObjectPool.Add(prefab, pool);
 
-            var list = new List<GameObject>();
+            var list = new List<GameObject>(initialPoolSize);
             if (initialPoolSize > 0)
             {
                 while (list.Count < initialPoolSize)
@@ -114,9 +116,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 list.Clear();
             if (this.prefabToObjectPool.TryGetValue(prefab.gameObject, out var pool))
             {
-                var pooledObject = pool.pooledObjects;
-                for (int i = 0; i < pooledObject.Count; ++i)
-                    list.Add(pooledObject[i].GetComponent<T>());
+                list.AddRange(pool.pooledObjects.Select(t => t.GetComponent<T>()));
             }
 
             return list;
@@ -168,9 +168,17 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             return this.CreatePool(prefab, initialPoolSize, root);
         }
 
+        private Dictionary<string, AsyncOperationHandle<GameObject>> prefabNameToLoadingTask = new();
         public async UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
-            var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
+            if (this.cachedLoadedPrefab.ContainsKey(prefabName)) return this.Spawn(this.cachedLoadedPrefab[prefabName], parent, position, rotation);
+            if (!this.prefabNameToLoadingTask.ContainsKey(prefabName))
+            {
+                this.prefabNameToLoadingTask.Add(prefabName, this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false));
+            }
+
+            var prefab = await this.prefabNameToLoadingTask[prefabName];
+            this.prefabNameToLoadingTask.Remove(prefabName);
 
             if (!this.cachedLoadedPrefab.ContainsKey(prefabName))
             {
@@ -190,9 +198,10 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (prefab == null)
                 return null;
 
-            if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
+            if (this.prefabToObjectPool.ContainsKey(prefab))
             {
-                var spawnedObj   = pool.Spawn(parent, position, rotation);
+                var pool       = this.prefabToObjectPool[prefab];
+                var spawnedObj = pool.Spawn(parent, position, rotation);
                 this.spawnedObjToObjectPool.Add(spawnedObj, pool);
                 return spawnedObj;
             }

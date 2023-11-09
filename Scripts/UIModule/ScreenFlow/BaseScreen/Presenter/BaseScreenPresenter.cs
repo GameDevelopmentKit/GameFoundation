@@ -52,7 +52,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             }
 
             if (this.View.Equals(null)) return;
-            this.View.RectTransform.SetParent(parent);
+            this.View.RectTransform.SetParent(parent, false);
         }
         public Transform GetViewParent()  { return this.View.RectTransform.parent; }
         public Transform CurrentTransform => this.View.RectTransform;

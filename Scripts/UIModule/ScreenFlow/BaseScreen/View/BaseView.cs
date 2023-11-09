@@ -71,14 +71,14 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
         {
             this.UpdateAlpha(1f);
             await this.ScreenTransition.PlayIntroAnim();
-            Debug.Log($"open screen view {this.name}");
+            // Debug.Log($"open screen view {this.name}");
             this.ViewDidOpen?.Invoke();
         }
 
         public virtual async UniTask Close()
         {
             await this.ScreenTransition.PlayOutroAnim();
-            Debug.Log($"Close screen view {this.name}");
+            // Debug.Log($"Close screen view {this.name}");
             this.UpdateAlpha(0);
             this.ViewDidClose?.Invoke();
         }

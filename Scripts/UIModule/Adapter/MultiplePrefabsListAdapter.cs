@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Com.TheFallenGames.OSA.Core;
     using Com.TheFallenGames.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
@@ -102,7 +103,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                     baseUIItemPresenter.Dispose();
                 } 
             }
-            this.presenters  = new List<TPresenter>();
+            this.presenters  = models.Select(model => this.diContainer.Instantiate(model.PresenterType) as TPresenter).ToList();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);

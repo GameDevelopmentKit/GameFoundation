@@ -30,7 +30,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         public static bool CheckObjectOnBound(this BaseView view, Bounds bounds, Bounds g) { return bounds.Intersects(g); }
 
         public static void InstantiateUIPresenter<TPresenter, TView, TModel>(this IInstantiator instantiator, ref TPresenter presenter, TView view, TModel model)
-            where TPresenter : IUIItemPresenter<TView, TModel> where TView : IUIView
+            where TPresenter : IUIItemPresenter<TView, TModel>
         {
             if (presenter == null)
             {

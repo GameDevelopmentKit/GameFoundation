@@ -31,7 +31,11 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         {
             this.curLocation = currentScreen == null ? string.Empty : currentScreen.ScreenId;
             this.isDequeuing = false;
-            if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0) return;
+            if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0)
+            {
+                if(!this.queueActions.TryGetValue("", out listAction) || listAction.Count <= 0)
+                    return;
+            }
             this.isDequeuing = true;
             Observable.TimerFrame(1, FrameCountType.EndOfFrame).ObserveOnMainThread().Subscribe(l => { this.Dequeue(listAction); });
         }
@@ -74,7 +78,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             {
                 this.trackUnCompleteActions.Add(action.actionId);
 
-                if (location == this.curLocation && !this.isDequeuing)
+                if (this.CheckLocation(location) && !this.isDequeuing)
                 {
                     this.OnStartAtLocation(this.screenManager.CurrentActiveScreen.Value);
                 }
@@ -128,7 +132,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                 foreach (var gameQueueAction in listAction)
                 {
                     if (gameQueueAction.isExecuting) break;
-                    if (this.curLocation == gameQueueAction.location && this.CheckAllDependActionComplete(gameQueueAction))
+                    if (this.CheckLocation(gameQueueAction.location) && this.CheckAllDependActionComplete(gameQueueAction))
                     {
                         //Debug.Log($"<color=red> GameQueueActionServices: dequeue action {gameQueueAction.actionId} at {curLocation}</color>");
                         gameQueueAction.OnComplete += action =>
@@ -153,6 +157,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                 this.isDequeuing = false;
             }
         }
+        private bool CheckLocation(string location) { return this.curLocation == location || location == ""; }
 
         private bool CheckAllDependActionComplete(IGameQueueAction action)
         {

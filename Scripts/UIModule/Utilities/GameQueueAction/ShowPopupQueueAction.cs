@@ -29,7 +29,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         {
             base.Action();
             var screenPresenter = await this.screenManager.OpenScreen<TPresenter,TModel>((TModel)this.state);
-            await UniTask.WaitUntil(() => screenPresenter.ScreenStatus != ScreenStatus.Opened);
+            await UniTask.WaitUntil(() => screenPresenter.ScreenStatus == ScreenStatus.Opened);
             this.Complete();
         }
     }

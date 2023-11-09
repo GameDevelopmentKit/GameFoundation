@@ -30,7 +30,7 @@
     public abstract class BaseUIItemPresenter<TView> : IUIItemPresenter where TView : MonoBehaviour, IUIView
     {
         public            TView  View       { get; private set; }
-        protected virtual string PrefabPath { get; } = typeof(TView).Name;
+        protected virtual string PrefabPath { get; private set; } = typeof(TView).Name;
 
         protected IGameAssets GameAssets;
 
@@ -71,6 +71,15 @@
             if (this.View == null)
             {
                 this.SetView(Object.Instantiate(prefabView, parent).GetComponent<TView>());
+            }
+        }
+        
+        public async UniTask SetView(string prefabPath, Transform parent)
+        {
+            if (this.View == null)
+            {
+                this.PrefabPath = prefabPath;
+                await this.SetView(parent);
             }
         }
 

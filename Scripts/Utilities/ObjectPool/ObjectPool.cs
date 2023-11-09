@@ -12,30 +12,29 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private bool isDestroying;
         public GameObject Spawn(Transform parent, Vector3 position, Quaternion rotation)
         {
-            GameObject obj                = null;
-            var        pooledObjectsCount = this.pooledObjects.Count;
-            
-            while (obj == null && pooledObjectsCount > 0)
+            GameObject obj;
+            if (this.pooledObjects.Count == 0)
             {
-                obj = this.pooledObjects[pooledObjectsCount - 1];
-                this.pooledObjects.RemoveAt(pooledObjectsCount - 1);
-            }
-
-            if (obj != null)
-            {
-                var transformObj = obj.transform;
-                transformObj.localPosition = position;
-                transformObj.localRotation = rotation;
-                transformObj.localScale    = this.prefab.transform.localScale;
-                obj.SetActive(true);
+                obj = Instantiate(this.prefab, position, rotation, this.transform);
             }
             else
             {
-                obj = Instantiate(this.prefab, position, rotation);
+                int index = this.pooledObjects.Count - 1;
+                obj = this.pooledObjects[index];
+                this.pooledObjects.RemoveAt(index);
+
+                var transformObj = obj.transform;
+                transformObj.SetLocalPositionAndRotation(position, rotation);
+                transformObj.localRotation = rotation;
+                obj.SetActive(true);
             }
 
-            obj.transform.SetParent(parent ? parent : this.transform);
-            this.spawnedObjects.Add(obj);
+            if (!ReferenceEquals(parent, null) && parent != obj.transform.parent)
+            {
+                obj.transform.SetParent(parent);
+            }
+
+            // this.spawnedObjects.Add(obj);
             return obj;
         }
 
@@ -43,9 +42,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         {
             if (!obj) return;
             this.pooledObjects.Add(obj);
-            this.spawnedObjects.Remove(obj);
+            // this.spawnedObjects.Remove(obj);
             obj.SetActive(false);
-            if (!this.isDestroying)
+            if (!this.isDestroying && obj.transform.parent != this.transform)
                 obj.transform.SetParent(this.transform);
         }
 

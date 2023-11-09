@@ -10,7 +10,7 @@
 
     public interface IAudioManager
     {
-        void PlaySound(string    name, bool isLoop = false);
+        void PlaySound(string name, bool isLoop = false);
         void StopAllSound(string name);
         void PlayPlayList(string playlist, bool random = false);
         void StopPlayList(string playlist);
@@ -105,12 +105,7 @@
 
         public virtual void CheckToMuteSound(bool isMute)
         {
-            var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
-
-            foreach (var transform in groups)
-            {
-                transform.groupMasterVolume = isMute ? 0 : 1;
-            }
+            MasterAudio.MixerMuted      = isMute;
         }
 
         public virtual void CheckToMuteMusic(bool value)
@@ -136,6 +131,8 @@
         }
 
         protected virtual void SetMusicValue(float value) { MasterAudio.PlaylistMasterVolume = value; }
+
+        public virtual void FadeMusicValue(float value, float fadeTime = 0.1f) { MasterAudio.FadeAllPlaylistsToVolume(value, fadeTime); }
 
         public void Dispose() { this.compositeDisposable.Dispose(); }
     }
