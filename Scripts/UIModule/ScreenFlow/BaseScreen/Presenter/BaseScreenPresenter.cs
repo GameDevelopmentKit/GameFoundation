@@ -1,12 +1,11 @@
 namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 {
-    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.LogService;
+    using global::UIModule.ScreenFlow;
     using UnityEngine;
     using Zenject;
 
@@ -31,7 +30,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public async void SetView(IUIView viewInstance)
         {
             this.View     = (TView)viewInstance;
-            this.ScreenId = $"{SceneDirector.CurrentSceneName}/{typeof(TView).Name}";
+            this.ScreenId = ScreenHelper.GetScreenId<TView>();
             if (this.View.IsReadyToUse)
             {
                 this.OnViewReady();
