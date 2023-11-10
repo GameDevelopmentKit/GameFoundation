@@ -296,7 +296,7 @@ public static class Build
             case BuildTarget.WebGL:
 #if UNITY_2022_1_OR_NEWER
 
-                UnityEditor.WebGL.UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
+                // UnityEditor.WebGL.UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
                 PlayerSettings.WebGL.showDiagnostics       = false;
 #endif

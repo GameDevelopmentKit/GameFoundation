@@ -134,6 +134,6 @@
 
         public virtual void FadeMusicValue(float value, float fadeTime = 0.1f) { MasterAudio.FadeAllPlaylistsToVolume(value, fadeTime); }
 
-        public void Dispose() { this.compositeDisposable.Dispose(); }
+        public void Dispose() { this.compositeDisposable?.Dispose(); }
     }
 }
