@@ -403,7 +403,7 @@ namespace DigitalRuby.SoundManagerNamespace
             for (int i = music.Count - 1; i >= 0; i--)
             {
                 bool nullMusic = (music[i] == null || music[i].AudioSource == null);
-                if (nullMusic || music[i].Update())
+                if (nullMusic || music[i].Update(true))
                 {
                     if (!nullMusic && music[i].Tag != persistTag)
                     {
