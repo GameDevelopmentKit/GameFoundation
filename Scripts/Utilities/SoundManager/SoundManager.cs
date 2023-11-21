@@ -158,7 +158,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// Update this looping audio source
         /// </summary>
         /// <returns>True if finished playing, false otherwise</returns>
-        public bool Update()
+        public bool Update(bool isMusic = false)
         {
             if (AudioSource != null && AudioSource.isPlaying)
             {
@@ -174,7 +174,7 @@ namespace DigitalRuby.SoundManagerNamespace
                 }
             }
 
-            return !paused;
+            return !isMusic && !this.paused;
         }
     }
 
@@ -403,7 +403,7 @@ namespace DigitalRuby.SoundManagerNamespace
             for (int i = music.Count - 1; i >= 0; i--)
             {
                 bool nullMusic = (music[i] == null || music[i].AudioSource == null);
-                if (nullMusic || music[i].Update())
+                if (nullMusic || music[i].Update(true))
                 {
                     if (!nullMusic && music[i].Tag != persistTag)
                     {
