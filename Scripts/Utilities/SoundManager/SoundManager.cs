@@ -158,7 +158,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// Update this looping audio source
         /// </summary>
         /// <returns>True if finished playing, false otherwise</returns>
-        public bool Update()
+        public bool Update(bool isMusic = false)
         {
             if (AudioSource != null && AudioSource.isPlaying)
             {
@@ -174,7 +174,7 @@ namespace DigitalRuby.SoundManagerNamespace
                 }
             }
 
-            return !paused;
+            return !isMusic && !this.paused;
         }
     }
 
