@@ -5,8 +5,10 @@ using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
 using Unity.CodeEditor;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Compilation;
@@ -112,7 +114,7 @@ public static class Build
         var platforms = string.Join(";", Targets.Select(t => t.Platform));
         var scriptingBackend       = ScriptingImplementation.Mono2x;
         var args                   = Environment.GetCommandLineArgs();
-        var buildOptions           = BuildOptions.None;
+        var buildOptions           = BuildOptions.CompressWithLz4HC;
         var outputPath             = "template.exe";
         var buildAppBundle         = false;
         var packageName            = "";
@@ -332,12 +334,31 @@ public static class Build
                 throw new ArgumentOutOfRangeException();
         }
     }
+    
+    [MenuItem("TheOne/Set All Groups to LZMA")]
+    public static void SetAllGroupsToLZMA()
+    {
+        // Access the addressable asset settings
+        var settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        // Iterate over all groups
+        foreach (var group in settings.groups)
+        {
+            // Set the compression type to LZMA for each group
+            var schema = group.GetSchema<BundledAssetGroupSchema>();
+            if (schema != null)
+            {
+                schema.Compression = BundledAssetGroupSchema.BundleCompressionMode.LZMA;
+            }
+        }
+    }
 
     /// <summary>
     /// Clean Addressable before build and init FMOD
     /// </summary>
     public static void BuildAddressable()
     {
+        SetAllGroupsToLZMA();
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
