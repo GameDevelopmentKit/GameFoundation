@@ -70,15 +70,15 @@ public static class Build
     private static BuildTargetInfo[] GetBuildTargetInfoFromString(string platforms)
     {
         return platforms.Split(';').Select(platformText => Targets.Single(t => t.Platform == platformText))
-            .ToArray();
+                        .ToArray();
     }
-    
+
     private static BuildTargetInfo[] GetBuildTargetInfoFromString(IEnumerable<string> platforms)
     {
         return platforms.Select(platformText => Targets.Single(t => t.Platform == platformText))
-            .ToArray();
+                        .ToArray();
     }
-    
+
     public static void SetScriptingDefineSymbols()
     {
         var args                   = Environment.GetCommandLineArgs();
@@ -99,7 +99,7 @@ public static class Build
         }
 
         if (string.IsNullOrEmpty(scriptingDefineSymbols)) return;
-        
+
         foreach (var buildTargetInfo in GetBuildTargetInfoFromString(platforms))
         {
             SetScriptingDefineSymbolInternal(buildTargetInfo.BuildTargetGroup, scriptingDefineSymbols);
@@ -111,19 +111,19 @@ public static class Build
     public static void BuildFromCommandLine()
     {
         // Grab the CSV platforms string
-        var platforms = string.Join(";", Targets.Select(t => t.Platform));
-        var scriptingBackend       = ScriptingImplementation.Mono2x;
-        var args                   = Environment.GetCommandLineArgs();
-        var buildOptions           = BuildOptions.CompressWithLz4HC;
-        var outputPath             = "template.exe";
-        var buildAppBundle         = false;
-        var packageName            = "";
-        var keyStoreFileName       = "the1_googleplay.keystore";
-        var keyStoreAliasName      = "theonestudio";
-        var keyStorePassword       = "tothemoon";
-        var keyStoreAliasPassword  = "tothemoon";
-        var iosTargetOSVersion     = "12.0";
-        var iosSigningTeamId       = "";
+        var platforms             = string.Join(";", Targets.Select(t => t.Platform));
+        var scriptingBackend      = ScriptingImplementation.Mono2x;
+        var args                  = Environment.GetCommandLineArgs();
+        var buildOptions          = BuildOptions.CompressWithLz4HC;
+        var outputPath            = "template.exe";
+        var buildAppBundle        = false;
+        var packageName           = "";
+        var keyStoreFileName      = "the1_googleplay.keystore";
+        var keyStoreAliasName     = "theonestudio";
+        var keyStorePassword      = "tothemoon";
+        var keyStoreAliasPassword = "tothemoon";
+        var iosTargetOSVersion    = "12.0";
+        var iosSigningTeamId      = "";
 
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
@@ -137,15 +137,15 @@ public static class Build
                     scriptingBackend = args[++i].ToLowerInvariant() switch
                     {
                         "il2cpp" => ScriptingImplementation.IL2CPP,
-                        "mono" => ScriptingImplementation.Mono2x,
-                        _ => throw new Exception("Unknown scripting backend")
+                        "mono"   => ScriptingImplementation.Mono2x,
+                        _        => throw new Exception("Unknown scripting backend")
                     };
 
                     break;
                 case "-development":
                     buildOptions |= BuildOptions.Development;
                     break;
-                
+
                 case "-outputPath":
                     outputPath = args[++i];
                     break;
@@ -178,14 +178,14 @@ public static class Build
                     break;
             }
         }
-        
-        
+
+
 #if PRODUCTION
             PlayerSettings.SetStackTraceLogType(LogType.Assert,  StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Log,     StackTraceLogType.None);
 #endif
-        
+
         if (buildAppBundle)
         {
             SetUpAndroidKeyStore(keyStoreFileName, keyStorePassword, keyStoreAliasName, keyStoreAliasPassword);
@@ -239,7 +239,7 @@ public static class Build
         Console.WriteLine("Building Targets: " +
                           string.Join(", ",
                               buildTargetInfos.Select(target => target.Platform)
-                                  .ToArray())); // Log which targets we're gonna build
+                                              .ToArray())); // Log which targets we're gonna build
 
         var errors = false;
         foreach (var platform in buildTargetInfos)
@@ -297,7 +297,7 @@ public static class Build
             case BuildTarget.Android:
                 //Change build architecture to ARMv7 and ARM6
 #if !UNITY_2022_1_OR_NEWER
-                PlayerSettings.Android.minifyWithR8  = true;
+                PlayerSettings.Android.minifyWithR8 = true;
 #endif
                 PlayerSettings.Android.minifyRelease = true;
                 PlayerSettings.Android.minifyDebug   = true;
@@ -310,17 +310,17 @@ public static class Build
 #if UNITY_WEBGL
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
-                PlayerSettings.WebGL.compressionFormat     = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
+                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
                 PlayerSettings.WebGL.decompressionFallback = false; // Disable compression for FBInstant game
-                PlayerSettings.runInBackground             = false;
-                PlayerSettings.WebGL.powerPreference       = WebGLPowerPreference.Default;
-                PlayerSettings.WebGL.dataCaching           = true;
-                PlayerSettings.WebGL.exceptionSupport      = WebGLExceptionSupport.None;
+                PlayerSettings.runInBackground = false;
+                PlayerSettings.WebGL.powerPreference = WebGLPowerPreference.Default;
+                PlayerSettings.WebGL.dataCaching = true;
+                PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 64;
                 UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
-                PlayerSettings.WebGL.showDiagnostics       = false;
+                PlayerSettings.WebGL.showDiagnostics = false;
 #if FB_INSTANT
                 PlayerSettings.WebGL.showDiagnostics = false;
 #else
@@ -334,7 +334,7 @@ public static class Build
                 throw new ArgumentOutOfRangeException();
         }
     }
-    
+
     [MenuItem("TheOne/Set All Groups to LZMA")]
     public static void SetAllGroupsToLZMA()
     {
@@ -358,7 +358,7 @@ public static class Build
     /// </summary>
     public static void BuildAddressable()
     {
-        SetAllGroupsToLZMA();
+        // SetAllGroupsToLZMA();
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
@@ -452,12 +452,12 @@ public static class Build
     private static string Prefix(LogType type) =>
         type switch
         {
-            LogType.Assert => "A",
-            LogType.Error => "E",
+            LogType.Assert    => "A",
+            LogType.Error     => "E",
             LogType.Exception => "X",
-            LogType.Log => "L",
-            LogType.Warning => "W",
-            _ => "????"
+            LogType.Log       => "L",
+            LogType.Warning   => "W",
+            _                 => "????"
         };
 
     /// <summary>
