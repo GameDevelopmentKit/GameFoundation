@@ -114,7 +114,7 @@ public static class Build
         var platforms             = string.Join(";", Targets.Select(t => t.Platform));
         var scriptingBackend      = ScriptingImplementation.Mono2x;
         var args                  = Environment.GetCommandLineArgs();
-        var buildOptions          = BuildOptions.CompressWithLz4HC;
+        var buildOptions          = BuildOptions.None;
         var outputPath            = "template.exe";
         var buildAppBundle        = false;
         var packageName           = "";
