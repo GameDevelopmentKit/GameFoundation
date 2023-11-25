@@ -359,7 +359,9 @@ public static class Build
     /// </summary>
     public static void BuildAddressable()
     {
+#if !THEONE_NO_LZMA
         SetAllGroupsToLZMA();
+#endif
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
