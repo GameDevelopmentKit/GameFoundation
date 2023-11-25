@@ -349,6 +349,7 @@ public static class Build
             if (schema != null)
             {
                 schema.Compression = BundledAssetGroupSchema.BundleCompressionMode.LZMA;
+                schema.UseUnityWebRequestForLocalBundles = true;
             }
         }
     }
@@ -358,7 +359,7 @@ public static class Build
     /// </summary>
     public static void BuildAddressable()
     {
-        // SetAllGroupsToLZMA();
+        SetAllGroupsToLZMA();
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
