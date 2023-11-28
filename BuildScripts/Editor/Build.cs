@@ -349,7 +349,7 @@ public static class Build
             if (schema != null)
             {
                 schema.Compression = BundledAssetGroupSchema.BundleCompressionMode.LZMA;
-                schema.UseUnityWebRequestForLocalBundles = true;
+                schema.UseUnityWebRequestForLocalBundles = false;
             }
         }
     }
