@@ -31,6 +31,8 @@ namespace BlueprintFlow.BlueprintReader
     /// <typeparam name="T2">Type of value</typeparam>
     public abstract class GenericBlueprintReaderByRow<T1, T2> : BlueprintByRow<T1, T2>, IGenericBlueprintReader
     {
+        public new T2 this[T1 key] => this.GetDataById(key);
+        
         public virtual async UniTask DeserializeFromCsv(string rawCsv)
         {
             this.CleanUp();
@@ -41,7 +43,7 @@ namespace BlueprintFlow.BlueprintReader
 
         public virtual List<List<string>> SerializeToRawData() { return this.ToRawData(true); }
 
-        public T2 GetDataById(T1 id)
+        public virtual T2 GetDataById(T1 id)
         {
             if (this.TryGetValue(id, out var result))
                 return result;
