@@ -208,9 +208,9 @@ public static class Build
     {
         PlayerSettings.Android.useCustomKeystore = true;
         PlayerSettings.Android.keystoreName      = keyStoreFileName;
-        PlayerSettings.keystorePass              = keyStorePass;
+        PlayerSettings.Android.keystorePass              = keyStorePass;
         PlayerSettings.Android.keyaliasName      = keyaliasName;
-        PlayerSettings.keyaliasPass              = keyaliasPass;
+        PlayerSettings.Android.keyaliasPass              = keyaliasPass;
     }
 
     public static void BuildInternal(ScriptingImplementation scriptingBackend, BuildOptions options,
