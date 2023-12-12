@@ -7,7 +7,6 @@ namespace GameFoundation.Scripts.Utilities.UserData
     using GameFoundation.Scripts.Interfaces;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
-    using GameFoundation.Scripts.Utilities.Utils;
     using Newtonsoft.Json;
     using UnityEngine;
 
