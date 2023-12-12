@@ -390,7 +390,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// </example>
         public static IEnumerable<T> CurveOrder<T>(this T[] listToOrder)
         {
-            if (listToOrder.Length == 0) yield break; // Nothing to do. 
+            if (listToOrder.Length == 0) yield break; // Nothing to do.
 
             // Move forward every two.
             for (var i = 0; i < listToOrder.Length; i += 2) yield return listToOrder[i];
@@ -477,12 +477,6 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 handler(item, idx++);
         }
 
-        public static void ForEach<T>(this T[] enumeration, Action<T> action)
-        {
-            foreach (var item in enumeration)
-                action(item);
-        }
-
         public static int GetArrayHashCode<T>(this T[] array) where T : notnull
         {
             unchecked
@@ -558,7 +552,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 #endif
     }
 
-    public static class CollectionExtensions
+    public static class CollectionExtension
     {
         public static void InsertAtIndex<T>(this IList<T> list, int index, T val)
         {
