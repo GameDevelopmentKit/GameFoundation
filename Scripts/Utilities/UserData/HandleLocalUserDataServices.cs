@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 {
     using System.Linq;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         protected override UniTask SaveJsons(params (string key, string json)[] values)
         {
-            values.ForEach(value => PlayerPrefs.SetString(value.key, value.json));
+            values.ForEach(PlayerPrefs.SetString);
             PlayerPrefs.Save();
             return UniTask.CompletedTask;
         }
