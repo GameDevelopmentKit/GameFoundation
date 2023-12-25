@@ -27,9 +27,9 @@
                    .Append(this.SetScaleTween(this.maxSize, this.duration))
                    .Append(this.SetScaleTween(this.minSize, this.duration))
                    .Append(this.SetScaleTween(1,this.duration))
-                   .SetUpdate(UpdateType.Fixed);
+                   .SetUpdate(true);
         }
 
-        private Tween SetScaleTween(float endValue, float animDuration) => this.transform.transform.DOScale(endValue, animDuration).SetEase(Ease.Linear).SetUpdate(UpdateType.Fixed); 
+        private Tween SetScaleTween(float endValue, float animDuration) => this.transform.transform.DOScale(endValue, animDuration).SetEase(Ease.Linear).SetUpdate(true); 
     }
 }
