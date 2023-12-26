@@ -24,5 +24,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
         public UniTask<ILocalData[]> Load(params Type[] types);
 
         public UniTask SaveAll();
+        
+        public UniTask DeleteAll();
     }
 }

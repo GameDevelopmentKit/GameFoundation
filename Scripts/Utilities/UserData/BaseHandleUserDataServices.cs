@@ -86,6 +86,11 @@ namespace GameFoundation.Scripts.Utilities.UserData
             }).ToArray());
             this.logService.LogWithColor("Saved all data", Color.green);
         }
+        public virtual UniTask DeleteAll()
+        {
+            this.userDataCache.Clear();
+            return this.SaveAll();
+        }
 
         protected abstract UniTask SaveJsons(params (string key, string json)[] values);
 

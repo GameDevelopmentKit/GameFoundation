@@ -23,5 +23,11 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
             return UniTask.FromResult(keys.Select(PlayerPrefs.GetString).ToArray());
         }
+
+        public override UniTask DeleteAll()
+        {
+            PlayerPrefs.DeleteAll();
+            return base.DeleteAll();
+        }
     }
 }
