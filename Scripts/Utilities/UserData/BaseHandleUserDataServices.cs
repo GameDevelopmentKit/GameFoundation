@@ -16,7 +16,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         public static string KeyOf(Type type) => UserDataPrefix + type.Name;
 
-        private static readonly JsonSerializerSettings JsonSetting = new()
+        public static readonly JsonSerializerSettings JsonSetting = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
