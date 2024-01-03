@@ -26,6 +26,21 @@ namespace GameFoundation.Scripts.Utilities.Extension
                             .SelectMany(GetTypesSafely)
                             .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type));
         }
+        
+        public static IEnumerable<Type> GetAllDerivedTypes(Type[] baseTypes, string[] assemblyNames)
+        {
+            var assemblyNamesHashset = new HashSet<string>(assemblyNames);
+            var assemblies           = AppDomain.CurrentDomain.GetAssemblies();
+
+            return assemblies.Where(asm => !asm.IsDynamic && assemblyNamesHashset.Contains(asm.GetName().Name))
+                .SelectMany(GetTypesSafely)
+                .Where(type => (type.IsClass || type.IsValueType) && !type.IsAbstract && baseTypes.Any(baseType => baseType.IsAssignableFrom(type)));
+        }
+
+        public static IEnumerable<Type> GetTypesInNamespace(Type[] baseTypes, string[] assemblyNames, string nameSpace)
+        {
+            return GetAllDerivedTypes(baseTypes, assemblyNames).Where(t => t.Namespace != null && t.Namespace.StartsWith(nameSpace));
+        }
 
         public static void CopyTo(this object from, object to)
         {
