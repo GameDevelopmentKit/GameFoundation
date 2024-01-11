@@ -30,14 +30,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         private void OnStartAtLocation(IScreenPresenter currentScreen)
         {
             this.curLocation = currentScreen == null ? string.Empty : currentScreen.ScreenId;
-            this.isDequeuing = false;
-            if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0)
-            {
-                if(!this.queueActions.TryGetValue("", out listAction) || listAction.Count <= 0)
-                    return;
-            }
-            this.isDequeuing = true;
-            Observable.TimerFrame(1, FrameCountType.EndOfFrame).ObserveOnMainThread().Subscribe(l => { this.Dequeue(listAction); });
+            this.TryDequeue(this.curLocation, true);
         }
 
         public bool Insert(string location, IGameQueueAction action, int index = -1)
@@ -80,7 +73,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
                 if (this.CheckLocation(location) && !this.isDequeuing)
                 {
-                    this.OnStartAtLocation(this.screenManager.CurrentActiveScreen.Value);
+                    this.TryDequeue(location);
                 }
             }
 
@@ -123,38 +116,50 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                 }
             }
         }
-
-        private void Dequeue(List<IGameQueueAction> listAction)
+        
+        private void TryDequeue(string location, bool isDelay = false)
         {
-            if (listAction.Count > 0)
+            this.isDequeuing = false;
+            if (!this.queueActions.TryGetValue(location, out var listAction) || listAction.Count <= 0)
             {
-                //Debug.Log($"<color=red> GameQueueActionServices: dequeue action, list action = {listAction.ToString2(action => action.actionId)}</color>");
-                foreach (var gameQueueAction in listAction)
-                {
-                    if (gameQueueAction.isExecuting) break;
-                    if (this.CheckLocation(gameQueueAction.location) && this.CheckAllDependActionComplete(gameQueueAction))
-                    {
-                        //Debug.Log($"<color=red> GameQueueActionServices: dequeue action {gameQueueAction.actionId} at {curLocation}</color>");
-                        gameQueueAction.OnComplete += action =>
-                        {
-                            this.trackUnCompleteActions.Remove(action.actionId);
-                            listAction.Remove(action);
-                            this.Dequeue(listAction);
-                        };
-                        gameQueueAction.OnStart += action =>
-                        {
-                            //Debug.Log($"<color=red> GameQueueActionServices: remove action {action.actionId}</color>");
-                            listAction.Remove(action);
-                        };
-                        gameQueueAction.Execute();
-                        break;
-                    }
-                }
+                if (!this.queueActions.TryGetValue("", out listAction) || listAction.Count <= 0)
+                    return;
+            }
+
+            this.isDequeuing = true;
+            if (isDelay)
+            {
+                Observable.TimerFrame(1, FrameCountType.EndOfFrame).ObserveOnMainThread().Subscribe(l => { this.Dequeue(listAction); });
             }
             else
             {
-//            Debug.Log($"<color=red> GameQueueActionServices: empty queue at {curLocation}</color>");
-                this.isDequeuing = false;
+                this.Dequeue(listAction);
+            }
+        }
+
+        private void Dequeue(List<IGameQueueAction> listAction)
+        {
+            //Debug.Log($"<color=red> GameQueueActionServices: dequeue action, list action = {listAction.ToString2(action => action.actionId)}</color>");
+            foreach (var gameQueueAction in listAction)
+            {
+                if (gameQueueAction.isExecuting) break;
+                if (this.CheckLocation(gameQueueAction.location) && this.CheckAllDependActionComplete(gameQueueAction))
+                {
+                    //Debug.Log($"<color=red> GameQueueActionServices: dequeue action {gameQueueAction.actionId} at {curLocation}</color>");
+                    gameQueueAction.OnComplete += action =>
+                    {
+                        this.trackUnCompleteActions.Remove(action.actionId);
+                        listAction.Remove(action);
+                        this.TryDequeue(this.curLocation);
+                    };
+                    gameQueueAction.OnStart += action =>
+                    {
+                        //Debug.Log($"<color=red> GameQueueActionServices: remove action {action.actionId}</color>");
+                        listAction.Remove(action);
+                    };
+                    gameQueueAction.Execute();
+                    break;
+                }
             }
         }
         private bool CheckLocation(string location) { return this.curLocation == location || location == ""; }
