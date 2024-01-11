@@ -89,21 +89,22 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
-            
+
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
                     baseUIItemPresenter.Dispose();
-                } 
+                }
             }
-            this.presenters  = new List<TPresenter>();
+
+            this.presenters = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
-        
+
         /// <summary>
         /// We need this because the original method only update to  this.VisibleItemsCount - 1
         /// </summary>
@@ -119,8 +120,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 this.ForceUpdateViewsHolderIfVisible(i);
             }
         }
-        
+
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
+
+        public List<TPresenter> GetPresenters() => this.presenters;
     }
 
 // This class keeps references to an item's views.
