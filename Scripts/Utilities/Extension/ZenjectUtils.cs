@@ -56,11 +56,18 @@ namespace GameFoundation.Scripts.Utilities.Extension
             }
         }
 
-        public static void BindInterfacesAndSelfToAllTypeDriveFrom<T>(this DiContainer diContainer)
+        public static void BindInterfacesAndSelfToAllTypeDriveFrom<T>(this DiContainer diContainer, bool nonLazy = false, bool sameAssembly = false)
         {
-            foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>())
+            foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>(sameAssembly))
             {
-                diContainer.BindInterfacesAndSelfTo(type).AsCached().NonLazy();
+                if (nonLazy)
+                {
+                    diContainer.BindInterfacesAndSelfTo(type).AsCached().NonLazy();
+                }
+                else
+                {
+                    diContainer.BindInterfacesAndSelfTo(type).AsCached();
+                }
             }
         }
 
