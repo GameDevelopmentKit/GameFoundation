@@ -19,17 +19,14 @@
 
             return elapsedTime.TotalHours switch
             {
-                < 1 => $"{elapsedTime.ToString("%m")} {(Math.Abs(elapsedTime.TotalMinutes - 1) < 1f ? minuteLow : minuteLows)} {ago}",
+                < 1  => $"{elapsedTime.ToString("%m")} {(Math.Abs(elapsedTime.TotalMinutes - 1) < 1f ? minuteLow : minuteLows)} {ago}",
                 < 24 => $"{elapsedTime.ToString("%h")} {(Math.Abs(elapsedTime.TotalHours - 1) < 1f ? hourLow : hourLows)} {ago}",
-                _ => $"{elapsedTime.ToString("%d")} {(Math.Abs(elapsedTime.TotalDays - 1) < 1f ? dayLow : dayLows)} {ago}"
+                _    => $"{elapsedTime.ToString("%d")} {(Math.Abs(elapsedTime.TotalDays - 1) < 1f ? dayLow : dayLows)} {ago}"
             };
         }
-        
-        public static string ConvertToTimeElapsed(DateTime endTime)
-        {
-            return ConvertToTimeElapsed((long)(endTime - DateTime.UtcNow).TotalSeconds);
-        }
-        
+
+        public static string ConvertToTimeElapsed(DateTime endTime) { return ConvertToTimeElapsed((long)(endTime - DateTime.UtcNow).TotalSeconds); }
+
         public static void SetTimeRemain(this TextMeshProUGUI txtCoolDown, long currentTime, long endTime)
         {
             var remainTime = endTime - currentTime;
@@ -94,6 +91,33 @@
 
             txt.text = originstring + s;
         }
+
+        public static string ToTimeString(this float time, string delimiter = ":", bool showZeroHour = false, bool showZeroMinus = false)
+        {
+            var    hours  = TimeSpan.FromSeconds(time).Hours;
+            var    minus  = TimeSpan.FromSeconds(time).Minutes;
+            var    second = TimeSpan.FromSeconds(time).Seconds;
+            string result;
+
+            if (hours > 0 || showZeroHour)
+            {
+                result = $"{hours:00}{delimiter}{minus:00}{delimiter}{second:00}";
+            }
+            else if (minus > 0 || showZeroMinus)
+            {
+                result = $"{minus:00}{delimiter}{second:00}";
+            }
+            else
+            {
+                result = $"{second:00}";
+            }
+
+            return result;
+        }
+
+        public static string ToTimeString(this long time, string delimiter = ":") { return ToTimeString((float)time, delimiter); }
+
+        public static string ToTimeString(this int time, string delimiter = ":") { return ToTimeString((float)time, delimiter); }
 
         public static string ToTimeString(this TimeSpan timeSpan, bool useSemiColon = false, bool space = false)
         {
