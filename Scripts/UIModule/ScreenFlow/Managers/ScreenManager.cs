@@ -147,7 +147,14 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             if (nextScreen != null)
             {
-                await nextScreen.OpenViewAsync();
+                try
+                {
+                    await nextScreen.OpenViewAsync();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
 
                 return nextScreen;
             }
@@ -167,7 +174,16 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             if (nextScreen != null)
             {
                 nextScreen.SetViewParent(this.CheckPopupIsOverlay(nextScreen) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
-                await nextScreen.OpenView(model);
+
+                try
+                {
+                    await nextScreen.OpenView(model);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
 
                 return nextScreen;
             }
@@ -234,7 +250,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         public async UniTask CloseAllScreenAsync()
         {
-            var tasks= new List<UniTask>();
+            var tasks              = new List<UniTask>();
             var cacheActiveScreens = this.activeScreens.ToList();
             this.activeScreens.Clear();
 
@@ -245,7 +261,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
-            
+
             await UniTask.WhenAll(tasks);
         }
 

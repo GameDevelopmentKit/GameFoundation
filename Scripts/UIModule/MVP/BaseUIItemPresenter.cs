@@ -74,6 +74,19 @@
             }
         }
         
+        /// <summary>
+        /// Set view automatically
+        /// </summary>
+        /// <param name="prefabView"></param>
+        /// <param name="parent"></param>
+        public void SetView(TView prefabView, Transform parent)
+        {
+            if (this.View == null)
+            {
+                this.SetView(Object.Instantiate(prefabView, parent));
+            }
+        }
+
         public async UniTask SetView(string prefabPath, Transform parent)
         {
             if (this.View == null)
