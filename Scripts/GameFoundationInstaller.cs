@@ -3,7 +3,6 @@
     using BlueprintFlow.BlueprintControlFlow;
     using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
     using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
@@ -43,9 +42,6 @@
             //Game Manager
             this.Container.Bind<IHandleUserDataServices>().To<HandleLocalUserDataServices>().AsCached();
             this.Container.DeclareSignal<UserDataLoadedSignal>();
-
-            //Player state
-            this.Container.Bind<PlayerState>().AsCached();
 
             //Genarate fps
             this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
