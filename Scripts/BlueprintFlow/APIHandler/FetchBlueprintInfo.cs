@@ -45,7 +45,6 @@ namespace BlueprintFlow.APIHandler
         public string Version;
         public string Hash;
         public string Url;
-        public void   Init() { }
     }
 
     public class FetchBlueprintInfo

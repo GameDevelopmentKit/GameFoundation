@@ -2,6 +2,6 @@
 {
     public interface ILocalData
     {
-        void Init();
+        public void Init(){ }
     }
 }

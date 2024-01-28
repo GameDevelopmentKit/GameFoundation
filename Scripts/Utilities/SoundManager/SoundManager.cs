@@ -25,38 +25,41 @@
 
         private readonly SignalBus                signalBus;
         private readonly PlaylistController       playlistController;
-        private readonly SoundSetting             soundSetting;
         private readonly MasterAudio              masterAudio;
+        private readonly IHandleUserDataServices  handleUserDataServices;
         private readonly DynamicSoundGroupCreator groupCreator;
 
         private CompositeDisposable compositeDisposable;
+        private SoundSetting        soundSetting;
 
-        public AudioManager(SignalBus signalBus, PlaylistController playlistController, SoundSetting SoundSetting, MasterAudio masterAudio)
+
+        public AudioManager(SignalBus signalBus, PlaylistController playlistController, MasterAudio masterAudio, IHandleUserDataServices handleUserDataServices)
         {
-            this.signalBus          = signalBus;
-            this.playlistController = playlistController;
-            this.soundSetting       = SoundSetting;
-            this.masterAudio        = masterAudio;
-            Instance                = this;
+            this.signalBus              = signalBus;
+            this.playlistController     = playlistController;
+            this.masterAudio            = masterAudio;
+            this.handleUserDataServices = handleUserDataServices;
+            Instance                    = this;
         }
 
         public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
 
         private async void SubscribeMasterAudio()
         {
+            this.soundSetting = await this.handleUserDataServices.Load<SoundSetting>();
             await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
             this.soundSetting.MuteSound.Value = false;
             this.soundSetting.MuteMusic.Value = false;
 
             this.compositeDisposable = new CompositeDisposable
-                                       {
-                                           //TODO uncomment this when we have a proper solution
-                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-                                           // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-                                           this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-                                           this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-                                           this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
-                                       };
+            {
+                //TODO uncomment this when we have a proper solution
+                // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
+                // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
+                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
+                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
+                this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
+            };
         }
 
         private void SetMasterVolume(bool value)
@@ -103,10 +106,7 @@
             }
         }
 
-        public virtual void CheckToMuteSound(bool isMute)
-        {
-            MasterAudio.MixerMuted      = isMute;
-        }
+        public virtual void CheckToMuteSound(bool isMute) { MasterAudio.MixerMuted = isMute; }
 
         public virtual void CheckToMuteMusic(bool value)
         {

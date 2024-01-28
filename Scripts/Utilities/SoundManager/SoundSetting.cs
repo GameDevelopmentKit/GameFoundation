@@ -10,9 +10,5 @@ namespace GameFoundation.Scripts.Models
         public BoolReactiveProperty  MuteSound    { get; set; } = new(false);
         public FloatReactiveProperty MusicValue   { get; set; } = new(1);
         public FloatReactiveProperty SoundValue   { get; set; } = new(1);
-        
-        public void Init()
-        {
-        }
     }
 }
