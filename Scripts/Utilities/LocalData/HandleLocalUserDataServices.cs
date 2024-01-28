@@ -8,9 +8,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
     public class HandleLocalUserDataServices : BaseHandleUserDataServices
     {
-        public HandleLocalUserDataServices(ILogService logService) : base(logService)
-        {
-        }
+        public HandleLocalUserDataServices(ILogService logService) : base(logService) { }
 
         protected override UniTask SaveJsons(params (string key, string json)[] values)
         {
@@ -19,10 +17,15 @@ namespace GameFoundation.Scripts.Utilities.UserData
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask<string[]> LoadJsons(params string[] keys)
+        protected override UniTask<string[]> LoadJsons(params string[] keys) { return UniTask.FromResult(keys.Select(PlayerPrefs.GetString).ToArray()); }
+
+        protected override UniTask SaveJson(string key, string json)
         {
-            return UniTask.FromResult(keys.Select(PlayerPrefs.GetString).ToArray());
+            PlayerPrefs.SetString(key, json);
+            PlayerPrefs.Save();
+            return UniTask.CompletedTask;
         }
+        protected override UniTask<string> LoadJson(string key) { return UniTask.FromResult(PlayerPrefs.GetString(key)); }
 
         public override UniTask DeleteAll()
         {
