@@ -39,15 +39,9 @@ namespace GameFoundation.Scripts.Utilities.Extension
             return (passes, fails);
         }
 
-        public static IEnumerable<T> EveryNthElement<T>(this IEnumerable<T> list, int n)
-        {
-            return list.Where((x, i) => i % n == 0);
-        }
+        public static IEnumerable<T> EveryNthElement<T>(this IEnumerable<T> list, int n) { return list.Where((x, i) => i % n == 0); }
 
-        public static IEnumerable<Type> Types<T>(this IEnumerable<T> set) where T : notnull
-        {
-            return set.Select(x => x.GetType());
-        }
+        public static IEnumerable<Type> Types<T>(this IEnumerable<T> set) where T : notnull { return set.Select(x => x.GetType()); }
 
         public static T GetAtIndexOrDefault<T>(this IList<T> list, int index)
         {
@@ -133,10 +127,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             return -1;
         }
 
-        public static T GetOrAdd<T>(this IList<T> list, Func<T, bool> match) where T : new()
-        {
-            return GetOrAdd(list, match, () => new T());
-        }
+        public static T GetOrAdd<T>(this IList<T> list, Func<T, bool> match) where T : new() { return GetOrAdd(list, match, () => new T()); }
         public static T GetOrAdd<T>(this IList<T> list, Func<T, bool> match, Func<T> create)
         {
             var entry = list.FirstOrDefault(match);
@@ -574,29 +565,14 @@ namespace GameFoundation.Scripts.Utilities.Extension
             return true;
         }
 
-        public static bool ContainsAll<T>(this ICollection<T> source, IEnumerable<T> values)
-        {
-            return values.All(source.Contains);
-        }
+        public static bool ContainsAll<T>(this ICollection<T> source, IEnumerable<T> values) { return values.All(source.Contains); }
 
         /// <summary> Checks if <paramref name="source" /> collection contains any value from <paramref name="values" />. </summary>
-        public static bool ContainsAny<T>(this ICollection<T> source, IEnumerable<T> values)
-        {
-            return values.Any(source.Contains);
-        }
+        public static bool ContainsAny<T>(this ICollection<T> source, IEnumerable<T> values) { return values.Any(source.Contains); }
 
-        public static T IndexOrDefault<T>(this ICollection<T> list, int index)
-        {
-            return (list.HasIndex(index) ? list.ElementAt(index) : default)!;
-        }
-        public static T IndexOrDefault<T>(this ICollection<T> list, int index, T defaultVal)
-        {
-            return list.HasIndex(index) ? list.ElementAt(index) : defaultVal;
-        }
-        public static bool HasIndex<T>(this ICollection<T> list, int index)
-        {
-            return !(index < 0 || index >= list.Count);
-        }
+        public static T    IndexOrDefault<T>(this ICollection<T> list, int index)               { return (list.HasIndex(index) ? list.ElementAt(index) : default)!; }
+        public static T    IndexOrDefault<T>(this ICollection<T> list, int index, T defaultVal) { return list.HasIndex(index) ? list.ElementAt(index) : defaultVal; }
+        public static bool HasIndex<T>(this ICollection<T> list, int index)                     { return !(index < 0 || index >= list.Count); }
 
         /// <summary>
         ///     Adds element to <paramref name="collection" /> only if it isn't null. Returns <c>true</c> if element was
@@ -827,9 +803,10 @@ namespace GameFoundation.Scripts.Utilities.Extension
     {
         public static T GetOrAdd<T, TK>(this IDictionary<TK, T> dictionary, TK key, Func<T> valueFunc)
         {
-            if (dictionary.ContainsKey(key)) return dictionary[key];
-            dictionary.Add(key, valueFunc());
-            return dictionary[key];
+            if (dictionary.TryGetValue(key, out var add)) return add;
+            add = valueFunc();
+            dictionary.Add(key, add);
+            return add;
         }
 
         public static async UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFunc)
