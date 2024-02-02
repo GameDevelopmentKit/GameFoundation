@@ -102,7 +102,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private RootUICanvas rootUICanvas;
         private ILogService  logService;
         private IGameAssets  gameAssets;
-        private bool         enableBackToClose = true;
+        private bool         enableBackToClose = false;
 
         #endregion
 
@@ -135,7 +135,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.signalBus.Unsubscribe<PopupBlurBgShowedSignal>(this.OnPopupBlurBgShowed);
         }
 
-        public void DisableBackToClose() { this.enableBackToClose = false; }
+        public void EnableBackToClose(bool enable) { this.enableBackToClose = enable; }
 
         #region Implement IScreenManager
 
