@@ -128,7 +128,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             }
             await base.OpenViewAsync();
         }
-        public virtual async UniTask OpenView(TModel model)
+        public virtual async UniTask OpenViewAsync(TModel model)
         {
             if (model != null)
             {

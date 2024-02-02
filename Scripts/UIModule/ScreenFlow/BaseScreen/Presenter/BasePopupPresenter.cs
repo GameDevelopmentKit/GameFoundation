@@ -50,7 +50,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         protected BasePopupPresenter(SignalBus signalBus, ILogService logService) : base(signalBus) { this.logService = logService; }
 
-        public async UniTask OpenView(TModel model)
+        public async UniTask OpenViewAsync(TModel model)
         {
             if (model != null)
             {

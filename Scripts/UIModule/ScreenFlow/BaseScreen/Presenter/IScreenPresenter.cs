@@ -41,7 +41,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
     public interface IScreenPresenter<in TModel> : IScreenPresenter
     {
-        public UniTask OpenView(TModel model);
+        public UniTask OpenViewAsync(TModel model);
     }
 
     public enum ScreenStatus
