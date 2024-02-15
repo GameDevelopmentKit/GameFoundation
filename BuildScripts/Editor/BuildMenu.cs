@@ -94,14 +94,7 @@ public static class BuildMenu
         OpenLog("Build-Client-Report.android.log");
     }
 
-    [MenuItem("Build/Android/build android ABB IL2CPP (Slow)", priority = 1100)]
-    private static void Build_Android_ABB()
-    {
-        Build.BuildInternal(ScriptingImplementation.IL2CPP, BuildOptions.None, new[] { Build.PlatformAndroid }, "default.abb");
-
-        OpenLog("Build-Client-Report.android.log");
-    }
-    
+ 
     [MenuItem("Build/Android/Setup keystore", priority = 1100)]
     private static void Build_Setup_KeyStore()
     {
