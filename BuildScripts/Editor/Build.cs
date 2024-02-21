@@ -124,6 +124,9 @@ public static class Build
         var keyStoreAliasPassword = "tothemoon";
         var iosTargetOSVersion    = "12.0";
         var iosSigningTeamId      = "";
+        
+        PlayerSettings.Android.minSdkVersion    = AndroidSdkVersions.AndroidApiLevel23;
+        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34;
 
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
