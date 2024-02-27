@@ -166,6 +166,6 @@
 
         protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
 
-        public void Dispose() { this.compositeDisposable.Dispose(); }
+        public void Dispose() { this.compositeDisposable?.Dispose(); }
     }
 }
