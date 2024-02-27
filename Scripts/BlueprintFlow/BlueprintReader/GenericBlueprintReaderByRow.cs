@@ -199,11 +199,11 @@ namespace BlueprintFlow.BlueprintReader
                     catch (IndexOutOfRangeException e)
                     {
                         throw new FieldDontExistInBlueprint(
-                            $"{this.blueprintType.FullName} - {memberInfo.MemberName}- {e}");
+                            $"{this.blueprintType.FullName} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"{this.blueprintType.FullName} - {memberInfo.MemberName}- {e}");
+                        throw new Exception($"{this.blueprintType.FullName} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
                     }
 
 
