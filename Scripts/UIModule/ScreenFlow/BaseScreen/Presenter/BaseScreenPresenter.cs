@@ -1,5 +1,6 @@
 namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 {
+    using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
@@ -12,6 +13,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     public abstract class BaseScreenPresenter<TView> : IScreenPresenter where TView : IScreenView
     {
         public         string       ScreenId        { get; private set; }
+        public         string       ScreenType      { get; private set; }
         public virtual bool         IsClosePrevious { get; protected set; } = false;
         public         ScreenStatus ScreenStatus    { get; protected set; } = ScreenStatus.Closed;
 
@@ -29,8 +31,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public async void SetView(IUIView viewInstance)
         {
-            this.View     = (TView)viewInstance;
-            this.ScreenId = ScreenHelper.GetScreenId<TView>();
+            this.View       = (TView)viewInstance;
+            this.ScreenId   = ScreenHelper.GetScreenId<TView>();
+            this.ScreenType = this.GetType().Name;
             if (this.View.IsReadyToUse)
             {
                 this.OnViewReady();
