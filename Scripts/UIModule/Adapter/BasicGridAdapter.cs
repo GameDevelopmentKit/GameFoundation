@@ -18,6 +18,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public  SimpleDataHelper<TModel> Models { get; private set; }
         private CanvasGroup              canvasGroup;
         private List<TPresenter>         presenters;
+        private HashSet<TView>           readiedViewSet = new();
 
         private DiContainer diContainer;
 
@@ -40,24 +41,29 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
         // *For the method's full description check the base implementation
-        protected override void UpdateCellViewsHolder(MyGridItemViewsHolder v)
+        protected override void UpdateCellViewsHolder(MyGridItemViewsHolder viewHolder)
         {
-            var index      = v.ItemIndex;
+            var index      = viewHolder.ItemIndex;
             if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
-            var viewObject = v.root.GetComponentInChildren<TView>(true);
+            var viewObject = viewHolder.root.GetComponentInChildren<TView>(true);
             if (this.presenters.Count <= index)
             {
-                var p = this.diContainer.Instantiate<TPresenter>();
-                p.SetView(viewObject);
-                p.BindData(model);
-                this.presenters.Add(p);
+                var presenter = this.diContainer.Instantiate<TPresenter>();
+                presenter.SetView(viewObject);
+                presenter.BindData(model);
+                this.presenters.Add(presenter);
             }
             else
             {
                 this.presenters[index].SetView(viewObject);
                 this.presenters[index].Dispose();
                 this.presenters[index].BindData(model);
+            }
+
+            if (this.readiedViewSet.Add(viewObject))
+            {
+                this.presenters[index].OnViewReady();
             }
         }
 

@@ -20,6 +20,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private SimpleDataHelper<TModel> Models { get; set; }
         private CanvasGroup              canvasGroup;
         private List<TPresenter>         presenters;
+        private HashSet<TView>           readiedViewSet = new();
 
         private DiContainer diContainer;
 
@@ -75,6 +76,11 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 this.presenters[index].SetView(viewObject);
                 this.presenters[index].Dispose();
                 this.presenters[index].BindData(model);
+            }
+            
+            if (this.readiedViewSet.Add(viewObject))
+            {
+                this.presenters[index].OnViewReady();
             }
         }
 

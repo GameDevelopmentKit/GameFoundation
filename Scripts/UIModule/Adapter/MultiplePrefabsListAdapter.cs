@@ -21,6 +21,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private CanvasGroup              canvasGroup;
         private SimpleDataHelper<TModel> models;
         private List<TPresenter>         presenters;
+        private HashSet<TView>           readiedViewSet = new();
+
 
         private DiContainer diContainer;
 
@@ -61,20 +63,25 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             if (this.models.Count <= index || index < 0) return;
 
             var model = this.models[index];
-            var view  = vh.root.GetComponentInChildren<TView>(true);
+            var viewObject  = vh.root.GetComponentInChildren<TView>(true);
 
             if (this.presenters.Count <= index)
             {
                 var presenter = this.diContainer.Instantiate(this.models[index].PresenterType) as TPresenter;
-                presenter.SetView(view);
+                presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
             }
             else
             {
-                this.presenters[index].SetView(view);
+                this.presenters[index].SetView(viewObject);
                 this.presenters[index].Dispose();
                 this.presenters[index].BindData(model);
+            }
+             
+            if (this.readiedViewSet.Add(viewObject))
+            {
+                this.presenters[index].OnViewReady();
             }
         }
 
