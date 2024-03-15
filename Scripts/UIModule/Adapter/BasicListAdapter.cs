@@ -66,21 +66,29 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             if (this.presenters.Count <= index)
             {
-                var p = this.diContainer.Instantiate<TPresenter>();
-                p.SetView(viewObject);
-                p.BindData(model);
-                this.presenters.Add(p);
+                var presenter = this.diContainer.Instantiate<TPresenter>();
+                presenter.SetView(viewObject);
+                presenter.BindData(model);
+                this.presenters.Add(presenter);
+                CallOnViewReady(viewObject, presenter);
             }
             else
             {
-                this.presenters[index].SetView(viewObject);
-                this.presenters[index].Dispose();
-                this.presenters[index].BindData(model);
+                var presenter = this.presenters[index];
+                presenter.SetView(viewObject);
+                presenter.Dispose();
+                presenter.BindData(model);
+                CallOnViewReady(viewObject, presenter);
             }
-            
-            if (this.readiedViewSet.Add(viewObject))
+
+            return;
+
+            void CallOnViewReady(TView view, TPresenter presenter)
             {
-                this.presenters[index].OnViewReady();
+                if (this.readiedViewSet.Add(view))
+                {
+                    presenter.OnViewReady();
+                }
             }
         }
 

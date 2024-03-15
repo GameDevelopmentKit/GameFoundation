@@ -53,17 +53,25 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
+                CallOnViewReady(viewObject, presenter);
             }
             else
             {
-                this.presenters[index].SetView(viewObject);
-                this.presenters[index].Dispose();
-                this.presenters[index].BindData(model);
+                var presenter = this.presenters[index];
+                presenter.SetView(viewObject);
+                presenter.Dispose();
+                presenter.BindData(model);
+                CallOnViewReady(viewObject, presenter);
             }
+            
+            return;
 
-            if (this.readiedViewSet.Add(viewObject))
+            void CallOnViewReady(TView view, TPresenter presenter)
             {
-                this.presenters[index].OnViewReady();
+                if (this.readiedViewSet.Add(view))
+                {
+                    presenter.OnViewReady();
+                }
             }
         }
 
