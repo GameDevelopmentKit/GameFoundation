@@ -11,6 +11,7 @@
         [SerializeField] private float maxSize  = 1.08f;
         [SerializeField] private float minSize  = 0.92f;
         [SerializeField] private float duration = 0.1f;
+        [SerializeField] private bool  ignoreAnimate;
 
         private void OnEnable()  { this.transform.localScale = Vector3.one; }
         private void OnDisable() { this.transform.localScale = Vector3.one; }
@@ -18,11 +19,16 @@
         public void OnPointerDown(PointerEventData eventData) { this.AnimatePressDown(); }
 
         public void OnPointerUp(PointerEventData eventData) { this.AnimatePopup(); }
-        
-        private void AnimatePressDown() { this.SetScaleTween(this.minSize, this.duration); }
+
+        private void AnimatePressDown()
+        {
+            if(this.ignoreAnimate) return;
+            this.SetScaleTween(this.minSize, this.duration);
+        }
         
         private void AnimatePopup()
         {
+            if(this.ignoreAnimate) return;
             DOTween.Sequence()
                    .Append(this.SetScaleTween(this.maxSize, this.duration))
                    .Append(this.SetScaleTween(this.minSize, this.duration))
