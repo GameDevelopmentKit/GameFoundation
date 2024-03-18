@@ -31,8 +31,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var lastScene = CurrentSceneName;
             CurrentSceneName = sceneName;
             var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName, loadMode, activeOnLoad);
-            _ = Resources.UnloadUnusedAssets();
-            this.GameAssets.UnloadUnusedAssets(lastScene);
+            await Resources.UnloadUnusedAssets();
+            await this.GameAssets.UnloadUnusedAssets(lastScene);
             this.signalBus.Fire<FinishLoadingNewSceneSignal>();
             return screenInstance;
         }
@@ -43,8 +43,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var lastScene = CurrentSceneName;
             CurrentSceneName = sceneName;
             await SceneManager.LoadSceneAsync(sceneName);
-            _ = Resources.UnloadUnusedAssets();
-            this.GameAssets.UnloadUnusedAssets(lastScene);
+            await Resources.UnloadUnusedAssets();
+            await this.GameAssets.UnloadUnusedAssets(lastScene);
             this.signalBus.Fire<FinishLoadingNewSceneSignal>();
         }
 
