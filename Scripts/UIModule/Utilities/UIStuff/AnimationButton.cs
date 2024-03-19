@@ -13,8 +13,13 @@
         [SerializeField] private float duration = 0.1f;
         [SerializeField] private bool  ignoreAnimate;
 
-        private void OnEnable()  { this.transform.localScale = Vector3.one; }
-        private void OnDisable() { this.transform.localScale = Vector3.one; }
+        private Vector3 initialScale;
+
+        private void Awake() { this.initialScale = this.transform.localScale; }
+
+        private void OnEnable() { this.transform.localScale = this.initialScale; }
+
+        private void OnDisable() { this.transform.localScale = this.initialScale; }
 
         public void OnPointerDown(PointerEventData eventData) { this.AnimatePressDown(); }
 
@@ -22,20 +27,20 @@
 
         private void AnimatePressDown()
         {
-            if(this.ignoreAnimate) return;
+            if (this.ignoreAnimate) return;
             this.SetScaleTween(this.minSize, this.duration);
         }
-        
+
         private void AnimatePopup()
         {
-            if(this.ignoreAnimate) return;
+            if (this.ignoreAnimate) return;
             DOTween.Sequence()
-                   .Append(this.SetScaleTween(this.maxSize, this.duration))
-                   .Append(this.SetScaleTween(this.minSize, this.duration))
-                   .Append(this.SetScaleTween(1,this.duration))
-                   .SetUpdate(true);
+                .Append(this.SetScaleTween(this.maxSize, this.duration))
+                .Append(this.SetScaleTween(this.minSize, this.duration))
+                .Append(this.SetScaleTween(1,            this.duration))
+                .SetUpdate(true);
         }
 
-        private Tween SetScaleTween(float endValue, float animDuration) => this.transform.transform.DOScale(endValue, animDuration).SetEase(Ease.Linear).SetUpdate(true); 
+        private Tween SetScaleTween(float endValue, float animDuration) => this.transform.transform.DOScale(endValue, animDuration).SetEase(Ease.Linear).SetUpdate(true);
     }
 }
