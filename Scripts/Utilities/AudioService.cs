@@ -16,7 +16,7 @@
     public interface IAudioService
     {
         void PlaySound(string name, AudioSource sender);
-        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
+        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 0f);
         void StopAllSound();
         void StopAll();
         void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);

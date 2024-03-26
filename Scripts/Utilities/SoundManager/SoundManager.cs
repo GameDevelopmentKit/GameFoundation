@@ -162,7 +162,7 @@ namespace DigitalRuby.SoundManagerNamespace
         {
             if (AudioSource != null && AudioSource.isPlaying)
             {
-                if ((AudioSource.volume = Mathf.Lerp(startVolume, TargetVolume, (timestamp += Time.unscaledDeltaTime) / currentMultiplier)) == 0.0f && Stopping)
+                if ((AudioSource.volume = Mathf.Lerp(startVolume, TargetVolume, currentMultiplier == 0 ? 1 : (timestamp += Time.unscaledDeltaTime) / currentMultiplier)) == 0.0f && Stopping)
                 {
                     AudioSource.Stop();
                     Stopping = false;
