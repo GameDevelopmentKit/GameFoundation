@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +7,7 @@ using frame8.Logic.Misc.Other;
 using frame8.Logic.Misc.Other.Extensions;
 using frame8.Logic.Misc.Visual.UI;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	/// <summary>Holds basic info, like padding, content size etc, abstractized from the scrolling direction</summary>
 	public class LayoutInfo

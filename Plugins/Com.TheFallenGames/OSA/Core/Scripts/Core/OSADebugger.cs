@@ -1,4 +1,4 @@
-﻿using frame8.Logic.Misc.Other;
+using frame8.Logic.Misc.Other;
 using frame8.Logic.Misc.Other.Extensions;
 using System;
 using System.Collections;
@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	public class OSADebugger : MonoBehaviour
 #if !UNITY_WSA && !UNITY_WSA_10_0

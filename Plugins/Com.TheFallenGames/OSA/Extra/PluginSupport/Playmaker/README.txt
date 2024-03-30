@@ -1,5 +1,5 @@
 File updated on 11.03.2020
-Check the latest version at https://thefallengames.com/unityassetstore/optimizedscrollviewadapter/playmaker/README.txt
+Check the latest version at https://forbiddenbyte.com/unityassetstore/optimizedscrollviewadapter/playmaker/README.txt
 
 
 Playmaker support only works with Unity 2017.1.0f3 and up + Playmaker 1.9.0 an up
@@ -20,7 +20,7 @@ Instructions:
 6.   Import the PMSupport-Unity2017-1-f3.unitypackage
 
 7.   For Unity 2017.3 and up, you'll probably get an error because OSA can't see the Playmaker code. This is normal.
-	 A. If you don't want to use ASMDEFs or just prefer a quicker set up, delete /Scripts/OSA.asmdef and /Scripts/Editor/OSA.Editor.asmdef.
+	 A. If you don't want to use ASMDEFs or just prefer a quicker set up, delete all *.asmdef files from OSA's folder.
 	 B. If you know how to set up ASMDEFs (https://docs.unity3d.com/2017.4/Documentation/Manual/ScriptCompilationAssemblyDefinitionFiles.html), 
 	    Open /Scripts/OSA.asmdef and add a reference to the Playmaker's asmdef file(s). Note that (at the moment of writing, 11.03.2020) Playmaker doesn't use .asmdef files
 	    by default (probably for compatibility reasons), so you'd have to manage it yourself.

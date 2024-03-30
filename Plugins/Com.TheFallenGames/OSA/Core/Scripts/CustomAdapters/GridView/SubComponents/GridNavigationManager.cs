@@ -1,8 +1,8 @@
-﻿using Com.TheFallenGames.OSA.CustomAdapters.GridView;
+using Com.ForbiddenByte.OSA.CustomAdapters.GridView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	public class GridNavigationManager<TParams, TCellViewsHolder> : NavigationManager<TParams, CellGroupViewsHolder<TCellViewsHolder>>
 		where TParams : GridParams

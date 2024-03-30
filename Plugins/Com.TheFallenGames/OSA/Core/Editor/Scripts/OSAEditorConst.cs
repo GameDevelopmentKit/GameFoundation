@@ -1,7 +1,7 @@
-﻿using Com.TheFallenGames.OSA.Editor.Util;
+using Com.ForbiddenByte.OSA.Editor.Util;
 using System.IO;
 
-namespace Com.TheFallenGames.OSA.Editor
+namespace Com.ForbiddenByte.OSA.Editor
 {
 	public class OSAEditorConst
 	{

@@ -1,7 +1,7 @@
 using UnityEditor;
-using Com.TheFallenGames.OSA.AdditionalComponents;
+using Com.ForbiddenByte.OSA.AdditionalComponents;
 
-namespace Com.TheFallenGames.OSA.Editor.Util
+namespace Com.ForbiddenByte.OSA.Editor.Util
 {
 	[CustomEditor(typeof(OSAProactiveNavigator), true)]
 	public class OSAProactiveNavigatorCustomEditor : UnityEditor.Editor

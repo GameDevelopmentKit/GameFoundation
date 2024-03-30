@@ -6,8 +6,10 @@ using UnityEngine.EventSystems;
 
 namespace frame8.Logic.Misc.Other
 {
-	public class UIUtils8 : Singleton8<UIUtils8>
+	public class UIUtils8
 	{
+		public static UIUtils8 Instance { get; } = new UIUtils8();
+
 		public Vector2 WorldToScreenPointForCanvas(Canvas canvas, Camera camera, Vector3 position)
 		{
 			var camIfNonOverlay = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : camera;
@@ -317,10 +319,6 @@ namespace frame8.Logic.Misc.Other
 				res = (positions[0] + positions[3]) / 2f;
 
 			return res;
-		}
-
-		public override void Init()
-		{
 		}
 	}
 }

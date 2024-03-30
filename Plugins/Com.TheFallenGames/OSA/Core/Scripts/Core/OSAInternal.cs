@@ -1,4 +1,4 @@
-﻿//#define ALLOW_DEBUG_OUTSIDE_EDITOR
+//#define ALLOW_DEBUG_OUTSIDE_EDITOR
 
 #if UNITY_EDITOR || ALLOW_DEBUG_OUTSIDE_EDITOR
 	//#define DEBUG_COMPUTE_VISIBILITY_TWIN
@@ -19,12 +19,12 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using frame8.Logic.Misc.Other.Extensions;
 using frame8.Logic.Misc.Visual.UI.MonoBehaviours;
-using Com.TheFallenGames.OSA.Core.SubComponents;
-using Com.TheFallenGames.OSA.Core.Data;
-using Com.TheFallenGames.OSA.Core.Data.Gallery;
-using Com.TheFallenGames.OSA.Core.Data.Animations;
+using Com.ForbiddenByte.OSA.Core.SubComponents;
+using Com.ForbiddenByte.OSA.Core.Data;
+using Com.ForbiddenByte.OSA.Core.Data.Gallery;
+using Com.ForbiddenByte.OSA.Core.Data.Animations;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	public abstract partial class OSA<TParams, TItemViewsHolder> : MonoBehaviour, IOSA
 	where TParams : BaseParams
@@ -258,7 +258,7 @@ namespace Com.TheFallenGames.OSA.Core
 				// This needs to be updated regularly (if looping/twin pass, but it doesn't add too much overhead, so it's ok to re-calculate it each time)
 				vsa = _InternalState.VirtualScrollableArea;
 
-				return ScrollToHelper_GetContentStartVirtualInsetFromViewportStart_Clamped(
+				return ScrollToHelper_GetContentStartVirtualInsetFromViewportStart(
 							vsa, 
 							itemIndex, 
 							normalizedOffsetFromViewportStart, 
@@ -475,29 +475,123 @@ namespace Com.TheFallenGames.OSA.Core
 		}
 
 		/// <summary> It assumes that the content is bigger than the viewport </summary>
-		double ScrollToHelper_GetContentStartVirtualInsetFromViewportStart_Clamped(double vsa, int itemIndex, double normalizedItemOffsetFromStart, double normalizedPositionOfItemPivotToUse)
+		double ScrollToHelper_GetContentStartVirtualInsetFromViewportStart(double vsa, int itemIndex, double normalizedItemOffsetFromStart, double normalizedPositionOfItemPivotToUse)
 		{
-			double maxContentInsetFromVPAllowed = _Params.effects.LoopItems && vsa > 0d ? _InternalState.vpSize/2d : 0d; // if looping, there's no need to clamp. in addition, clamping would cancel a scrollTo if the content is exactly at start or end
-			double minContentVirtualInsetFromVPAllowed = -vsa - maxContentInsetFromVPAllowed;
-			int itemViewIdex = _ItemsDesc.GetItemViewIndexFromRealIndexChecked(itemIndex);
-			double itemSize = _ItemsDesc[itemViewIdex];
-			double insetToAdd = _InternalState.vpSize * normalizedItemOffsetFromStart - itemSize * normalizedPositionOfItemPivotToUse;
+			int itemViewIndex = _ItemsDesc.GetItemViewIndexFromRealIndexChecked(itemIndex);
+			double itemVrtInsetFromStart = _InternalState.GetItemVirtualInsetFromParentStartUsingItemIndexInView(itemViewIndex);
+			double itemSize = _ItemsDesc[itemViewIndex];
+			double insetToAddFromFineTunedOffsets = _InternalState.vpSize * normalizedItemOffsetFromStart - itemSize * normalizedPositionOfItemPivotToUse;
+			var looping = _Params.effects.LoopItems;
 
-			double itemVrtInsetFromStart = _InternalState.GetItemVirtualInsetFromParentStartUsingItemIndexInView(itemViewIdex);
-			double ctInsetFromStart_Clamped = Math.Max(
-						minContentVirtualInsetFromVPAllowed,
-						Math.Min(maxContentInsetFromVPAllowed, -itemVrtInsetFromStart + insetToAdd)
-					);
+			// The standard ct inset calculation, i.e. go towards start if target real index is smaller, else towards end
+			double ctInsetFromStart_NonLooping = -itemVrtInsetFromStart + insetToAddFromFineTunedOffsets;
+
+			if (looping)
+			{
+				// When looping, we try to loop to the closer item
+				double? ctInsetFromStart_ShorterPathIfExists = _ScrollToHelper_GetContentStartVirtualInsetFromViewportStart_Looping_ShorterPathIfExists(
+					itemViewIndex, 
+					itemVrtInsetFromStart,
+					normalizedItemOffsetFromStart,
+					normalizedPositionOfItemPivotToUse,
+					insetToAddFromFineTunedOffsets
+				);
+
+				if (ctInsetFromStart_ShorterPathIfExists != null)
+					return ctInsetFromStart_ShorterPathIfExists.Value;
+
+				//return ctInsetFromStart_ShorterPathIfExists ?? ctInsetFromStart_NonLooping;
+			}
+
+            // If looping, there's no need to clamp. In addition, clamping would cancel a scrollTo if the content is exactly at start or end
+            double defaultAllowedOutsideBoundary = _InternalState.vpSize / 2d;
+            double maxContentInsetFromVPAllowed = _Params.effects.LoopItems && vsa > 0d ? defaultAllowedOutsideBoundary : 0d;
+
+            //double maxContentInsetFromVPAllowed = 0d;
+
+			double minContentVirtualInsetFromVPAllowed = -vsa - maxContentInsetFromVPAllowed;
+
+			double ctInsetFromStart_Clamped = ClampDouble(ctInsetFromStart_NonLooping, minContentVirtualInsetFromVPAllowed, maxContentInsetFromVPAllowed);
 
 			//Debug.Log("siz=" + itemSize + ", -itemVrtInsetFromStart=" + (-itemVrtInsetFromStart) + ", insetToAdd=" + insetToAdd + ", ctInsetFromStart_Clamped=" + ctInsetFromStart_Clamped);
 
 			return ctInsetFromStart_Clamped;
 		}
 
-		//bool DoesInsetDeltaRequireOptimization(double insetDelta)
-		//{
-		//	return Math.Abs(insetDelta) > OSAConst.RECYCLE_ALL__MIN_DRAG_AMOUNT_AS_FACTOR_OF_VIEWPORT_SIZE * _InternalState.vpSize;
-		//}
+		// IMGDOC <!image url="$(SolutionDir)\Docs\img\OSA\SmoothScroll-Shortest-Path-Looping.png" scale=".86"/>
+		double? _ScrollToHelper_GetContentStartVirtualInsetFromViewportStart_Looping_ShorterPathIfExists(
+			int itemViewIndex, double itemVrtInsetFromStart, double normalizedItemOffsetFromStart, double normalizedPositionOfItemPivotToUse, double insetToAddFromFineTunedOffsets)
+		{
+			if (_VisibleItemsCount == 0)
+            {
+				//Debug.Log("Visible 0");
+				return null;
+            }
+
+			double ctSize = _InternalState.ctVirtualSize;
+			double vpSize = _InternalState.vpSize;
+			double itemSize = _ItemsDesc[itemViewIndex];
+			double ctCurrentInsetFromStart = _InternalState.ctVirtualInsetFromVPS_Cached;
+			double itemEndEdgeDistToCTS = itemVrtInsetFromStart + itemSize;
+			double ctAmountBeforeVP = -ctCurrentInsetFromStart;
+			bool isItemBeforeVP = itemEndEdgeDistToCTS < ctAmountBeforeVP;
+
+			// Measured in 'distance from CTS', or the more commonly used 'inset from CTS'
+			double travelBeginDefaultPoint = itemVrtInsetFromStart + normalizedPositionOfItemPivotToUse * itemSize;
+
+			if (isItemBeforeVP)
+            {
+				double contentBeforeTravelBeginDefaultPoint = travelBeginDefaultPoint;
+
+				double travelBeforeViewportAmount = ctAmountBeforeVP - travelBeginDefaultPoint;
+				double travelInsideViewportAmount = vpSize * normalizedItemOffsetFromStart;
+				double totalDefaultTravel = travelBeforeViewportAmount + travelInsideViewportAmount;
+                double travelEndPoint = travelBeginDefaultPoint + totalDefaultTravel;
+
+				double remainingContentAfterTravelEndPoint = ctSize - travelEndPoint;
+
+				// How much would we travel if we'd scroll in the other direction and a loop will have been happened
+				double totalAlternativeTravel = remainingContentAfterTravelEndPoint + contentBeforeTravelBeginDefaultPoint;
+
+				if (totalDefaultTravel < totalAlternativeTravel)
+                {
+					// Default item scrolling will already use the shortest direction
+					return null;
+				}
+
+				return ctCurrentInsetFromStart - totalAlternativeTravel;
+			}
+
+			double ctAmountBeforeVpPlusInsideVP = ctAmountBeforeVP + vpSize;
+			bool isItemAfterVP = itemVrtInsetFromStart > ctAmountBeforeVpPlusInsideVP;
+			if (isItemAfterVP)
+			{
+				double contentAfterTravelBeginDefaultPoint = ctSize - travelBeginDefaultPoint;
+
+                double ctAmountAfterVP = ctSize - ctAmountBeforeVP - vpSize;
+
+                double travelAfterViewportAmount = ctAmountAfterVP - contentAfterTravelBeginDefaultPoint;
+				double travelInsideViewportAmount = vpSize * (1f - normalizedItemOffsetFromStart);
+				double totalDefaultTravel = travelAfterViewportAmount + travelInsideViewportAmount;
+				double travelEndPoint = travelBeginDefaultPoint - totalDefaultTravel;
+
+				double remainingContentBeforeTravelEndPoint = travelEndPoint;
+
+				// How much would we travel if we'd scroll in the other direction and a loop will have been happened
+				double totalAlternativeTravel = remainingContentBeforeTravelEndPoint + contentAfterTravelBeginDefaultPoint;
+
+				if (totalDefaultTravel < totalAlternativeTravel)
+				{
+					// Default item scrolling will already use the shortest direction
+					return null;
+				}
+
+				return ctCurrentInsetFromStart + totalAlternativeTravel;
+			}
+
+			// If item is inside vp, no special treatment is needed
+			return null;
+		}
 
 		/// <summary><paramref name="virtualInset"/> should be a valid value. See how it's clamped in <see cref="ScrollTo(int, float, float)"/></summary>
 		internal double SetContentVirtualInsetFromViewportStart(double virtualInset, ref ContentSizeOrPositionChangeParams p, out bool looped)
@@ -505,49 +599,6 @@ namespace Com.TheFallenGames.OSA.Core
 			_ReleaseFromPull.inProgress = false;
 
 			double deltaInset = virtualInset - _InternalState.ctVirtualInsetFromVPS_Cached;
-			//Debug.Log("virtualInset " + virtualInset + ", deltaInset " + deltaInset + ", maxAllowed " + OSAConst.RECYCLE_ALL__MIN_DRAG_AMOUNT_AS_FACTOR_OF_VIEWPORT_SIZE * _InternalState.vpSize);
-//			//Debug.Log("insetDelta " + insetDelta + ", maxAllowed " + OSAConst.RECYCLE_ALL__MIN_DRAG_AMOUNT_AS_FACTOR_OF_VIEWPORT_SIZE * _InternalState.vpSize);
-			//bool bigJumpOptimization = DoesInsetDeltaRequireOptimization(insetDelta);
-//			//Debug.Log("SetInset " + virtualInset.ToString(OSAConst.DEBUG_FLOAT_FORMAT) + (bigJumpOptimization ? ", bigJumpOptimiz." : ""));
-//#warning remove this if tested and not needed anymore
-//			if (false && bigJumpOptimization)
-//			{
-//				//Debug.Log("bigJumpOptimization ");
-//				//Debug.Log("Opt1 curInset " + _InternalState.ctVirtualInsetFromVPS_Cached + ", insetDelta " + insetDelta + ", vsa " + _InternalState.VirtualScrollableArea);
-//				RecycleAllVisibleViewsHolders();
-
-//				p.contentInsetOverride = virtualInset;
-//				looped = UpdateCTVrtInsetFromVPS(ref p);
-
-//				// Quick-fix: items not being corrected + computed when jumping large amounts when recycleAll threshold is reached, 
-//				// especially if different sizes
-//				CorrectPositionsOfVisibleItems(false);
-//				ComputeVisibilityForCurrentPositionRawParams(true, false, -.1d);
-//				ComputeVisibilityForCurrentPositionRawParams(true, false, .1d);
-
-//				//Debug.Log("Opt2 curInset " + _InternalState.ctVirtualInsetFromVPS_Cached + ", insetDelta " + insetDelta + ", vsa " + _InternalState.VirtualScrollableArea);
-
-//				//// Quick fix for when looping and doing big jumps, which may prevent looping from being executed
-//				//if (_Params.effects.LoopItems && _InternalState.VirtualScrollableArea > 0)
-//				//{
-//				//	Debug.Log("Opt3 vsa " + _InternalState.VirtualScrollableArea + ", insetDelta " + insetDelta);
-//				//	Drag(
-//				//		1f * Math.Sign(insetDelta),
-//				//		_InternalState.VirtualScrollableArea > 0 ? AllowContentOutsideBoundsMode.ALLOW : AllowContentOutsideBoundsMode.ALLOW_IF_OUTSIDE_AMOUNT_SHRINKS,
-//				//		p.cancelSnappingIfAny
-//				//	);
-//				//	Drag(
-//				//		1f * -Math.Sign(insetDelta),
-//				//		_InternalState.VirtualScrollableArea > 0 ? AllowContentOutsideBoundsMode.ALLOW : AllowContentOutsideBoundsMode.ALLOW_IF_OUTSIDE_AMOUNT_SHRINKS,
-//				//		p.cancelSnappingIfAny
-//				//	);
-
-//				//	//ComputeVisibilityForCurrentPositionRawParams(true, false, -.1f);
-//				//	//ComputeVisibilityForCurrentPositionRawParams(true, false, .1f);
-//				//}
-//			}
-//			else
-//			{
 				bool _;
 
 			if (!p.keepVelocity)
@@ -564,12 +615,6 @@ namespace Com.TheFallenGames.OSA.Core
 			);
 
 			CorrectPositionsOfVisibleItems(false, p.fireScrollPositionChangedEvent);
-				//if (bigJumpOptimization)
-				//{
-				//	Debug.Log("bigJumpOptimization");
-				//	ClearCachedRecyclableItems();
-				//}
-			//}
 
 			return deltaInset;
 		}
@@ -828,7 +873,7 @@ namespace Com.TheFallenGames.OSA.Core
 
 			switch (changeMode)
 			{
-				// IMGDOC <!image url="$(SolutionDir)\frame8\Docs\img\OSA\Insert-Remove-Items.jpg" scale=".86"/>
+				// IMGDOC <!image url="$(SolutionDir)\Docs\img\OSA\Insert-Remove-Items.jpg" scale=".86"/>
 				case ItemCountChangeMode.INSERT:
 					{
 						int vhIndex;
@@ -1123,7 +1168,7 @@ namespace Com.TheFallenGames.OSA.Core
 					break;
 
 
-				// IMGDOC <!image url="$(SolutionDir)\frame8\Docs\img\OSA\Insert-Remove-Items-Remove.jpg" scale=".81"/>
+				// IMGDOC <!image url="$(SolutionDir)\Docs\img\OSA\Insert-Remove-Items-Remove.jpg" scale=".81"/>
 				case ItemCountChangeMode.REMOVE:
 					{
 						//if (emptyAreaWhenCTSmallerThanVP > 0)
@@ -3006,6 +3051,15 @@ namespace Com.TheFallenGames.OSA.Core
 			}
 
 			return twinPassScheduledAfter;
+		}
+
+		double ClampDouble(double t, double min, double max)
+		{
+			if (t < min)
+				return min;
+			if (t > max)
+				return max;
+			return t;
 		}
 	}
 }

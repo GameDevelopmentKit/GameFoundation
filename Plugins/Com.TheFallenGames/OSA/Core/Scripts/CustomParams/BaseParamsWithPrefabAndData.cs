@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace Com.TheFallenGames.OSA.CustomParams
+namespace Com.ForbiddenByte.OSA.CustomParams
 {
 	/// <summary>
 	/// If you don't need full control over the list data by storing it manually, and none of the DataHelpers are appropriate for your use case, 

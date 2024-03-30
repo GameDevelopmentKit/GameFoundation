@@ -1,9 +1,9 @@
 using UnityEngine;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 using frame8.Logic.Misc.Other.Extensions;
 using frame8.Logic.Misc.Visual.UI;
 
-namespace Com.TheFallenGames.OSA.AdditionalComponents
+namespace Com.ForbiddenByte.OSA.AdditionalComponents
 {
 	/// <summary>
 	/// Very useful script when you want to attach arbitrary content anywhere in an OSA and have it scrollable as any other item.

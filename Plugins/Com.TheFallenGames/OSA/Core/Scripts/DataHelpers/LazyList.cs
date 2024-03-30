@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
 
-namespace Com.TheFallenGames.OSA.DataHelpers
+namespace Com.ForbiddenByte.OSA.DataHelpers
 {
 	/// <summary>
 	/// <para>Very handy List implementation that delays object creation until it's accessed,</para>

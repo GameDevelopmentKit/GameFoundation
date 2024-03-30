@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Com.TheFallenGames.OSA.Core.Data.Gallery
+namespace Com.ForbiddenByte.OSA.Core.Data.Gallery
 {
 	/// <summary>
 	/// See <see cref="GalleryAnimation"/>

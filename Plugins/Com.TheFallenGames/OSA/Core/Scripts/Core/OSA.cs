@@ -1,6 +1,6 @@
-﻿//#define DEBUG_EVENT_SYSTEM 
-using Com.TheFallenGames.OSA.Core.SubComponents;
-using Com.TheFallenGames.OSA.Core.SubComponents.List;
+//#define DEBUG_EVENT_SYSTEM 
+using Com.ForbiddenByte.OSA.Core.SubComponents;
+using Com.ForbiddenByte.OSA.Core.SubComponents.List;
 using frame8.Logic.Misc.Other;
 using frame8.Logic.Misc.Other.Extensions;
 using frame8.Logic.Misc.Visual.UI;
@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
     /// <summary>
     /// <para>Old name: ScrollRectItemsAdapter (renamed in 3.0 to SRIA, and in v4.1 to OSA as a final name - short for Optimized ScrollView Adapter)</para>
@@ -296,11 +296,16 @@ namespace Com.TheFallenGames.OSA.Core
 					return;
 			}
 
-			if (!isActiveAndEnabled)
-				return;
+			if (!isActiveAndEnabled || !_Params.DragEnabled)
+			{
+				// Bugfix 29.05.2023 (indirect thanks GVguide from discord, discovered while investigating another bug with PageView):
+				// If a drag begins while !DragEnabled and DragEnabled switches to true while the drag still happens,
+				// OSA will pick it up, but that causes some issues with the Snapper8.
+				// Instead, a BeginDrag-Drag-EndDrag session should be either completely ignored or completely processed (atomicity)
+				_PrimaryEventID = null;
 
-			if (!_Params.DragEnabled)
 				return;
+			}
 
 			// Bugfix 23 May 2019 (Thanks stansison (Unity forum)): 
 			// The hotfix below didn't work like the builtin ScrollRect. If the EventSystem's 
@@ -351,7 +356,6 @@ namespace Com.TheFallenGames.OSA.Core
 
 			if (!_Params.DragEnabled)
 				return;
-
 
 			// Update 07.05.2021: See bugfix in OSAInternal with the same date
 			//// Bugfix 19.10.2020: When there are no items, we shouldn't be able to drag the content. 
@@ -900,7 +904,7 @@ namespace Com.TheFallenGames.OSA.Core
 
 			double vsa = _InternalState.VirtualScrollableArea;
 			bool ctBiggerThanVP = vsa > 0d;
-			double newInset = ScrollToHelper_GetContentStartVirtualInsetFromViewportStart_Clamped(
+			double newInset = ScrollToHelper_GetContentStartVirtualInsetFromViewportStart(
 					vsa,
 					itemIndex,
 					normalizedOffsetFromViewportStart,
@@ -1344,7 +1348,7 @@ namespace Com.TheFallenGames.OSA.Core
 			if (twinPassScheduledBefore)
 				throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 
-            for (int i = 0; i < VisibleItemsCount - 1; i++)
+            for (int i = 0; i < VisibleItemsCount; i++)
             {
 				var vh = GetItemViewsHolder(i);
 				ForceUpdateViewsHolder(vh);
@@ -1538,6 +1542,8 @@ namespace Com.TheFallenGames.OSA.Core
 			// signifying that it was put it in the RecycleableItems list
 			if (newItemIndex == -1)
 				inRecycleBinOrVisible.UnmarkForRebuild();
+
+			inRecycleBinOrVisible.OnBeforeRecycleOrDisable(newItemIndex);
 		}
 
 		/// <summary>
@@ -1715,16 +1721,43 @@ namespace Com.TheFallenGames.OSA.Core
 		}
 
 		/// <summary>
+		/// Same as <see cref="ForceRebuildViewsHolderAndUpdateSize(TItemViewsHolder, bool, bool, bool)"/>, but does a best guess for which direction should the content grow/shrink from.
+		/// <para>In a nutshell, uses <see cref="GuessShouldKeepEndStationaryOnResize(TItemViewsHolder)"/> to guess a good value for itemEndEdgeStationary. This is useful for cases where an item also changes its size as a result of this call, otherwise you can just use the other version.</para>
+		/// <para>Should only be called outside of OSA's main callbacks. For the exact allowed usage, see <see cref="RequestChangeItemSizeAndUpdateLayout(int, float, bool, bool, bool, bool)"/></para>
+		/// </summary>
+		protected void ForceRebuildViewsHolderAndUpdateSizeWithAutoEndEdge(TItemViewsHolder viewsHolder, bool keepVelocity = true)
+		{
+			bool endEdgeStationary = GuessShouldKeepEndStationaryOnResize(viewsHolder);
+			ForceRebuildViewsHolderAndUpdateSize(viewsHolder, itemEndEdgeStationary: endEdgeStationary, correctPosition: true, keepVelocity);
+		}
+
+		/// <summary>
 		/// A convenience method that calls <see cref="ForceRebuildViewsHolder(TItemViewsHolder)"/> and then <see cref="RequestChangeItemSizeAndUpdateLayout(int, float, bool, bool, bool, bool)"/>.
 		/// The most common usage is changing an item's size using a ContentSizeFitter, but doing so outside the ComputeVisibility pass, such as when only one of your items 
 		/// is externally changed and needs to update its size immediately. An example would by a "Typing..." message box in a chat that can change to show a big message at any time.
 		/// In this example, there's no need to update all of the items (as done via <see cref="ScheduleComputeVisibilityTwinPass(bool)"/>), but only one particular item.
 		/// <para>Should only be called outside of OSA's main callbacks. For the exact allowed usage, see <see cref="RequestChangeItemSizeAndUpdateLayout(int, float, bool, bool, bool, bool)"/></para>
 		/// </summary>
-		protected void ForceRebuildViewsHolderAndUpdateSize(TItemViewsHolder viewsHolder, bool itemEndEdgeStationary = false, bool correctPosition = true)
+		protected void ForceRebuildViewsHolderAndUpdateSize(TItemViewsHolder viewsHolder, bool itemEndEdgeStationary = false, bool correctPosition = true, bool keepVelocity = true)
 		{
 			var newSize = ForceRebuildViewsHolder(viewsHolder);
-			RequestChangeItemSizeAndUpdateLayout(viewsHolder, newSize, itemEndEdgeStationary, true, correctPosition);
+			RequestChangeItemSizeAndUpdateLayout(viewsHolder, newSize, itemEndEdgeStationary, true, correctPosition, keepVelocity);
+		}
+
+		/// <summary>
+		/// Tries to guess a good value for itemEndEdgeStationary (several methods need this parameter). This is useful for cases where an item is about to change its size and you want to minimize big movements of the surrounding content.
+		/// </summary>
+		protected bool GuessShouldKeepEndStationaryOnResize(TItemViewsHolder viewsHolder)
+		{
+			var root = viewsHolder.root;
+			var spaceBefore = GetItemRealInsetFromParentStart(root);
+			var spaceAfter = GetItemRealInsetFromParentEnd(root);
+			bool moreStuffVisibleBelow = spaceAfter > spaceBefore;
+			var approxThreshold = -Mathf.Max(10f, _Params.ContentSpacing);
+			bool contentIsNearEnd = ContentVirtualInsetFromViewportEnd > approxThreshold;
+			bool endEdgeStationary = contentIsNearEnd || moreStuffVisibleBelow;
+
+			return endEdgeStationary;
 		}
 
 		/// <summary>

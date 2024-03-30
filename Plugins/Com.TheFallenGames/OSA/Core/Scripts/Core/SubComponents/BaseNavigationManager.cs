@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	public abstract class BaseNavigationManager
 	{

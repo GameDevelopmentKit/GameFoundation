@@ -1,9 +1,9 @@
-﻿//#define DEBUG_COMPUTE_VISIBILITY
+//#define DEBUG_COMPUTE_VISIBILITY
 
 using System;
 using UnityEngine;
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	internal class ComputeVisibilityManager<TParams, TItemViewsHolder>
 		where TParams : BaseParams

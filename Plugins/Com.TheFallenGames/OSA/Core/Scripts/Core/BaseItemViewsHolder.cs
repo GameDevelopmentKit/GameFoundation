@@ -1,5 +1,5 @@
-﻿
-namespace Com.TheFallenGames.OSA.Core
+
+namespace Com.ForbiddenByte.OSA.Core
 {
 	/// <summary>The minimal implementation of a Views Holder that can be used with <see cref="OSA{TParams, TItemViewsHolder}"/></summary>
 	public class BaseItemViewsHolder : AbstractViewsHolder

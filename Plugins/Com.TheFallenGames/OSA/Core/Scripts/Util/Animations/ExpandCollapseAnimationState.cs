@@ -1,15 +1,15 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using Com.TheFallenGames.OSA.Core.Data.Animations;
+using Com.ForbiddenByte.OSA.Core.Data.Animations;
 using System;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 
-namespace Com.TheFallenGames.OSA.Util.Animations
+namespace Com.ForbiddenByte.OSA.Util.Animations
 {
 	/// <summary>
-	/// Used for more control than <see cref="Com.TheFallenGames.OSA.Util.ExpandCollapseOnClick"/> offers.
-	/// Holds all the required data for animating an item's size. The animation is done manually, using an MonoBehaviour's Update
+	/// Used for more control than what <see cref="Com.ForbiddenByte.OSA.Util.ExpandCollapseOnClick"/> offers.
+	/// Holds all the required data for animating an item's size. The animation is done manually, using a MonoBehaviour's Update
 	/// </summary>
 	public class ExpandCollapseAnimationState
 	{

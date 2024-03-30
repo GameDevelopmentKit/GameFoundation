@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using UnityEngine;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 using frame8.Logic.Misc.Other.Extensions;
-using Com.TheFallenGames.OSA.Core.SubComponents;
+using Com.ForbiddenByte.OSA.Core.SubComponents;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-namespace Com.TheFallenGames.OSA.CustomAdapters.GridView
+namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
 {
 	/// <summary>
 	/// <para>An optimized adapter for a GridView </para>
@@ -293,6 +293,17 @@ namespace Com.TheFallenGames.OSA.CustomAdapters.GridView
 			return null;
 		}
 
+		public bool ForceUpdateCellViewsHolderIfVisible(int cellItemIndex)
+		{
+			var vh = GetCellViewsHolderIfVisible(cellItemIndex);
+			if (vh == null)
+				return false;
+
+			UpdateCellViewsHolder(vh);
+
+			return true;
+		}
+
 		/// <summary>Scroll to the specified GROUP. Use <see cref="ScrollTo(int, float, float)"/> if scrolling to a CELL was intended instead</summary>
 		/// <seealso cref="OSA{TParams, TItemViewsHolder}.ScrollTo(int, float, float)"/>
 		public virtual void ScrollToGroup(int groupIndex, float normalizedOffsetFromViewportStart = 0f, float normalizedPositionOfItemPivotToUse = 0f)
@@ -406,13 +417,18 @@ namespace Com.TheFallenGames.OSA.CustomAdapters.GridView
 		{
 			base.OnBeforeRecycleOrDisableViewsHolder(inRecycleBinOrVisible, newItemIndex);
 
-			// 2 fors are more efficient
-			if (newItemIndex == -1)
-				for (int i = 0; i < inRecycleBinOrVisible.NumActiveCells; ++i)
-					OnBeforeRecycleOrDisableCellViewsHolder(inRecycleBinOrVisible.ContainingCellViewsHolders[i], -1);
-			else
-				for (int i = 0; i < inRecycleBinOrVisible.NumActiveCells; ++i)
-					OnBeforeRecycleOrDisableCellViewsHolder(inRecycleBinOrVisible.ContainingCellViewsHolders[i], newItemIndex * _Params.CurrentUsedNumCellsPerGroup + i);
+			for (int i = 0; i < inRecycleBinOrVisible.NumActiveCells; ++i)
+			{
+				var cellVh = inRecycleBinOrVisible.ContainingCellViewsHolders[i];
+				int newCellIndex;
+
+				if (newItemIndex == -1)
+					newCellIndex = -1;
+				else
+					newCellIndex = newItemIndex * _Params.CurrentUsedNumCellsPerGroup + i;
+
+				OnBeforeRecycleOrDisableCellViewsHolder(cellVh, newCellIndex);
+			}
 		}
 
 		/// <summary> This is not needed yet in case of grid adapters </summary>
@@ -448,7 +464,10 @@ namespace Com.TheFallenGames.OSA.CustomAdapters.GridView
 
 		/// <summary>The only important callback for inheritors. It provides cell's views holder which has just become visible and whose views should be updated from its corresponding data model. viewsHolder.ItemIndex(<see cref="AbstractViewsHolder.ItemIndex"/>) can be used to know what data model is associated with. </summary>
 		/// <param name="viewsHolder">The cell's views holder</param>
-		protected virtual void OnBeforeRecycleOrDisableCellViewsHolder(TCellVH viewsHolder, int newItemIndex) { }
+		protected virtual void OnBeforeRecycleOrDisableCellViewsHolder(TCellVH viewsHolder, int newItemIndex) 
+		{
+			viewsHolder.OnBeforeRecycleOrDisable(newItemIndex);
+		}
 
 		protected virtual void OnCellGroupsRefreshed(int prevGroupsCount, int curGroupsCount)
 		{

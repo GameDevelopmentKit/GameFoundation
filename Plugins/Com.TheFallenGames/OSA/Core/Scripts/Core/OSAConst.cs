@@ -1,10 +1,10 @@
-﻿
 
-namespace Com.TheFallenGames.OSA.Core
+
+namespace Com.ForbiddenByte.OSA.Core
 {
 	public class OSAConst
 	{
-		public const string OSA_VERSION_STRING = "6.1.0";
+		public const string OSA_VERSION_STRING = "7.0.0";
 
 		public const int MAX_ITEMS = int.MaxValue - 1;
 		public const int MAX_ITEMS_WHILE_LOOPING_TO_ALLOW_TWIN_PASS = 800 * 1000 * 1000;
@@ -24,6 +24,6 @@ namespace Com.TheFallenGames.OSA.Core
 		public const string DOUBLE_TO_STRING_CONVERSION_SPECIFIER_PRESERVE_PRECISION = "G17";
 		public const string FLOAT_TO_STRING_CONVERSION_SPECIFIER_PRESERVE_PRECISION = "G9";
 
-		public const string OSA_PATH_IN_RESOURCES = "Com.TheFallenGames/OSA";
+		public const string OSA_PATH_IN_RESOURCES = "Com.ForbiddenByte.OSA";
 	}
 }

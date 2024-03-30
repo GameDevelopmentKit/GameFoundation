@@ -1,7 +1,7 @@
-﻿//#define DEBUG_COMPUTE_VISIBILITY
+//#define DEBUG_COMPUTE_VISIBILITY
 
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	internal struct ContentSizeOrPositionChangeParams
 	{

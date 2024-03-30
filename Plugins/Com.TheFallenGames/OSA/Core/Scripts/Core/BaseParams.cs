@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Serialization;
 using frame8.Logic.Misc.Other.Extensions;
-using Com.TheFallenGames.OSA.Core.SubComponents;
-using Com.TheFallenGames.OSA.Core.Data;
-using Com.TheFallenGames.OSA.Core.Data.Gallery;
-using Com.TheFallenGames.OSA.Core.Data.Animations;
+using Com.ForbiddenByte.OSA.Core.SubComponents;
+using Com.ForbiddenByte.OSA.Core.Data;
+using Com.ForbiddenByte.OSA.Core.Data.Gallery;
+using Com.ForbiddenByte.OSA.Core.Data.Animations;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	/// <summary>
 	/// <para>Input params to be passed to <see cref="OSA{TParams, TItemViewsHolder}.Init()"/></para>
@@ -170,7 +170,7 @@ namespace Com.TheFallenGames.OSA.Core
 
 		[SerializeField]
 		AnimationParams _Animation = new AnimationParams();
-		public AnimationParams Animation { get { return _Animation; }}
+		public AnimationParams Animation { get { return _Animation; } }
 
 		[SerializeField]
 		[FormerlySerializedAs("optimization")]
@@ -206,7 +206,7 @@ namespace Com.TheFallenGames.OSA.Core
 		/// This makes sure the content and viewport have valid values. It can also be overridden to initialize custom data
 		/// </summary>
 		public virtual void InitIfNeeded(IOSA iAdapter)
-        {
+		{
 			_ScrollViewRT = iAdapter.AsMonoBehaviour.transform as RectTransform;
 			LayoutRebuilder.ForceRebuildLayoutImmediate(ScrollViewRT);
 
@@ -280,7 +280,7 @@ namespace Com.TheFallenGames.OSA.Core
 				}
 
 				if (showLog)
-					Debug.Log("OSA: setting conteng padding to be the same as content spacing (" + ContentSpacing.ToString("#############.##")+"), because looping is enabled");
+					Debug.Log("OSA: setting conteng padding to be the same as content spacing (" + ContentSpacing.ToString("#############.##") + "), because looping is enabled");
 			}
 
 			Navigation.InitIfNeeded();
@@ -336,7 +336,7 @@ namespace Com.TheFallenGames.OSA.Core
 			if (widthOfHeightErr != null)
 				throw new OSAException("OSA: '" + rt.name + "' reports a zero or negative " + widthOfHeightErr + "(" + sizErr + "). " +
 					"\nThis can happen if you don't have a Canvas component in the OSA's parents or if you accidentally set an invalid size in editor. " +
-					"\nIf '"+ rt.name + "' is instantiated at runtime, make sure you use the version of Object.Instantiate(..) that also takes the parent " +
+					"\nIf '" + rt.name + "' is instantiated at runtime, make sure you use the version of Object.Instantiate(..) that also takes the parent " +
 						"so it can be directly instantiated in it. The parent should be a Canvas or a descendant of a Canvas"
 					);
 		}
@@ -536,6 +536,9 @@ namespace Com.TheFallenGames.OSA.Core
 					ElasticMovement = false;
 					Debug.Log("OSA: 'elasticMovement' was set to false, because 'loopItems' is true. Elasticity only makes sense when there is an end");
 				}
+
+				if (HasContentVisual)
+					ContentVisual.rectTransform.MatchParentSize(true);
 
 				InitGalleryEffectMigrations();
 			}

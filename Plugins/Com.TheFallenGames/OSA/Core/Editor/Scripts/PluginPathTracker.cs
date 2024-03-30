@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Com.TheFallenGames.OSA.Editor
+namespace Com.ForbiddenByte.OSA.Editor
 {
     /// <summary>
     /// Used to keep track of the plugin's path, wherever you move it inside the project. This way, we don't need to hardcode paths.

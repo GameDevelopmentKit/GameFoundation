@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using System;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
     /// <summary>
     /// Class representing the concept of a Views Holder, i.e. a class that references some views and the id of the data displayed by those views. 
@@ -24,9 +25,9 @@ namespace Com.TheFallenGames.OSA.Core
 		/// Instantiates <paramref name="rootPrefabGO"/>, assigns it to root and sets its itemIndex to <paramref name="itemIndex"/>. 
 		/// Activates the new instance if <paramref name="activateRootGameObject"/> is true. Also calls CollectViews if <paramref name="callCollectViews"/> is true
 		/// </summary>
-		public void Init(GameObject rootPrefabGO, RectTransform parent, int itemIndex, bool activateRootGameObject = true, bool callCollectViews = true)
+		public void Init(GameObject rootPrefabGO, RectTransform parent, int itemIndex, bool activateRootGameObject = true, bool callCollectViews = true, bool worldPositionStays = false)
 		{
-			var go = GameObject.Instantiate(rootPrefabGO, parent, false);
+			var go = GameObject.Instantiate(rootPrefabGO, parent, worldPositionStays);
 
 			root = go.transform as RectTransform;
 			OnRootCreated(itemIndex, activateRootGameObject, callCollectViews);
@@ -77,6 +78,16 @@ namespace Com.TheFallenGames.OSA.Core
 		public virtual void ShiftIndex(int shift, int modulo)
 		{
 			ItemIndex = ShiftIntWithOverflowCheck(ItemIndex, shift, modulo);
+		}
+
+		/// <summary>
+		/// Called by OSA when it's decided that this Views Holder should be disabled (first) or recycled (second) by the current recycling policy. 
+		/// When fast-scrolling, a VH can be recycled without first being disabled (to save resources).
+		/// <para>Most of the time, you'll be interested in this to cleanup any resources, such as pending image downloads that aren't needed anymore since this item goes out of view or will represent another model.</para>
+		/// <para>See <see cref="OSA{TParams, TItemViewsHolder}.OnBeforeRecycleOrDisableViewsHolder(TItemViewsHolder, int)"/></para>
+		/// </summary>
+		public virtual void OnBeforeRecycleOrDisable(int newItemIndex)
+		{
 		}
 
 		/// <summary>

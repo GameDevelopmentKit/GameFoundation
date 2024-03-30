@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using frame8.Logic.Misc.Visual.UI.MonoBehaviours;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 
-namespace Com.TheFallenGames.OSA.Editor.OSAWizard
+namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
 {
 	public abstract class BaseOSAWindow<TWindowParams> : EditorWindow where TWindowParams : BaseWindowParams
 	{
@@ -257,18 +257,19 @@ namespace Com.TheFallenGames.OSA.Editor.OSAWizard
 
 		protected void DrawIcon()
 		{
-			float iconSize = 50f;
-			float padding = 3f;
+			float iconSize = 55f;
+			float padding_icon = 10f;
+			float padding_text = 0f;
 			var r = new Rect();
 			float labelHeight = 15f;
 			r.width = r.height = iconSize;
-			r.position = new Vector2(position.width - iconSize - padding, position.height - iconSize - labelHeight - padding);
+			r.position = new Vector2(position.width - iconSize - padding_icon, position.height - iconSize - labelHeight - padding_icon);
 			var prevColor = GUI.color;
 			var newColor = Color.white;
 			newColor.a = .6f;
 			GUI.color = newColor;
 			GUI.DrawTexture(r, _Icon);
-			r.position = new Vector3(r.position.x - padding, r.position.y + r.height + padding);
+			r.position = new Vector3(r.position.x - padding_text / 2f, r.position.y + r.height + 3f);
 			r.height = labelHeight;
 			var style = new GUIStyle();
 			style.fontSize = 9;
@@ -336,7 +337,7 @@ namespace Com.TheFallenGames.OSA.Editor.OSAWizard
 		protected void DrawSubmitButon(string title)
 		{
 			Rect buttonCRect = new Rect();
-			buttonCRect.width = 170f;
+			buttonCRect.width = 200f;
 			buttonCRect.height = 30f;
 			buttonCRect.x = (position.width - buttonCRect.width) / 2;
 			buttonCRect.y = position.height - buttonCRect.height - _RootGUIStyle.padding.bottom;

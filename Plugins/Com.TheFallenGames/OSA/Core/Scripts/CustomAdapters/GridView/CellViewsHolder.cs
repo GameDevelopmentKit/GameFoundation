@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 
-namespace Com.TheFallenGames.OSA.CustomAdapters.GridView
+namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
 {
     /// <summary>
     /// By design, each cell should have exactly one child and it should hold the views. This is because the cell's GameObject must always be active, while the views may not be.

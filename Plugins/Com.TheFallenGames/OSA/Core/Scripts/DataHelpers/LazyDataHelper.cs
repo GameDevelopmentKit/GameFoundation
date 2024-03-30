@@ -1,7 +1,7 @@
-﻿using System;
-using Com.TheFallenGames.OSA.Core;
+using System;
+using Com.ForbiddenByte.OSA.Core;
 
-namespace Com.TheFallenGames.OSA.DataHelpers
+namespace Com.ForbiddenByte.OSA.DataHelpers
 {
 	/// <summary>
 	/// <para>Contains shortcuts for common operations on a list. Most notably, it adds/removes items for you and notifies the adapter after.</para>

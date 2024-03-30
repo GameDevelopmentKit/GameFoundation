@@ -1,7 +1,7 @@
-﻿using Com.TheFallenGames.OSA.Core.Data.Animations;
+using Com.ForbiddenByte.OSA.Core.Data.Animations;
 using System;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	public class OSAMath
 	{

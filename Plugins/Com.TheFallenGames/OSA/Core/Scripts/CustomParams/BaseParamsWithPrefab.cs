@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using Com.TheFallenGames.OSA.Core;
+using UnityEngine;
+using Com.ForbiddenByte.OSA.Core;
 using UnityEngine.UI;
 using System;
 using UnityEngine.Serialization;
 
-namespace Com.TheFallenGames.OSA.CustomParams
+namespace Com.ForbiddenByte.OSA.CustomParams
 {
 	/// <summary>
 	/// Custom params containing a single prefab. <see cref="ItemPrefabSize"/> is calculated on first accessing and invalidated each time <see cref="InitIfNeeded(IOSA)"/> is called.

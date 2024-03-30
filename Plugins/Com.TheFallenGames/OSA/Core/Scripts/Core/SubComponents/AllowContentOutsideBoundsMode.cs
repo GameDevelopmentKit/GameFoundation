@@ -1,4 +1,4 @@
-﻿namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	internal enum AllowContentOutsideBoundsMode
 	{

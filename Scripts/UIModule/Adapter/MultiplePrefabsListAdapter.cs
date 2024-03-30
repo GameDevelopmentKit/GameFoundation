@@ -2,8 +2,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
-    using Com.TheFallenGames.OSA.Core;
-    using Com.TheFallenGames.OSA.DataHelpers;
+    using Com.ForbiddenByte.OSA.Core;
+    using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;

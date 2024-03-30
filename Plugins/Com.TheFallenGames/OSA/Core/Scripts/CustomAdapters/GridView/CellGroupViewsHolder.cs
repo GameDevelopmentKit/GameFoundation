@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 
-namespace Com.TheFallenGames.OSA.CustomAdapters.GridView
+namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
 {
     /// <summary>
     /// <para>A views holder representing a group of cells (row or column). It instantiates the maximum number of cells it can contain,</para>
