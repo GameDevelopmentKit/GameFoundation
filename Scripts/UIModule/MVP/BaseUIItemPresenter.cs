@@ -13,14 +13,14 @@
         /// Show/Hide view
         /// </summary>
         /// <param name="value"></param>
-        void SetActiveView(bool value);
+        void SetActiveView(bool value) { }
     }
 
-    public interface IUIItemPresenter<TView, TModel>
+    public interface IUIItemPresenter<TView, TModel> : IUIItemPresenter
     {
         public UniTask SetView(Transform parent);
-        public void    SetView(TView     viewInstance);
-        public void    BindData(TModel   param);
+        public void    SetView(TView viewInstance);
+        public void    BindData(TModel param);
     }
 
     /// <summary>
@@ -35,6 +35,7 @@
         protected IGameAssets GameAssets;
 
         protected BaseUIItemPresenter(IGameAssets gameAssets) { this.GameAssets = gameAssets; }
+
         /// <summary>
         /// Set view automatically
         /// </summary>
@@ -73,7 +74,7 @@
                 this.SetView(Object.Instantiate(prefabView, parent).GetComponent<TView>());
             }
         }
-        
+
         /// <summary>
         /// Set view automatically
         /// </summary>
@@ -101,6 +102,7 @@
         /// </summary>
         /// <param name="viewInstance"></param>
         public virtual void SetView(TView viewInstance) { this.View = viewInstance; }
+
         public void SetView(IUIView viewInstance) { this.View = (TView)viewInstance; }
 
         public virtual void SetActiveView(bool value)
@@ -111,14 +113,14 @@
 
     public abstract class BaseUIItemPresenter<TView, TModel> : BaseUIItemPresenter<TView>, IUIItemPresenter<TView, TModel>, IDisposable where TView : MonoBehaviour, IUIView
     {
-        public abstract void BindData(TModel      param);
+        public abstract void BindData(TModel param);
         protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets) { }
         public virtual void Dispose() { }
     }
 
     public abstract class BaseUIItemPresenter<TView, TModel1, TModel2> : BaseUIItemPresenter<TView> where TView : MonoBehaviour, IUIView
     {
-        public abstract void BindData(TModel1     param1, TModel2 param2);
+        public abstract void BindData(TModel1 param1, TModel2 param2);
         protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets) { }
     }
 
@@ -148,13 +150,13 @@
 
     public abstract class BaseUIItemPoolablePresenter<TView, TModel> : BaseUIItemPoolablePresenter<TView>, IUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
     {
-        public abstract void BindData(TModel              param);
+        public abstract void BindData(TModel param);
         protected BaseUIItemPoolablePresenter(IGameAssets gameAssets) : base(gameAssets) { }
     }
 
     public abstract class BaseUIItemPoolablePresenter<TView, TModel1, TModel2> : BaseUIItemPoolablePresenter<TView> where TView : MonoBehaviour, IUIView
     {
-        public abstract void BindData(TModel1             param1, TModel2 param2);
+        public abstract void BindData(TModel1 param1, TModel2 param2);
         protected BaseUIItemPoolablePresenter(IGameAssets gameAssets) : base(gameAssets) { }
     }
 
