@@ -2,8 +2,8 @@
   "name": "com.gdk.core",
   "displayName": "Game Foundation Core",
   "description": "Game Foundation provides pre-built common game systems that are flexible and extensible so that developers can focus on building unique gameplay.",
-  "version": "0.0.1",
-  "unity": "2021.3",
+  "version": "0.0.2",
+  "unity": "2022.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -18,8 +18,8 @@
     "com.neuecc.unirx": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts"
   },
   "dependencies": {
-    "com.unity.addressables": "1.20.5",
-    "com.unity.nuget.newtonsoft-json": "3.0.2"
+    "com.unity.addressables": "1.21.20",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   },
   "keywords": [
     "SDK",
