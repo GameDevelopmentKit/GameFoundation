@@ -48,6 +48,8 @@
             }
         }
 
+        public virtual void OnViewReady() { }
+
         /// <summary>
         /// Set view automatically
         /// </summary>
@@ -101,9 +103,27 @@
         /// Set view manually
         /// </summary>
         /// <param name="viewInstance"></param>
-        public virtual void SetView(TView viewInstance) { this.View = viewInstance; }
+        public virtual void SetView(TView viewInstance)
+        {
+            var isViewNull = this.View == null;
+            this.View = viewInstance;
 
-        public void SetView(IUIView viewInstance) { this.View = (TView)viewInstance; }
+            if (isViewNull)
+            {
+                this.OnViewReady();
+            }
+        }
+
+        public void SetView(IUIView viewInstance)
+        {
+            var isViewNull = this.View == null;
+            this.View = (TView)viewInstance;
+
+            if (isViewNull)
+            {
+                this.OnViewReady();
+            }
+        }
 
         public virtual void SetActiveView(bool value)
         {
