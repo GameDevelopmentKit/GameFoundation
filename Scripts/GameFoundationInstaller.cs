@@ -13,6 +13,7 @@
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
     using global::Models;
+    using global::UIModule.Utilities.UIStuff;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
@@ -44,7 +45,8 @@
 
             //Helper
             this.Container.Bind<LoadImageHelper>().AsCached();
-
+            this.Container.BindInterfacesTo<PopupAttributeHelper>().AsCached().NonLazy();
+            
             //Installer
             BlueprintServicesInstaller.Install(this.Container);
             ScreenFlowInstaller.Install(this.Container);

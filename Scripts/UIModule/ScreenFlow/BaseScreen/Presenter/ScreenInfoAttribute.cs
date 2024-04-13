@@ -18,7 +18,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public bool IsCloseWhenTapOutside { get; }
         public bool IsOverlay             { get; }
 
-        public PopupInfoAttribute(string addressableScreenPath, bool isEnableBlur = true, bool isCloseWhenTapOutside = true,
+        public PopupInfoAttribute(string addressableScreenPath, bool isEnableBlur = true, bool isCloseWhenTapOutside = false,
             bool isOverlay = false) : base(addressableScreenPath)
         {
             this.IsEnableBlur          = isEnableBlur;
