@@ -1,7 +1,7 @@
 namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
     using System.Collections;
-    using UniRx;
+    using R3;
     using UnityEngine;
 
     public class DetectRotateOrientation : MonoBehaviour
