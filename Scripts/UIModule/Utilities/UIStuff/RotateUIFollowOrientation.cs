@@ -4,9 +4,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
     using DG.Tweening;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using Sirenix.OdinInspector;
-    using UniRx;
     using UnityEngine;
     using Zenject;
+    using R3;
 
     public class RotateUIFollowOrientation : MonoBehaviour
     {

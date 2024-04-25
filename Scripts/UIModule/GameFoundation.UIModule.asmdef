@@ -9,13 +9,13 @@
         "GameFoundation.Utilities",
         "Unity.TextMeshPro",
         "OSA.Core",
-        "UniRx",
         "Unity.Addressables",
         "Unity.ResourceManager",
         "UniTask.Addressables",
         "Zenject-Source",
         "Zenject-Signals",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "R3.Unity"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -24,7 +24,8 @@
     "precompiledReferences": [
         "DOTween.dll",
         "Sirenix.OdinInspector.Attributes.dll",
-        "Zenject-usage.dll"
+        "Zenject-usage.dll",
+        "R3.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
