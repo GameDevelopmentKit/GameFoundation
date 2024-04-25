@@ -12,7 +12,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
-    using UniRx;
+    using R3;
     using UnityEditor;
     using UnityEngine;
     using Zenject;
