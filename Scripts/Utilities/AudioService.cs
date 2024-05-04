@@ -9,7 +9,7 @@
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
-    using UniRx;
+    using R3;
     using UnityEngine;
     using Zenject;
 

@@ -1,7 +1,7 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System;
-    using UniRx;
+    using R3;
     using Zenject;
 
     public class BaseQueueAction : IGameQueueAction
