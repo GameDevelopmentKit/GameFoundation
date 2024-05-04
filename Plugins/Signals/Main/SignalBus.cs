@@ -59,6 +59,18 @@ namespace Zenject
         {
             this.InternalUnsubscribe<TSignal>(callback);
         }
+        
+        public void TryUnsubscribe<TSignal>(Action callback)
+        {
+            try
+            {
+                this.InternalUnsubscribe<TSignal>(callback);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
 
         public void TryUnsubscribe<TSignal>(Action<TSignal> callback)
         {
