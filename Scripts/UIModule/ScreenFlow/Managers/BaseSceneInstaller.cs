@@ -58,8 +58,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 }
 
                 EditorApplication.ExitPlaymode();
-#endif
             }
         }
+#endif
     }
 }
