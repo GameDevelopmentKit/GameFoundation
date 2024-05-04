@@ -31,14 +31,15 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.screenManager.CurrentOverlayRoot = this.rootUICanvas.RootUIOverlayTransform;
         }
 
+#if UNITY_EDITOR
         private void OnValidate()
         {
+            var activeScene = SceneManager.GetActiveScene();
             var sceneContext = this.GetComponent<SceneContext>();
             if (!sceneContext.AutoInjectInHierarchy)
             {
                 sceneContext.AutoInjectInHierarchy = true;
-                Debug.LogException(new Exception("SceneContext AutoInjectInHierarchy should be true, commit this scene please!!!"));
-#if UNITY_EDITOR
+                Debug.LogException(new Exception($"{activeScene.name}: SceneContext AutoInjectInHierarchy should be true, commit this scene please!!!"));
                 EditorApplication.delayCall += MarkSceneDirtyOnce;
 
                 void MarkSceneDirtyOnce()
@@ -47,13 +48,16 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     EditorApplication.delayCall -= MarkSceneDirtyOnce;
 
                     // Check if the current scene is already marked as dirty to avoid unnecessary operations
-                    if (!SceneManager.GetActiveScene().isDirty)
+                    if (!activeScene.isDirty)
                     {
                         EditorSceneManager.MarkSceneDirty(
-                            SceneManager.GetActiveScene()
+                            activeScene
                         );
+                        EditorSceneManager.SaveScene(activeScene, activeScene.path);
                     }
                 }
+
+                EditorApplication.ExitPlaymode();
 #endif
             }
         }
