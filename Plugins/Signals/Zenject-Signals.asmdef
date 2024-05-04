@@ -2,7 +2,10 @@
     "name": "Zenject-Signals",
     "rootNamespace": "",
     "references": [
-        "Zenject-Source"
+        "Zenject-Source",
+        "MessagePipe.Zenject",
+        "MessagePipe",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
