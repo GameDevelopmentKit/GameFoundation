@@ -2,7 +2,7 @@
     "name": "Zenject-Editor",
     "rootNamespace": "",
     "references": [
-        "Zenject-Source"
+        "Zenject"
     ],
     "includePlatforms": [
         "Editor"

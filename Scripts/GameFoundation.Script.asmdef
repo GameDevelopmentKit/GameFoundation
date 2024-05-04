@@ -9,7 +9,7 @@
         "GameFoundation.UIModule",
         "MasterAAASound.Scripts",
         "I2Localization.Scripts",
-        "Zenject-Source",
+        "Zenject",
         "Zenject-Signals"
     ],
     "includePlatforms": [],

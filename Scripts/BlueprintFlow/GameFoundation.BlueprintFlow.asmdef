@@ -4,7 +4,7 @@
     "references": [
         "UniTask",
         "GameFoundation.Utilities",
-        "Zenject-Source",
+        "Zenject",
         "Zenject-Signals",
         "GameFoundation.Models"
     ],
