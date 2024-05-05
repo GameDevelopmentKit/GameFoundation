@@ -5,6 +5,7 @@
     using GameFoundation.Scripts.AssetLibrary;
     using UnityEngine;
     using Zenject;
+    using Zenject.Internal;
     using Object = UnityEngine.Object;
 
     public interface IUIItemPresenter : IUIPresenter

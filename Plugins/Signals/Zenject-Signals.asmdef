@@ -1,8 +1,11 @@
 {
-    "name": "GameFoundation.Models",
+    "name": "Zenject-Signals",
     "rootNamespace": "",
     "references": [
-        "Zenject"
+        "Zenject",
+        "MessagePipe.Zenject",
+        "MessagePipe",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

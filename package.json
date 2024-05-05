@@ -16,11 +16,20 @@
   "gitDependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
-    "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity"
+    "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
+    "com.svermeulen.extenject": "https://github.com/svermeulen/Yazef.git?path=UnityProject/Assets/Plugins/Zenject/Source#",
+    "com.cysharp.messagepipe": "https://github.com/Cysharp/MessagePipe.git?path=src/MessagePipe.Unity/Assets/Plugins/MessagePipe",
+    "com.cysharp.messagepipe.zenject": "https://github.com/Cysharp/MessagePipe.git?path=src/MessagePipe.Unity/Assets/Plugins/MessagePipe.Zenject"
   },
   "dependencies": {
     "com.unity.addressables": "1.21.20",
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.svermeulen.extenject": "10.0.0",
+    "com.github-glitchenzo.nugetforunity": "4.1.0",
+    "com.cysharp.r3": "1.1.11",
+    "com.cysharp.unitask": "2.5.4",
+    "com.cysharp.messagepipe": "1.8.1",
+    "com.cysharp.messagepipe.zenject": "1.8.1"
   },
   "keywords": [
     "SDK",

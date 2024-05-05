@@ -4,12 +4,11 @@
     "references": [
         "I2Localization.Scripts",
         "MasterAAASound.Scripts",
-        "UniRx",
         "Unity.TextMeshPro",
         "UniTask",
         "Unity.Timeline",
         "GameFoundation.AssetLibrary",
-        "Zenject-Source",
+        "Zenject",
         "GameFoundation.Models",
         "Zenject-Signals",
         "UniTask.Addressables",

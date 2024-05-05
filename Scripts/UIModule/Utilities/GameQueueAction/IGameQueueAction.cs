@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System;
     using Zenject;
+    using Zenject.Internal;
 
     public interface IGameQueueAction : IDisposable, IPoolable<IMemoryPool,string, string>
     {

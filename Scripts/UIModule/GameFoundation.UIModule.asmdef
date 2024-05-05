@@ -12,7 +12,7 @@
         "Unity.Addressables",
         "Unity.ResourceManager",
         "UniTask.Addressables",
-        "Zenject-Source",
+        "Zenject",
         "Zenject-Signals",
         "DOTween.Modules",
         "R3.Unity"

@@ -3,6 +3,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     using System;
     using R3;
     using Zenject;
+    using Zenject.Internal;
 
     public class BaseQueueAction : IGameQueueAction
     {
