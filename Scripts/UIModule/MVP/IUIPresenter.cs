@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.UIModule.MVP
     public interface IUIPresenter
     {
         public void SetView(IUIView viewInstance);
+        void        OnViewReady() { }
     }
 
     public interface IUIPresenterWithModel<TModel> : IUIPresenter
