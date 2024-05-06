@@ -7,6 +7,7 @@ public class DelegateEqualityComparer : IEqualityComparer<Delegate>
     {
         if (ReferenceEquals(x, y)) return true;
         if (x == null || y == null) return false;
+        if (x.Target == null || y.Target == null) return false;
 
         return x.Method.Equals(y.Method) && x.Target.Equals(y.Target);
     }

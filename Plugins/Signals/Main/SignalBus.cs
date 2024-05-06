@@ -2,7 +2,7 @@ namespace Zenject
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
+    using System.Linq;
     using MessagePipe;
 
     public class SignalBus
@@ -95,6 +95,19 @@ namespace Zenject
                 }
                 else
                 {
+                    if (dlg.Target == null)
+                    {
+                        //clear up dictionary
+                        var keysToRemove = actions.Keys
+                            .Where(k => k.Target == null)
+                            .ToList();
+
+                        foreach (var key in keysToRemove)
+                        {
+                            actions.Remove(key);
+                        }
+                        return;
+                    }
                     throw new Exception($"{typeof(TSignal)} - {dlg.Target}: Callback not subscribed!!!");
                 }
             }
