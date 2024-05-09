@@ -97,7 +97,6 @@ namespace BuildScripts.Editor
 #if THEONE_IAP
             projectCapabilityManager.AddInAppPurchase();
 #endif
-            projectCapabilityManager.AddGameCenter();
             projectCapabilityManager.AddPushNotifications(true);
             projectCapabilityManager.WriteToFile();
             Debug.Log($"onelog: End success Post Process Build. Entitlements");
