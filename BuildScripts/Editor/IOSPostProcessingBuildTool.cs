@@ -114,6 +114,9 @@ namespace BuildScripts.Editor
             // add NSUserTrackingUsageDescription for iOS 14
             rootDict.SetString("NSUserTrackingUsageDescription", "This identifier will be used to personalized your advertising experience.");
             rootDict.SetString("NSAdvertisingAttributionReportEndpoint", "https://postbacks-is.com");
+            
+            // fix jenkins not auto set
+            rootDict.SetString("MinimumOSVersion", PlayerSettings.iOS.targetOSVersionString);
 
             // add IOS 14 Network Support
             var array = rootDict.CreateArray("SKAdNetworkItems");
