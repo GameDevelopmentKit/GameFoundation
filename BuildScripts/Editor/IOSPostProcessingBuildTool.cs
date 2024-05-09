@@ -45,7 +45,7 @@ namespace BuildScripts.Editor
             if (buildTarget != BuildTarget.iOS) return;
 
             var plistPath = pathToBuiltProject + "/Info.plist";
-            var plist = new PlistDocument();
+            var plist     = new PlistDocument();
             plist.ReadFromString(File.ReadAllText(plistPath));
             var rootDict = plist.root;
 
@@ -60,41 +60,47 @@ namespace BuildScripts.Editor
 
         private static void SettingProjectIOS(BuildTarget buildTarget, string pathToBuiltProject)
         {
-            var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
+            try
+            {
+                var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
-            var pbxProject = new PBXProject();
-            pbxProject.ReadFromString(File.ReadAllText(projectPath));
+                var pbxProject = new PBXProject();
+                pbxProject.ReadFromString(File.ReadAllText(projectPath));
 
-            var mainTargetGuid = pbxProject.GetUnityMainTargetGuid();
-            var testTargetGuid = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
-            var frameworkTargetGuid = pbxProject.GetUnityFrameworkTargetGuid();
-            var projectGuid = pbxProject.ProjectGuid();
+                var mainTargetGuid           = pbxProject.GetUnityMainTargetGuid();
+                var testTargetGuid           = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
+                var unityFrameworkTargetGuid = pbxProject.GetUnityFrameworkTargetGuid();
+                var projectGuid              = pbxProject.ProjectGuid();
+                var pbxProjectPath           = PBXProject.GetPBXProjectPath(pathToBuiltProject);
 
-            SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, frameworkTargetGuid, projectGuid);
-            SetCapabilities(projectPath, frameworkTargetGuid);
+                SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
 
-            File.WriteAllText(projectPath, pbxProject.WriteToString());
+                File.WriteAllText(projectPath, pbxProject.WriteToString());
+
+                SetCapability(pbxProjectPath, mainTargetGuid);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
         }
 
         #endregion
 
-        private static void SetCapabilities(string projectPath, string frameworkTargetGuid)
+        private static void SetCapability(string pbxProjectPath, string mainTargetGuid)
         {
-            //Set the entitlements file name to what you want but make sure it has this extension
-            const string entitlementsFileName = "1MGame.entitlements";
-
-            var entitlements = new ProjectCapabilityManager(projectPath, entitlementsFileName, "Unity-iPhone", frameworkTargetGuid);
-            entitlements.AddPushNotifications(true);
-            entitlements.AddGameCenter();
+            var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, "Entitlements.entitlements", null, mainTargetGuid);
 #if THEONE_SIGN_IN
-            entitlements.AddSignInWithApple();
+            projectCapabilityManager.AddSignInWithApple();
 #endif
 #if THEONE_IAP
-            entitlements.AddInAppPurchase();
+            projectCapabilityManager.AddInAppPurchase();
 #endif
-
-            //Apply
-            entitlements.WriteToFile();
+            projectCapabilityManager.AddGameCenter();
+            projectCapabilityManager.AddPushNotifications(true);
+            projectCapabilityManager.WriteToFile();
+            Debug.Log($"onelog: End success Post Process Build. Entitlements");
         }
 
         private static void SetPlistConfig(PlistElementDict rootDict)
