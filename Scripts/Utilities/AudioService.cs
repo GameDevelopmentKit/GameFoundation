@@ -21,6 +21,9 @@
         void StopAll();
         void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void StopPlayList();
+        void SetPlayListTime(float time);
+        void PausePlayList();
+        void ResumePlayList();
         void StopAllPlayList();
         void PauseEverything();
         void ResumeEverything();
@@ -41,8 +44,13 @@
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
-        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets,
-            ObjectPoolManager objectPoolManager, ILogService logService)
+        public AudioService(
+            SignalBus         signalBus,
+            SoundSetting      SoundSetting,
+            IGameAssets       gameAssets,
+            ObjectPoolManager objectPoolManager,
+            ILogService       logService
+        )
         {
             this.signalBus         = signalBus;
             this.soundSetting      = SoundSetting;
@@ -146,6 +154,24 @@
             this.MusicAudioSource.clip = null;
             this.MusicAudioSource.Recycle();
             this.MusicAudioSource = null;
+        }
+
+        public void SetPlayListTime(float time)
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.time = time;
+        }
+
+        public void PausePlayList()
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.Pause();
+        }
+
+        public void ResumePlayList()
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.Play();
         }
 
         public void StopAllPlayList() { this.StopPlayList(); }
