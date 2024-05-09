@@ -99,7 +99,7 @@ namespace BuildScripts.Editor
 #endif
             projectCapabilityManager.AddPushNotifications(true);
             projectCapabilityManager.WriteToFile();
-            Debug.Log($"onelog: End success Post Process Build. Entitlements");
+            Debug.Log($"onelog: IOSPostProcessingBuildTool End success Post Process Build. Entitlements");
         }
 
         private static void SetPlistConfig(PlistElementDict rootDict)
@@ -114,9 +114,6 @@ namespace BuildScripts.Editor
             // add NSUserTrackingUsageDescription for iOS 14
             rootDict.SetString("NSUserTrackingUsageDescription", "This identifier will be used to personalized your advertising experience.");
             rootDict.SetString("NSAdvertisingAttributionReportEndpoint", "https://postbacks-is.com");
-            
-            // fix jenkins not auto set
-            rootDict.SetString("MinimumOSVersion", PlayerSettings.iOS.targetOSVersionString);
 
             // add IOS 14 Network Support
             var array = rootDict.CreateArray("SKAdNetworkItems");
@@ -144,6 +141,7 @@ namespace BuildScripts.Editor
                 Debug.Log("Add allow insecure http IOS has exception. " + e);
             }
 #endif
+            Debug.Log($"onelog: IOSPostProcessingBuildTool End SetPlistConfig");
         }
 
         private static void SetProjectConfig(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
@@ -165,6 +163,12 @@ namespace BuildScripts.Editor
             pbxProject.SetBuildProperty(testTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
             pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
             pbxProject.SetBuildProperty(projectGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+
+            // fix batch mode not set
+            pbxProject.SetBuildProperty(mainTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", "13.0");
+            pbxProject.SetBuildProperty(testTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", "13.0");
+            pbxProject.SetBuildProperty(frameworkTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", "13.0");
+            pbxProject.SetBuildProperty(projectGuid, "IPHONEOS_DEPLOYMENT_TARGET", "13.0");
         }
     }
 }
