@@ -9,6 +9,7 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using UnityEditor.Android;
 
 // ------------------------------------------------------------------------
 // https://docs.unity3d.com/Manual/CommandLineArguments.html
@@ -101,6 +102,7 @@ public static class Build
 
     public static void BuildFromCommandLine()
     {
+        AndroidExternalToolsSettings.gradlePath = null;
         // Grab the CSV platforms string
         var platforms = string.Join(";", Targets.Select(t => t.Platform));
         var scriptingBackend       = ScriptingImplementation.Mono2x;
