@@ -4,6 +4,7 @@ namespace BuildScripts.Editor
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using Cysharp.Threading.Tasks;
     using UnityEditor;
     using UnityEditor.Callbacks;
     using UnityEditor.iOS.Xcode;
@@ -40,7 +41,7 @@ namespace BuildScripts.Editor
         #endregion
 
         [PostProcessBuild]
-        public static void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
+        public static async void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
         {
             if (buildTarget != BuildTarget.iOS) return;
 
@@ -48,7 +49,9 @@ namespace BuildScripts.Editor
             {
                 SetPlistConfig(pathToBuiltProject);
                 SetProjectConfig(pathToBuiltProject);
-                SetPodConfig(pathToBuiltProject);
+                await SetPodConfig(pathToBuiltProject);
+                
+                Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
             }
             catch (Exception e)
             {
@@ -79,8 +82,9 @@ namespace BuildScripts.Editor
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
         }
 
-        private static void SetPodConfig(string pathToBuiltProject)
+        private static async UniTask SetPodConfig(string pathToBuiltProject)
         {
+            await UniTask.Delay(5000);
             var podfilePath = Path.Combine(pathToBuiltProject, "Podfile");
 
             if (File.Exists(podfilePath))
