@@ -5,6 +5,7 @@ using System.Linq;
 using GameFoundation.BuildScripts.Runtime;
 using Unity.CodeEditor;
 using UnityEditor;
+using UnityEditor.Android;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Settings;
@@ -110,6 +111,7 @@ public static class Build
 
     public static void BuildFromCommandLine()
     {
+        AndroidExternalToolsSettings.gradlePath = null;
         // Grab the CSV platforms string
         var platforms             = string.Join(";", Targets.Select(t => t.Platform));
         var scriptingBackend      = ScriptingImplementation.Mono2x;
