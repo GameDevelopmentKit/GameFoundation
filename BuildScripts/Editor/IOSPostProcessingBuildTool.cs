@@ -83,8 +83,9 @@ namespace BuildScripts.Editor
 
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 3");
             SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
-            await SetCapability(pbxProjectPath, mainTargetGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 4");
+            await SetCapability(pbxProjectPath, mainTargetGuid);
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 5");
 
             await File.WriteAllTextAsync(projectPath, pbxProject.WriteToString());
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
@@ -198,16 +199,22 @@ namespace BuildScripts.Editor
 
         private static async UniTask SetCapability(string pbxProjectPath, string mainTargetGuid)
         {
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 1");
             var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, "Entitlements.entitlements", null, mainTargetGuid);
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 2");
 #if THEONE_SIGN_IN
             projectCapabilityManager.AddSignInWithApple();
 #endif
 #if THEONE_IAP
             projectCapabilityManager.AddInAppPurchase();
 #endif
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 3");
             projectCapabilityManager.AddPushNotifications(true);
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 4");
             projectCapabilityManager.WriteToFile();
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 5");
             await UniTask.Delay(100);
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 6");
         }
 
         #endregion
