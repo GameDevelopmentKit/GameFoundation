@@ -47,6 +47,7 @@ namespace BuildScripts.Editor
 
             try
             {
+                await UniTask.Delay(5000);
                 await SetPlistConfig(pathToBuiltProject);
                 await SetProjectConfig(pathToBuiltProject);
                 await SetPodConfig(pathToBuiltProject);
