@@ -84,7 +84,7 @@ namespace BuildScripts.Editor
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 3");
             SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 4");
-            await SetCapability(pbxProjectPath, mainTargetGuid);
+            SetCapability(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 5");
 
             await File.WriteAllTextAsync(projectPath, pbxProject.WriteToString());
@@ -197,24 +197,21 @@ namespace BuildScripts.Editor
             pbxProject.SetBuildProperty(projectGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
         }
 
-        private static async UniTask SetCapability(string pbxProjectPath, string mainTargetGuid)
+        private static void SetCapability(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
         {
             Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 1");
-            var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, "Entitlements.entitlements", null, mainTargetGuid);
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 2");
-#if THEONE_SIGN_IN
-            projectCapabilityManager.AddSignInWithApple();
-#endif
+            foreach (var targetGuid in new List<string> { mainTargetGuid, testTargetGuid, frameworkTargetGuid, projectGuid })
+            {
+                pbxProject.AddCapability(targetGuid, PBXCapabilityType.PushNotifications);
 #if THEONE_IAP
-            projectCapabilityManager.AddInAppPurchase();
+                pbxProject.AddCapability(targetGuid, PBXCapabilityType.InAppPurchase);
 #endif
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 3");
-            projectCapabilityManager.AddPushNotifications(true);
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 4");
-            projectCapabilityManager.WriteToFile();
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 5");
-            await UniTask.Delay(100);
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 6");
+#if THEONE_SIGN_IN
+                pbxProject.AddCapability(targetGuid, PBXCapabilityType.SignInWithApple);
+#endif
+            }
+
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 2");
         }
 
         #endregion
