@@ -48,8 +48,11 @@ namespace BuildScripts.Editor
             try
             {
                 await UniTask.Delay(5000);
+                Debug.Log("onelog: IOSPostProcessingBuildTool 1");
                 await SetPlistConfig(pathToBuiltProject);
+                Debug.Log("onelog: IOSPostProcessingBuildTool 2");
                 await SetProjectConfig(pathToBuiltProject);
+                Debug.Log("onelog: IOSPostProcessingBuildTool 3");
                 await SetPodConfig(pathToBuiltProject);
 
                 Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
@@ -68,7 +71,9 @@ namespace BuildScripts.Editor
             var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
             var pbxProject = new PBXProject();
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 1");
             pbxProject.ReadFromString(await File.ReadAllTextAsync(projectPath));
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 2");
 
             var mainTargetGuid           = pbxProject.GetUnityMainTargetGuid();
             var testTargetGuid           = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
@@ -76,8 +81,10 @@ namespace BuildScripts.Editor
             var projectGuid              = pbxProject.ProjectGuid();
             var pbxProjectPath           = PBXProject.GetPBXProjectPath(pathToBuiltProject);
 
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 3");
             SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             await SetCapability(pbxProjectPath, mainTargetGuid);
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 4");
 
             await File.WriteAllTextAsync(projectPath, pbxProject.WriteToString());
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
