@@ -1,139 +1,785 @@
-﻿namespace GameFoundation.Scripts.Utilities
-{
-    using System;
-    using Cysharp.Threading.Tasks;
-    using DarkTonic.MasterAudio;
-    using GameFoundation.Scripts.Models;
-    using GameFoundation.Scripts.Utilities.UserData;
-    using UniRx;
-    using Zenject;
+﻿/*
+Simple Sound Manager (c) 2016 Digital Ruby, LLC
+http://www.digitalruby.com
 
-    public interface IAudioManager
+Source code may no longer be redistributed in source format. Using this in apps and games is fine.
+*/
+
+using UnityEngine;
+
+using System.Collections;
+using System.Collections.Generic;
+
+namespace DigitalRuby.SoundManagerNamespace
+{
+    /// <summary>
+    /// Provides an easy wrapper to looping audio sources with nice transitions for volume when starting and stopping
+    /// </summary>
+    public class LoopingAudioSource
     {
-        void PlaySound(string name, bool isLoop = false);
-        void StopAllSound(string name);
-        void PlayPlayList(string playlist, bool random = false);
-        void StopPlayList(string playlist);
-        void StopAllPlayList();
-        void PauseEverything();
-        void ResumeEverything();
+        /// <summary>
+        /// The audio source that is looping
+        /// </summary>
+        public AudioSource AudioSource { get; private set; }
+
+        /// <summary>
+        /// The target volume
+        /// </summary>
+        public float TargetVolume { get; set; }
+
+        /// <summary>
+        /// The original target volume - useful if the global sound volume changes you can still have the original target volume to multiply by.
+        /// </summary>
+        public float OriginalTargetVolume { get; private set; }
+
+        /// <summary>
+        /// Is this sound stopping?
+        /// </summary>
+        public bool Stopping { get; private set; }
+
+        /// <summary>
+        /// Whether the looping audio source persists in between scene changes
+        /// </summary>
+        public bool Persist { get; private set; }
+
+        /// <summary>
+        /// Tag for the looping audio source
+        /// </summary>
+        public int Tag { get; set; }
+
+        private float startVolume;
+        private float startMultiplier;
+        private float stopMultiplier;
+        private float currentMultiplier;
+        private float timestamp;
+        private bool paused;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="audioSource">Audio source, will be looped automatically</param>
+        /// <param name="startMultiplier">Start multiplier - seconds to reach peak sound</param>
+        /// <param name="stopMultiplier">Stop multiplier - seconds to fade sound back to 0 volume when stopped</param>
+        /// <param name="persist">Whether to persist the looping audio source between scene changes</param>
+        public LoopingAudioSource(AudioSource audioSource, float startMultiplier, float stopMultiplier, bool persist)
+        {
+            AudioSource = audioSource;
+            if (audioSource != null)
+            {
+                AudioSource.loop = true;
+                AudioSource.volume = 0.0f;
+                AudioSource.Stop();
+            }
+
+            this.startMultiplier = currentMultiplier = startMultiplier;
+            this.stopMultiplier = stopMultiplier;
+            Persist = persist;
+        }
+
+        /// <summary>
+        /// Play this looping audio source
+        /// </summary>
+        /// <param name="isMusic">True if music, false if sound effect</param>
+        public void Play(bool isMusic)
+        {
+            Play(1.0f, isMusic);
+        }
+
+        /// <summary>
+        /// Play this looping audio source
+        /// </summary>
+        /// <param name="targetVolume">Max volume</param>
+        /// <param name="isMusic">True if music, false if sound effect</param>
+        /// <returns>True if played, false if already playing or error</returns>
+        public bool Play(float targetVolume, bool isMusic)
+        {
+            if (AudioSource != null)
+            {
+                var audioSourceVolume              = (this.AudioSource.isPlaying ? this.AudioSource.volume : 0.0f);
+            #if UNITY_IOS
+                audioSourceVolume = 1;
+            #endif
+                AudioSource.volume   = startVolume = audioSourceVolume;
+                AudioSource.loop     = true;
+                currentMultiplier    = startMultiplier;
+                OriginalTargetVolume = targetVolume;
+                TargetVolume         = targetVolume;
+                Stopping             = false;
+                timestamp            = 0.0f;
+                if (!AudioSource.isPlaying)
+                {
+                    AudioSource.Play();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Stop this looping audio source. The sound will fade out smoothly.
+        /// </summary>
+        public void Stop()
+        {
+            if (AudioSource != null && AudioSource.isPlaying && !Stopping)
+            {
+                startVolume = AudioSource.volume;
+                TargetVolume = 0.0f;
+                currentMultiplier = stopMultiplier;
+                Stopping = true;
+                timestamp = 0.0f;
+            }
+        }
+
+        /// <summary>
+        /// Pauses the looping audio source
+        /// </summary>
+        public void Pause()
+        {
+            if (AudioSource != null && !paused && AudioSource.isPlaying)
+            {
+                paused = true;
+                AudioSource.Pause();
+            }
+        }
+
+        /// <summary>
+        /// Resumes the looping audio source
+        /// </summary>
+        public void Resume()
+        {
+            if (AudioSource != null && paused)
+            {
+                paused = false;
+                AudioSource.UnPause();
+            }
+        }
+
+        /// <summary>
+        /// Update this looping audio source
+        /// </summary>
+        /// <returns>True if finished playing, false otherwise</returns>
+        public bool Update(bool isMusic = false)
+        {
+            if (AudioSource != null && AudioSource.isPlaying)
+            {
+                if ((AudioSource.volume = Mathf.Lerp(startVolume, TargetVolume, (timestamp += Time.unscaledDeltaTime) / currentMultiplier)) == 0.0f && Stopping)
+                {
+                    AudioSource.Stop();
+                    Stopping = false;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return !isMusic && !this.paused;
+        }
     }
 
-    public class AudioManager : IAudioManager, IInitializable, IDisposable
+    /// <summary>
+    /// Sound manager extension methods
+    /// </summary>
+    public static class SoundManagerExtensions
     {
-        public static AudioManager Instance { get; private set; }
-
-        private readonly SignalBus                signalBus;
-        private readonly PlaylistController       playlistController;
-        private readonly MasterAudio              masterAudio;
-        private readonly IHandleUserDataServices  handleUserDataServices;
-        private readonly DynamicSoundGroupCreator groupCreator;
-
-        private CompositeDisposable compositeDisposable;
-        private SoundSetting        soundSetting;
-
-
-        public AudioManager(SignalBus signalBus, PlaylistController playlistController, MasterAudio masterAudio, IHandleUserDataServices handleUserDataServices)
+        /// <summary>
+        /// Play an audio clip once using the global sound volume as a multiplier
+        /// </summary>
+        /// <param name="source">AudioSource</param>
+        /// <param name="clip">Clip</param>
+        public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip)
         {
-            this.signalBus              = signalBus;
-            this.playlistController     = playlistController;
-            this.masterAudio            = masterAudio;
-            this.handleUserDataServices = handleUserDataServices;
-            Instance                    = this;
+            SoundManager.PlayOneShotSound(source, clip, 1.0f);
         }
 
-        public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
-
-        private async void SubscribeMasterAudio()
+        /// <summary>
+        /// Play an audio clip once using the global sound volume as a multiplier
+        /// </summary>
+        /// <param name="source">AudioSource</param>
+        /// <param name="clip">Clip</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip, float volumeScale)
         {
-            this.soundSetting = await this.handleUserDataServices.Load<SoundSetting>();
-            await UniTask.WaitUntil(() => this.playlistController.ControllerIsReady);
-            this.soundSetting.MuteSound.Value = false;
-            this.soundSetting.MuteMusic.Value = false;
-
-            this.compositeDisposable = new CompositeDisposable
-            {
-                //TODO uncomment this when we have a proper solution
-                // this.gameFoundationLocalData.IndexSettingRecord.MuteMusic.Subscribe(this.CheckToMuteMusic),
-                // this.gameFoundationLocalData.IndexSettingRecord.MuteSound.Subscribe(this.CheckToMuteSound),
-                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-                this.soundSetting.MasterVolume.Subscribe(this.SetMasterVolume)
-            };
+            SoundManager.PlayOneShotSound(source, clip, volumeScale);
         }
 
-        private void SetMasterVolume(bool value)
+        /// <summary>
+        /// Play an audio clip once using the global music volume as a multiplier
+        /// </summary>
+        /// <param name="source">AudioSource</param>
+        /// <param name="clip">Clip</param>
+        public static void PlayOneShotMusicManaged(this AudioSource source, AudioClip clip)
         {
-            var finalValue = value ? 1 : 0;
-            MasterAudio.MasterVolumeLevel = finalValue;
+            SoundManager.PlayOneShotMusic(source, clip, 1.0f);
+        }
 
-            if (value)
+        /// <summary>
+        /// Play an audio clip once using the global music volume as a multiplier
+        /// </summary>
+        /// <param name="source">AudioSource</param>
+        /// <param name="clip">Clip</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        public static void PlayOneShotMusicManaged(this AudioSource source, AudioClip clip, float volumeScale)
+        {
+            SoundManager.PlayOneShotMusic(source, clip, volumeScale);
+        }
+
+        /// <summary>
+        /// Play a sound and loop it until stopped, using the global sound volume as a modifier
+        /// </summary>
+        /// <param name="source">Audio source to play</param>
+        public static void PlayLoopingSoundManaged(this AudioSource source)
+        {
+            SoundManager.PlayLoopingSound(source, 1.0f, 1.0f);
+        }
+
+        /// <summary>
+        /// Play a sound and loop it until stopped, using the global sound volume as a modifier
+        /// </summary>
+        /// <param name="source">Audio source to play</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
+        public static void PlayLoopingSoundManaged(this AudioSource source, float volumeScale, float fadeSeconds)
+        {
+            SoundManager.PlayLoopingSound(source, volumeScale, fadeSeconds);
+        }
+
+        /// <summary>
+        /// Play a music track and loop it until stopped, using the global music volume as a modifier
+        /// </summary>
+        /// <param name="source">Audio source to play</param>
+        public static void PlayLoopingMusicManaged(this AudioSource source)
+        {
+            SoundManager.PlayLoopingMusic(source, 1.0f, 1.0f, false);
+        }
+
+        /// <summary>
+        /// Play a music track and loop it until stopped, using the global music volume as a modifier
+        /// </summary>
+        /// <param name="source">Audio source to play</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
+        /// <param name="persist">Whether to persist the looping music between scene changes</param>
+        public static void PlayLoopingMusicManaged(this AudioSource source, float volumeScale, float fadeSeconds, bool persist)
+        {
+            SoundManager.PlayLoopingMusic(source, volumeScale, fadeSeconds, persist);
+        }
+
+        /// <summary>
+        /// Stop a looping sound
+        /// </summary>
+        /// <param name="source">AudioSource to stop</param>
+        public static void StopLoopingSoundManaged(this AudioSource source)
+        {
+            SoundManager.StopLoopingSound(source);
+        }
+
+        /// <summary>
+        /// Stop a looping music track
+        /// </summary>
+        /// <param name="source">AudioSource to stop</param>
+        public static void StopLoopingMusicManaged(this AudioSource source)
+        {
+            SoundManager.StopLoopingMusic(source);
+        }
+    }
+
+    /// <summary>
+    /// Do not add this script in the inspector. Just call the static methods from your own scripts or use the AudioSource extension methods.
+    /// </summary>
+    public class SoundManager : MonoBehaviour
+    {
+        private static int persistTag = 0;
+        private static bool needsInitialize = true;
+        private static GameObject root;
+        private static SoundManager instance;
+        private static readonly List<LoopingAudioSource> music = new List<LoopingAudioSource>();
+        private static readonly List<AudioSource> musicOneShot = new List<AudioSource>();
+        private static readonly List<LoopingAudioSource> sounds = new List<LoopingAudioSource>();
+        private static readonly HashSet<LoopingAudioSource> persistedSounds = new HashSet<LoopingAudioSource>();
+        private static readonly Dictionary<AudioClip, List<float>> soundsOneShot = new Dictionary<AudioClip, List<float>>();
+        private static float soundVolume = 1.0f;
+        private static float musicVolume = 1.0f;
+        private static bool updated;
+        private static bool pauseSoundsOnApplicationPause = true;
+
+        [RuntimeInitializeOnLoadMethod]
+        static void RunOnRuntimeInitialized()
+        {
+            persistTag      = 0;
+            needsInitialize = true;
+            music.Clear();           
+            musicOneShot.Clear();   
+            sounds.Clear();        
+            persistedSounds.Clear();
+            soundsOneShot.Clear();
+            soundVolume                   = 1.0f;
+            musicVolume                   = 1.0f;
+            pauseSoundsOnApplicationPause = true;
+        }
+
+        /// <summary>
+        /// Maximum number of the same audio clip to play at once
+        /// </summary>
+        public static int MaxDuplicateAudioClips = 4;
+
+        /// <summary>
+        /// Whether to stop sounds when a new level loads. Set to false for additive level loading.
+        /// </summary>
+        public static bool StopSoundsOnLevelLoad = true;
+
+        private static void EnsureCreated()
+        {
+            if (needsInitialize)
             {
-                MasterAudio.UnmuteAllPlaylists();
+                needsInitialize = false;
+                root = new GameObject();
+                root.name = "DigitalRubySoundManager";
+                // root.hideFlags = HideFlags.HideAndDontSave;
+                instance = root.AddComponent<SoundManager>();
+                GameObject.DontDestroyOnLoad(root);
             }
-            else
-            {
-                MasterAudio.MuteAllPlaylists();
-            }
         }
 
-        public virtual void PlaySound(string name, bool isLoop = false) => MasterAudio.PlaySound(name, isChaining: isLoop);
-
-        public void StopAllSound(string name) => MasterAudio.StopAllOfSound(name);
-
-        public virtual void PlayPlayList(string playlist, bool random = false)
+        private void StopLoopingListOnLevelLoad(IList<LoopingAudioSource> list)
         {
-            this.playlistController.isShuffle = random;
-            MasterAudio.StartPlaylist(playlist);
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (!list[i].Persist || !list[i].AudioSource.isPlaying)
+                {
+                    list.RemoveAt(i);
+                }
+            }
         }
 
-        public void StopPlayList(string playlist) { MasterAudio.StopPlaylist(playlist); }
-
-        public void StopAllPlayList() { MasterAudio.StopAllPlaylists(); }
-
-        public void PauseEverything()
+        private void ClearPersistedSounds()
         {
-            if (this.playlistController.ControllerIsReady)
+            foreach (LoopingAudioSource s in persistedSounds)
             {
-                MasterAudio.MuteEverything();
+                if (!s.AudioSource.isPlaying)
+                {
+                    GameObject.Destroy(s.AudioSource.gameObject);
+                }
             }
+            persistedSounds.Clear();
         }
-        public void ResumeEverything()
+
+        private void SceneManagerSceneLoaded(UnityEngine.SceneManagement.Scene s, UnityEngine.SceneManagement.LoadSceneMode m)
         {
-            if (this.playlistController.ControllerIsReady)
+            // Just in case this is called a bunch of times, we put a check here
+            if (updated && StopSoundsOnLevelLoad)
             {
-                MasterAudio.UnmuteEverything();
+                persistTag++;
+
+                updated = false;
+
+                Debug.LogWarningFormat("Reloaded level, new sound manager persist tag: {0}", persistTag);
+
+                StopAllNonLoopingSounds();
+                StopLoopingListOnLevelLoad(sounds);
+                StopLoopingListOnLevelLoad(music);
+                soundsOneShot.Clear();
+                ClearPersistedSounds();
             }
         }
 
-        public virtual void CheckToMuteSound(bool isMute) { MasterAudio.MixerMuted = isMute; }
-
-        public virtual void CheckToMuteMusic(bool value)
+        private void Start()
         {
-            if (value)
-            {
-                MasterAudio.MuteAllPlaylists();
-            }
-            else
-            {
-                MasterAudio.UnmuteAllPlaylists();
-            }
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += SceneManagerSceneLoaded;
         }
 
-        protected virtual void SetSoundValue(float value)
+        private void Update()
         {
-            var groups = this.masterAudio.transform.GetComponentsInChildren<MasterAudioGroup>();
+            updated = true;
 
-            foreach (var transform in groups)
+            for (int i = sounds.Count - 1; i >= 0; i--)
             {
-                transform.groupMasterVolume = value;
+                if (sounds[i].Update())
+                {
+                    sounds.RemoveAt(i);
+                }
+            }
+            for (int i = music.Count - 1; i >= 0; i--)
+            {
+                bool nullMusic = (music[i] == null || music[i].AudioSource == null);
+                if (nullMusic || music[i].Update(true))
+                {
+                    if (!nullMusic && music[i].Tag != persistTag)
+                    {
+                        Debug.LogWarning("Destroying persisted audio from previous scene: " + music[i].AudioSource.gameObject.name);
+
+                        // cleanup persisted audio from previous scenes
+                        GameObject.Destroy(music[i].AudioSource.gameObject);
+                    }
+                    music.RemoveAt(i);
+                }
+            }
+            for (int i = musicOneShot.Count - 1; i >= 0; i--)
+            {
+                if (!musicOneShot[i].isPlaying)
+                {
+                    musicOneShot.RemoveAt(i);
+                }
             }
         }
 
-        protected virtual void SetMusicValue(float value) { MasterAudio.PlaylistMasterVolume = value; }
+        private void OnApplicationFocus(bool paused)
+        {
+            if (SoundManager.PauseSoundsOnApplicationPause)
+            {
+                if (paused)
+                {
+                    SoundManager.ResumeAll();
+                }
+                else
+                {
+                    SoundManager.PauseAll();
+                }
+            }
+        }
 
-        public virtual void FadeMusicValue(float value, float fadeTime = 0.1f) { MasterAudio.FadeAllPlaylistsToVolume(value, fadeTime); }
+        private static void UpdateSounds()
+        {
+            foreach (LoopingAudioSource s in sounds)
+            {
+                s.TargetVolume = s.OriginalTargetVolume * soundVolume;
+            }
+        }
 
-        public void Dispose() { this.compositeDisposable.Dispose(); }
+        private static void UpdateMusic()
+        {
+            foreach (LoopingAudioSource s in music)
+            {
+                if (!s.Stopping)
+                {
+                    s.TargetVolume = s.OriginalTargetVolume * musicVolume;
+                }
+            }
+            foreach (AudioSource s in musicOneShot)
+            {
+                s.volume = musicVolume;
+            }
+        }
+
+        private static IEnumerator RemoveVolumeFromClip(AudioClip clip, float volume)
+        {
+            yield return new WaitForSeconds(clip.length);
+
+            List<float> volumes;
+            if (soundsOneShot.TryGetValue(clip, out volumes))
+            {
+                volumes.Remove(volume);
+            }
+        }
+
+        private static void PlayLooping(AudioSource source, List<LoopingAudioSource> sources, float volumeScale, float fadeSeconds, bool persist, bool stopAll)
+        {
+            EnsureCreated();
+
+            for (int i = sources.Count - 1; i >= 0; i--)
+            {
+                LoopingAudioSource s = sources[i];
+                if (s.AudioSource == source)
+                {
+                    sources.RemoveAt(i);
+                }
+                if (stopAll)
+                {
+                    s.Stop();
+                }
+            }
+            {
+                source.gameObject.SetActive(true);
+                LoopingAudioSource s = new LoopingAudioSource(source, fadeSeconds, fadeSeconds, persist);
+                s.Play(volumeScale, true);
+                s.Tag = persistTag;
+                sources.Add(s);
+
+                if (persist)
+                {
+                    if (!source.gameObject.name.StartsWith("PersistedBySoundManager-"))
+                    {
+                        source.gameObject.name = "PersistedBySoundManager-" + source.gameObject.name + "-" + source.gameObject.GetInstanceID();
+                    }
+                    source.gameObject.transform.parent = null;
+                    GameObject.DontDestroyOnLoad(source.gameObject);
+                    persistedSounds.Add(s);
+                }
+            }
+        }
+
+        private static void StopLooping(AudioSource source, List<LoopingAudioSource> sources)
+        {
+            foreach (LoopingAudioSource s in sources)
+            {
+                if (s.AudioSource == source)
+                {
+                    s.Stop();
+                    source = null;
+                    break;
+                }
+            }
+            if (source != null)
+            {
+                source.Stop();
+            }
+        }
+
+        /// <summary>
+        /// Play a sound once - sound volume will be affected by global sound volume
+        /// </summary>
+        /// <param name="source">Audio source</param>
+        /// <param name="clip">Clip</param>
+        public static void PlayOneShotSound(AudioSource source, AudioClip clip)
+        {
+            PlayOneShotSound(source, clip, 1.0f);
+        }
+
+        /// <summary>
+        /// Play a sound once - sound volume will be affected by global sound volume
+        /// </summary>
+        /// <param name="source">Audio source</param>
+        /// <param name="clip">Clip</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        public static void PlayOneShotSound(AudioSource source, AudioClip clip, float volumeScale)
+        {
+            EnsureCreated();
+
+            List<float> volumes;
+            if (!soundsOneShot.TryGetValue(clip, out volumes))
+            {
+                volumes = new List<float>();
+                soundsOneShot[clip] = volumes;
+            }
+            else if (volumes.Count == MaxDuplicateAudioClips)
+            {
+                return;
+            }
+
+            float minVolume = float.MaxValue;
+            float maxVolume = float.MinValue;
+            foreach (float volume in volumes)
+            {
+                minVolume = Mathf.Min(minVolume, volume);
+                maxVolume = Mathf.Max(maxVolume, volume);
+            }
+
+            float requestedVolume = (volumeScale * soundVolume);
+            if (maxVolume > 0.5f)
+            {
+                requestedVolume = (minVolume + maxVolume) / (float)(volumes.Count + 2);
+            }
+            // else requestedVolume can stay as is
+
+            volumes.Add(requestedVolume);
+            source.PlayOneShot(clip, requestedVolume);
+            instance.StartCoroutine(RemoveVolumeFromClip(clip, requestedVolume));
+        }
+
+        /// <summary>
+        /// Play a looping sound - sound volume will be affected by global sound volume
+        /// </summary>
+        /// <param name="source">Audio source to play looping</param>
+        public static void PlayLoopingSound(AudioSource source)
+        {
+            PlayLoopingSound(source, 1.0f, 1.0f);
+        }
+
+        /// <summary>
+        /// Play a looping sound - sound volume will be affected by global sound volume
+        /// </summary>
+        /// <param name="source">Audio source to play looping</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        /// <param name="fadeSeconds">Seconds to fade in and out</param>
+        public static void PlayLoopingSound(AudioSource source, float volumeScale, float fadeSeconds)
+        {
+            PlayLooping(source, sounds, volumeScale, fadeSeconds, false, false);
+            UpdateSounds();
+        }
+
+        /// <summary>
+        /// Play a music track once - music volume will be affected by the global music volume
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="clip"></param>
+        public static void PlayOneShotMusic(AudioSource source, AudioClip clip)
+        {
+            PlayOneShotMusic(source, clip, 1.0f);
+        }
+
+        /// <summary>
+        /// Play a music track once - music volume will be affected by the global music volume
+        /// </summary>
+        /// <param name="source">Audio source</param>
+        /// <param name="clip">Clip</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        public static void PlayOneShotMusic(AudioSource source, AudioClip clip, float volumeScale)
+        {
+            EnsureCreated();
+
+            int index = musicOneShot.IndexOf(source);
+            if (index >= 0)
+            {
+                musicOneShot.RemoveAt(index);
+            }
+            source.PlayOneShot(clip, volumeScale * musicVolume);
+            musicOneShot.Add(source);
+        }
+
+        /// <summary>
+        /// Play a looping music track - music volume will be affected by the global music volume
+        /// </summary>
+        /// <param name="source">Audio source</param>
+        public static void PlayLoopingMusic(AudioSource source)
+        {
+            PlayLoopingMusic(source, 1.0f, 1.0f, false);
+        }
+
+        /// <summary>
+        /// Play a looping music track - music volume will be affected by the global music volume
+        /// </summary>
+        /// <param name="source">Audio source</param>
+        /// <param name="volumeScale">Additional volume scale</param>
+        /// <param name="fadeSeconds">Seconds to fade in and out</param>
+        /// <param name="persist">Whether to persist the looping music between scene changes</param>
+        public static void PlayLoopingMusic(AudioSource source, float volumeScale, float fadeSeconds, bool persist)
+        {
+            PlayLooping(source, music, volumeScale, fadeSeconds, persist, true);
+            UpdateMusic();
+        }
+
+        /// <summary>
+        /// Stop looping a sound for an audio source
+        /// </summary>
+        /// <param name="source">Audio source to stop looping sound for</param>
+        public static void StopLoopingSound(AudioSource source)
+        {
+            StopLooping(source, sounds);
+        }
+
+        /// <summary>
+        /// Stop looping music for an audio source
+        /// </summary>
+        /// <param name="source">Audio source to stop looping music for</param>
+        public static void StopLoopingMusic(AudioSource source)
+        {
+            StopLooping(source, music);
+        }
+
+        /// <summary>
+        /// Stop all looping sounds, music, and music one shots. Non-looping sounds are not stopped.
+        /// </summary>
+        public static void StopAll()
+        {
+            StopAllLoopingSounds();
+            StopAllNonLoopingSounds();
+            StopAllLoopingMusics();
+        }
+
+        /// <summary>
+        /// Stop all looping sounds. Non-looping sounds are not stopped.
+        /// </summary>
+        public static void StopAllLoopingSounds()
+        {
+            foreach (LoopingAudioSource s in sounds)
+            {
+                s.Stop();
+            }
+        }
+
+        /// <summary>
+        /// Stop all musics. 
+        /// </summary>
+        public static void StopAllLoopingMusics()
+        {
+            foreach (LoopingAudioSource s in music)
+            {
+                s.Stop();
+            }
+        }
+
+        /// <summary>
+        /// Stop all non-looping sounds. Looping sounds and looping music are not stopped.
+        /// </summary>
+        public static void StopAllNonLoopingSounds()
+        {
+            foreach (AudioSource s in musicOneShot)
+            {
+                s.Stop();
+            }
+        }
+
+        /// <summary>
+        /// Pause all sounds
+        /// </summary>
+        public static void PauseAll()
+        {
+            foreach (LoopingAudioSource s in sounds)
+            {
+                s.Pause();
+            }
+            foreach (LoopingAudioSource s in music)
+            {
+                s.Pause();
+            }
+        }
+
+        /// <summary>
+        /// Unpause and resume all sounds
+        /// </summary>
+        public static void ResumeAll()
+        {
+            foreach (LoopingAudioSource s in sounds)
+            {
+                s.Resume();
+            }
+            foreach (LoopingAudioSource s in music)
+            {
+                s.Resume();
+            }
+        }
+
+        /// <summary>
+        /// Global music volume multiplier
+        /// </summary>
+        public static float MusicVolume
+        {
+            get { return musicVolume; }
+            set
+            {
+                if (value != musicVolume)
+                {
+                    musicVolume = value;
+                    UpdateMusic();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Global sound volume multiplier
+        /// </summary>
+        public static float SoundVolume
+        {
+            get { return soundVolume; }
+            set
+            {
+                if (value != soundVolume)
+                {
+                    soundVolume = value;
+                    UpdateSounds();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Whether to pause sounds when the application is paused and resume them when the application is activated.
+        /// Player option "Run In Background" must be selected to enable this. Default is true.
+        /// </summary>
+        public static bool PauseSoundsOnApplicationPause
+        {
+            get { return pauseSoundsOnApplicationPause; }
+            set { pauseSoundsOnApplicationPause = value; }
+        }
     }
 }

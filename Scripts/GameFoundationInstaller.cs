@@ -1,8 +1,8 @@
 ﻿namespace GameFoundation.Scripts
 {
     using BlueprintFlow.BlueprintControlFlow;
-    using DarkTonic.MasterAudio;
     using GameFoundation.Scripts.AssetLibrary;
+    using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
     using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
@@ -18,7 +18,7 @@
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
     {
-        public override void InstallBindings()
+        public override  void InstallBindings()
         {
             SignalBusInstaller.Install(this.Container);
 
@@ -27,9 +27,6 @@
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
-            //CreateMasterAudio
-            this.Container.Bind<PlaylistController>().FromComponentInNewPrefabResource("GameFoundationPlaylistController").AsCached().NonLazy();
-            this.Container.Bind<MasterAudio>().FromComponentInNewPrefabResource("GameFoundationAudio").AsCached().NonLazy();
             this.Container.BindInterfacesTo<AudioManager>().AsCached().NonLazy();
 
             //Localization services
@@ -48,12 +45,19 @@
 
             //Helper
             this.Container.Bind<LoadImageHelper>().AsCached();
-
             //Installer
             BlueprintServicesInstaller.Install(this.Container);
             ScreenFlowInstaller.Install(this.Container);
             ApplicationServiceInstaller.Install(this.Container);
             GameQueueActionInstaller.Install(this.Container);
+            this.BindSoundSetting();
+        }
+        
+        private async void BindSoundSetting()
+        {
+            var localDataServices = this.Container.Resolve<IHandleUserDataServices>();
+            var soundData         = await localDataServices.Load<SoundSetting>();
+            this.Container.Bind<SoundSetting>().FromInstance(soundData).AsCached().NonLazy();
         }
     }
 }
