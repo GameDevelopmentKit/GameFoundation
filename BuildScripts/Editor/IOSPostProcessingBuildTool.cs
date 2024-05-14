@@ -84,7 +84,7 @@ namespace BuildScripts.Editor
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 3");
             SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 4");
-            // SetCapability(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
+            SetCapability(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 5");
 
             await File.WriteAllTextAsync(projectPath, pbxProject.WriteToString());
@@ -200,16 +200,13 @@ namespace BuildScripts.Editor
         private static void SetCapability(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
         {
             Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 1");
-            foreach (var targetGuid in new List<string> { mainTargetGuid, testTargetGuid, frameworkTargetGuid, projectGuid })
-            {
-                pbxProject.AddCapability(targetGuid, PBXCapabilityType.PushNotifications);
+            pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.PushNotifications);
 #if THEONE_IAP
-                pbxProject.AddCapability(targetGuid, PBXCapabilityType.InAppPurchase);
+            pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.InAppPurchase);
 #endif
 #if THEONE_SIGN_IN
-                pbxProject.AddCapability(targetGuid, PBXCapabilityType.SignInWithApple);
+            pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.SignInWithApple);
 #endif
-            }
 
             Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 2");
         }
