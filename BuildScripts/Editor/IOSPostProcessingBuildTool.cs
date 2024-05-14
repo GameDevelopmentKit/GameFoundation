@@ -47,9 +47,10 @@ namespace BuildScripts.Editor
 
             try
             {
+                await UniTask.Delay(5000);
                 SetPlistConfig(pathToBuiltProject);
                 SetProjectConfig(pathToBuiltProject);
-                await SetPodConfig(pathToBuiltProject);
+                SetPodConfig(pathToBuiltProject);
                 
                 Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
             }
@@ -82,9 +83,8 @@ namespace BuildScripts.Editor
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
         }
 
-        private static async UniTask SetPodConfig(string pathToBuiltProject)
+        private static void SetPodConfig(string pathToBuiltProject)
         {
-            await UniTask.Delay(5000);
             var podfilePath = Path.Combine(pathToBuiltProject, "Podfile");
 
             if (File.Exists(podfilePath))
