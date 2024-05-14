@@ -1,6 +1,7 @@
 ﻿namespace GameFoundation.Scripts
 {
     using BlueprintFlow.BlueprintControlFlow;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
@@ -14,11 +15,14 @@
     using GameFoundation.Scripts.Utilities.UserData;
     using global::Models;
     using I2.Loc;
+    using UnityEngine;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
     {
-        public override  void InstallBindings()
+        private GameObject objectPoolContainer;
+
+        public override void InstallBindings()
         {
             SignalBusInstaller.Install(this.Container);
 
@@ -51,8 +55,16 @@
             ApplicationServiceInstaller.Install(this.Container);
             GameQueueActionInstaller.Install(this.Container);
             this.BindSoundSetting();
+            this.CreateObjectPool(AudioManager.AudioSourceKey, 3).Forget();
         }
-        
+
+        private async UniTask CreateObjectPool(string prefabName, int initialPoolSize = 1)
+        {
+            this.objectPoolContainer = new GameObject(nameof(this.objectPoolContainer));
+            Object.DontDestroyOnLoad(this.objectPoolContainer);
+            await this.Container.Resolve<ObjectPoolManager>().CreatePool(prefabName, initialPoolSize, this.objectPoolContainer);
+        }
+
         private async void BindSoundSetting()
         {
             var localDataServices = this.Container.Resolve<IHandleUserDataServices>();
