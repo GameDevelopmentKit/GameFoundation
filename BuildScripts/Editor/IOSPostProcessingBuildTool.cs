@@ -84,8 +84,6 @@ namespace BuildScripts.Editor
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 3");
             SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 4");
-            SetCapability(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 5");
 
             await File.WriteAllTextAsync(projectPath, pbxProject.WriteToString());
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
@@ -172,34 +170,29 @@ namespace BuildScripts.Editor
 
         private static void SetProjectConfig(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
         {
-            // disable bitcode by default, reduce app size
-            pbxProject.SetBuildProperty(mainTargetGuid, "ENABLE_BITCODE", "NO");
-            pbxProject.SetBuildProperty(testTargetGuid, "ENABLE_BITCODE", "NO");
-            pbxProject.SetBuildProperty(frameworkTargetGuid, "ENABLE_BITCODE", "NO");
-            pbxProject.SetBuildProperty(projectGuid, "ENABLE_BITCODE", "NO");
+            #region Framework
 
             pbxProject.AddFrameworkToProject(mainTargetGuid, "iAd.framework", false);       // for Appsflyer tracking search ads
             pbxProject.AddFrameworkToProject(mainTargetGuid, "AdSupport.framework", false); // Add framework for (iron source mediation)
 
+            #endregion
+
+            #region Build Properties
+
             pbxProject.AddBuildProperty(mainTargetGuid, "OTHER_LDFLAGS", "-lxml2"); // Add '-lxml2' of facebook to "Other Linker Flags"
             pbxProject.SetBuildProperty(mainTargetGuid, "ARCHS", "arm64");
 
-            // Disable Unity Framework Target
-            pbxProject.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
-            pbxProject.SetBuildProperty(testTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
-            pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
-            pbxProject.SetBuildProperty(projectGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+            foreach (var targetGuid in new[] { mainTargetGuid, testTargetGuid, frameworkTargetGuid, projectGuid })
+            {
+                pbxProject.SetBuildProperty(targetGuid, "ENABLE_BITCODE", "NO");                         // Disable bitcode by default, reduce app size
+                pbxProject.SetBuildProperty(targetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");  // Disable Unity Framework Target
+                pbxProject.SetBuildProperty(targetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget); // Fix batch mode not set
+            }
 
-            // fix batch mode not set
-            pbxProject.SetBuildProperty(mainTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
-            pbxProject.SetBuildProperty(testTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
-            pbxProject.SetBuildProperty(frameworkTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
-            pbxProject.SetBuildProperty(projectGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
-        }
+            #endregion
 
-        private static void SetCapability(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
-        {
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 1");
+            #region Capabilities
+
             pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.PushNotifications);
 #if THEONE_IAP
             pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.InAppPurchase);
@@ -208,9 +201,8 @@ namespace BuildScripts.Editor
             pbxProject.AddCapability(mainTargetGuid, PBXCapabilityType.SignInWithApple);
 #endif
 
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetCapability 2");
+            #endregion
         }
-
         #endregion
     }
 }
