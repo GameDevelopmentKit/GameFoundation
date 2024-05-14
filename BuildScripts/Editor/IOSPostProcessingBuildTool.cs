@@ -84,7 +84,7 @@ namespace BuildScripts.Editor
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 3");
             SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 4");
-            SetCapability(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
+            // SetCapability(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig 5");
 
             await File.WriteAllTextAsync(projectPath, pbxProject.WriteToString());
