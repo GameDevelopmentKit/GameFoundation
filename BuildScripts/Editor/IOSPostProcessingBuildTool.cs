@@ -10,6 +10,7 @@ namespace BuildScripts.Editor
     using UnityEditor.iOS.Xcode;
     using UnityEngine;
 
+    // OLD
     public class IOSPostProcessingBuildTool
     {
         private const string IOSMinimumTarget = "13.0";
@@ -40,29 +41,29 @@ namespace BuildScripts.Editor
 
         #endregion
 
-        [PostProcessBuild]
-        public static async void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
-        {
-            if (buildTarget != BuildTarget.iOS) return;
-
-            try
-            {
-                await UniTask.Delay(5000);
-                Debug.Log("onelog: IOSPostProcessingBuildTool 1");
-                await SetPlistConfig(pathToBuiltProject);
-                Debug.Log("onelog: IOSPostProcessingBuildTool 2");
-                await SetProjectConfig(pathToBuiltProject);
-                Debug.Log("onelog: IOSPostProcessingBuildTool 3");
-                await SetPodConfig(pathToBuiltProject);
-
-                Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                throw;
-            }
-        }
+        // [PostProcessBuild]
+        // public static async void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
+        // {
+        //     if (buildTarget != BuildTarget.iOS) return;
+        //
+        //     try
+        //     {
+        //         await UniTask.Delay(5000);
+        //         Debug.Log("onelog: IOSPostProcessingBuildTool 1");
+        //         await SetPlistConfig(pathToBuiltProject);
+        //         Debug.Log("onelog: IOSPostProcessingBuildTool 2");
+        //         await SetProjectConfig(pathToBuiltProject);
+        //         Debug.Log("onelog: IOSPostProcessingBuildTool 3");
+        //         await SetPodConfig(pathToBuiltProject);
+        //
+        //         Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Debug.LogException(e);
+        //         throw;
+        //     }
+        // }
 
         #region Main
 
