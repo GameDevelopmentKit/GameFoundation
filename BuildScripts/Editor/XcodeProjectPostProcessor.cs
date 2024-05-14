@@ -40,68 +40,68 @@ namespace BuildScripts.Editor
             "275upjj5gd.skadnetwork", "klf5c3l5u5.skadnetwork", "uw77j35x4d.skadnetwork", "mtkv5xtk9e.skadnetwork", "mp6xlyr22a.skadnetwork"
         };
 
-        [PostProcessBuild(int.MaxValue)]
-        public static void OnPostProcessBuild(BuildTarget buildTarget, string path)
-        {
-            Debug.Log("onelog: Process Info.plist");
-            var plistPath = Path.Combine(path, "Info.plist");
-            var plist     = new PlistDocument();
-            plist.ReadFromFile(plistPath);
-#if APPSFLYER
-            plist.root.SetString("NSAdvertisingAttributionReportEndpoint", "https://appsflyer-skadnetwork.com");
-#elif ADJUST
-		plist.root.SetString("NSAdvertisingAttributionReportEndpoint", "https://adjust-skadnetwork.com");
-#endif
-            plist.root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
-
-            Debug.Log("Setup SKAdNetwork items");
-            PlistElementArray networkItems = null;
-
-            networkItems = plist.root["SKAdNetworkItems"] == null ? plist.root.CreateArray("SKAdNetworkItems") : plist.root["SKAdNetworkItems"].AsArray();
-
-            var existSkAdNetworks = new HashSet<string>();
-            foreach (var plistElement in networkItems.values)
-            {
-                var networkItem = plistElement.AsDict();
-                var skAdNetwork = networkItem["SKAdNetworkIdentifier"].AsString();
-                if (existSkAdNetworks.Add(skAdNetwork))
-                {
-                    Debug.Log("Exist sk ad network: " + skAdNetwork);
-                }
-            }
-
-            foreach (var identifier in ADNetworkIdentifiers)
-            {
-                if (!existSkAdNetworks.Add(identifier)) continue;
-                var networkItemDict = networkItems.AddDict();
-                Debug.Log("Add sk ad network: " + identifier);
-                networkItemDict.SetString("SKAdNetworkIdentifier", identifier);
-            }
-
-            plist.root.SetString("NSUserTrackingUsageDescription", "This identifier will be used to personalized your advertising experience.");
-
-            File.WriteAllText(plistPath, plist.WriteToString());
-
-            Debug.Log("onelog:Process xcode project");
-            var projPath = PBXProject.GetPBXProjectPath(path);
-            var project  = new PBXProject();
-            project.ReadFromFile(projPath);
-            var mainTargetGuid     = project.GetUnityMainTargetGuid();
-            var unityFrameworkGuid = project.GetUnityFrameworkTargetGuid();
-            project.SetBuildProperty(mainTargetGuid, "GENERATE_INFOPLIST_FILE", "NO");
-            project.SetBuildProperty(mainTargetGuid, "ENABLE_BITCODE", "NO");
-            project.SetBuildProperty(unityFrameworkGuid, "ENABLE_BITCODE", "NO");
-            project.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "YES");
-            project.SetBuildProperty(unityFrameworkGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
-            EmbedDynamicLibrariesIfNeeded(path, project, mainTargetGuid);
-
-            project.WriteToFile(projPath);
-
-            var capacilities = new ProjectCapabilityManager(projPath, EntitlementFilename, null, mainTargetGuid);
-            capacilities.AddBackgroundModes(BackgroundModesOptions.RemoteNotifications);
-            capacilities.AddPushNotifications(false);
-            capacilities.WriteToFile();
-        }
+//         [PostProcessBuild(int.MaxValue)]
+//         public static void OnPostProcessBuild(BuildTarget buildTarget, string path)
+//         {
+//             Debug.Log("onelog: Process Info.plist");
+//             var plistPath = Path.Combine(path, "Info.plist");
+//             var plist     = new PlistDocument();
+//             plist.ReadFromFile(plistPath);
+// #if APPSFLYER
+//             plist.root.SetString("NSAdvertisingAttributionReportEndpoint", "https://appsflyer-skadnetwork.com");
+// #elif ADJUST
+// 		plist.root.SetString("NSAdvertisingAttributionReportEndpoint", "https://adjust-skadnetwork.com");
+// #endif
+//             plist.root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
+//
+//             Debug.Log("Setup SKAdNetwork items");
+//             PlistElementArray networkItems = null;
+//
+//             networkItems = plist.root["SKAdNetworkItems"] == null ? plist.root.CreateArray("SKAdNetworkItems") : plist.root["SKAdNetworkItems"].AsArray();
+//
+//             var existSkAdNetworks = new HashSet<string>();
+//             foreach (var plistElement in networkItems.values)
+//             {
+//                 var networkItem = plistElement.AsDict();
+//                 var skAdNetwork = networkItem["SKAdNetworkIdentifier"].AsString();
+//                 if (existSkAdNetworks.Add(skAdNetwork))
+//                 {
+//                     Debug.Log("Exist sk ad network: " + skAdNetwork);
+//                 }
+//             }
+//
+//             foreach (var identifier in ADNetworkIdentifiers)
+//             {
+//                 if (!existSkAdNetworks.Add(identifier)) continue;
+//                 var networkItemDict = networkItems.AddDict();
+//                 Debug.Log("Add sk ad network: " + identifier);
+//                 networkItemDict.SetString("SKAdNetworkIdentifier", identifier);
+//             }
+//
+//             plist.root.SetString("NSUserTrackingUsageDescription", "This identifier will be used to personalized your advertising experience.");
+//
+//             File.WriteAllText(plistPath, plist.WriteToString());
+//
+//             Debug.Log("onelog:Process xcode project");
+//             var projPath = PBXProject.GetPBXProjectPath(path);
+//             var project  = new PBXProject();
+//             project.ReadFromFile(projPath);
+//             var mainTargetGuid     = project.GetUnityMainTargetGuid();
+//             var unityFrameworkGuid = project.GetUnityFrameworkTargetGuid();
+//             project.SetBuildProperty(mainTargetGuid, "GENERATE_INFOPLIST_FILE", "NO");
+//             project.SetBuildProperty(mainTargetGuid, "ENABLE_BITCODE", "NO");
+//             project.SetBuildProperty(unityFrameworkGuid, "ENABLE_BITCODE", "NO");
+//             project.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "YES");
+//             project.SetBuildProperty(unityFrameworkGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+//             EmbedDynamicLibrariesIfNeeded(path, project, mainTargetGuid);
+//
+//             project.WriteToFile(projPath);
+//
+//             var capacilities = new ProjectCapabilityManager(projPath, EntitlementFilename, null, mainTargetGuid);
+//             capacilities.AddBackgroundModes(BackgroundModesOptions.RemoteNotifications);
+//             capacilities.AddPushNotifications(false);
+//             capacilities.WriteToFile();
+//         }
 
         private static void EmbedDynamicLibrariesIfNeeded(string buildPath, PBXProject project, string targetGuid)
         {
