@@ -51,7 +51,7 @@ namespace BuildScripts.Editor
                 Debug.Log("onelog:  OnPostProcessBuild Start");
                 await SetPlistConfig(pathToBuiltProject);
                 
-                var projectPath = PBXProject.GetPBXProjectPath(pathToBuiltProject);
+                var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
                 var pbxProject = new PBXProject();
                 pbxProject.ReadFromFile(projectPath);
