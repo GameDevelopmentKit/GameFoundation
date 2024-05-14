@@ -50,7 +50,7 @@ namespace BuildScripts.Editor
                 await UniTask.Delay(1000);
                 Debug.Log("onelog:  OnPostProcessBuild Start");
                 await SetPlistConfig(pathToBuiltProject);
-                
+
                 var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
                 var pbxProject = new PBXProject();
@@ -61,10 +61,10 @@ namespace BuildScripts.Editor
                 var unityFrameworkTargetGuid = pbxProject.GetUnityFrameworkTargetGuid();
                 var projectGuid              = pbxProject.ProjectGuid();
 
-                SetProjectConfig(pbxProject, pathToBuiltProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
+                SetProjectConfig(pbxProject, projectPath, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
 
                 SetCapability(projectPath, mainTargetGuid);
-                
+
                 await SetPodConfig(pathToBuiltProject);
 
                 Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
@@ -165,7 +165,7 @@ namespace BuildScripts.Editor
 
         #region Set Project Config function
 
-        private static void SetProjectConfig(PBXProject pbxProject, string pathToBuiltProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
+        private static void SetProjectConfig(PBXProject pbxProject, string projectPath, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
         {
             pbxProject.AddFrameworkToProject(mainTargetGuid, "iAd.framework", false);       // for Appsflyer tracking search ads
             pbxProject.AddFrameworkToProject(mainTargetGuid, "AdSupport.framework", false); // Add framework for (iron source mediation)
@@ -184,7 +184,7 @@ namespace BuildScripts.Editor
             }
 
             Debug.Log("onelog: OnPostProcessBuild SetProjectConfig");
-            pbxProject.WriteToFile(pathToBuiltProject);
+            File.WriteAllText(projectPath, pbxProject.WriteToString());
         }
 
         private static void SetCapability(string pbxProjectPath, string mainTargetGuid)
