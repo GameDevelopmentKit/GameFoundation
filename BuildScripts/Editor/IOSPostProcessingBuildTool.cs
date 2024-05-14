@@ -80,6 +80,7 @@ namespace BuildScripts.Editor
 
         private static async UniTask SetPodConfig(string pathToBuiltProject)
         {
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetPodConfig Start");
             var podfilePath = Path.Combine(pathToBuiltProject, "Podfile");
 
             if (File.Exists(podfilePath))
@@ -100,7 +101,7 @@ namespace BuildScripts.Editor
             }
             else
             {
-                Debug.LogError("onelog: IOSPostProcessingBuildTool Podfile not found at: " + podfilePath);
+                Debug.LogError("onelog: IOSPostProcessingBuildTool SetPodConfig Podfile not found at: " + podfilePath);
             }
         }
 
@@ -182,6 +183,7 @@ namespace BuildScripts.Editor
                 pbxProject.SetBuildProperty(targetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget); // Fix batch mode not set
             }
 
+            Debug.Log("onelog: OnPostProcessBuild SetProjectConfig");
             pbxProject.WriteToFile(pathToBuiltProject);
         }
 
@@ -196,6 +198,7 @@ namespace BuildScripts.Editor
 #endif
             projectCapabilityManager.AddBackgroundModes(BackgroundModesOptions.RemoteNotifications);
             projectCapabilityManager.AddPushNotifications(false);
+            Debug.Log("onelog:  OnPostProcessBuild SetCapability");
             projectCapabilityManager.WriteToFile();
         }
 
