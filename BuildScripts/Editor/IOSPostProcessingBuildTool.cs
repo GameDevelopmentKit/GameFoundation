@@ -1,4 +1,4 @@
-#if UNITY_IOS || UNITY_IPHONE
+#if UNITY_IOS ||UNITY_IPHONE
 namespace BuildScripts.Editor
 {
     using System;
@@ -12,8 +12,7 @@ namespace BuildScripts.Editor
 
     public class IOSPostProcessingBuildTool
     {
-        private const string IOSMinimumTarget    = "13.0";
-        private const string EntitlementFilename = "Production.entitlements";
+        private const string IOSMinimumTarget = "13.0";
 
         #region SKNetworks
 
@@ -41,47 +40,51 @@ namespace BuildScripts.Editor
 
         #endregion
 
-        [PostProcessBuild(int.MaxValue)]
+        [PostProcessBuild]
         public static async void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
         {
             if (buildTarget != BuildTarget.iOS) return;
 
             try
             {
-                Debug.Log("onelog:  OnPostProcessBuild Start");
                 SetPlistConfig(pathToBuiltProject);
-
-                var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
-
-                var pbxProject = new PBXProject();
-                pbxProject.ReadFromString(File.ReadAllText(projectPath));
-
-                var mainTargetGuid           = pbxProject.GetUnityMainTargetGuid();
-                var testTargetGuid           = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
-                var unityFrameworkTargetGuid = pbxProject.GetUnityFrameworkTargetGuid();
-                var projectGuid              = pbxProject.ProjectGuid();
-
-                SetProjectConfig(pbxProject, projectPath, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
-
-                SetCapability(projectPath, mainTargetGuid);
-
+                SetProjectConfig(pathToBuiltProject);
                 await SetPodConfig(pathToBuiltProject);
-
+                
                 Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
             }
             catch (Exception e)
             {
-                Debug.LogError($"onelog: OnPostProcessBuild Fail: {e.Message}");
+                Debug.LogException(e);
                 throw;
             }
         }
 
         #region Main
 
+        private static void SetProjectConfig(string pathToBuiltProject)
+        {
+            var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
+
+            var pbxProject = new PBXProject();
+            pbxProject.ReadFromString(File.ReadAllText(projectPath));
+
+            var mainTargetGuid           = pbxProject.GetUnityMainTargetGuid();
+            var testTargetGuid           = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
+            var unityFrameworkTargetGuid = pbxProject.GetUnityFrameworkTargetGuid();
+            var projectGuid              = pbxProject.ProjectGuid();
+            var pbxProjectPath           = PBXProject.GetPBXProjectPath(pathToBuiltProject);
+
+            SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
+            SetCapability(pbxProjectPath, mainTargetGuid);
+
+            File.WriteAllText(projectPath, pbxProject.WriteToString());
+            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
+        }
+
         private static async UniTask SetPodConfig(string pathToBuiltProject)
         {
             await UniTask.Delay(5000);
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetPodConfig Start");
             var podfilePath = Path.Combine(pathToBuiltProject, "Podfile");
 
             if (File.Exists(podfilePath))
@@ -102,7 +105,7 @@ namespace BuildScripts.Editor
             }
             else
             {
-                Debug.LogError("onelog: IOSPostProcessingBuildTool SetPodConfig Podfile not found at: " + podfilePath);
+                Debug.LogError("onelog: IOSPostProcessingBuildTool Podfile not found at: " + podfilePath);
             }
         }
 
@@ -111,44 +114,36 @@ namespace BuildScripts.Editor
             var plistPath = pathToBuiltProject + "/Info.plist";
             var plist     = new PlistDocument();
             plist.ReadFromString(File.ReadAllText(plistPath));
-
-            //TODO:
-            //plist.root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
+            var rootDict = plist.root;
 
             // Disable Firebase screen view tracking
-            plist.root.SetBoolean("FirebaseAutomaticScreenReportingEnabled", false);
-            plist.root.SetBoolean("FirebaseAppStoreReceiptURLCheckEnabled", false);
+            rootDict.SetBoolean("FirebaseAutomaticScreenReportingEnabled", false);
+            rootDict.SetBoolean("FirebaseAppStoreReceiptURLCheckEnabled", false);
 
             // add this to use google mobile ads (iron source mediation)
-            plist.root.SetBoolean("GADIsAdManagerApp", true);
+            rootDict.SetBoolean("GADIsAdManagerApp", true);
 
             // add NSUserTrackingUsageDescription for iOS 14
-            plist.root.SetString("NSUserTrackingUsageDescription", "This identifier will be used to personalized your advertising experience.");
-#if APPSFLYER
-            plist.root.SetString("NSAdvertisingAttributionReportEndpoint", "https://appsflyer-skadnetwork.com");
-#elif ADJUST
-		    plist.root.SetString("NSAdvertisingAttributionReportEndpoint", "https://adjust-skadnetwork.com");
-#else
-            plist.root.SetString("NSAdvertisingAttributionReportEndpoint", "https://postbacks-is.com");
-#endif
+            rootDict.SetString("NSUserTrackingUsageDescription", "This identifier will be used to personalized your advertising experience.");
+            rootDict.SetString("NSAdvertisingAttributionReportEndpoint", "https://postbacks-is.com");
 
             // add IOS 14 Network Support
-            var array = plist.root.CreateArray("SKAdNetworkItems");
+            var array = rootDict.CreateArray("SKAdNetworkItems");
 
             foreach (var skNetwork in SkNetworks)
             {
                 var item = array.AddDict();
-                item.SetString("SKAdNetworkIdentifier", $"{skNetwork}.skadnetwork");
+                item.SetString("SKAdNetworkIdentifier", $"{skNetwork}.skadnetwork"); //ironSource
             }
 
-            // bypass Provide Export Compliance in App Store Connect
-            plist.root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
+            // bypass Provide Export Compliance in Appstore Connect
+            rootDict.SetBoolean("ITSAppUsesNonExemptEncryption", false);
 
             // allow insecure http IOS
 #if ALLOW_INSECURE_HTTP_LOAD
             try
             {
-                PlistElementDict dictNSAppTransportSecurity = (PlistElementDict)plist.root["NSAppTransportSecurity"];
+                PlistElementDict dictNSAppTransportSecurity = (PlistElementDict)rootDict["NSAppTransportSecurity"];
                 PlistElementDict dictNSExceptionDomains = dictNSAppTransportSecurity.CreateDict("NSExceptionDomains");
                 PlistElementDict dictDomain = dictNSExceptionDomains.CreateDict("ip-api.com");
                 dictDomain.SetBoolean("NSExceptionAllowsInsecureHTTPLoads", true);
@@ -158,7 +153,7 @@ namespace BuildScripts.Editor
                 Debug.Log("Add allow insecure http IOS has exception. " + e);
             }
 #endif
-
+            // Write to file
             File.WriteAllText(plistPath, plist.WriteToString());
             Debug.Log($"onelog: IOSPostProcessingBuildTool End SetPlistConfig");
         }
@@ -167,30 +162,36 @@ namespace BuildScripts.Editor
 
         #region Set Project Config function
 
-        private static void SetProjectConfig(PBXProject pbxProject, string projectPath, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
+        private static void SetProjectConfig(PBXProject pbxProject, string mainTargetGuid, string testTargetGuid, string frameworkTargetGuid, string projectGuid)
         {
+            // disable bitcode by default, reduce app size
+            pbxProject.SetBuildProperty(mainTargetGuid, "ENABLE_BITCODE", "NO");
+            pbxProject.SetBuildProperty(testTargetGuid, "ENABLE_BITCODE", "NO");
+            pbxProject.SetBuildProperty(frameworkTargetGuid, "ENABLE_BITCODE", "NO");
+            pbxProject.SetBuildProperty(projectGuid, "ENABLE_BITCODE", "NO");
+
             pbxProject.AddFrameworkToProject(mainTargetGuid, "iAd.framework", false);       // for Appsflyer tracking search ads
             pbxProject.AddFrameworkToProject(mainTargetGuid, "AdSupport.framework", false); // Add framework for (iron source mediation)
 
             pbxProject.AddBuildProperty(mainTargetGuid, "OTHER_LDFLAGS", "-lxml2"); // Add '-lxml2' of facebook to "Other Linker Flags"
             pbxProject.SetBuildProperty(mainTargetGuid, "ARCHS", "arm64");
-            //TODO:
-            //pbxProject.SetBuildProperty(mainTargetGuid, "GENERATE_INFOPLIST_FILE", "NO");
 
-            foreach (var targetGuid in new[] { mainTargetGuid, testTargetGuid, frameworkTargetGuid, projectGuid })
-            {
-                pbxProject.SetBuildProperty(targetGuid, "ENABLE_BITCODE", "NO");                         // Disable bitcode by default, reduce app size
-                pbxProject.SetBuildProperty(targetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget); // Fix batch mode not set
-                pbxProject.SetBuildProperty(targetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");  // Disable Unity Framework Target
-            }
+            // Disable Unity Framework Target
+            pbxProject.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+            pbxProject.SetBuildProperty(testTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+            pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+            pbxProject.SetBuildProperty(projectGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
 
-            Debug.Log("onelog: OnPostProcessBuild SetProjectConfig");
-            File.WriteAllText(projectPath, pbxProject.WriteToString());
+            // fix batch mode not set
+            pbxProject.SetBuildProperty(mainTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
+            pbxProject.SetBuildProperty(testTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
+            pbxProject.SetBuildProperty(frameworkTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
+            pbxProject.SetBuildProperty(projectGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
         }
 
         private static void SetCapability(string pbxProjectPath, string mainTargetGuid)
         {
-            var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, EntitlementFilename, null, mainTargetGuid);
+            var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, "Production.entitlements", null, mainTargetGuid);
 #if THEONE_SIGN_IN
             projectCapabilityManager.AddSignInWithApple();
 #endif
