@@ -1,4 +1,4 @@
-#if UNITY_IOS
+#if UNITY_IOS || UNITY_IPHONE
 namespace BuildScripts.Editor
 {
     using System;
@@ -10,7 +10,6 @@ namespace BuildScripts.Editor
     using UnityEditor.iOS.Xcode;
     using UnityEngine;
 
-    // OLD
     public class IOSPostProcessingBuildTool
     {
         private const string IOSMinimumTarget    = "13.0";
@@ -45,16 +44,17 @@ namespace BuildScripts.Editor
         [PostProcessBuild(int.MaxValue)]
         public static async void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
         {
+            if (buildTarget != BuildTarget.iOS) return;
+
             try
             {
-                await UniTask.Delay(1000);
                 Debug.Log("onelog:  OnPostProcessBuild Start");
-                await SetPlistConfig(pathToBuiltProject);
+                SetPlistConfig(pathToBuiltProject);
 
                 var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
                 var pbxProject = new PBXProject();
-                pbxProject.ReadFromFile(projectPath);
+                pbxProject.ReadFromString(File.ReadAllText(projectPath));
 
                 var mainTargetGuid           = pbxProject.GetUnityMainTargetGuid();
                 var testTargetGuid           = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
@@ -80,12 +80,13 @@ namespace BuildScripts.Editor
 
         private static async UniTask SetPodConfig(string pathToBuiltProject)
         {
+            await UniTask.Delay(5000);
             Debug.Log("onelog: IOSPostProcessingBuildTool SetPodConfig Start");
             var podfilePath = Path.Combine(pathToBuiltProject, "Podfile");
 
             if (File.Exists(podfilePath))
             {
-                var lines = await File.ReadAllLinesAsync(podfilePath);
+                var lines = File.ReadAllLines(podfilePath);
 
                 for (var i = 0; i < lines.Length; i++)
                 {
@@ -96,7 +97,7 @@ namespace BuildScripts.Editor
                     }
                 }
 
-                await File.WriteAllLinesAsync(podfilePath, lines);
+                File.WriteAllLines(podfilePath, lines);
                 Debug.Log("onelog: IOSPostProcessingBuildTool SetPodConfig Success");
             }
             else
@@ -105,13 +106,14 @@ namespace BuildScripts.Editor
             }
         }
 
-        private static async UniTask SetPlistConfig(string pathToBuiltProject)
+        private static void SetPlistConfig(string pathToBuiltProject)
         {
-            var plistPath = Path.Combine(pathToBuiltProject, "Info.plist");
+            var plistPath = pathToBuiltProject + "/Info.plist";
             var plist     = new PlistDocument();
-            plist.ReadFromFile(plistPath);
+            plist.ReadFromString(File.ReadAllText(plistPath));
 
-            plist.root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
+            //TODO:
+            //plist.root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
 
             // Disable Firebase screen view tracking
             plist.root.SetBoolean("FirebaseAutomaticScreenReportingEnabled", false);
@@ -157,7 +159,7 @@ namespace BuildScripts.Editor
             }
 #endif
 
-            await File.WriteAllTextAsync(plistPath, plist.WriteToString());
+            File.WriteAllText(plistPath, plist.WriteToString());
             Debug.Log($"onelog: IOSPostProcessingBuildTool End SetPlistConfig");
         }
 
@@ -172,15 +174,14 @@ namespace BuildScripts.Editor
 
             pbxProject.AddBuildProperty(mainTargetGuid, "OTHER_LDFLAGS", "-lxml2"); // Add '-lxml2' of facebook to "Other Linker Flags"
             pbxProject.SetBuildProperty(mainTargetGuid, "ARCHS", "arm64");
-            pbxProject.SetBuildProperty(mainTargetGuid, "GENERATE_INFOPLIST_FILE", "NO");
-
-            pbxProject.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "YES");
-            pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+            //TODO:
+            //pbxProject.SetBuildProperty(mainTargetGuid, "GENERATE_INFOPLIST_FILE", "NO");
 
             foreach (var targetGuid in new[] { mainTargetGuid, testTargetGuid, frameworkTargetGuid, projectGuid })
             {
                 pbxProject.SetBuildProperty(targetGuid, "ENABLE_BITCODE", "NO");                         // Disable bitcode by default, reduce app size
                 pbxProject.SetBuildProperty(targetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget); // Fix batch mode not set
+                pbxProject.SetBuildProperty(targetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");  // Disable Unity Framework Target
             }
 
             Debug.Log("onelog: OnPostProcessBuild SetProjectConfig");
@@ -198,8 +199,8 @@ namespace BuildScripts.Editor
 #endif
             projectCapabilityManager.AddBackgroundModes(BackgroundModesOptions.RemoteNotifications);
             projectCapabilityManager.AddPushNotifications(false);
-            Debug.Log("onelog:  OnPostProcessBuild SetCapability");
             projectCapabilityManager.WriteToFile();
+            Debug.Log("onelog:  OnPostProcessBuild SetCapability");
         }
 
         #endregion
