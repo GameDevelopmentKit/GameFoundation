@@ -5,10 +5,8 @@
     using Cysharp.Threading.Tasks;
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
-    using GameFoundation.Scripts.Utilities.UserData;
     using UniRx;
     using UnityEngine;
     using Zenject;
@@ -32,7 +30,6 @@
         public static AudioService Instance { get; private set; }
 
         private readonly SignalBus         signalBus;
-        private readonly SoundSetting      soundSetting;
         private readonly IGameAssets       gameAssets;
         private readonly ObjectPoolManager objectPoolManager;
         private readonly ILogService       logService;
@@ -41,28 +38,20 @@
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
-        public AudioService(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets,
+        public AudioService(SignalBus signalBus, IGameAssets gameAssets,
             ObjectPoolManager objectPoolManager, ILogService logService)
         {
             this.signalBus         = signalBus;
-            this.soundSetting      = SoundSetting;
             this.gameAssets        = gameAssets;
             this.objectPoolManager = objectPoolManager;
             this.logService        = logService;
             Instance               = this;
         }
 
-        public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
-
-        private void SubscribeMasterAudio()
+        public void Initialize()
         {
-            this.compositeDisposable = new CompositeDisposable
-            {
-                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-            };
-            SoundManager.MusicVolume = this.soundSetting.MusicValue.Value;
-            SoundManager.SoundVolume = this.soundSetting.SoundValue.Value;
+            this.SetSoundValue(1);
+            this.SetMusicValue(1);
         }
 
         private async UniTask<AudioSource> GetAudioSource()
