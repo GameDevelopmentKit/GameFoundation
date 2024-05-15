@@ -71,7 +71,7 @@ namespace BuildScripts.Editor
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Debug.LogError($"onelog: OnPostProcessBuild Fail: {e.Message}");
                 throw;
             }
         }
