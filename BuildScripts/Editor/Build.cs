@@ -321,7 +321,6 @@ public static class Build
                 PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
 #if UNITY_2022_1_OR_NEWER
                 PlayerSettings.WebGL.initialMemorySize = 64;
-                UserBuildSettings.codeOptimization = WasmCodeOptimization.DiskSize;
                 PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
                 PlayerSettings.WebGL.showDiagnostics = false;
 #if FB_INSTANT
