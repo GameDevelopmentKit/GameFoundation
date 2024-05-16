@@ -40,16 +40,15 @@ namespace BuildScripts.Editor
 
         #endregion
 
-        [PostProcessBuild]
+        [PostProcessBuild(int.MaxValue)]
         public static async void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
         {
             if (buildTarget != BuildTarget.iOS) return;
 
             try
             {
-                await UniTask.Delay(5000);
-                await SetPlistConfig(pathToBuiltProject);
-                await SetProjectConfig(pathToBuiltProject);
+                SetPlistConfig(pathToBuiltProject);
+                SetProjectConfig(pathToBuiltProject);
                 await SetPodConfig(pathToBuiltProject);
 
                 Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
@@ -63,12 +62,12 @@ namespace BuildScripts.Editor
 
         #region Main
 
-        private static async UniTask SetProjectConfig(string pathToBuiltProject)
+        private static void SetProjectConfig(string pathToBuiltProject)
         {
             var projectPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
             var pbxProject = new PBXProject();
-            pbxProject.ReadFromString(await File.ReadAllTextAsync(projectPath));
+            pbxProject.ReadFromString(File.ReadAllText(projectPath));
 
             var mainTargetGuid           = pbxProject.GetUnityMainTargetGuid();
             var testTargetGuid           = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
@@ -77,19 +76,20 @@ namespace BuildScripts.Editor
             var pbxProjectPath           = PBXProject.GetPBXProjectPath(pathToBuiltProject);
 
             SetProjectConfig(pbxProject, mainTargetGuid, testTargetGuid, unityFrameworkTargetGuid, projectGuid);
-            await SetCapability(pbxProjectPath, mainTargetGuid);
+            SetCapability(pbxProjectPath, mainTargetGuid);
 
-            await File.WriteAllTextAsync(projectPath, pbxProject.WriteToString());
+            File.WriteAllText(projectPath, pbxProject.WriteToString());
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
         }
 
         private static async UniTask SetPodConfig(string pathToBuiltProject)
         {
+            await UniTask.Delay(5000);
             var podfilePath = Path.Combine(pathToBuiltProject, "Podfile");
 
             if (File.Exists(podfilePath))
             {
-                var lines = await File.ReadAllLinesAsync(podfilePath);
+                var lines = File.ReadAllLines(podfilePath);
 
                 for (var i = 0; i < lines.Length; i++)
                 {
@@ -100,7 +100,7 @@ namespace BuildScripts.Editor
                     }
                 }
 
-                await File.WriteAllLinesAsync(podfilePath, lines);
+                File.WriteAllLines(podfilePath, lines);
                 Debug.Log("onelog: IOSPostProcessingBuildTool SetPodConfig Success");
             }
             else
@@ -109,11 +109,11 @@ namespace BuildScripts.Editor
             }
         }
 
-        private static async UniTask SetPlistConfig(string pathToBuiltProject)
+        private static void SetPlistConfig(string pathToBuiltProject)
         {
             var plistPath = pathToBuiltProject + "/Info.plist";
             var plist     = new PlistDocument();
-            plist.ReadFromString(await File.ReadAllTextAsync(plistPath));
+            plist.ReadFromString(File.ReadAllText(plistPath));
             var rootDict = plist.root;
 
             // Disable Firebase screen view tracking
@@ -154,7 +154,7 @@ namespace BuildScripts.Editor
             }
 #endif
             // Write to file
-            await File.WriteAllTextAsync(plistPath, plist.WriteToString());
+            File.WriteAllText(plistPath, plist.WriteToString());
             Debug.Log($"onelog: IOSPostProcessingBuildTool End SetPlistConfig");
         }
 
@@ -189,18 +189,19 @@ namespace BuildScripts.Editor
             pbxProject.SetBuildProperty(projectGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
         }
 
-        private static async UniTask SetCapability(string pbxProjectPath, string mainTargetGuid)
+        private static void SetCapability(string pbxProjectPath, string mainTargetGuid)
         {
-            var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, "Entitlements.entitlements", null, mainTargetGuid);
+            var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, "Production.entitlements", null, mainTargetGuid);
 #if THEONE_SIGN_IN
             projectCapabilityManager.AddSignInWithApple();
 #endif
 #if THEONE_IAP
             projectCapabilityManager.AddInAppPurchase();
 #endif
-            projectCapabilityManager.AddPushNotifications(true);
+            projectCapabilityManager.AddBackgroundModes(BackgroundModesOptions.RemoteNotifications);
+            projectCapabilityManager.AddPushNotifications(false);
             projectCapabilityManager.WriteToFile();
-            await UniTask.Delay(100);
+            Debug.Log("onelog:  OnPostProcessBuild SetCapability");
         }
 
         #endregion
