@@ -313,21 +313,8 @@ public static class Build
 #if UNITY_WEBGL
             case BuildTarget.WebGL:
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
-                PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled; // Disable compression for FBInstant game
-                PlayerSettings.WebGL.decompressionFallback = false; // Disable compression for FBInstant game
-                PlayerSettings.runInBackground = false;
-                PlayerSettings.WebGL.powerPreference = WebGLPowerPreference.Default;
-                PlayerSettings.WebGL.dataCaching = true;
-                PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
+                PlayerSettings.runInBackground = true;
 #if UNITY_2022_1_OR_NEWER
-                PlayerSettings.WebGL.initialMemorySize = 64;
-                PlayerSettings.SetIl2CppCodeGeneration(NamedBuildTarget.WebGL, Il2CppCodeGeneration.OptimizeSize);
-                PlayerSettings.WebGL.showDiagnostics = false;
-#if FB_INSTANT
-                PlayerSettings.WebGL.showDiagnostics = false;
-#else
-                PlayerSettings.WebGL.showDiagnostics = true;
-#endif // FB_INSTANT
 
 #endif // UNITY_2022_1_OR_NEWER
                 break;
