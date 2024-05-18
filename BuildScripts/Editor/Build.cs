@@ -337,33 +337,11 @@ public static class Build
         }
     }
 
-    [MenuItem("TheOne/Set All Groups to LZMA")]
-    public static void SetAllGroupsToLZMA()
-    {
-        // Access the addressable asset settings
-        var settings = AddressableAssetSettingsDefaultObject.Settings;
-
-        // Iterate over all groups
-        foreach (var group in settings.groups)
-        {
-            // Set the compression type to LZMA for each group
-            var schema = group.GetSchema<BundledAssetGroupSchema>();
-            if (schema != null)
-            {
-                schema.Compression = BundledAssetGroupSchema.BundleCompressionMode.LZMA;
-                schema.UseUnityWebRequestForLocalBundles = false;
-            }
-        }
-    }
-
     /// <summary>
     /// Clean Addressable before build and init FMOD
     /// </summary>
     public static void BuildAddressable()
     {
-#if !THEONE_NO_LZMA
-        SetAllGroupsToLZMA();
-#endif
         Console.WriteLine($"--------------------");
         Console.WriteLine($"Clean addressable");
         Console.WriteLine($"--------------------");
