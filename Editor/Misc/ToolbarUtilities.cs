@@ -1,4 +1,4 @@
-﻿namespace Editor.Misc
+﻿namespace GDK.Editor.Misc
 {
     using System;
     using System.Collections.Generic;
