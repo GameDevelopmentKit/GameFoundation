@@ -8,24 +8,16 @@ namespace LeTai.Asset.TranslucentImage.Editor
 [CanEditMultipleObjects]
 public class TranslucentImageSourceEditor : UnityEditor.Editor
 {
-#region constants
-    readonly GUIContent downsampleLabel = new GUIContent("Downsample",
-                                                         "Reduce the size of the screen before processing. Increase will improve performance but create more artifact");
-
-    readonly GUIContent regionLabel = new GUIContent("Blur Region",
-                                                     "Choose which part of the screen to blur. Blur smaller region is faster");
-
-    readonly GUIContent updateRateLabel = new GUIContent("Max Update Rate",
-                                                         "How many time to blur per second. Reduce to increase performance and save battery for slow moving background");
-
-    readonly GUIContent previewLabel = new GUIContent("Preview",
-                                                      "Preview the effect over the entire screen");
-#endregion
-
-
     UnityEditor.Editor configEditor;
 
-    public ScalableBlurConfigEditor ConfigEditor
+    EditorProperty blurConfig;
+    EditorProperty downsample;
+    EditorProperty blurRegion;
+    EditorProperty maxUpdateRate;
+    EditorProperty backgroundFill;
+    EditorProperty preview;
+
+    ScalableBlurConfigEditor ConfigEditor
     {
         get
         {
@@ -40,57 +32,52 @@ public class TranslucentImageSourceEditor : UnityEditor.Editor
         }
     }
 
+    void OnEnable()
+    {
+        blurConfig     = new EditorProperty(serializedObject, nameof(TranslucentImageSource.BlurConfig));
+        downsample     = new EditorProperty(serializedObject, nameof(TranslucentImageSource.Downsample));
+        blurRegion     = new EditorProperty(serializedObject, nameof(TranslucentImageSource.BlurRegion));
+        maxUpdateRate  = new EditorProperty(serializedObject, nameof(TranslucentImageSource.MaxUpdateRate));
+        backgroundFill = new EditorProperty(serializedObject, nameof(TranslucentImageSource.BackgroundFill));
+        preview        = new EditorProperty(serializedObject, nameof(TranslucentImageSource.Preview));
+    }
+
     public override void OnInspectorGUI()
     {
-        Undo.RecordObject(target, "Change Translucent Image Source property");
-        PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+        EditorGUILayout.Space();
+        blurConfig.Draw();
 
-        var tiSource = (TranslucentImageSource)target;
-
-        using (var v = new EditorGUILayout.VerticalScope())
+        var curConfig = (ScalableBlurConfig)blurConfig.serializedProperty.objectReferenceValue;
+        if (!curConfig)
         {
-            EditorGUILayout.Space();
-            GUI.Box(v.rect, GUIContent.none);
-            tiSource.BlurConfig = (BlurConfig)EditorGUILayout.ObjectField("Config file",
-                                                                          tiSource.BlurConfig,
-                                                                          typeof(BlurConfig),
-                                                                          false);
-
-            if (tiSource.BlurConfig == null)
+            EditorGUILayout.HelpBox("Missing Blur Config", MessageType.Warning);
+            if (GUILayout.Button("New Blur Config File"))
             {
-                EditorGUILayout.HelpBox("Missing Blur Config", MessageType.Warning);
-                if (GUILayout.Button("New Blur Config File"))
-                {
-                    ScalableBlurConfig config = CreateInstance<ScalableBlurConfig>();
+                ScalableBlurConfig newConfig = CreateInstance<ScalableBlurConfig>();
 
-                    var path = AssetDatabase.GenerateUniqueAssetPath(
-                        $"Assets/{SceneManager.GetActiveScene().name} {tiSource.gameObject.name} Blur Config.asset");
-                    AssetDatabase.CreateAsset(config, path);
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-                    EditorGUIUtility.PingObject(config);
-                    tiSource.BlurConfig = config;
-                }
+                var path = AssetDatabase.GenerateUniqueAssetPath(
+                    $"Assets/{SceneManager.GetActiveScene().name} {serializedObject.targetObject.name} Blur Config.asset");
+                AssetDatabase.CreateAsset(newConfig, path);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                EditorGUIUtility.PingObject(newConfig);
+                blurConfig.serializedProperty.objectReferenceValue = newConfig;
             }
-            else
-            {
-                // EditorGUILayout.LabelField("Blur settings", EditorStyles.centeredGreyMiniLabel);
-                ConfigEditor.Draw((ScalableBlurConfig)tiSource.BlurConfig);
-            }
+        }
+        else
+        {
+            ConfigEditor.Draw();
         }
 
         EditorGUILayout.Space();
 
-        // Common properties
-        tiSource.Downsample    = EditorGUILayout.IntSlider(downsampleLabel, tiSource.Downsample, 0, 3);
-        tiSource.BlurRegion    = EditorGUILayout.RectField(regionLabel, tiSource.BlurRegion);
-        tiSource.maxUpdateRate = EditorGUILayout.FloatField(updateRateLabel, tiSource.maxUpdateRate);
-        tiSource.preview       = EditorGUILayout.Toggle(previewLabel, tiSource.preview);
+        downsample.Draw();
+        blurRegion.Draw();
+        maxUpdateRate.Draw();
+        backgroundFill.Draw();
+        preview.Draw();
 
-        if (GUI.changed)
-        {
-            EditorUtility.SetDirty(target);
-        }
+        if (GUI.changed) serializedObject.ApplyModifiedProperties();
     }
 }
 }

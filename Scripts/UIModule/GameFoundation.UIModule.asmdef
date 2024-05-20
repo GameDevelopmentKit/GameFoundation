@@ -3,7 +3,6 @@
     "rootNamespace": "",
     "references": [
         "Unity.RenderPipelines.Universal.Runtime",
-        "LeTai.TranslucentImage.Scripts",
         "UniTask",
         "GameFoundation.AssetLibrary",
         "GameFoundation.Utilities",
@@ -15,7 +14,8 @@
         "UniTask.Addressables",
         "Zenject-Source",
         "Zenject-Signals",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "LeTai.TranslucentImage"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

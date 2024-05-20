@@ -18,7 +18,7 @@ public partial class TranslucentImage
         brightness = material.GetFloat(_brightnessPropId);
         flatten    = material.GetFloat(_flattenPropId);
 
-        source = source ? source : FindObjectOfType<TranslucentImageSource>();
+        source = source ? source : Shims.FindObjectOfType<TranslucentImageSource>();
     }
 
     static Material FindDefaultMaterial()

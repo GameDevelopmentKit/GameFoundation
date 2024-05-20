@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 namespace LeTai.Asset.TranslucentImage
@@ -15,16 +17,16 @@ public partial class TranslucentImage : Image, IMeshModifier
     public TranslucentImageSource source;
 
     /// <summary>
-    /// (De)Saturate them image, 1 is normal, 0 is grey scale, below zero make the image negative
+    /// (De)Saturate the image, 1 is normal, 0 is grey scale, below zero make the image negative
     /// </summary>
-    [Tooltip("(De)Saturate them image, 1 is normal, 0 is black and white, below zero make the image negative")]
+    [Tooltip("(De)Saturate the image, 1 is normal, 0 is black and white, below zero make the image negative")]
     [Range(-1, 3)]
     public float vibrancy = 1;
 
     /// <summary>
-    /// Brighten/darken them image
+    /// Brighten/darken the image
     /// </summary>
-    [Tooltip("Brighten/darken them image")] [Range(-1, 1)]
+    [Tooltip("Brighten/darken the image")] [Range(-1, 1)]
     public float brightness = 0;
 
     /// <summary>
@@ -41,10 +43,13 @@ public partial class TranslucentImage : Image, IMeshModifier
 
     Material materialForRenderingCached;
     bool     shouldRun;
+    bool     isBirp;
 
     protected override void Start()
     {
         base.Start();
+
+        isBirp = !GraphicsSettings.currentRenderPipeline;
 
         oldVibrancy   = vibrancy;
         oldBrightness = brightness;
@@ -73,14 +78,16 @@ public partial class TranslucentImage : Image, IMeshModifier
 
     bool IsInPrefabMode()
     {
-#if UNITY_EDITOR
-        var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
-        if (stage != null)
-        {
-            return true;
-        }
-#endif
+#if !UNITY_EDITOR
         return false;
+#else // UNITY_EDITOR
+#if UNITY_2021_2_OR_NEWER
+        var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+#else
+        var stage = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+#endif
+        return stage != null;
+#endif // !UNITY_EDITOR
     }
 
     bool sourceAcquiredOnStart = false;
@@ -90,7 +97,7 @@ public partial class TranslucentImage : Image, IMeshModifier
         if (IsInPrefabMode()) return;
         if (sourceAcquiredOnStart) return;
 
-        source                = source ? source : FindObjectOfType<TranslucentImageSource>();
+        source                = source ? source : Shims.FindObjectOfType<TranslucentImageSource>();
         sourceAcquiredOnStart = true;
     }
 
@@ -128,7 +135,17 @@ public partial class TranslucentImage : Image, IMeshModifier
         }
 
         materialForRenderingCached.SetTexture(_blurTexPropId, source.BlurredScreen);
-        materialForRenderingCached.SetVector(_cropRegionPropId, source.BlurRegionNormalizedScreenSpace.ToMinMaxVector());
+
+        if (isBirp || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+        {
+            materialForRenderingCached.SetVector(_cropRegionPropId, source.BlurRegionNormalizedScreenSpace.ToMinMaxVector());
+        }
+        else
+        {
+            materialForRenderingCached.SetVector(_cropRegionPropId, source.BlurRegion.ToMinMaxVector());
+        }
+
+        source.Request();
     }
 
     void Update()

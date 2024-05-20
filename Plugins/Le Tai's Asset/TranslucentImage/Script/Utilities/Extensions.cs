@@ -33,11 +33,35 @@ public static class Extensions
         }
     }
 
-    public static void BlitFullscreenTriangle(this CommandBuffer     cmd,
-                                              RenderTargetIdentifier source,
-                                              RenderTargetIdentifier destination,
-                                              Material               material,
-                                              int                    pass)
+    public static void BlitCustom(
+        this CommandBuffer     cmd,
+        RenderTargetIdentifier source,
+        RenderTargetIdentifier destination,
+        Material               material,
+        int                    passIndex,
+        bool                   useBuiltin = false
+    )
+    {
+        if (useBuiltin)
+            cmd.Blit(source, destination, material, passIndex);
+        else if (
+            SystemInfo.graphicsShaderLevel >= 30
+#if !UNITY_2023_1_OR_NEWER
+         && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2
+#endif
+        )
+            cmd.BlitProcedural(source, destination, material, passIndex);
+        else
+            cmd.BlitFullscreenTriangle(source, destination, material, passIndex);
+    }
+
+    public static void BlitFullscreenTriangle(
+        this CommandBuffer     cmd,
+        RenderTargetIdentifier source,
+        RenderTargetIdentifier destination,
+        Material               material,
+        int                    pass
+    )
     {
         cmd.SetGlobalTexture("_MainTex", source);
 
@@ -48,6 +72,23 @@ public static class Extensions
 #endif
 
         cmd.DrawMesh(FullscreenTriangle, Matrix4x4.identity, material, 0, pass);
+    }
+
+    public static void BlitProcedural(
+        this CommandBuffer     cmd,
+        RenderTargetIdentifier source,
+        RenderTargetIdentifier destination,
+        Material               material,
+        int                    passIndex
+    )
+    {
+        cmd.SetGlobalTexture(ShaderId.MAIN_TEX, source);
+        cmd.SetRenderTarget(new RenderTargetIdentifier(destination, 0, CubemapFace.Unknown, -1),
+                            RenderBufferLoadAction.DontCare,
+                            RenderBufferStoreAction.Store,
+                            RenderBufferLoadAction.DontCare,
+                            RenderBufferStoreAction.DontCare);
+        cmd.DrawProcedural(Matrix4x4.identity, material, passIndex, MeshTopology.Quads, 4, 1, null);
     }
 
     /// For normalized screen size

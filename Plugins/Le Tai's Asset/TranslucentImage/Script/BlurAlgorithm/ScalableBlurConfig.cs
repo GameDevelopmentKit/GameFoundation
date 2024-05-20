@@ -7,10 +7,16 @@ namespace LeTai.Asset.TranslucentImage
                  order = 100)]
 public class ScalableBlurConfig : BlurConfig
 {
-    [SerializeField] float radius    = 4;
-    [SerializeField] int   iteration = 4;
-    [SerializeField] int   maxDepth  = 6;
-    [SerializeField] float strength;
+    [SerializeField]
+    [Tooltip("Blurriness. Does NOT affect performance")]
+    float radius = 4;
+    [SerializeField]
+    [Tooltip("The number of times to run the algorithm to increase the smoothness of the effect. Can affect performance when increase")]
+    [Range(0, 8)]
+    int iteration = 4;
+    [SerializeField]
+    [Tooltip("How strong the blur is")]
+    float strength;
 
     /// <summary>
     /// Distance between the base texel and the texel to be sampled.
@@ -34,18 +40,6 @@ public class ScalableBlurConfig : BlurConfig
     }
 
     /// <summary>
-    /// Clamp the minimum size of the intermediate texture. Reduce flickering and blur
-    /// </summary>
-    /// <value>
-    /// Must larger than 0
-    /// </value>
-    public int MaxDepth
-    {
-        get { return maxDepth; }
-        set { maxDepth = Mathf.Max(1, value); }
-    }
-
-    /// <summary>
     /// User friendly property to control the amount of blur
     /// </summary>
     ///<value>
@@ -56,29 +50,15 @@ public class ScalableBlurConfig : BlurConfig
         get { return strength = Radius * Mathf.Pow(2, Iteration); }
         set
         {
-            strength = Mathf.Max(0, value);
-            SetAdvancedFieldFromSimple();
-        }
-    }
+            strength = Mathf.Clamp(value, 0, (1 << 14) * (1 << 14));
 
-    /// <summary>
-    /// Calculate size and iteration from strength
-    /// </summary>
-    protected virtual void SetAdvancedFieldFromSimple()
-    {
-        var iterationPower = Mathf.Pow(2, Iteration);
-        Radius = strength / iterationPower;
-
-        while (Radius < 1 && Iteration > 0)
-        {
-            Iteration--;
-            Radius *= 2;
-        }
-
-        while (Radius > iterationPower)
-        {
-            Radius /= 2;
-            Iteration++;
+            // Bit fiddling would be faster, but need unsafe or .NET Core 3.0+
+            // for BitOperations, and BitConverter that doesn't creates garbages :(
+            radius    = Mathf.Sqrt(strength);
+            iteration = 0;
+            while ((1 << iteration) < radius)
+                iteration++;
+            radius = strength / (1 << iteration);
         }
     }
 }

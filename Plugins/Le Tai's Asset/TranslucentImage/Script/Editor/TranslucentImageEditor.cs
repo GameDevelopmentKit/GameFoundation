@@ -64,7 +64,7 @@ public class TranslucentImageEditor : ImageEditor
         EditorGUILayout.PropertyField(source);
         if (source.objectReferenceValue == null)
         {
-            var existingSources = FindObjectsOfType<TranslucentImageSource>();
+            var existingSources = Shims.FindObjectsOfType<TranslucentImageSource>();
             if (existingSources.Length > 0)
             {
                 using (new EditorGUI.IndentLevelScope())
@@ -133,9 +133,9 @@ public class TranslucentImageEditor : ImageEditor
             return;
         }
 
-        var diffSource = FindObjectsOfType<TranslucentImage>()
-                        .Where(ti => ti.source != self.source)
-                        .ToList();
+        var diffSource = Shims.FindObjectsOfType<TranslucentImage>()
+                              .Where(ti => ti.source != self.source)
+                              .ToList();
 
         if (!diffSource.Any())
         {

@@ -72,7 +72,7 @@
             {
                 half4 vertex : SV_POSITION;
                 half4 color : COLOR;
-                half2 texcoord : TEXCOORD0;
+                float2 texcoord : TEXCOORD0;
                 half4 worldPosition : TEXCOORD1;
                 float4 blurTexcoord : TEXCOORD2;
                 half2 extraData : TEXCOORD3;
@@ -81,7 +81,7 @@
 
             fixed4 _TextureSampleAdd;
             half4 _ClipRect;
-            half4 _CropRegion; //xMin, yMin, xMax, yMax
+            float4 _CropRegion; //xMin, yMin, xMax, yMax
 
 
             v2f vert(appdata IN)

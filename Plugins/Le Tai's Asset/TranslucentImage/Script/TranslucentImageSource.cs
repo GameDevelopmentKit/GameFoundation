@@ -19,61 +19,51 @@ namespace LeTai.Asset.TranslucentImage
 [HelpURL("https://leloctai.com/asset/translucentimage/docs/articles/customize.html#translucent-image-source")]
 public partial class TranslucentImageSource : MonoBehaviour
 {
-#region Public field
-    /// <summary>
-    /// Maximum number of times to update the blurred image each second
-    /// </summary>
-    public float maxUpdateRate = float.PositiveInfinity;
-
-    /// <summary>
-    /// Render the blurred result to the render target
-    /// </summary>
-    public bool preview;
-#endregion
-
-
 #region Private Field
-    private IBlurAlgorithm blurAlgorithm;
-
     [SerializeField]
-    private BlurAlgorithmType blurAlgorithmSelection = BlurAlgorithmType.ScalableBlur;
+    BlurConfig blurConfig;
 
-    [SerializeField]
-    private BlurConfig blurConfig;
-
-    [SerializeField]
+    [SerializeField] [Range(0, 3)]
+    [Tooltip("Reduce the size of the screen before processing. Increase will improve performance but create more artifact")]
     int downsample;
 
-    int lastDownsample;
-
     [SerializeField]
+    [Tooltip("Choose which part of the screen to blur. Smaller region is faster")]
     Rect blurRegion = new Rect(0, 0, 1, 1);
 
-    Rect lastBlurRegion = new Rect(0, 0, 1, 1);
+    [SerializeField]
+    [Tooltip("How many time to blur per second. Reduce to increase performance and save battery for slow moving background")]
+    float maxUpdateRate = float.PositiveInfinity;
 
-    //Disable non-sense warning from Unity
+    [SerializeField]
+    [Tooltip("Preview the effect fullscreen. Not recommended for runtime use")]
+    bool preview;
+
+    [SerializeField]
+    [Tooltip("Fill the background where the frame buffer alpha is 0. Useful for VR Underlay and Passthrough, where these areas would otherwise be black")]
+    BackgroundFill backgroundFill = new BackgroundFill();
+
+    int        lastDownsample;
+    Rect       lastBlurRegion   = new Rect(0, 0, 1, 1);
+    Vector2Int lastCamPixelSize = Vector2Int.zero;
+    float      lastUpdate;
+
+    IBlurAlgorithm blurAlgorithm;
+
 #pragma warning disable 0108
     Camera camera;
 #pragma warning restore 0108
-
     Material      previewMaterial;
     RenderTexture blurredScreen;
+    CommandBuffer cmd;
+    bool          isRequested;
+#pragma warning disable CS0169
+    bool isForOverlayCanvas;
+#pragma warning restore CS0169
 #endregion
 
 
 #region Properties
-    public BlurAlgorithmType BlurAlgorithmSelection
-    {
-        get { return blurAlgorithmSelection; }
-        set
-        {
-            if (value == blurAlgorithmSelection)
-                return;
-            blurAlgorithmSelection = value;
-            InitializeBlurAlgorithm();
-        }
-    }
-
     public BlurConfig BlurConfig
     {
         get { return blurConfig; }
@@ -85,24 +75,7 @@ public partial class TranslucentImageSource : MonoBehaviour
     }
 
     /// <summary>
-    /// Result of the image effect. Translucent Image use this as their content (read-only)
-    /// </summary>
-    public RenderTexture BlurredScreen
-    {
-        get { return blurredScreen; }
-        set { blurredScreen = value; }
-    }
-
-    /// <summary>
-    /// The Camera attached to the same GameObject. Cached in field 'camera'
-    /// </summary>
-    internal Camera Cam
-    {
-        get { return camera ? camera : camera = GetComponent<Camera>(); }
-    }
-
-    /// <summary>
-    /// The rendered image will be shrinked by a factor of 2^{{this}} before bluring to reduce processing time
+    /// The rendered image will be shrinked by a factor of 2^{{Downsample}} before bluring to reduce processing time
     /// </summary>
     /// <value>
     /// Must be non-negative. Default to 0
@@ -132,21 +105,79 @@ public partial class TranslucentImageSource : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Maximum number of times to update the blurred image each second
+    /// </summary>
+    public float MaxUpdateRate
+    {
+        get => maxUpdateRate;
+        set => maxUpdateRate = value;
+    }
+
+    /// <summary>
+    /// Fill the background where the frame buffer alpha is 0. Useful for VR Underlay and Passthrough, where these areas would otherwise be black
+    /// </summary>
+    public BackgroundFill BackgroundFill
+    {
+        get => backgroundFill;
+        set => backgroundFill = value;
+    }
+
+    /// <summary>
+    /// Render the blurred result to the render target
+    /// </summary>
+    public bool Preview
+    {
+        get => preview;
+        set => preview = value;
+    }
+
+    /// <summary>
+    /// Result of the image effect. Translucent Image use this as their content (read-only)
+    /// </summary>
+    public RenderTexture BlurredScreen
+    {
+        get { return blurredScreen; }
+        set { blurredScreen = value; }
+    }
+
+    /// <summary>
+    /// Set in SRP to provide Cam.rect for overlay cameras
+    /// </summary>
+    public Rect CamRectOverride { get; set; } = Rect.zero;
+
+    /// <summary>
+    /// Blur Region rect is relative to Cam.rect . This is relative to the full screen
+    /// </summary>
     public Rect BlurRegionNormalizedScreenSpace
     {
         get
         {
-            var camRect = Cam.rect;
+            var camRect = CamRectOverride.width == 0 ? Cam.rect : CamRectOverride;
+            camRect.min = Vector2.Max(Vector2.zero, camRect.min);
+            camRect.max = Vector2.Min(Vector2.one, camRect.max);
+
             return new Rect(camRect.position + BlurRegion.position * camRect.size,
                             camRect.size * BlurRegion.size);
         }
 
         set
         {
-            var camRect = Cam.rect;
-            blurRegion.position = (value.position - camRect.position) / camRect.size;
-            blurRegion.size     = value.size / camRect.size;
+            var camRect = CamRectOverride.width == 0 ? Cam.rect : CamRectOverride;
+            camRect.min = Vector2.Max(Vector2.zero, camRect.min);
+            camRect.max = Vector2.Min(Vector2.one, camRect.max);
+
+            BlurRegion = new Rect((value.position - camRect.position) / camRect.size,
+                                  value.size / camRect.size);
         }
+    }
+
+    /// <summary>
+    /// The Camera attached to the same GameObject. Cached in field 'camera'
+    /// </summary>
+    internal Camera Cam
+    {
+        get { return camera ? camera : camera = GetComponent<Camera>(); }
     }
 
     /// <summary>
@@ -155,7 +186,7 @@ public partial class TranslucentImageSource : MonoBehaviour
     /// </summary>
     float MinUpdateCycle
     {
-        get { return (maxUpdateRate > 0) ? (1f / maxUpdateRate) : float.PositiveInfinity; }
+        get { return (MaxUpdateRate > 0) ? (1f / MaxUpdateRate) : float.PositiveInfinity; }
     }
 #endregion
 
@@ -172,7 +203,7 @@ public partial class TranslucentImageSource : MonoBehaviour
 
     protected virtual void OnGUI()
     {
-        if (!preview) return;
+        if (!Preview) return;
         if (UnityEditor.Selection.activeGameObject != gameObject) return;
 
         var curBlurRegionNSS = BlurRegionNormalizedScreenSpace;
@@ -194,33 +225,31 @@ public partial class TranslucentImageSource : MonoBehaviour
         previewMaterial = new Material(Shader.Find("Hidden/FillCrop"));
 
         InitializeBlurAlgorithm();
-        CreateNewBlurredScreen();
+        CreateNewBlurredScreen(Vector2Int.RoundToInt(Cam.pixelRect.size));
 
         lastDownsample = Downsample;
     }
 
     void OnDestroy()
     {
-        // RT are not released automatically
         if (BlurredScreen)
             BlurredScreen.Release();
     }
 
     void InitializeBlurAlgorithm()
     {
-        switch (BlurAlgorithmSelection)
+        switch (blurConfig)
         {
-        case BlurAlgorithmType.ScalableBlur:
+        case ScalableBlurConfig _:
             blurAlgorithm = new ScalableBlur();
             break;
         default:
-            throw new ArgumentOutOfRangeException(nameof(BlurAlgorithmSelection));
+            blurAlgorithm = new ScalableBlur();
+            break;
         }
-
-        blurAlgorithm.Init(BlurConfig);
     }
 
-    protected virtual void CreateNewBlurredScreen()
+    protected virtual void CreateNewBlurredScreen(Vector2Int camPixelSize)
     {
         if (BlurredScreen)
             BlurredScreen.Release();
@@ -228,16 +257,16 @@ public partial class TranslucentImageSource : MonoBehaviour
 #if ENABLE_VR
         if (XRSettings.enabled)
         {
-            BlurredScreen = new RenderTexture(XRSettings.eyeTextureDesc);
-            BlurredScreen.width = Mathf.RoundToInt(BlurredScreen.width * BlurRegion.width) >> Downsample;
+            BlurredScreen        = new RenderTexture(XRSettings.eyeTextureDesc);
+            BlurredScreen.width  = Mathf.RoundToInt(BlurredScreen.width * BlurRegion.width) >> Downsample;
             BlurredScreen.height = Mathf.RoundToInt(BlurredScreen.height * BlurRegion.height) >> Downsample;
-            BlurredScreen.depth = 0;
+            BlurredScreen.depth  = 0;
         }
         else
 #endif
         {
-            BlurredScreen = new RenderTexture(Mathf.RoundToInt(Cam.pixelWidth * BlurRegion.width) >> Downsample,
-                                              Mathf.RoundToInt(Cam.pixelHeight * BlurRegion.height) >> Downsample, 0);
+            BlurredScreen = new RenderTexture(Mathf.RoundToInt(camPixelSize.x * BlurRegion.width) >> Downsample,
+                                              Mathf.RoundToInt(camPixelSize.y * BlurRegion.height) >> Downsample, 0);
         }
 
         BlurredScreen.antiAliasing = 1;
@@ -251,61 +280,90 @@ public partial class TranslucentImageSource : MonoBehaviour
 
     TextureDimension lastEyeTexDim;
 
-    public void OnBeforeBlur()
+    public void OnBeforeBlur(Vector2Int camPixelSize)
     {
         if (
             BlurredScreen == null
          || !BlurredScreen.IsCreated()
          || Downsample != lastDownsample
          || !BlurRegion.Approximately(lastBlurRegion)
+         || camPixelSize != lastCamPixelSize
 #if ENABLE_VR
          || XRSettings.deviceEyeTextureDimension != lastEyeTexDim
 #endif
         )
         {
-            CreateNewBlurredScreen();
-            lastDownsample = Downsample;
-            lastBlurRegion = BlurRegion;
+            CreateNewBlurredScreen(camPixelSize);
+            lastDownsample   = Downsample;
+            lastBlurRegion   = BlurRegion;
+            lastCamPixelSize = camPixelSize;
 #if ENABLE_VR
             lastEyeTexDim = XRSettings.deviceEyeTextureDimension;
 #endif
         }
+
+        lastUpdate = GetTrueCurrentTime();
     }
 
-    protected virtual void OnRenderImage(RenderTexture source, RenderTexture destination)
+
+    private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if (blurAlgorithm == null || BlurConfig == null)
-            goto draw_unmodified;
-
-        if (shouldUpdateBlur())
+        if (cmd == null)
         {
-            OnBeforeBlur();
-            blurAlgorithm.Blur(source, BlurRegion, ref blurredScreen);
+            cmd      = new CommandBuffer();
+            cmd.name = "Translucent Image Source";
         }
 
-        if (preview)
+        if (blurAlgorithm != null && BlurConfig != null)
         {
-            previewMaterial.SetVector(ShaderId.CROP_REGION, BlurRegion.ToMinMaxVector());
-            Graphics.Blit(BlurredScreen, destination, previewMaterial);
-            return;
+            if (ShouldUpdateBlur())
+            {
+                cmd.Clear();
+
+                OnBeforeBlur(Vector2Int.RoundToInt(Cam.pixelRect.size));
+                blurAlgorithm.Init(BlurConfig, true);
+                var blurExecData = new BlurExecutor.BlurExecutionData(source,
+                                                                      this,
+                                                                      blurAlgorithm);
+                BlurExecutor.ExecuteBlurWithTempTextures(cmd, ref blurExecData);
+
+                Graphics.ExecuteCommandBuffer(cmd);
+            }
+
+            if (Preview)
+            {
+                previewMaterial.SetVector(ShaderId.CROP_REGION, BlurRegion.ToMinMaxVector());
+                Graphics.Blit(BlurredScreen, destination, previewMaterial);
+            }
+            else
+            {
+                Graphics.Blit(source, destination);
+            }
+        }
+        else
+        {
+            Graphics.Blit(source, destination);
         }
 
-        draw_unmodified:
-        Graphics.Blit(source, destination);
+
+        isRequested = false;
     }
 
-    float lastUpdate;
+    public void Request()
+    {
+        isRequested = true;
+    }
 
-    public bool shouldUpdateBlur()
+    public bool ShouldUpdateBlur()
     {
         if (!enabled)
             return false;
 
+        if (!Preview && !isRequested)
+            return false;
+
         float now    = GetTrueCurrentTime();
         bool  should = now - lastUpdate >= MinUpdateCycle;
-
-        if (should)
-            lastUpdate = GetTrueCurrentTime();
 
         return should;
     }
@@ -315,7 +373,7 @@ public partial class TranslucentImageSource : MonoBehaviour
 #if UNITY_EDITOR
         return (float)UnityEditor.EditorApplication.timeSinceStartup;
 #else
-            return Time.unscaledTime;
+        return Time.unscaledTime;
 #endif
     }
 }

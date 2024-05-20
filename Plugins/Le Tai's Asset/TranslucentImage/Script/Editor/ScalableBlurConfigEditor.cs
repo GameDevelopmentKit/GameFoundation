@@ -8,24 +8,13 @@ namespace LeTai.Asset.TranslucentImage.Editor
 [CanEditMultipleObjects]
 public class ScalableBlurConfigEditor : UnityEditor.Editor
 {
-    readonly GUIContent radiusLabel = new GUIContent(
-        "Radius",
-        "Blurriness. Does NOT affect performance"
-    );
-
-    readonly GUIContent iterationLabel = new GUIContent(
-        "Iteration",
-        "The number of times to run the algorithm to increase the smoothness of the effect. Can affect performance when increase"
-    );
-
-    readonly GUIContent depthLabel = new GUIContent(
-        "Max Depth",
-        "Decrease will reduce flickering, blurriness and performance"
-    );
-
     readonly AnimBool useAdvancedControl = new AnimBool(false);
 
     int tab, previousTab;
+
+    EditorProperty radius;
+    EditorProperty iteration;
+    EditorProperty strength;
 
     public void Awake()
     {
@@ -35,39 +24,30 @@ public class ScalableBlurConfigEditor : UnityEditor.Editor
 
     public void OnEnable()
     {
+        radius    = new EditorProperty(serializedObject, nameof(ScalableBlurConfig.Radius));
+        iteration = new EditorProperty(serializedObject, nameof(ScalableBlurConfig.Iteration));
+        strength  = new EditorProperty(serializedObject, nameof(ScalableBlurConfig.Strength));
+
         // Without this editor will not Repaint automatically when animating
         useAdvancedControl.valueChanged.AddListener(Repaint);
     }
 
     public override void OnInspectorGUI()
     {
-        ScalableBlurConfig config = (ScalableBlurConfig) target;
-
-        Draw(config);
+        Draw();
     }
 
-    public void Draw(ScalableBlurConfig config)
+    public void Draw()
     {
-        Undo.RecordObject(target, "Modify Blur Config");
-
-        using (var v = new EditorGUILayout.VerticalScope())
+        using (new EditorGUILayout.VerticalScope())
         {
-            EditorGUILayout.Space();
             DrawTabBar();
-            EditorGUILayout.Space();
 
             using (var changes = new EditorGUI.ChangeCheckScope())
             {
-                DrawTabsContent(config);
-                EditorGUILayout.Space();
-
-                config.MaxDepth = EditorGUILayout.IntField(depthLabel, config.MaxDepth);
-                EditorGUILayout.Space();
-
-                if (changes.changed)
-                {
-                    EditorUtility.SetDirty(target);
-                }
+                serializedObject.Update();
+                DrawTabsContent();
+                if (changes.changed) serializedObject.ApplyModifiedProperties();
             }
         }
     }
@@ -80,7 +60,7 @@ public class ScalableBlurConfigEditor : UnityEditor.Editor
 
             tab = GUILayout.Toolbar(
                 tab,
-                new[] {"Simple", "Advanced"},
+                new[] { "Simple", "Advanced" },
                 GUILayout.MinWidth(0),
                 GUILayout.MaxWidth(EditorGUIUtility.pixelsPerPoint * 192)
             );
@@ -98,23 +78,21 @@ public class ScalableBlurConfigEditor : UnityEditor.Editor
         useAdvancedControl.target = tab == 1;
     }
 
-    void DrawTabsContent(ScalableBlurConfig config)
+    void DrawTabsContent()
     {
-        //Simple tab
         if (EditorGUILayout.BeginFadeGroup(1 - useAdvancedControl.faded))
         {
-            config.Strength = Mathf.Max(0, EditorGUILayout.FloatField("Strength", config.Strength));
+            // EditorProperty dooesn't invoke getter. Not needed anywhere else.
+            _ = ((ScalableBlurConfig)target).Strength;
+            strength.Draw();
         }
-
         EditorGUILayout.EndFadeGroup();
 
-        //Advanced tab
         if (EditorGUILayout.BeginFadeGroup(useAdvancedControl.faded))
         {
-            config.Radius    = EditorGUILayout.FloatField(radiusLabel, config.Radius);
-            config.Iteration = EditorGUILayout.IntSlider(iterationLabel, config.Iteration, 0, 6);
+            radius.Draw();
+            iteration.Draw();
         }
-
         EditorGUILayout.EndFadeGroup();
     }
 
