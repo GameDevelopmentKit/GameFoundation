@@ -124,7 +124,7 @@ public static class Build
         var keyStoreAliasName     = "theonestudio";
         var keyStorePassword      = "tothemoon";
         var keyStoreAliasPassword = "tothemoon";
-        var iosTargetOSVersion    = "12.0";
+        var iosTargetOSVersion    = "13.0";
         var iosSigningTeamId      = "";
         
         PlayerSettings.Android.minSdkVersion    = AndroidSdkVersions.AndroidApiLevel23;
@@ -209,7 +209,7 @@ public static class Build
             buildAppBundle, packageName);
     }
 
-    public static void SetupIos(string teamId, string targetOSVersion)
+    private static void SetupIos(string teamId, string targetOSVersion)
     {
         PlayerSettings.iOS.appleDeveloperTeamID  = teamId;
         PlayerSettings.iOS.targetOSVersionString = targetOSVersion;
@@ -432,18 +432,6 @@ public static class Build
 
             file.WriteLine();
         }
-
-        // output structured editor build log for later analysis
-        // var jsonFilePath = $"../Build/Logs/Build-Client.{platform}.json";
-        // using (var file = new StreamWriter(jsonFilePath))
-        // {
-        //     var serializer = new JsonSerializer();
-
-        //     using (JsonWriter writer = new JsonTextWriter(file))
-        //     {
-        //         serializer.Serialize(writer, report);
-        //     }
-        // }
     }
 
     private static void WriteStep(StreamWriter file, BuildStep step)
@@ -475,7 +463,11 @@ public static class Build
     {
         // Bundle version will be use for some third party like Backtrace, DeltaDNA,...
         PlayerSettings.bundleVersion             = GameVersion.Version;
+#if UNITY_ANDROID
         PlayerSettings.Android.bundleVersionCode = GameVersion.BuildNumber;
+#elif UNITY_IOS
+        PlayerSettings.iOS.buildNumber           = GameVersion.BuildNumber.ToString();
+#endif
     }
 
     public static void SetScriptingDefineSymbolInternal(BuildTargetGroup buildTargetGroup,
