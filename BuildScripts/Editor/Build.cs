@@ -312,6 +312,11 @@ public static class Build
                 break;
 #if UNITY_WEBGL
             case BuildTarget.WebGL:
+#if DEVELOPMENT_BUILD
+                PlayerSettings.WebGL.showDiagnostics = true;
+#else
+                PlayerSettings.WebGL.showDiagnostics = false;
+#endif
                 PlayerSettings.SetManagedStrippingLevel(platform.BuildTargetGroup, ManagedStrippingLevel.High);
                 PlayerSettings.runInBackground = true;
 #if UNITY_2022_1_OR_NEWER
