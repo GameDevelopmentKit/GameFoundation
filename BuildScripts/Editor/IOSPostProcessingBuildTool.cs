@@ -125,7 +125,14 @@ namespace BuildScripts.Editor
 
             // add NSUserTrackingUsageDescription for iOS 14
             rootDict.SetString("NSUserTrackingUsageDescription", "This identifier will be used to personalized your advertising experience.");
+
+#if APPSFLYER
+		    rootDict.SetString("NSAdvertisingAttributionReportEndpoint", "https://appsflyer-skadnetwork.com");
+#elif ADJUST
+		    rootDict.SetString("NSAdvertisingAttributionReportEndpoint", "https://adjust-skadnetwork.com");
+#elif IRONSOURCE
             rootDict.SetString("NSAdvertisingAttributionReportEndpoint", "https://postbacks-is.com");
+#endif
 
             // add IOS 14 Network Support
             var array = rootDict.CreateArray("SKAdNetworkItems");
