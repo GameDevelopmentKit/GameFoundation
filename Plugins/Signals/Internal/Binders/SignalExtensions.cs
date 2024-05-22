@@ -6,7 +6,9 @@ namespace Zenject
     {
         public static void DeclareSignal<TSignal>(this DiContainer container)
         {
-            container.BindMessageBroker<TSignal>(SignalBusInstaller.Options);
+            //Currently we only support project context signals
+            ProjectContext.Instance.Container.BindMessageBroker<TSignal>(SignalBusInstaller.Options);
+            //container.BindMessageBroker<TSignal>(SignalBusInstaller.Options);
         }
     }
 }
