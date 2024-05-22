@@ -1,10 +1,9 @@
-#if UNITY_IOS ||UNITY_IPHONE
+#if UNITY_IOS
 namespace BuildScripts.Editor
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using Cysharp.Threading.Tasks;
     using UnityEditor;
     using UnityEditor.Callbacks;
     using UnityEditor.iOS.Xcode;
@@ -12,8 +11,6 @@ namespace BuildScripts.Editor
 
     public class IOSPostProcessingBuildTool
     {
-        private const string IOSMinimumTarget = "13.0";
-
         #region SKNetworks
 
         private static readonly List<string> SkNetworks = new()
@@ -41,15 +38,12 @@ namespace BuildScripts.Editor
         #endregion
 
         [PostProcessBuild(int.MaxValue)]
-        public static async void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
+        public static void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
         {
-            if (buildTarget != BuildTarget.iOS) return;
-
             try
             {
                 SetPlistConfig(pathToBuiltProject);
                 SetProjectConfig(pathToBuiltProject);
-                await SetPodConfig(pathToBuiltProject);
 
                 Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
             }
@@ -80,33 +74,6 @@ namespace BuildScripts.Editor
 
             File.WriteAllText(projectPath, pbxProject.WriteToString());
             Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
-        }
-
-        private static async UniTask SetPodConfig(string pathToBuiltProject)
-        {
-            await UniTask.Delay(5000);
-            var podfilePath = Path.Combine(pathToBuiltProject, "Podfile");
-
-            if (File.Exists(podfilePath))
-            {
-                var lines = File.ReadAllLines(podfilePath);
-
-                for (var i = 0; i < lines.Length; i++)
-                {
-                    if (lines[i].Contains("platform :ios,"))
-                    {
-                        lines[i] = $"platform :ios, '{IOSMinimumTarget}'";
-                        break;
-                    }
-                }
-
-                File.WriteAllLines(podfilePath, lines);
-                Debug.Log("onelog: IOSPostProcessingBuildTool SetPodConfig Success");
-            }
-            else
-            {
-                Debug.LogError("onelog: IOSPostProcessingBuildTool Podfile not found at: " + podfilePath);
-            }
         }
 
         private static void SetPlistConfig(string pathToBuiltProject)
@@ -188,12 +155,6 @@ namespace BuildScripts.Editor
             pbxProject.SetBuildProperty(testTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
             pbxProject.SetBuildProperty(frameworkTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
             pbxProject.SetBuildProperty(projectGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
-
-            // fix batch mode not set
-            pbxProject.SetBuildProperty(mainTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
-            pbxProject.SetBuildProperty(testTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
-            pbxProject.SetBuildProperty(frameworkTargetGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
-            pbxProject.SetBuildProperty(projectGuid, "IPHONEOS_DEPLOYMENT_TARGET", IOSMinimumTarget);
         }
 
         private static void SetCapability(string pbxProjectPath, string mainTargetGuid)
