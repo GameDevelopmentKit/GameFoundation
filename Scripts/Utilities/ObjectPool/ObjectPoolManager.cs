@@ -250,7 +250,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             }
             else
             {
-                throw new Exception($"Can't recycle object {obj.Path()}, maybe you already recycled it!");
+                Debug.LogWarning($"Can't recycle object {obj.Path()}, maybe you already recycled it!");
             }
         }
 
