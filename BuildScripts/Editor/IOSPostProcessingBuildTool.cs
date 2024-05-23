@@ -4,6 +4,7 @@ namespace BuildScripts.Editor
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using GameFoundation.BuildScripts.Runtime;
     using UnityEditor;
     using UnityEditor.Callbacks;
     using UnityEditor.iOS.Xcode;
@@ -112,6 +113,9 @@ namespace BuildScripts.Editor
 
             // bypass Provide Export Compliance in Appstore Connect
             rootDict.SetBoolean("ITSAppUsesNonExemptEncryption", false);
+            
+            // set build version
+            rootDict.SetString("CFBundleVersion",GameVersion.BuildNumber.ToString());
 
             // allow insecure http IOS
 #if ALLOW_INSECURE_HTTP_LOAD
