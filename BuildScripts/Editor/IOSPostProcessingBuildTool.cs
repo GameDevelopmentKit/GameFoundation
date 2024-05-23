@@ -37,22 +37,22 @@ namespace BuildScripts.Editor
 
         #endregion
 
-        [PostProcessBuild(int.MaxValue)]
-        public static void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
-        {
-            try
-            {
-                SetPlistConfig(pathToBuiltProject);
-                SetProjectConfig(pathToBuiltProject);
-
-                Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                throw;
-            }
-        }
+        // [PostProcessBuild(int.MaxValue)]
+        // public static void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
+        // {
+        //     try
+        //     {
+        //         SetPlistConfig(pathToBuiltProject);
+        //         SetProjectConfig(pathToBuiltProject);
+        //
+        //         Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Debug.LogException(e);
+        //         throw;
+        //     }
+        // }
 
         #region Main
 
