@@ -13,7 +13,7 @@ namespace BlueprintFlow.APIHandler
     {
         [Inject] private ILogService     logService;
         
-#if !GDK_NETWORK_ENABLE
+// #if !GDK_NETWORK_ENABLE
         public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
         {
             try
@@ -31,13 +31,13 @@ namespace BlueprintFlow.APIHandler
             }
         }
         
-#else
-        [Inject] private Network.WebService.IHttpService httpService;
-        public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
-        {
-            return this.httpService.Download(blueprintDownloadUrl, filePath, onDownloadProgress.Invoke);
-        }
+// #else
+        // [Inject] private Network.WebService.IHttpService httpService;
+        // public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
+        // {
+        //     return this.httpService.Download(blueprintDownloadUrl, filePath, onDownloadProgress.Invoke);
+        // }
         
-#endif
+// #endif
     }
 }

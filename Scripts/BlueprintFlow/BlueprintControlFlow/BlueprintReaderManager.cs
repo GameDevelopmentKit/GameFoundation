@@ -138,7 +138,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             return result;
         }
 
-        private UniTask ReadAllBlueprint(Dictionary<string, string> listRawBlueprints)
+        protected UniTask ReadAllBlueprint(Dictionary<string, string> listRawBlueprints)
         {
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {

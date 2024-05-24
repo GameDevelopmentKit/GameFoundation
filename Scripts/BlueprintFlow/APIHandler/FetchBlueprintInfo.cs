@@ -1,36 +1,36 @@
 namespace BlueprintFlow.APIHandler
 {
-#if GDK_NETWORK_ENABLE
-    using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
-    using GameFoundation.Scripts.Network.WebService;
-    using GameFoundation.Scripts.Network.WebService.Requests;
-    using GameFoundation.Scripts.Utilities.LogService;
-
-    /// <summary>
-    /// Get blueprint download link from server
-    /// </summary>
-    public class BlueprintDownloadRequest : BaseHttpRequest<GetBlueprintResponseData>
-    {
-        #region zenject
-
-        private readonly BlueprintReaderManager blueprintReaderManager;
-
-        #endregion
-
-        public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) :
-            base(logger)
-        {
-            this.blueprintReaderManager = blueprintReaderManager;
-        }
-
-        public override void Process(GetBlueprintResponseData responseDataData)
-        {
-            this.Logger.Log($"Blueprint download link: {responseDataData.Url}");
-            this.blueprintReaderManager.LoadBlueprint(responseDataData.Url, responseDataData.Hash);
-        }
-    }
-
-#else
+// #if GDK_NETWORK_ENABLE
+//     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
+//     using GameFoundation.Scripts.Network.WebService;
+//     using GameFoundation.Scripts.Network.WebService.Requests;
+//     using GameFoundation.Scripts.Utilities.LogService;
+//
+//     /// <summary>
+//     /// Get blueprint download link from server
+//     /// </summary>
+//     public class BlueprintDownloadRequest : BaseHttpRequest<GetBlueprintResponseData>
+//     {
+//         #region zenject
+//
+//         private readonly BlueprintReaderManager blueprintReaderManager;
+//
+//         #endregion
+//
+//         public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) :
+//             base(logger)
+//         {
+//             this.blueprintReaderManager = blueprintReaderManager;
+//         }
+//
+//         public override void Process(GetBlueprintResponseData responseDataData)
+//         {
+//             this.Logger.Log($"Blueprint download link: {responseDataData.Url}");
+//             this.blueprintReaderManager.LoadBlueprint(responseDataData.Url, responseDataData.Hash);
+//         }
+//     }
+//
+// #else
     using System;
     using System.IO;
     using System.Net;
@@ -72,5 +72,5 @@ namespace BlueprintFlow.APIHandler
             }
         }
     }
-#endif
+// #endif
 }
