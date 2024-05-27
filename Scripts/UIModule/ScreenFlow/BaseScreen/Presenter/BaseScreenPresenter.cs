@@ -82,7 +82,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public virtual void HideView()
         {
-            if (this.ScreenStatus == ScreenStatus.Hide) return;
+            if (this.ScreenStatus is ScreenStatus.Hide or ScreenStatus.Destroyed) return;
             this.ScreenStatus = ScreenStatus.Hide;
             this.View.Hide();
             // this.SignalBus.Fire(new ScreenHideSignal() { ScreenPresenter = this }); // Active this signal later, when need
