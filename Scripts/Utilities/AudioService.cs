@@ -22,6 +22,7 @@
         void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void StopPlayList();
         void SetPlayListTime(float time);
+        void SetPlayListPitch(float pitch);
         void PausePlayList();
         void ResumePlayList();
         void StopAllPlayList();
@@ -45,11 +46,11 @@
         private AudioSource                     MusicAudioSource;
 
         public AudioService(
-            SignalBus         signalBus,
-            SoundSetting      SoundSetting,
-            IGameAssets       gameAssets,
+            SignalBus signalBus,
+            SoundSetting SoundSetting,
+            IGameAssets gameAssets,
             ObjectPoolManager objectPoolManager,
-            ILogService       logService
+            ILogService logService
         )
         {
             this.signalBus         = signalBus;
@@ -160,6 +161,10 @@
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.time = time;
+        }
+        public void SetPlayListPitch(float pitch)
+        {
+            this.MusicAudioSource.pitch = pitch;
         }
 
         public void PausePlayList()
