@@ -4,7 +4,7 @@ namespace Zenject
     using System.Collections.Generic;
     using MessagePipe;
 
-    public class SignalBus
+    public class SignalBus : ILateDisposable
     {
         private readonly DiContainer container;
 
@@ -17,11 +17,13 @@ namespace Zenject
 
         public void Fire<TSignal>()
         {
+            if (this.isDisposed) return;
             this.GetPublisher<TSignal>().Publish(default);
         }
 
         public void Fire<TSignal>(TSignal signal)
         {
+            if (this.isDisposed) return;
             this.GetPublisher<TSignal>().Publish(signal);
         }
 
@@ -79,6 +81,7 @@ namespace Zenject
 
         private bool TrySubscribe_Internal<TSignal>(Action callback)
         {
+            if (this.isDisposed) return false;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (this.subscribers.ContainsKey(key)) return false;
@@ -88,6 +91,7 @@ namespace Zenject
 
         private bool TrySubscribe_Internal<TSignal>(Action<TSignal> callback)
         {
+            if (this.isDisposed) return false;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (this.subscribers.ContainsKey(key)) return false;
@@ -97,6 +101,7 @@ namespace Zenject
 
         private bool TryUnsubscribe_Internal<TSignal>(Action callback)
         {
+            if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (!this.subscribers.Remove(key, out var subscriber)) return false;
@@ -106,11 +111,24 @@ namespace Zenject
 
         private bool TryUnsubscribe_Internal<TSignal>(Action<TSignal> callback)
         {
+            if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (!this.subscribers.Remove(key, out var subscriber)) return false;
             subscriber.Dispose();
             return true;
+        }
+
+        private bool isDisposed;
+
+        void ILateDisposable.LateDispose()
+        {
+            foreach (var subscriber in this.subscribers.Values)
+            {
+                subscriber.Dispose();
+            }
+            this.subscribers.Clear();
+            this.isDisposed = true;
         }
     }
 }

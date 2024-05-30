@@ -8,7 +8,7 @@ namespace Zenject
         public override void InstallBindings()
         {
             this.Container.BindMessagePipe();
-            this.Container.Bind<SignalBus>().AsSingle().CopyIntoAllSubContainers();
+            this.Container.BindInterfacesAndSelfTo<SignalBus>().AsSingle().CopyIntoAllSubContainers();
         }
     }
 }
