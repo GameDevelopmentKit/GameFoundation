@@ -29,42 +29,42 @@ namespace Zenject
 
         public void Subscribe<TSignal>(Action callback)
         {
-            if (!this.TrySubscribe_Internal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
         }
 
         public void Subscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TrySubscribe_Internal(callback)) throw new ArgumentException("Callback already subscribed");
+            if (!this.TrySubscribeInternal(callback)) throw new ArgumentException("Callback already subscribed");
         }
 
         public bool TrySubscribe<TSignal>(Action callback)
         {
-            return this.TrySubscribe_Internal<TSignal>(callback);
+            return this.TrySubscribeInternal<TSignal>(callback);
         }
 
         public bool TrySubscribe<TSignal>(Action<TSignal> callback)
         {
-            return this.TrySubscribe_Internal(callback);
+            return this.TrySubscribeInternal(callback);
         }
 
         public void Unsubscribe<TSignal>(Action callback)
         {
-            if (!this.TryUnsubscribe_Internal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
         }
 
         public void Unsubscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TryUnsubscribe_Internal(callback)) throw new ArgumentException("Callback not subscribed");
+            if (!this.TryUnsubscribeInternal(callback)) throw new ArgumentException("Callback not subscribed");
         }
 
         public bool TryUnsubscribe<TSignal>(Action callback)
         {
-            return this.TryUnsubscribe_Internal<TSignal>(callback);
+            return this.TryUnsubscribeInternal<TSignal>(callback);
         }
 
         public bool TryUnsubscribe<TSignal>(Action<TSignal> callback)
         {
-            return this.TryUnsubscribe_Internal(callback);
+            return this.TryUnsubscribeInternal(callback);
         }
 
         private IPublisher<TSignal> GetPublisher<TSignal>()
@@ -79,7 +79,7 @@ namespace Zenject
             return subscriber;
         }
 
-        private bool TrySubscribe_Internal<TSignal>(Action callback)
+        private bool TrySubscribeInternal<TSignal>(Action callback)
         {
             if (this.isDisposed) return false;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
@@ -89,7 +89,7 @@ namespace Zenject
             return true;
         }
 
-        private bool TrySubscribe_Internal<TSignal>(Action<TSignal> callback)
+        private bool TrySubscribeInternal<TSignal>(Action<TSignal> callback)
         {
             if (this.isDisposed) return false;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
@@ -99,7 +99,7 @@ namespace Zenject
             return true;
         }
 
-        private bool TryUnsubscribe_Internal<TSignal>(Action callback)
+        private bool TryUnsubscribeInternal<TSignal>(Action callback)
         {
             if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
@@ -109,7 +109,7 @@ namespace Zenject
             return true;
         }
 
-        private bool TryUnsubscribe_Internal<TSignal>(Action<TSignal> callback)
+        private bool TryUnsubscribeInternal<TSignal>(Action<TSignal> callback)
         {
             if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
