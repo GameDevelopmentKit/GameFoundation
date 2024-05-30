@@ -81,7 +81,7 @@ namespace Zenject
 
         private bool TrySubscribeInternal<TSignal>(Action callback)
         {
-            if (this.isDisposed) return false;
+            if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (this.subscribers.ContainsKey(key)) return false;
@@ -91,7 +91,7 @@ namespace Zenject
 
         private bool TrySubscribeInternal<TSignal>(Action<TSignal> callback)
         {
-            if (this.isDisposed) return false;
+            if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (this.subscribers.ContainsKey(key)) return false;
