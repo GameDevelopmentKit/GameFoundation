@@ -34,7 +34,7 @@ namespace Zenject
 
         public void Subscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TrySubscribeInternal(callback)) throw new ArgumentException("Callback already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
         }
 
         public bool TrySubscribe<TSignal>(Action callback)
@@ -44,7 +44,7 @@ namespace Zenject
 
         public bool TrySubscribe<TSignal>(Action<TSignal> callback)
         {
-            return this.TrySubscribeInternal(callback);
+            return this.TrySubscribeInternal<TSignal>(callback);
         }
 
         public void Unsubscribe<TSignal>(Action callback)
@@ -54,7 +54,7 @@ namespace Zenject
 
         public void Unsubscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TryUnsubscribeInternal(callback)) throw new ArgumentException("Callback not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
         }
 
         public bool TryUnsubscribe<TSignal>(Action callback)
@@ -64,7 +64,7 @@ namespace Zenject
 
         public bool TryUnsubscribe<TSignal>(Action<TSignal> callback)
         {
-            return this.TryUnsubscribeInternal(callback);
+            return this.TryUnsubscribeInternal<TSignal>(callback);
         }
 
         private IPublisher<TSignal> GetPublisher<TSignal>()
@@ -79,37 +79,23 @@ namespace Zenject
             return subscriber;
         }
 
-        private bool TrySubscribeInternal<TSignal>(Action callback)
+        private bool TrySubscribeInternal<TSignal>(Delegate callback)
         {
             if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (this.subscribers.ContainsKey(key)) return false;
-            this.subscribers.Add(key, this.GetSubscriber<TSignal>().Subscribe(_ => callback()));
+            var wrapper = callback switch
+            {
+                Action action          => _ => action(),
+                Action<TSignal> action => action,
+                _                      => throw new ArgumentException("Callback type not supported"),
+            };
+            this.subscribers.Add(key, this.GetSubscriber<TSignal>().Subscribe(wrapper));
             return true;
         }
 
-        private bool TrySubscribeInternal<TSignal>(Action<TSignal> callback)
-        {
-            if (this.isDisposed) return true;
-            if (callback is null) throw new ArgumentNullException(nameof(callback));
-            var key = (typeof(TSignal), callback);
-            if (this.subscribers.ContainsKey(key)) return false;
-            this.subscribers.Add(key, this.GetSubscriber<TSignal>().Subscribe(callback));
-            return true;
-        }
-
-        private bool TryUnsubscribeInternal<TSignal>(Action callback)
-        {
-            if (this.isDisposed) return true;
-            if (callback is null) throw new ArgumentNullException(nameof(callback));
-            var key = (typeof(TSignal), callback);
-            if (!this.subscribers.Remove(key, out var subscriber)) return false;
-            subscriber.Dispose();
-            return true;
-        }
-
-        private bool TryUnsubscribeInternal<TSignal>(Action<TSignal> callback)
+        private bool TryUnsubscribeInternal<TSignal>(Delegate callback)
         {
             if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
