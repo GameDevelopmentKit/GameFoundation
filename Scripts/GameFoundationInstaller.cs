@@ -2,11 +2,8 @@
 {
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
-    using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
-    using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
-    using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using Zenject;
@@ -26,16 +23,9 @@
             //Service
             this.Container.Bind<ILogService>().To<LogService>().AsSingle().NonLazy();
 
-            //Genarate fps
-            this.Container.Bind<Fps>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
-
-            //Helper
-            this.Container.Bind<LoadImageHelper>().AsCached();
-
             //Installer
             ScreenFlowInstaller.Install(this.Container);
             ApplicationServiceInstaller.Install(this.Container);
-            GameQueueActionInstaller.Install(this.Container);
         }
     }
 }
