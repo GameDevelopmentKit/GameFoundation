@@ -4,6 +4,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using DG.Tweening;
+    using DG.Tweening.Core;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
@@ -87,7 +88,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
             imageComponent.preserveAspect = originPreserveAspect;
             imageComponent.sprite         = sprite;
-            imageComponent.DOFade(originAlpha, 0.5f);
         }
 
         public async UniTask<Sprite> LoadSpriteFromUrl(string url)
