@@ -3,6 +3,7 @@
     using DataManager.Blueprint.BlueprintController;
     using DataManager.LocalData;
     using DataManager.MasterData;
+    using GameConfigs;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
@@ -13,7 +14,6 @@
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
-    using global::Models;
     using I2.Loc;
     using Zenject;
 

@@ -9,7 +9,6 @@
         "Unity.Timeline",
         "GameFoundation.AssetLibrary",
         "Zenject-Source",
-        "GameFoundation.Models",
         "Zenject-Signals",
         "UniTask.Addressables",
         "Unity.ResourceManager",

@@ -3,8 +3,8 @@ namespace DataManager.Blueprint.BlueprintController
     using DataManager.Blueprint.APIHandler;
     using DataManager.Blueprint.BlueprintReader;
     using DataManager.Blueprint.Signals;
+    using GameConfigs;
     using GameFoundation.Scripts.Utilities.Extension;
-    using Models;
     using Zenject;
 
     /// <summary>

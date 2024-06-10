@@ -3,8 +3,8 @@
     "rootNamespace": "",
     "references": [
         "GameFoundation.Editor",
-        "GameFoundation.BlueprintFlow",
-        "GameFoundation.DataManager"
+        "GameFoundation.DataManager",
+        "GameFoundation.GameConfigs"
     ],
     "includePlatforms": [
         "Editor"

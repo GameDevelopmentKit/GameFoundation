@@ -1,7 +1,7 @@
 namespace DataManager.Blueprint.BlueprintController
 {
     using System;
-    using Models;
+    using GameConfigs;
     using UnityEngine;
 
     /// <summary>

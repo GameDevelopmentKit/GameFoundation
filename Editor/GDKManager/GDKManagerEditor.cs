@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using GameConfigs;
 using GameFoundation.Scripts.Utilities.Extension;
-using Models;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;

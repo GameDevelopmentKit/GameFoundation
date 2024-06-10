@@ -1,12 +1,12 @@
-namespace Models
+namespace GameConfigs
 {
     using System;
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
-#if UNITY_EDITOR
     using UnityEditor;
-#endif
     using UnityEngine;
+#if UNITY_EDITOR
+#endif
 
     public class GDKConfig : SerializedScriptableObject
     {
@@ -73,7 +73,7 @@ namespace Models
             }
         }
 
-        public bool HasGameConfig<T>() where T : IGameConfig { return HasGameConfig(typeof(T)); }
+        public bool HasGameConfig<T>() where T : IGameConfig { return this.HasGameConfig(typeof(T)); }
 
         public bool HasGameConfig(Type type) { return this.typeToGameConfig != null && this.typeToGameConfig.ContainsKey(type); }
 

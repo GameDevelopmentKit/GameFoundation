@@ -1,5 +1,5 @@
 ﻿
-    using Models;
+    using GameConfigs;
     using UnityEngine;
     using UnityEngine.UIElements;
 

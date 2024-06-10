@@ -1,4 +1,4 @@
-﻿namespace Models
+﻿namespace GameConfigs
 {
     public interface IGameConfig
     {
