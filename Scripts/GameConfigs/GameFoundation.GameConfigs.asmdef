@@ -1,0 +1,17 @@
+{
+    "name": "GameFoundation.GameConfigs",
+    "rootNamespace": "",
+    "references": [
+        "UniRx",
+        "Zenject-Source"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -3,7 +3,6 @@
     "rootNamespace": "",
     "references": [
         "I2Localization.Scripts",
-        "MasterAAASound.Scripts",
         "UniRx",
         "Unity.TextMeshPro",
         "UniTask",

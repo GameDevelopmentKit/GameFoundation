@@ -4,14 +4,14 @@
     "references": [
         "GameFoundation.Utilities",
         "GameFoundation.AssetLibrary",
-        "GameFoundation.BlueprintFlow",
-        "GameFoundation.Models",
         "GameFoundation.UIModule",
-        "MasterAAASound.Scripts",
         "I2Localization.Scripts",
         "Zenject-Source",
         "Zenject-Signals",
-        "UniTask"
+        "UniTask",
+        "GameFoundation.GameConfigs",
+        "GameFoundation.SoundManager",
+        "GameFoundation.DataManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

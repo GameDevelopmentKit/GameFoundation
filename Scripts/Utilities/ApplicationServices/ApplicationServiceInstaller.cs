@@ -6,7 +6,6 @@
     {
         public override void InstallBindings()
         {
-            this.Container.Bind<MinimizeAppService>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
             this.Container.DeclareSignal<ApplicationPauseSignal>();
             this.Container.DeclareSignal<UpdateTimeAfterFocusSignal>();
         }
