@@ -17,6 +17,7 @@
     {
         void PlaySound(string name, AudioSource sender);
         void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
+        void PlaySound(AudioClip name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
         void StopAllSound();
         void StopAll();
         void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
@@ -61,6 +62,7 @@
                 this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
                 this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
             };
+
             SoundManager.MusicVolume = this.soundSetting.MusicValue.Value;
             SoundManager.SoundVolume = this.soundSetting.SoundValue.Value;
         }
@@ -70,6 +72,7 @@
             var audioSource = await this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
             audioSource.clip   = null;
             audioSource.volume = 1;
+
             return audioSource;
         }
 
@@ -83,11 +86,13 @@
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
+
             if (isLoop)
             {
                 if (this.loopingSoundNameToSources.ContainsKey(name))
                 {
                     this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
+
                     return;
                 }
 
@@ -101,6 +106,31 @@
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
+        }
+
+        public async void PlaySound(AudioClip audioClip, bool isLoop = false, float volumeScale = 1, float fadeSeconds = 1)
+        {
+            var audioSource = await this.GetAudioSource();
+            if (isLoop)
+            {
+                if (this.loopingSoundNameToSources.ContainsKey(audioClip.name))
+                {
+                    this.logService.Warning($"You already played  looping - {audioClip.name}!!!!, do you want to play it again?");
+
+                    return;
+                }
+
+                audioSource.clip = audioClip;
+                audioSource.PlayLoopingSoundManaged(volumeScale, fadeSeconds);
+                this.loopingSoundNameToSources.Add(audioClip.name, audioSource);
+            }
+            else
+            {
+                audioSource.PlayOneShotSoundManaged(audioClip);
+                await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
+                audioSource.Recycle();
+            }
+            
         }
 
         public void StopAllSound()
