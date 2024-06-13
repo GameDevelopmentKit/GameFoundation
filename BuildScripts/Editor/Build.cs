@@ -127,8 +127,8 @@ public static class Build
         var iosTargetOSVersion    = "13.0";
         var iosSigningTeamId      = "";
         
-        PlayerSettings.Android.minSdkVersion    = AndroidSdkVersions.AndroidApiLevel23;
-        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34;
+        PlayerSettings.Android.minSdkVersion    = AndroidSdkVersions.AndroidApiLevel24;
+        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel34;
 
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
