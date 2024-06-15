@@ -1,14 +1,9 @@
 {
-    "name": "GameFoundation.Editor",
+    "name": "GameFoundation.BlueprintFlow.Editor",
     "rootNamespace": "",
     "references": [
-        "GameFoundation.UIModule",
-        "GameFoundation.Network.Config",
-        "GameFoundation.Utilities",
-        "Unity.Addressables",
-        "Unity.ResourceManager",
-        "UniTask.Addressables",
-        "UniTask",
+        "GameFoundation.Editor",
+        "GameFoundation.DataManager",
         "GameFoundation.GameConfigs"
     ],
     "includePlatforms": [

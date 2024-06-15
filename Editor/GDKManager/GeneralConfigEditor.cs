@@ -1,4 +1,4 @@
-using Models;
+using GameConfigs;
 using UnityEditor;
 using UnityEngine.UIElements;
 

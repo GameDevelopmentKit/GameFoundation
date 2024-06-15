@@ -1,19 +1,18 @@
 {
-    "name": "GameFoundation.Editor",
+    "name": "GameFoundation.SoundManager",
     "rootNamespace": "",
     "references": [
-        "GameFoundation.UIModule",
-        "GameFoundation.Network.Config",
+        "GameFoundation.DataManager",
         "GameFoundation.Utilities",
-        "Unity.Addressables",
+        "GameFoundation.AssetLibrary",
+        "Zenject-Signals",
         "Unity.ResourceManager",
-        "UniTask.Addressables",
         "UniTask",
-        "GameFoundation.GameConfigs"
+        "UniTask.Addressables",
+        "UniRx",
+        "Unity.Addressables"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

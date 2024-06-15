@@ -1,19 +1,15 @@
 {
-    "name": "GameFoundation.Editor",
+    "name": "GameFoundation.DataManager",
     "rootNamespace": "",
     "references": [
-        "GameFoundation.UIModule",
-        "GameFoundation.Network.Config",
+        "GameFoundation.BlueprintFlow",
         "GameFoundation.Utilities",
-        "Unity.Addressables",
-        "Unity.ResourceManager",
-        "UniTask.Addressables",
         "UniTask",
+        "Zenject-Source",
+        "Zenject-Signals",
         "GameFoundation.GameConfigs"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
