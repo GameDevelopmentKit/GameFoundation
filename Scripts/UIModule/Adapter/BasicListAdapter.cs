@@ -70,7 +70,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
-                CallOnViewReady(viewObject, presenter);
             }
             else
             {
@@ -78,17 +77,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.SetView(viewObject);
                 presenter.Dispose();
                 presenter.BindData(model);
-                CallOnViewReady(viewObject, presenter);
-            }
-
-            return;
-
-            void CallOnViewReady(TView view, TPresenter presenter)
-            {
-                if (this.readiedViewSet.Add(view))
-                {
-                    presenter.OnViewReady();
-                }
             }
         }
 
@@ -126,6 +114,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public void ForceUpdateFullVisibleItems()
         {
             var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
+
             if (twinPassScheduledBefore)
                 throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 

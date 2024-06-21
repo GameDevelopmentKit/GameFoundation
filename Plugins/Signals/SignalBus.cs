@@ -67,13 +67,13 @@ namespace Zenject
 
         private IPublisher<TSignal> GetPublisher<TSignal>()
         {
-            if (this.container.TryResolve<IPublisher<TSignal>>() is not { } publisher) throw new("Signal not declared");
+            if (this.container.TryResolve<IPublisher<TSignal>>() is not { } publisher) throw new($"Signal {typeof(TSignal)} not declared");
             return publisher;
         }
 
         private ISubscriber<TSignal> GetSubscriber<TSignal>()
         {
-            if (this.container.TryResolve<ISubscriber<TSignal>>() is not { } subscriber) throw new("Signal not declared");
+            if (this.container.TryResolve<ISubscriber<TSignal>>() is not { } subscriber) throw new($"Signal {typeof(TSignal)} not declared");
             return subscriber;
         }
 

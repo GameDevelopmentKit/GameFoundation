@@ -43,17 +43,18 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // *For the method's full description check the base implementation
         protected override void UpdateCellViewsHolder(MyGridItemViewsHolder viewHolder)
         {
-            var index      = viewHolder.ItemIndex;
+            var index = viewHolder.ItemIndex;
+
             if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
             var viewObject = viewHolder.root.GetComponentInChildren<TView>(true);
+
             if (this.presenters.Count <= index)
             {
                 var presenter = this.diContainer.Instantiate<TPresenter>();
                 presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
-                CallOnViewReady(viewObject, presenter);
             }
             else
             {
@@ -61,17 +62,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.SetView(viewObject);
                 presenter.Dispose();
                 presenter.BindData(model);
-                CallOnViewReady(viewObject, presenter);
-            }
-            
-            return;
-
-            void CallOnViewReady(TView view, TPresenter presenter)
-            {
-                if (this.readiedViewSet.Add(view))
-                {
-                    presenter.OnViewReady();
-                }
             }
         }
 
@@ -86,21 +76,22 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
-            
+
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
                     baseUIItemPresenter.Dispose();
-                } 
+                }
             }
-            this.presenters  = new List<TPresenter>();
+
+            this.presenters = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
-        
+
         /// <summary>
         /// We need this because the original method only update to  this.VisibleItemsCount - 1
         /// </summary>
@@ -108,6 +99,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public void ForceUpdateFullVisibleItems()
         {
             var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
+
             if (twinPassScheduledBefore)
                 throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 
@@ -118,7 +110,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         }
 
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
-        
+
         public List<TPresenter> GetPresenters() => this.presenters;
     }
 

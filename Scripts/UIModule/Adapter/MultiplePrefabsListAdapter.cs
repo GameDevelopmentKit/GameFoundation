@@ -23,7 +23,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private List<TPresenter>         presenters;
         private HashSet<TView>           readiedViewSet = new();
 
-
         private DiContainer diContainer;
 
         #region OSA implementation
@@ -49,6 +48,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             var vh = new BaseItemViewsHolder();
             vh.Init(this.Parameters.ItemPrefabs[this.models[itemIndex].PrefabName], this.Parameters.Content, itemIndex);
+
             return vh;
         }
 
@@ -62,8 +62,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             if (this.models.Count <= index || index < 0) return;
 
-            var model = this.models[index];
-            var viewObject  = vh.root.GetComponentInChildren<TView>(true);
+            var model      = this.models[index];
+            var viewObject = vh.root.GetComponentInChildren<TView>(true);
 
             if (this.presenters.Count <= index)
             {
@@ -71,7 +71,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
-                CallOnViewReady(viewObject, presenter);
             }
             else
             {
@@ -79,25 +78,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.SetView(viewObject);
                 presenter.Dispose();
                 presenter.BindData(model);
-                CallOnViewReady(viewObject, presenter);
-            }
-             
-            
-            return;
-
-            void CallOnViewReady(TView view, TPresenter presenter)
-            {
-                if (this.readiedViewSet.Add(view))
-                {
-                    presenter.OnViewReady();
-                }
             }
         }
 
-        protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _)
-        {
-            return this.models[vh.ItemIndex].PresenterType == this.models[itemIndex].PresenterType;
-        }
+        protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _) { return this.models[vh.ItemIndex].PresenterType == this.models[itemIndex].PresenterType; }
 
         #endregion
 
@@ -110,19 +94,21 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             this.diContainer = diContainer;
             this.models      = new SimpleDataHelper<TModel>(this);
-            
+
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
                     baseUIItemPresenter.Dispose();
-                } 
+                }
             }
-            this.presenters  = new List<TPresenter>();
+
+            this.presenters = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.models.ResetItems(models);
+
             for (var i = 0; i < models.Count; ++i)
             {
                 this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
@@ -142,6 +128,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public override void InitIfNeeded(IOSA iAdapter)
         {
             base.InitIfNeeded(iAdapter);
+
             foreach (var itemPrefab in this.itemPrefabs)
             {
                 this.AssertValidWidthHeight(itemPrefab);
