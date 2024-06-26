@@ -22,7 +22,7 @@ namespace DataManager.LocalData
         };
 
         private readonly ILogService                    logService;
-        private readonly Dictionary<string, ILocalData> userDataCache = new();
+        private readonly Dictionary<string, ILocalData> localDataCache = new();
 
         protected BaseHandleLocalDataServices(ILogService logService) { this.logService = logService; }
 
@@ -30,7 +30,7 @@ namespace DataManager.LocalData
         {
             var key = KeyOf(typeof(T));
 
-            this.userDataCache.TryAdd(key, data);
+            this.localDataCache.TryAdd(key, data);
 
             if (!force) return;
 
@@ -51,7 +51,7 @@ namespace DataManager.LocalData
 
         private ILocalData InternalLoad(string key, string json, Type type)
         {
-            return this.userDataCache.GetOrAdd(key, () =>
+            return this.localDataCache.GetOrAdd(key, () =>
             {
                 var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type, JsonSetting);
 
@@ -73,7 +73,7 @@ namespace DataManager.LocalData
 
         public async UniTask SaveAll()
         {
-            await this.SaveJsons(this.userDataCache.Select(value =>
+            await this.SaveJsons(this.localDataCache.Select(value =>
             {
                 this.logService.LogWithColor($"Saved {value.Key}", Color.green);
                 return (value.Key, JsonConvert.SerializeObject(value.Value, JsonSetting));
@@ -83,7 +83,7 @@ namespace DataManager.LocalData
 
         public virtual UniTask DeleteAll()
         {
-            this.userDataCache.Clear();
+            this.localDataCache.Clear();
             return this.SaveAll();
         }
 
