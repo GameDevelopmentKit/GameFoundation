@@ -66,11 +66,11 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
 			}
 
 			// Requiring an EventSystem in scenes to make sure the UI is interactive, but allowing prefab-editing scenes to not have one, since these are just temporary scenes
-			if (!CWiz.IsInsidePrefabEditingScene() && !GameObject.FindObjectOfType<EventSystem>())
-			{
-				reasonIfNotValid = "No EventSystem was found in the scene. Please add one";
-				return false;
-			}
+			// if (!CWiz.IsInsidePrefabEditingScene() && !GameObject.FindObjectOfType<EventSystem>())
+			// {
+			// 	reasonIfNotValid = "No EventSystem was found in the scene. Please add one";
+			// 	return false;
+			// }
 
 			reasonIfNotValid = null;
 			var tr = asRT as Transform;

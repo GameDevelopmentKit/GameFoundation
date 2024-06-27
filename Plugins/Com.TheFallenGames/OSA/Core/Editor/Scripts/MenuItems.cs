@@ -135,12 +135,12 @@ namespace Com.ForbiddenByte.OSA.Editor
 		{
 			string reasonIfNotValid;
 			// Manually checking for validation, as this provides richer info about the case when creation is not possible
-			if (!CreateOSAWindow.Validate(true, out reasonIfNotValid))
-			{
-				CWiz.ShowCouldNotExecuteCommandNotification(null);
-				Debug.Log("OSA: Could not create ScrollView on the selected object: " + reasonIfNotValid);
-				return false;
-			}
+			// if (!CreateOSAWindow.Validate(true, out reasonIfNotValid))
+			// {
+			// 	CWiz.ShowCouldNotExecuteCommandNotification(null);
+			// 	Debug.Log("OSA: Could not create ScrollView on the selected object: " + reasonIfNotValid);
+			// 	return false;
+			// }
 
 			return true;
 		}
