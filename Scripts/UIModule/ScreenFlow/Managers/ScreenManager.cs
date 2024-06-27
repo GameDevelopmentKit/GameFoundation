@@ -95,8 +95,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private IScreenPresenter previousActiveScreen;
 
-        private Dictionary<Type, IScreenPresenter>       typeToLoadedScreenPresenter;
-        private Dictionary<Type, Task<IScreenPresenter>> typeToPendingScreen;
+        private Dictionary<Type, IScreenPresenter>          typeToLoadedScreenPresenter;
+        private Dictionary<Type, UniTask<IScreenPresenter>> typeToPendingScreen;
 
         private SignalBus    signalBus;
         private RootUICanvas rootUICanvas;
@@ -115,7 +115,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.activeScreens               = new List<IScreenPresenter>();
             this.typeToLoadedScreenPresenter = new Dictionary<Type, IScreenPresenter>();
-            this.typeToPendingScreen         = new Dictionary<Type, Task<IScreenPresenter>>();
+            this.typeToPendingScreen         = new Dictionary<Type, UniTask<IScreenPresenter>>();
 
             this.signalBus.Subscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
             this.signalBus.Subscribe<ScreenShowSignal>(this.OnShowScreen);
@@ -200,7 +200,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             return (T)result;
 
-            async Task<IScreenPresenter> InstantiateScreen()
+            async UniTask<IScreenPresenter> InstantiateScreen()
             {
                 screenPresenter = this.GetCurrentContainer().Instantiate<T>();
                 var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
