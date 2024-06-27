@@ -6,7 +6,6 @@ namespace DataManager.MasterData
     using DataManager.Blueprint.BlueprintController;
     using DataManager.LocalData;
     using DataManager.UserData;
-    using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
     using Zenject;
 
@@ -36,7 +35,22 @@ namespace DataManager.MasterData
 
             try
             {
-                await UniTask.WhenAll(this.PreLoadUserData(), this.blueprintReaderManager.LoadBlueprint());
+                //Todo refactor when implement load user data from remote flow later
+                this.userDataCache.Clear();
+                
+                // load all pref load data and blueprint
+                var preloadDataTask = UniTask.WhenAll(this.PreloadUserDataTypes.Select(x => this.GetDataInternal(x.GetDataType())));
+                await UniTask.WhenAll(preloadDataTask, this.blueprintReaderManager.LoadBlueprint());
+                
+                foreach (var preloadUserData in this.PreloadUserDataTypes)
+                {
+                    if (this.userDataCache.TryGetValue(preloadUserData.GetDataType().Name, out var data))
+                    {
+                        preloadUserData.InitializeData(data);
+                    }
+                }
+                
+                this.PreloadUserDataTypes.Clear();
             }
             catch (Exception e)
             {
@@ -63,15 +77,6 @@ namespace DataManager.MasterData
                     initializeDataOnStart.InitializeData(data);
                 });
             }
-        }
-
-        private async UniTask PreLoadUserData()
-        {
-            //Todo refactor when implement load user data from remote flow later
-            this.userDataCache.Clear();
-            await UniTask.WhenAll(this.PreloadUserDataTypes.Select(x => this.GetDataInternal(x.GetDataType()).ContinueWith(x.InitializeData)));
-
-            this.PreloadUserDataTypes.Clear();
         }
 
         private static bool IsLocalData(Type type) { return typeof(ILocalData).IsAssignableFrom(type); }
