@@ -14,7 +14,8 @@
         "UniTask.Addressables",
         "Unity.ResourceManager",
         "Unity.Addressables",
-        "BuildScript.Runtime"
+        "BuildScript.Runtime",
+        "I2.Scripts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
