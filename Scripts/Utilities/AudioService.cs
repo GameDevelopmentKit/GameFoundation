@@ -12,6 +12,7 @@
     using UniRx;
     using UnityEngine;
     using Zenject;
+    using ObservableExtensions = UniRx.ObservableExtensions;
 
     public interface IAudioService
     {
@@ -59,8 +60,8 @@
         {
             this.compositeDisposable = new CompositeDisposable
             {
-                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
+                ObservableExtensions.Subscribe(this.soundSetting.MusicValue, this.SetMusicValue),
+                ObservableExtensions.Subscribe(this.soundSetting.SoundValue, this.SetSoundValue),
             };
 
             SoundManager.MusicVolume = this.soundSetting.MusicValue.Value;
@@ -111,6 +112,7 @@
         public async void PlaySound(AudioClip audioClip, bool isLoop = false, float volumeScale = 1, float fadeSeconds = 1)
         {
             var audioSource = await this.GetAudioSource();
+
             if (isLoop)
             {
                 if (this.loopingSoundNameToSources.ContainsKey(audioClip.name))
@@ -130,7 +132,6 @@
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
-            
         }
 
         public void StopAllSound()

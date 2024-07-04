@@ -132,7 +132,7 @@ public static class UIToolkitExtension
         {
             if (!string.IsNullOrEmpty(key))
             {
-                var sprite = await Addressables.LoadAssetAsync<Sprite>(key);
+                var sprite = (Sprite)await Addressables.LoadAssetAsync<Sprite>(key);
                 if (sprite != null)
                 {
                     return sprite;

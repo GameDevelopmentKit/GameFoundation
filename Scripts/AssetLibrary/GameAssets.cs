@@ -87,6 +87,8 @@ namespace GameFoundation.Scripts.AssetLibrary
         public bool DestroyGameObject(GameObject gameObject);
         
         Dictionary<object, AsyncOperationHandle> GetLoadingAssets();
+        
+        int GetLoadingAssetsCount();
     }
 
     /// <summary>
@@ -99,6 +101,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         private readonly Dictionary<object, AsyncOperationHandle> loadingAssets = new Dictionary<object, AsyncOperationHandle>(20);
 
+        public int GetLoadingAssetsCount() => this.loadingAssets.Count;
         /// <summary>
         /// A dictionary use for caching the loaded assets
         /// </summary>
