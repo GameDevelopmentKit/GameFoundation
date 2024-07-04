@@ -126,9 +126,6 @@ public static class Build
         var keyStoreAliasPassword = "tothemoon";
         var iosTargetOSVersion    = "13.0";
         var iosSigningTeamId      = "";
-        
-        PlayerSettings.Android.minSdkVersion    = AndroidSdkVersions.AndroidApiLevel24;
-        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel34;
 
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
@@ -237,6 +234,9 @@ public static class Build
         IEnumerable<string> platforms, string outputPath,
         bool buildAppBundle = false, string packageName = "")
     {
+        PlayerSettings.Android.minSdkVersion    = AndroidSdkVersions.AndroidApiLevel24;
+        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel34;
+        
         BuildTools.ResetBuildSettings();
         EditorUserBuildSettings.buildAppBundle = buildAppBundle;
 
