@@ -36,6 +36,7 @@
 
         private CompositeDisposable             compositeDisposable;
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
+        private List<AudioSource>               oneShotSources = new();
         private AudioSource                     MusicAudioSource;
 
         public AudioService(SignalBus signalBus, IGameAssets gameAssets,
@@ -87,7 +88,9 @@
             else
             {
                 audioSource.PlayOneShotSoundManaged(audioClip);
+                this.oneShotSources.Add(audioSource);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
+                this.oneShotSources.Remove(audioSource);
                 audioSource.Recycle();
             }
         }
@@ -97,6 +100,11 @@
             SoundManager.StopAllLoopingSounds();
             SoundManager.StopAllNonLoopingSounds();
 
+            foreach (var audioSource in this.oneShotSources)
+            {
+                audioSource.gameObject.Recycle();
+            }
+            
             foreach (var audioSource in this.loopingSoundNameToSources.Values)
             {
                 audioSource.gameObject.Recycle();
