@@ -41,7 +41,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// Unload all auto unload assets in scene
         /// </summary>
         /// <param name="sceneName"> Scene Target</param>
-        void UnloadUnusedAssets(string sceneName);
+        UniTask UnloadUnusedAssets(string sceneName);
         /// <summary>
         ///     Preload assets for target scene
         /// </summary>
@@ -281,7 +281,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// Unload all auto unload assets in scene
         /// </summary>
         /// <param name="sceneName"> Scene Target</param>
-        public void UnloadUnusedAssets(string sceneName)
+        public async UniTask UnloadUnusedAssets(string sceneName)
         {
             //For loading scene
             if (string.IsNullOrEmpty(sceneName)) return;
@@ -290,7 +290,7 @@ namespace GameFoundation.Scripts.AssetLibrary
             foreach (var asset in listAsset)
             {
                 if (this.loadedScenes.ContainsKey(asset))
-                    this.UnloadSceneAsync(asset);
+                    await this.UnloadSceneAsync(asset);
                 else
                     this.ReleaseAsset(asset);
             }
