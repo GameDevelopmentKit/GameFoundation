@@ -44,7 +44,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName, loadMode, false);
             await this.UnloadSceneAsync(lastScene);
             _ = Resources.UnloadUnusedAssets();
-            screenInstance.ActivateAsync();
+
+            if (activeOnLoad)
+            {
+                screenInstance.ActivateAsync();
+            }
+
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {
                 CurrentScreenName = new List<string>() { lastScene },
