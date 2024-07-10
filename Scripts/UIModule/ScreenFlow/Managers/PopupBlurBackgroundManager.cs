@@ -55,10 +55,14 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         {
             if (this.currentPopup != null && this.currentPopup.ScreenStatus != ScreenStatus.Opened)
             {
-                this.ShowImage(false);
+                
+                if (this.showImageCoroutine != null)
+                    this.StopCoroutine(this.showImageCoroutine);
+                this.blurImage.enabled = false;
+                this.blurImage.transform.SetParent(null,false);
+
                 this.btnClose.gameObject.SetActive(false);
                 this.currentPopup = null;
-                this.blurImage.transform.SetParent(null,false);
             }
         }
 
@@ -68,7 +72,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var popupInfo = this.GetPopupInfo(this.currentPopup);
             if (popupInfo.IsEnableBlur)
             {
-                this.ShowImage(true);
+                this.showImageCoroutine = this.StartCoroutine(this.ShowImageInternal());
             }
 
             this.btnClose.gameObject.SetActive(popupInfo.IsCloseWhenTapOutside);
@@ -76,23 +80,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.blurImage.rectTransform.SetAsFirstSibling();
         }
 
-        private void ShowImage(bool enable)
-        {
-            if (this.showImageCoroutine != null)
-                this.StopCoroutine(this.showImageCoroutine);
-
-            if (!enable)
-            {
-                this.blurImage.enabled = false;
-                return;
-            }
-
-            this.showImageCoroutine = this.StartCoroutine(this.ShowImageInternal());
-        }
-
         private IEnumerator ShowImageInternal()
         {
             this.blurImage.enabled              = false;
+            this.translucentImageSource.Request();
             this.translucentImageSource.enabled = true;
             // First, disable the blur image so that we can see the UI behind it.
             // Then enable TranslucentImageSource and wait until end of frame for the camera to render the UI and TranslucentImageSource can capture it.
