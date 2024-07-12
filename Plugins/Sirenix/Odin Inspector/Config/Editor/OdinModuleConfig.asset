@@ -19,5 +19,7 @@ MonoBehaviour:
     ActivationSettings: 0
   - ID: Unity.Localization
     ActivationSettings: 0
+  - ID: Unity.Addressables
+    ActivationSettings: 0
   ModuleTogglingSettings: 1
   ModuleUpdateSettings: 1
