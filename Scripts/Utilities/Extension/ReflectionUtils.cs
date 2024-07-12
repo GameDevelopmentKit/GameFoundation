@@ -40,6 +40,15 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 }
             }
         }
+        
+        public static IEnumerable<FieldInfo> GetRecursiveFields(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+        {
+            return type.GetFields(bindingFlags)
+                .Concat(type.BaseType is { } baseType
+                    ? GetRecursiveFields(baseType, bindingFlags)
+                    : Enumerable.Empty<FieldInfo>()
+                );
+        }
 
         public static IEnumerable<Type> GetTypesSafely(Assembly assembly)
         {
