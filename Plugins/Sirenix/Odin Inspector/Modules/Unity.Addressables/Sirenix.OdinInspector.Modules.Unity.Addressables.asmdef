@@ -10,7 +10,9 @@
         "Sirenix.Utilities",
         "Sirenix.OdinValidator.Editor"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
