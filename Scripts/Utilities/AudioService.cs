@@ -117,8 +117,8 @@
                 audioSource.PlayOneShotSoundManaged(audioClip);
                 this.oneShotSources.Add(audioSource);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
-                this.oneShotSources.Remove(audioSource);
-                audioSource?.Recycle();
+                // this.oneShotSources.Remove(audioSource);
+                // if(audioSource.isActiveAndEnabled) audioSource.Recycle();
             }
         }
 
@@ -129,12 +129,12 @@
 
             foreach (var audioSource in this.oneShotSources)
             {
-                audioSource.gameObject.Recycle();
+                if(audioSource.isActiveAndEnabled) audioSource.gameObject.Recycle();
             }
             
             foreach (var audioSource in this.loopingSoundNameToSources.Values)
             {
-                audioSource.gameObject.Recycle();
+                if(audioSource.isActiveAndEnabled) audioSource.gameObject?.Recycle();
             }
 
             this.loopingSoundNameToSources.Clear();
