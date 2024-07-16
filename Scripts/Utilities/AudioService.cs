@@ -49,6 +49,7 @@
 
         private CompositeDisposable             compositeDisposable;
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
+        private List<AudioSource>               oneShotSources            = new();
         private AudioSource                     MusicAudioSource;
 
         [Preserve]
@@ -68,14 +69,11 @@
             Instance               = this;
         }
 
-        public void Initialize()
-        {
-            this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio);
-        }
+        public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
 
         private void SubscribeMasterAudio()
         {
-            this.compositeDisposable = new()
+            this.compositeDisposable = new CompositeDisposable
             {
                 this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
                 this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
@@ -117,8 +115,10 @@
             else
             {
                 audioSource.PlayOneShotSoundManaged(audioClip);
+                this.oneShotSources.Add(audioSource);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
-                audioSource.Recycle();
+                this.oneShotSources.Remove(audioSource);
+                audioSource?.Recycle();
             }
         }
 
@@ -127,7 +127,15 @@
             SoundManager.StopAllLoopingSounds();
             SoundManager.StopAllNonLoopingSounds();
 
-            foreach (var audioSource in this.loopingSoundNameToSources.Values) audioSource.gameObject.Recycle();
+            foreach (var audioSource in this.oneShotSources)
+            {
+                audioSource.gameObject.Recycle();
+            }
+            
+            foreach (var audioSource in this.loopingSoundNameToSources.Values)
+            {
+                audioSource.gameObject.Recycle();
+            }
 
             this.loopingSoundNameToSources.Clear();
         }
@@ -212,17 +220,13 @@
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.Play();
         }
-
         public bool IsPlayingPlayList()
         {
             if (this.MusicAudioSource == null) return false;
             return this.MusicAudioSource.isPlaying;
         }
 
-        public void StopAllPlayList()
-        {
-            this.StopPlayList();
-        }
+        public void StopAllPlayList() { this.StopPlayList(); }
 
         public void PauseEverything()
         {
@@ -236,19 +240,10 @@
             SoundManager.ResumeAll();
         }
 
-        protected virtual void SetSoundValue(float value)
-        {
-            SoundManager.SoundVolume = value;
-        }
+        protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
-        protected virtual void SetMusicValue(float value)
-        {
-            SoundManager.MusicVolume = value;
-        }
+        protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
 
-        public void Dispose()
-        {
-            this.compositeDisposable?.Dispose();
-        }
+        public void Dispose() { this.compositeDisposable?.Dispose(); }
     }
 }
