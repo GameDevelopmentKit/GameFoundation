@@ -4,4 +4,8 @@
     {
         void Init();
     }
+
+    public interface IIgnoreCreateFromReflection
+    {
+    }
 }
