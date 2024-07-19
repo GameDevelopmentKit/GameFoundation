@@ -20,6 +20,7 @@
         void StopAllSound();
         void StopAll();
         void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+        void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void StopPlayList();
         void SetPlayListTime(float time);
         void SetPlayListPitch(float pitch);
@@ -143,6 +144,16 @@
             this.StopPlayList();
 
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
+            this.MusicAudioSource      = await this.GetAudioSource();
+            this.MusicAudioSource.clip = audioClip;
+            this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
+        }
+        
+        
+        public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        {
+            this.StopPlayList();
+            
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
