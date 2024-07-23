@@ -8,7 +8,7 @@ namespace Zenject
     {
         private readonly DiContainer container;
 
-        private readonly Dictionary<(Type, Delegate), IDisposable> subscribers = new();
+        private readonly Dictionary<(Type SignalType, Delegate Callback), (IDisposable Disposable, bool AutoDispose)> subscriptions = new();
 
         public SignalBus(DiContainer container)
         {
@@ -84,14 +84,16 @@ namespace Zenject
             if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
-            if (this.subscribers.ContainsKey(key)) return false;
+            if (this.subscriptions.ContainsKey(key)) return false;
             var wrapper = callback switch
             {
                 Action action          => _ => action(),
                 Action<TSignal> action => action,
                 _                      => throw new ArgumentException("Callback type not supported"),
             };
-            this.subscribers.Add(key, this.GetSubscriber<TSignal>().Subscribe(wrapper));
+            var disposable  = this.GetSubscriber<TSignal>().Subscribe(wrapper);
+            var autoDispose = this.container.HasBindingId(typeof(ISubscriber<TSignal>), null, InjectSources.Local);
+            this.subscriptions.Add(key, (disposable, autoDispose));
             return true;
         }
 
@@ -100,8 +102,8 @@ namespace Zenject
             if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
-            if (!this.subscribers.Remove(key, out var subscriber)) return false;
-            subscriber.Dispose();
+            if (!this.subscriptions.Remove(key, out var subscription)) return false;
+            subscription.Disposable.Dispose();
             return true;
         }
 
@@ -109,11 +111,12 @@ namespace Zenject
 
         void ILateDisposable.LateDispose()
         {
-            foreach (var subscriber in this.subscribers.Values)
+            foreach (var subscription in this.subscriptions.Values)
             {
-                subscriber.Dispose();
+                if (!subscription.AutoDispose) continue;
+                subscription.Disposable.Dispose();
             }
-            this.subscribers.Clear();
+            this.subscriptions.Clear();
             this.isDisposed = true;
         }
     }
