@@ -8,7 +8,7 @@ namespace Zenject
     {
         private readonly DiContainer container;
 
-        private readonly Dictionary<(Type SignalType, Delegate Callback), (IDisposable Disposable, bool AutoDispose)> subscriptions = new();
+        private readonly Dictionary<(Type SignalType, Delegate Callback), IDisposable> subscriptions = new();
 
         public SignalBus(DiContainer container)
         {
@@ -91,9 +91,8 @@ namespace Zenject
                 Action<TSignal> action => action,
                 _                      => throw new ArgumentException("Callback type not supported"),
             };
-            var disposable  = this.GetSubscriber<TSignal>().Subscribe(wrapper);
-            var autoDispose = this.container.HasBindingId(typeof(ISubscriber<TSignal>), null, InjectSources.Local);
-            this.subscriptions.Add(key, (disposable, autoDispose));
+            var subscription  = this.GetSubscriber<TSignal>().Subscribe(wrapper);
+            this.subscriptions.Add(key, subscription);
             return true;
         }
 
@@ -103,7 +102,7 @@ namespace Zenject
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (!this.subscriptions.Remove(key, out var subscription)) return false;
-            subscription.Disposable.Dispose();
+            subscription.Dispose();
             return true;
         }
 
@@ -113,8 +112,7 @@ namespace Zenject
         {
             foreach (var subscription in this.subscriptions.Values)
             {
-                if (!subscription.AutoDispose) continue;
-                subscription.Disposable.Dispose();
+                subscription.Dispose();
             }
             this.subscriptions.Clear();
             this.isDisposed = true;
