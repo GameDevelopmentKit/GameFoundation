@@ -2,14 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using BuildScripts.Editor.Addressable;
 using GameFoundation.BuildScripts.Runtime;
 using Unity.CodeEditor;
 using UnityEditor;
 using UnityEditor.Android;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Build;
-using UnityEditor.AddressableAssets.Settings;
-using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Compilation;
@@ -126,6 +123,8 @@ public static class Build
         var keyStoreAliasPassword = "tothemoon";
         var iosTargetOSVersion    = "13.0";
         var iosSigningTeamId      = "";
+        var remoteAddressableBuildPath = "";
+        var remoteAddressableLoadPath = "";
 
         PlayerSettings.Android.useCustomKeystore = false;
         for (var i = 0; i < args.Length; ++i)
@@ -142,12 +141,10 @@ public static class Build
                         "mono"   => ScriptingImplementation.Mono2x,
                         _        => throw new Exception("Unknown scripting backend")
                     };
-
                     break;
                 case "-development":
                     buildOptions |= BuildOptions.Development;
                     break;
-
                 case "-outputPath":
                     outputPath = args[++i];
                     break;
@@ -178,6 +175,12 @@ public static class Build
                 case "-iosSigningTeamId":
                     iosSigningTeamId = args[++i];
                     break;
+                case "-remoteAddressableBuildPath":
+                    remoteAddressableBuildPath = args[++i];
+                    break;
+                case "-remoteAddressableLoadPath":
+                    remoteAddressableLoadPath = args[++i];
+                    break;
             }
         }
 
@@ -187,7 +190,11 @@ public static class Build
             PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Log,     StackTraceLogType.None);
 #endif
-
+        if (!string.IsNullOrEmpty(remoteAddressableBuildPath) && !string.IsNullOrEmpty(remoteAddressableLoadPath))
+        {
+            AddressableBuildTool.CreateOrUpdateTheOneCDNProfile(remoteAddressableBuildPath, remoteAddressableLoadPath);
+        }
+        
         if (buildAppBundle)
         {
             SetUpAndroidKeyStore(keyStoreFileName, keyStorePassword, keyStoreAliasName, keyStoreAliasPassword);
@@ -263,7 +270,7 @@ public static class Build
             SetApplicationVersion();
 
             EditorUserBuildSettings.SwitchActiveBuildTarget(platform.BuildTargetGroup, platform.BuildTarget);
-            BuildAddressable();
+            AddressableBuildTool.BuildAddressable();
 
             // Set up the build options
             if (platform.Platform.Equals(PlatformWebGL))
@@ -338,54 +345,6 @@ public static class Build
             default:
                 throw new ArgumentOutOfRangeException();
         }
-    }
-
-    [MenuItem("TheOne/Set All Groups to LZMA")]
-    public static void SetAllGroupsToLZMA()
-    {
-        // Access the addressable asset settings
-        var settings = AddressableAssetSettingsDefaultObject.Settings;
-
-        // Iterate over all groups
-        foreach (var group in settings.groups)
-        {
-            // Set the compression type to LZMA for each group
-            var schema = group.GetSchema<BundledAssetGroupSchema>();
-            if (schema != null)
-            {
-                schema.Compression = BundledAssetGroupSchema.BundleCompressionMode.LZMA;
-                schema.UseUnityWebRequestForLocalBundles = false;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Clean Addressable before build and init FMOD
-    /// </summary>
-    public static void BuildAddressable()
-    {
-#if !THEONE_NO_LZMA
-        SetAllGroupsToLZMA();
-#endif
-        Console.WriteLine($"--------------------");
-        Console.WriteLine($"Clean addressable");
-        Console.WriteLine($"--------------------");
-        AddressableAssetSettings.CleanPlayerContent();
-        Console.WriteLine($"--------------------");
-        Console.WriteLine($"Build addressable");
-        Console.WriteLine($"--------------------");
-        AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
-        var success = string.IsNullOrEmpty(result.Error);
-        if (!success)
-        {
-            var errorMessage = "Addressable build error encountered: " + result.Error;
-            Debug.LogError(errorMessage);
-            throw new Exception(errorMessage);
-        }
-
-        Console.WriteLine($"--------------------");
-        Console.WriteLine($"Finish building addressable");
-        Console.WriteLine($"--------------------");
     }
 
     /// <summary>

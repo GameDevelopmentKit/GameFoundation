@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using BuildScripts.Editor.Addressable;
 using UnityEditor;
 using UnityEditorInternal;
 
@@ -154,7 +155,7 @@ public static class BuildMenu
     [MenuItem("Build/Addressable/build_fresh", priority = 1100)]
     private static void Build_Addressable_fresh()
     {
-        Build.BuildAddressable();
+        AddressableBuildTool.BuildAddressable();
     }
 
 
