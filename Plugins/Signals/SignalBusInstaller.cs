@@ -9,6 +9,7 @@ namespace Zenject
         {
             this.Container.BindMessagePipe();
             this.Container.BindInterfacesAndSelfTo<SignalBus>().AsSingle().CopyIntoAllSubContainers();
+            this.Container.BindLateDisposableExecutionOrder<SignalBus>(-999);
         }
     }
 }
