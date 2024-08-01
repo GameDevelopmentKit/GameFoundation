@@ -23,6 +23,7 @@
         void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void StopPlayList();
         void SetPlayListTime(float time);
+        float GetPlayListTime();
         void SetPlayListPitch(float pitch);
         void PausePlayList();
         void ResumePlayList();
@@ -173,8 +174,18 @@
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.time = time;
         }
+        /// <summary>
+        /// Get playlist time
+        /// </summary>
+        /// <returns>Return playlist time, -1 if no playlist is playing</returns>
+        public float GetPlayListTime()
+        {
+            if (this.MusicAudioSource == null) return -1f;
+            return this.MusicAudioSource.time;
+        }
         public void SetPlayListPitch(float pitch)
         {
+            if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.pitch = pitch;
         }
 
