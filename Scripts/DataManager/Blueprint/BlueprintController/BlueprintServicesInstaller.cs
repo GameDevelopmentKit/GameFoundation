@@ -2,6 +2,7 @@ namespace DataManager.Blueprint.BlueprintController
 {
     using DataManager.Blueprint.APIHandler;
     using DataManager.Blueprint.BlueprintReader;
+    using DataManager.Blueprint.BlueprintSource;
     using DataManager.Blueprint.Signals;
     using GameConfigs;
     using GameFoundation.Scripts.Utilities.Extension;
@@ -16,12 +17,13 @@ namespace DataManager.Blueprint.BlueprintController
         {
             //BindBlueprint reader for mobile
             this.Container.Bind<PreProcessBlueprintMobile>().AsCached().NonLazy();
-            this.Container.Bind<FetchBlueprintInfo>().WhenInjectedInto<BlueprintReaderManager>();
-            this.Container.Bind<BlueprintDownloader>().WhenInjectedInto<BlueprintReaderManager>();
+            this.Container.Bind<FetchBlueprintInfo>().AsCached();
+            this.Container.Bind<BlueprintDownloader>().AsCached();
             this.Container.Bind<BlueprintReaderManager>().AsCached();
             this.Container.Bind<BlueprintConfig>().FromResolveGetter<GDKConfig>(config => config.GetGameConfig<BlueprintConfig>()).AsCached();
 
-            this.Container.BindAllTypeDriveFrom<IGenericBlueprintReader>();
+            this.Container.BindAllDerivedTypes<IGenericBlueprintReader>();
+            this.Container.BindInterfacesAndSelfToAllTypeDriveFrom<IBlueprintLoader>();
 
             this.Container.DeclareSignal<LoadBlueprintDataSucceedSignal>();
             this.Container.DeclareSignal<LoadBlueprintDataProgressSignal>();
