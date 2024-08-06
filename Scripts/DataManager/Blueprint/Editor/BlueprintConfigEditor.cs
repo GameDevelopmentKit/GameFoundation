@@ -10,7 +10,7 @@
         protected override string ConfigPath { get; } = "GameConfigs";
         public override VisualElement LoadView()
         {
-            var blueprintConfigTemplate = EditorGUIUtility.Load("Packages/com.gdk.core/Scripts/BlueprintFlow/Editor/BlueprintConfigEditor.uxml") as VisualTreeAsset;
+            var blueprintConfigTemplate = EditorGUIUtility.Load("Packages/com.gdk.core/Scripts/DataManager/Blueprint/Editor/BlueprintConfigEditor.uxml") as VisualTreeAsset;
 
             if (blueprintConfigTemplate == null) return this;
             var blueprintConfigVisual = blueprintConfigTemplate.CloneTree();

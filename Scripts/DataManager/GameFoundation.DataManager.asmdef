@@ -7,7 +7,11 @@
         "UniTask",
         "Zenject-Source",
         "Zenject-Signals",
-        "GameFoundation.GameConfigs"
+        "GameFoundation.GameConfigs",
+        "GameFoundation.AssetLibrary",
+        "Unity.ResourceManager",
+        "UniTask.Addressables",
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
