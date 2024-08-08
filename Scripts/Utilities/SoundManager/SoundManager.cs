@@ -190,7 +190,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="clip">Clip</param>
         public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip)
         {
-            SoundManager.PlayOneShotSound(source, clip, 1.0f);
+            SoundManager.PlayOneShotSound(source, clip, 1.0f, false);
         }
 
         /// <summary>
@@ -199,9 +199,9 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">AudioSource</param>
         /// <param name="clip">Clip</param>
         /// <param name="volumeScale">Additional volume scale</param>
-        public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip, float volumeScale)
+        public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip, float volumeScale, bool isAverage = false)
         {
-            SoundManager.PlayOneShotSound(source, clip, volumeScale);
+            SoundManager.PlayOneShotSound(source, clip, volumeScale, isAverage);
         }
 
         /// <summary>
@@ -533,7 +533,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="clip">Clip</param>
         public static void PlayOneShotSound(AudioSource source, AudioClip clip)
         {
-            PlayOneShotSound(source, clip, 1.0f);
+            PlayOneShotSound(source, clip, 1.0f, false);
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source</param>
         /// <param name="clip">Clip</param>
         /// <param name="volumeScale">Additional volume scale</param>
-        public static void PlayOneShotSound(AudioSource source, AudioClip clip, float volumeScale, bool isAverage = false)
+        public static void PlayOneShotSound(AudioSource source, AudioClip clip, float volumeScale, bool isAverage)
         {
             EnsureCreated();
 
@@ -576,9 +576,6 @@ namespace DigitalRuby.SoundManagerNamespace
             }
 
             volumes.Add(requestedVolume);
-            Debug.Log("Volume count: " + volumes.Count);
-            Debug.Log("Request volume: " + requestedVolume);
-            source.PlayOneShot(clip, requestedVolume);
             instance.StartCoroutine(RemoveVolumeFromClip(clip, requestedVolume));
         }
 
