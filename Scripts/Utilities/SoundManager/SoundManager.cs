@@ -322,7 +322,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <summary>
         /// Maximum number of the same audio clip to play at once
         /// </summary>
-        public static int MaxDuplicateAudioClips = 4;
+        public static int MaxDuplicateAudioClips = 10;
 
         /// <summary>
         /// Whether to stop sounds when a new level loads. Set to false for additive level loading.
@@ -542,7 +542,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source</param>
         /// <param name="clip">Clip</param>
         /// <param name="volumeScale">Additional volume scale</param>
-        public static void PlayOneShotSound(AudioSource source, AudioClip clip, float volumeScale)
+        public static void PlayOneShotSound(AudioSource source, AudioClip clip, float volumeScale, bool isAverage = false)
         {
             EnsureCreated();
 
@@ -556,23 +556,28 @@ namespace DigitalRuby.SoundManagerNamespace
             {
                 return;
             }
-
-            float minVolume = float.MaxValue;
-            float maxVolume = float.MinValue;
-            foreach (float volume in volumes)
-            {
-                minVolume = Mathf.Min(minVolume, volume);
-                maxVolume = Mathf.Max(maxVolume, volume);
-            }
-
+            
             float requestedVolume = (volumeScale * soundVolume);
-            if (maxVolume > 0.5f)
+
+            if (isAverage)
             {
-                requestedVolume = (minVolume + maxVolume) / (float)(volumes.Count + 2);
+                float minVolume = float.MaxValue;
+                float maxVolume = float.MinValue;
+                foreach (float volume in volumes)
+                {
+                    minVolume = Mathf.Min(minVolume, volume);
+                    maxVolume = Mathf.Max(maxVolume, volume);
+                }
+            
+                if (maxVolume > 0.5f)
+                {
+                    requestedVolume = (minVolume + maxVolume) / (float)(volumes.Count + 2);
+                }
             }
-            // else requestedVolume can stay as is
 
             volumes.Add(requestedVolume);
+            Debug.Log("Volume count: " + volumes.Count);
+            Debug.Log("Request volume: " + requestedVolume);
             source.PlayOneShot(clip, requestedVolume);
             instance.StartCoroutine(RemoveVolumeFromClip(clip, requestedVolume));
         }
