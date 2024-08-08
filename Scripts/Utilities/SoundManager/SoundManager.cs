@@ -576,6 +576,7 @@ namespace DigitalRuby.SoundManagerNamespace
             }
 
             volumes.Add(requestedVolume);
+            source.PlayOneShot(clip, requestedVolume);
             instance.StartCoroutine(RemoveVolumeFromClip(clip, requestedVolume));
         }
 
