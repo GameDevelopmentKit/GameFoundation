@@ -16,7 +16,7 @@
     public interface IAudioService
     {
         void PlaySound(string name, AudioSource sender);
-        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
+        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
         void StopAllSound();
         void StopAll();
         void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
@@ -90,7 +90,7 @@
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f)
+        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
