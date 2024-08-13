@@ -29,7 +29,7 @@ namespace BuildScripts.Editor
                 SetPlistConfig(pathToBuiltProject);
                 SetProjectConfig(pathToBuiltProject);
 
-                Debug.Log("onelog: IOSPostProcessingBuildTool OnPostProcessBuild Success");
+                Debug.Log("IOSPostProcessingBuildTool OnPostProcessBuild Success");
             }
             catch (Exception e)
             {
@@ -57,7 +57,7 @@ namespace BuildScripts.Editor
             SetCapability(pbxProjectPath, mainTargetGuid);
 
             File.WriteAllText(projectPath, pbxProject.WriteToString());
-            Debug.Log("onelog: IOSPostProcessingBuildTool SetProjectConfig Success");
+            Debug.Log("IOSPostProcessingBuildTool SetProjectConfig Success");
         }
 
         private static void SetPlistConfig(string pathToBuiltProject)
@@ -124,7 +124,7 @@ namespace BuildScripts.Editor
             
             // Write to file
             File.WriteAllText(plistPath, plist.WriteToString());
-            Debug.Log($"onelog: IOSPostProcessingBuildTool End SetPlistConfig");
+            Debug.Log($"IOSPostProcessingBuildTool End SetPlistConfig");
         }
 
         #endregion
@@ -155,16 +155,16 @@ namespace BuildScripts.Editor
         private static void SetCapability(string pbxProjectPath, string mainTargetGuid)
         {
             var projectCapabilityManager = new ProjectCapabilityManager(pbxProjectPath, "Production.entitlements", null, mainTargetGuid);
-#if THEONE_SIGN_IN
+#if SIGN_IN
             projectCapabilityManager.AddSignInWithApple();
 #endif
-#if THEONE_IAP
+#if IAP
             projectCapabilityManager.AddInAppPurchase();
 #endif
             projectCapabilityManager.AddBackgroundModes(BackgroundModesOptions.RemoteNotifications);
             projectCapabilityManager.AddPushNotifications(false);
             projectCapabilityManager.WriteToFile();
-            Debug.Log("onelog:  OnPostProcessBuild SetCapability");
+            Debug.Log(" OnPostProcessBuild SetCapability");
         }
 
         #endregion

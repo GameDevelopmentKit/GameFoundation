@@ -79,7 +79,6 @@ namespace Zenject
 
         private bool TrySubscribeInternal<TSignal>(Delegate callback)
         {
-            if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (this.subscriptions.ContainsKey(key)) return false;
@@ -96,7 +95,6 @@ namespace Zenject
 
         private bool TryUnsubscribeInternal<TSignal>(Delegate callback)
         {
-            if (this.isDisposed) return true;
             if (callback is null) throw new ArgumentNullException(nameof(callback));
             var key = (typeof(TSignal), callback);
             if (!this.subscriptions.Remove(key, out var subscription)) return false;
@@ -104,7 +102,6 @@ namespace Zenject
             return true;
         }
 
-        private bool isDisposed;
 
         void ILateDisposable.LateDispose()
         {
@@ -113,7 +110,6 @@ namespace Zenject
                 subscription.Dispose();
             }
             this.subscriptions.Clear();
-            this.isDisposed = true;
         }
     }
 }
