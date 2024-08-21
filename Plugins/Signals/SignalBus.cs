@@ -17,13 +17,11 @@ namespace Zenject
 
         public void Fire<TSignal>()
         {
-            if (this.isDisposed) return;
             this.GetPublisher<TSignal>().Publish(default);
         }
 
         public void Fire<TSignal>(TSignal signal)
         {
-            if (this.isDisposed) return;
             this.GetPublisher<TSignal>().Publish(signal);
         }
 
