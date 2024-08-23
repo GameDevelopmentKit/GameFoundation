@@ -23,6 +23,17 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.GameAssets = gameAssets;
         }
 
+        public async UniTask<SceneInstance> ReloadCurrentScene()
+        {
+            var sceneName = CurrentSceneName;
+            await this.GameAssets.UnloadSceneAsync(sceneName);
+
+            CurrentSceneName = sceneName;
+            var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName);
+
+            return screenInstance;
+        }
+
         //to backup for old version
         public UniTask<SceneInstance> LoadSingleSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
         {
