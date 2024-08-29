@@ -27,12 +27,12 @@ namespace Zenject
 
         public void Subscribe<TSignal>(Action callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} already subscribed");
         }
 
         public void Subscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} already subscribed");
         }
 
         public bool TrySubscribe<TSignal>(Action callback)
@@ -47,12 +47,12 @@ namespace Zenject
 
         public void Unsubscribe<TSignal>(Action callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} not subscribed");
         }
 
         public void Unsubscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} not subscribed");
         }
 
         public bool TryUnsubscribe<TSignal>(Action callback)

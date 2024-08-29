@@ -26,11 +26,24 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public async UniTask<SceneInstance> ReloadCurrentScene()
         {
             var sceneName = CurrentSceneName;
+
+            this.signalBus.Fire(new StartLoadingNewSceneSignal
+            {
+                CurrentScreenName = new List<string>() { CurrentSceneName },
+                TargetScreenName  = new List<string>() { sceneName },
+                ActiveScreenName  = sceneName
+            });
             await this.GameAssets.UnloadSceneAsync(sceneName);
 
             CurrentSceneName = sceneName;
             var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName);
 
+            this.signalBus.Fire(new FinishLoadingNewSceneSignal
+            {
+                CurrentScreenName = new List<string>() { sceneName },
+                TargetScreenName  = new List<string>() { sceneName },
+                ActiveScreenName  = sceneName
+            });
             return screenInstance;
         }
 
