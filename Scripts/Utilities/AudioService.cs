@@ -74,6 +74,7 @@
                 this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
                 this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
             };
+
             SoundManager.MusicVolume = this.soundSetting.MusicValue.Value;
             SoundManager.SoundVolume = this.soundSetting.SoundValue.Value;
         }
@@ -83,6 +84,7 @@
             var audioSource = await this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
             audioSource.clip   = null;
             audioSource.volume = 1;
+
             return audioSource;
         }
 
@@ -96,11 +98,13 @@
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
+
             if (isLoop)
             {
                 if (this.loopingSoundNameToSources.ContainsKey(name))
                 {
                     this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
+
                     return;
                 }
 
@@ -110,7 +114,7 @@
             }
             else
             {
-                audioSource.PlayOneShotSoundManaged(audioClip,volumeScale);
+                audioSource.PlayOneShotSoundManaged(audioClip, volumeScale);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
@@ -120,6 +124,7 @@
         {
             SoundManager.StopAllLoopingSounds();
             SoundManager.StopAllNonLoopingSounds();
+            SoundManager.StopAllOneShotSound();
 
             foreach (var audioSource in this.loopingSoundNameToSources.Values)
             {
@@ -151,12 +156,11 @@
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
-        
-        
+
         public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
             this.StopPlayList();
-            
+
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
@@ -176,6 +180,7 @@
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.time = time;
         }
+
         /// <summary>
         /// Get playlist time
         /// </summary>
@@ -183,14 +188,16 @@
         public float GetPlayListTime()
         {
             if (this.MusicAudioSource == null) return -1f;
+
             return this.MusicAudioSource.time;
         }
+
         public void SetPlayListPitch(float pitch)
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.pitch = pitch;
         }
-        
+
         public void SetPlayListLoop(bool isLoop)
         {
             if (this.MusicAudioSource == null) return;
