@@ -3694,6 +3694,11 @@
             The base type of the value entry. If this is value entry represents a member value, this is the type of the member. If the value entry represents a collection element, this is the element type of the collection.
             </summary>
         </member>
+        <member name="P:Sirenix.OdinInspector.Editor.PropertyValueEntryAlias.TValueGenericTypeArgument">
+            <summary>
+            The generic value type of the value entry alias itself, IE, the PropertyValueEntryAlias implements the IPropertyValueEntry&lt;TValue&gt; interface - this member returns TValue regardless of the actual type of the backing objects. This is a performance shortcut to checking TValue using reflection, used internally by the property system to determine whether a value entry alias needs to be swapped out with an alias for a different type.
+            </summary>
+        </member>
         <member name="P:Sirenix.OdinInspector.Editor.PropertyValueEntryAlias.ValueState">
             <summary>
             The special state of the value entry.
@@ -3845,6 +3850,11 @@
         <member name="P:Sirenix.OdinInspector.Editor.PropertyValueEntryAlias`2.BaseValueType">
             <summary>
             The base type of the value entry. If this is value entry represents a member value, this is the type of the member. If the value entry represents a collection element, this is the element type of the collection.
+            </summary>
+        </member>
+        <member name="P:Sirenix.OdinInspector.Editor.PropertyValueEntryAlias`2.TValueGenericTypeArgument">
+            <summary>
+            The generic value type of the value entry alias itself, IE, the PropertyValueEntryAlias implements the IPropertyValueEntry&lt;TValue&gt; interface - this member returns TValue regardless of the actual type of the backing objects. This is a performance shortcut to checking TValue using reflection, used internally by the property system to determine whether a value entry alias needs to be swapped out with an alias for a different type.
             </summary>
         </member>
         <member name="P:Sirenix.OdinInspector.Editor.PropertyValueEntryAlias`2.ValueState">
