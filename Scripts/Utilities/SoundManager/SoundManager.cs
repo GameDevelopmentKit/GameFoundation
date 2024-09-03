@@ -360,6 +360,7 @@ namespace DigitalRuby.SoundManagerNamespace
                 StopLoopingListOnLevelLoad(sounds);
                 StopLoopingListOnLevelLoad(music);
                 soundsOneShot.Clear();
+                listSoundOneshot.Clear();
                 ClearPersistedSounds();
             }
         }
@@ -698,8 +699,10 @@ namespace DigitalRuby.SoundManagerNamespace
         {
             foreach (var s in listSoundOneshot)
             {
-                s.Stop();
+                s?.Stop();
             }
+
+            listSoundOneshot.RemoveAll(x => x == null);
         }
 
         /// <summary>
