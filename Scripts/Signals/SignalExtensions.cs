@@ -1,3 +1,4 @@
+#if GDK_ZENJECT
 namespace Zenject
 {
     using MessagePipe;
@@ -12,3 +13,4 @@ namespace Zenject
         }
     }
 }
+#endif

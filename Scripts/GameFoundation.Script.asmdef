@@ -10,7 +10,8 @@
         "MasterAAASound.Scripts",
         "I2Localization.Scripts",
         "Zenject",
-        "Zenject-Signals"
+        "GameFoundation.Signals",
+        "GameFoundation.DI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

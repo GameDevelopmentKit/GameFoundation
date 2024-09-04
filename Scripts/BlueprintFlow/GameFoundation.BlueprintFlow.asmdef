@@ -5,7 +5,7 @@
         "UniTask",
         "GameFoundation.Utilities",
         "Zenject",
-        "Zenject-Signals",
+        "GameFoundation.Signals",
         "GameFoundation.Models"
     ],
     "includePlatforms": [],

@@ -13,7 +13,7 @@
         "Unity.ResourceManager",
         "UniTask.Addressables",
         "Zenject",
-        "Zenject-Signals",
+        "GameFoundation.Signals",
         "DOTween.Modules",
         "R3.Unity"
     ],

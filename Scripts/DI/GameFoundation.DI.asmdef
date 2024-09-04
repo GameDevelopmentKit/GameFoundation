@@ -1,0 +1,7 @@
+{
+  "name": "GameFoundation.DI",
+  "rootNamespace": "GameFoundation.DI",
+  "references": [
+    "Zenject"
+  ]
+}

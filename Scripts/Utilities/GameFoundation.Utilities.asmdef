@@ -10,7 +10,7 @@
         "GameFoundation.AssetLibrary",
         "Zenject",
         "GameFoundation.Models",
-        "Zenject-Signals",
+        "GameFoundation.Signals",
         "UniTask.Addressables",
         "Unity.ResourceManager",
         "Unity.Addressables",
