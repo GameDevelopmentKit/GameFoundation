@@ -3,5 +3,12 @@
   "rootNamespace": "GameFoundation.DI",
   "references": [
     "Zenject"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "GDK_ZENJECT"
+    }
   ]
 }

@@ -2,8 +2,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System;
     using R3;
-    using Zenject;
-    using Zenject.Internal;
 
     public class BaseQueueAction : IGameQueueAction
     {
@@ -77,24 +75,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.OnExecute   = null;
             this.OnStart     = null;
             this.OnComplete  = null;
-
-            this.pool?.Despawn(this);
-        }
-
-        private IMemoryPool pool;
-
-        public void OnDespawned() { this.pool = null; }
-        public void OnSpawned(IMemoryPool poolParam, string actionIdParam, string locationParam)
-        {
-            this.pool = poolParam;
-
-            this.actionId      = actionIdParam;
-            this.dependActions = null;
-
-            this.location    = locationParam;
-            this.state       = null;
-            this.delay       = -1f;
-            this.isExecuting = false;
         }
     }
 }

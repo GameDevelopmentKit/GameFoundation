@@ -1,4 +1,4 @@
-﻿namespace UIModule.ScreenFlow
+﻿namespace GameFoundation.Scripts.UIModule.ScreenFlow
 {
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;

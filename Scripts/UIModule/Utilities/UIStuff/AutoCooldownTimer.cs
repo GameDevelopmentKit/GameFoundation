@@ -4,12 +4,11 @@
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using R3;
     using Zenject;
-    using Zenject.Internal;
 
     /// <summary>
     /// A timer cooldown by cycle automatically, mainly use for UI
     /// </summary>
-    public class AutoCooldownTimer : IDisposable, IPoolable<IMemoryPool>
+    public class AutoCooldownTimer : IDisposable
     {
         private readonly int  minDays;
         private readonly int  minHours;
@@ -21,16 +20,13 @@
         private Action<long> onEveryCycle;
         private Action       onComplete;
 
-        private readonly SignalBus   signalBus;
-        private          IMemoryPool pool;
-
         public AutoCooldownTimer(SignalBus signalBus, int minMinutes = 60, int minHours = 24, int minDays = 30)
         {
-            this.signalBus = signalBus;
-
             this.minDays    = minDays;
             this.minHours   = minHours;
             this.minMinutes = minMinutes;
+
+            signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
         }
 
         private void OnUpdateTimeAfterFocus(UpdateTimeAfterFocusSignal signal)
@@ -54,33 +50,33 @@
             this.onComplete          = onCompleteParam;
 
             var currentCycle = this.GetCycleByTime(this.currentCooldownTime);
-//        Debug.Log("Create count down with depth = " + Depth);
+            //        Debug.Log("Create count down with depth = " + Depth);
 
-            this.observableTimer = Observable.Interval(TimeSpan.FromSeconds(currentCycle)).Subscribe( _ =>
+            this.observableTimer = Observable.Interval(TimeSpan.FromSeconds(currentCycle)).Subscribe(_ =>
+            {
+                // Debug.Log($"count down = {cooldownTime} - depth = {Depth}");
+                this.onEveryCycle?.Invoke(this.currentCooldownTime);
+                if (this.currentCooldownTime <= 0)
                 {
-                    // Debug.Log($"count down = {cooldownTime} - depth = {Depth}");
-                    this.onEveryCycle?.Invoke(this.currentCooldownTime);
-                    if (this.currentCooldownTime <= 0)
+                    this.onComplete?.Invoke();
+                    this.Dispose();
+                    return;
+                }
+
+                if (currentCycle != 1)
+                {
+                    var nextCycle = this.GetCycleByTime(this.currentCooldownTime);
+
+                    if (nextCycle != currentCycle)
                     {
-                        this.onComplete?.Invoke();
-                        this.Dispose();
+                        this.observableTimer?.Dispose();
+                        this.CountDown(this.currentCooldownTime, this.onEveryCycle, this.onComplete, depth + 1);
                         return;
                     }
+                }
 
-                    if (currentCycle != 1)
-                    {
-                        var nextCycle = this.GetCycleByTime(this.currentCooldownTime);
-
-                        if (nextCycle != currentCycle)
-                        {
-                            this.observableTimer?.Dispose();
-                            this.CountDown(this.currentCooldownTime, this.onEveryCycle, this.onComplete, depth + 1);
-                            return;
-                        }
-                    }
-
-                    this.currentCooldownTime -= currentCycle;
-                });
+                this.currentCooldownTime -= currentCycle;
+            });
 
             return this;
         }
@@ -114,17 +110,6 @@
             this.onComplete   = null;
             this.onEveryCycle = null;
             this.observableTimer?.Dispose();
-            this.pool?.Despawn(this);
-        }
-        public void OnDespawned()
-        {
-            this.pool = null;
-            this.signalBus.Unsubscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
-        }
-        public void OnSpawned(IMemoryPool pool)
-        {
-            this.pool = pool; 
-            this.signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
         }
     }
 }

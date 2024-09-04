@@ -1,7 +1,7 @@
 ﻿namespace GameFoundation.Scripts
 {
     using BlueprintFlow.BlueprintControlFlow;
-    using GameFoundation.DI.Adapters;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
@@ -20,6 +20,7 @@
     {
         public override void InstallBindings()
         {
+            this.Container.BindInterfacesTo<ZenjectContainer>().AsSingle();
             this.Container.BindInterfacesTo<ZenjectAdapter>().AsSingle();
 
             SignalBusInstaller.Install(this.Container);

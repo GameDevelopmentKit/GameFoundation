@@ -2,10 +2,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System;
     using DG.Tweening;
+    using GameFoundation.Scripts.UIModule.ScreenFlow;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
-    using global::UIModule.ScreenFlow;
     using UnityEngine.Playables;
 
     public class GameQueueActionContext
@@ -41,7 +41,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.gameQueueActionServices.Append(baseAction);
             return baseAction;
         }
-        
+
         public IGameQueueAction AddScreenToQueueAction<TPresenter, TLocationView>(string actionId = "") where TPresenter : IScreenPresenter where TLocationView : IScreenView => this.AddScreenToQueueAction<TPresenter>(actionId, ScreenHelper.GetScreenId<TLocationView>());
 
         public IGameQueueAction AddScreenToQueueAction<TPresenter>(string actionId = "", string location = "") where TPresenter : IScreenPresenter
@@ -50,7 +50,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.gameQueueActionServices.Append(action);
             return action;
         }
-        
+
         public IGameQueueAction AddScreenToQueueAction<TPresenter, TModel, TLocationView>(TModel model, string actionId = "") where TPresenter : IScreenPresenter<TModel> where TLocationView : IScreenView  => this.AddScreenToQueueAction<TPresenter, TModel>(model, actionId, ScreenHelper.GetScreenId<TLocationView>());
 
         public IGameQueueAction AddScreenToQueueAction<TPresenter, TModel>(TModel model, string actionId = "", string location = "") where TPresenter : IScreenPresenter<TModel>

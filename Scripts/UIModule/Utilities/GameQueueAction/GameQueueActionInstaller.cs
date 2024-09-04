@@ -1,3 +1,4 @@
+#if GDK_ZENJECT
 namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using Zenject;
@@ -11,3 +12,4 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         }
     }
 }
+#endif

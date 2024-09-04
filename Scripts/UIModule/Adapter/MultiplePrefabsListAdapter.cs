@@ -5,9 +5,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     using Com.ForbiddenByte.OSA.Core;
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
-    using Zenject;
 
     // There are 2 important callbacks you need to implement, apart from Start(): CreateViewsHolder() and UpdateViewsHolder()
     // See explanations below
@@ -23,8 +23,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private List<TPresenter>         presenters;
         private HashSet<TView>           readiedViewSet = new();
 
-
-        private DiContainer diContainer;
+        private IDependencyContainer container;
 
         #region OSA implementation
 
@@ -62,12 +61,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             if (this.models.Count <= index || index < 0) return;
 
-            var model = this.models[index];
-            var viewObject  = vh.root.GetComponentInChildren<TView>(true);
+            var model      = this.models[index];
+            var viewObject = vh.root.GetComponentInChildren<TView>(true);
 
             if (this.presenters.Count <= index)
             {
-                var presenter = this.diContainer.Instantiate(this.models[index].PresenterType) as TPresenter;
+                var presenter = this.container.Instantiate(this.models[index].PresenterType) as TPresenter;
                 presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
@@ -81,8 +80,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.BindData(model);
                 CallOnViewReady(viewObject, presenter);
             }
-             
-            
+
             return;
 
             void CallOnViewReady(TView view, TPresenter presenter)
@@ -106,19 +104,19 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async UniTask InitItemAdapter(List<TModel> models, DiContainer diContainer)
+        public async UniTask InitItemAdapter(List<TModel> models, IDependencyContainer container)
         {
-            this.diContainer = diContainer;
-            this.models      = new SimpleDataHelper<TModel>(this);
-            
+            this.container = container;
+            this.models    = new SimpleDataHelper<TModel>(this);
+
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
                     baseUIItemPresenter.Dispose();
-                } 
+                }
             }
-            this.presenters  = new List<TPresenter>();
+            this.presenters = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
