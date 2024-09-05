@@ -1,7 +1,30 @@
-﻿#if !GDK_ZENJECT && !GDK_VCONTAINER
-#nullable enable
+﻿#nullable enable
 namespace GameFoundation.DI
 {
+    #if GDK_ZENJECT
+    using UnityEngine;
+    using Zenject;
+
+    public static class DIExtensions
+    {
+        private static SceneContext? CurrentSceneContext;
+
+        /// <summary>
+        ///     Get DiContainer from Scene context in the current active scene
+        /// </summary>
+        public static IDependencyContainer GetCurrentContainer()
+        {
+            if (!CurrentSceneContext)
+            {
+                CurrentSceneContext = Object.FindObjectOfType<SceneContext>();
+            }
+            return (CurrentSceneContext?.Container ?? ProjectContext.Instance.Container).Resolve<IDependencyContainer>();
+        }
+
+        /// <inheritdoc cref="GetCurrentContainer()"/>
+        public static IDependencyContainer GetCurrentContainer(this object _) => GetCurrentContainer();
+    }
+    #else
     using System;
 
     public static class DIExtensions
@@ -13,5 +36,5 @@ namespace GameFoundation.DI
 
         public static IDependencyContainer GetCurrentContainer(this object _) => GetCurrentContainer();
     }
+    #endif
 }
-#endif

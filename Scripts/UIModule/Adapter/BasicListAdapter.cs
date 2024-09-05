@@ -17,26 +17,18 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        private SimpleDataHelper<TModel> Models { get; set; }
-        private CanvasGroup              canvasGroup;
-        private List<TPresenter>         presenters;
-        private HashSet<TView>           readiedViewSet = new();
-
-        private IDependencyContainer container;
+        public           SimpleDataHelper<TModel> Models { get; private set; }
+        private          IDependencyContainer     container;
+        private readonly List<TPresenter>         presenters     = new();
+        private readonly HashSet<TView>           readiedViewSet = new();
 
         #region OSA implementation
 
-        protected override void Start()
+        protected override void Awake()
         {
-            this.Models = new SimpleDataHelper<TModel>(this);
-
-            // Calling this initializes internal data and prepares the adapter to handle item count changes
-            base.Start();
-
-            // Retrieve the models from your data source and set the items count
-            /*
-            RetrieveDataAndUpdate(500);
-            */
+            base.Awake();
+            this.container = this.GetCurrentContainer();
+            this.Models    = new(this);
         }
 
         // This is called initially, as many times as needed to fill the viewport,
@@ -99,21 +91,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async UniTask InitItemAdapter(List<TModel> modelList, IDependencyContainer container)
+        public async UniTask InitItemAdapter(List<TModel> modelList)
         {
-            this.container = container;
-            this.Models    = new SimpleDataHelper<TModel>(this);
-
-            if (this.presenters != null)
+            foreach (var baseUIItemPresenter in this.presenters)
             {
-                foreach (var baseUIItemPresenter in this.presenters)
-                {
-                    baseUIItemPresenter.Dispose();
-                }
+                baseUIItemPresenter.Dispose();
             }
-
-            this.presenters = new List<TPresenter>();
-
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);

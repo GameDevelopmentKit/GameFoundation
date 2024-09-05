@@ -23,7 +23,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.Container.DeclareSignal<PopupHiddenSignal>();
             this.Container.DeclareSignal<PopupBlurBgShowedSignal>();
 
-            this.Container.BindIFactory<AutoCooldownTimer>().AsTransient();
+            this.Container.Bind<AutoCooldownTimer>().AsTransient();
         }
     }
 }

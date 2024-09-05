@@ -22,8 +22,8 @@ namespace GameFoundation.Scripts
     {
         public override void InstallBindings()
         {
-            this.Container.BindInterfacesTo<ZenjectContainer>().AsSingle();
-            this.Container.BindInterfacesTo<ZenjectAdapter>().AsSingle();
+            this.Container.BindInterfacesTo<ZenjectContainer>().AsSingle().CopyIntoAllSubContainers();
+            this.Container.BindInterfacesTo<ZenjectAdapter>().AsSingle().CopyIntoAllSubContainers();
 
             SignalBusInstaller.Install(this.Container);
 
