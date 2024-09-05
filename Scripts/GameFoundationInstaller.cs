@@ -1,4 +1,5 @@
-﻿namespace GameFoundation.Scripts
+﻿#if GDK_ZENJECT
+namespace GameFoundation.Scripts
 {
     using BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.DI;
@@ -57,3 +58,4 @@
         }
     }
 }
+#endif

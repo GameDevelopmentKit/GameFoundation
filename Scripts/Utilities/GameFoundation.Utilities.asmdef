@@ -1,28 +1,27 @@
 {
-    "name": "GameFoundation.Utilities",
-    "rootNamespace": "",
-    "references": [
-        "I2Localization.Scripts",
-        "MasterAAASound.Scripts",
-        "Unity.TextMeshPro",
-        "UniTask",
-        "Unity.Timeline",
-        "GameFoundation.AssetLibrary",
-        "Zenject",
-        "GameFoundation.Models",
-        "GameFoundation.Signals",
-        "UniTask.Addressables",
-        "Unity.ResourceManager",
-        "Unity.Addressables",
-        "BuildScript.Runtime"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "GameFoundation.Utilities",
+  "rootNamespace": "",
+  "references": [
+    "I2Localization.Scripts",
+    "MasterAAASound.Scripts",
+    "Unity.TextMeshPro",
+    "UniTask",
+    "Unity.Timeline",
+    "GameFoundation.AssetLibrary",
+    "GameFoundation.DI",
+    "GameFoundation.Models",
+    "GameFoundation.Signals",
+    "UniTask.Addressables",
+    "Unity.ResourceManager",
+    "Unity.Addressables",
+    "Zenject",
+    "BuildScript.Runtime"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "GDK_ZENJECT"
+    }
+  ]
 }

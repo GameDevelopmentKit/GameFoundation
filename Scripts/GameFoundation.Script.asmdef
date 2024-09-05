@@ -1,25 +1,23 @@
 {
-    "name": "GameFoundation.Script",
-    "rootNamespace": "",
-    "references": [
-        "GameFoundation.Utilities",
-        "GameFoundation.AssetLibrary",
-        "GameFoundation.BlueprintFlow",
-        "GameFoundation.Models",
-        "GameFoundation.UIModule",
-        "MasterAAASound.Scripts",
-        "I2Localization.Scripts",
-        "Zenject",
-        "GameFoundation.Signals",
-        "GameFoundation.DI"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "GameFoundation.Script",
+  "rootNamespace": "GameFoundation",
+  "references": [
+    "GameFoundation.Utilities",
+    "GameFoundation.AssetLibrary",
+    "GameFoundation.BlueprintFlow",
+    "GameFoundation.Models",
+    "GameFoundation.UIModule",
+    "MasterAAASound.Scripts",
+    "I2Localization.Scripts",
+    "Zenject",
+    "GameFoundation.Signals",
+    "GameFoundation.DI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "GDK_ZENJECT"
+    }
+  ]
 }

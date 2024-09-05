@@ -12,20 +12,21 @@
     using R3;
     using UnityEngine;
     using Zenject;
+    using IInitializable = GameFoundation.DI.IInitializable;
 
     public interface IAudioService
     {
         void  PlaySound(string name, AudioSource sender);
-        void  PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void  PlaySound(string name, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
         void  StopAllSound();
         void  StopAll();
-        void  PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+        void  PlayPlayList(string    musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void  PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void  StopPlayList();
         void  SetPlayListTime(float time);
         float GetPlayListTime();
         void  SetPlayListPitch(float pitch);
-        void  SetPlayListLoop(bool isLoop);
+        void  SetPlayListLoop(bool   isLoop);
         void  PausePlayList();
         void  ResumePlayList();
         bool  IsPlayingPlayList();
@@ -50,11 +51,11 @@
         private AudioSource                     MusicAudioSource;
 
         public AudioService(
-            SignalBus signalBus,
-            SoundSetting SoundSetting,
-            IGameAssets gameAssets,
+            SignalBus         signalBus,
+            SoundSetting      SoundSetting,
+            IGameAssets       gameAssets,
             ObjectPoolManager objectPoolManager,
-            ILogService logService
+            ILogService       logService
         )
         {
             this.signalBus         = signalBus;
@@ -151,12 +152,11 @@
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
-        
-        
+
         public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
             this.StopPlayList();
-            
+
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
@@ -176,6 +176,7 @@
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.time = time;
         }
+
         /// <summary>
         /// Get playlist time
         /// </summary>
@@ -185,12 +186,13 @@
             if (this.MusicAudioSource == null) return -1f;
             return this.MusicAudioSource.time;
         }
+
         public void SetPlayListPitch(float pitch)
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.pitch = pitch;
         }
-        
+
         public void SetPlayListLoop(bool isLoop)
         {
             if (this.MusicAudioSource == null) return;

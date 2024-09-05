@@ -1,9 +1,9 @@
+#if GDK_ZENJECT
 namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System;
     using System.Linq;
     using Zenject;
-    using Object = UnityEngine.Object;
 
     public static class ZenjectUtils
     {
@@ -12,8 +12,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             var bindMemoryPoolMethod = container.GetType().GetMethods().First(methodInfo => methodInfo.Name.Equals("BindIFactory") && methodInfo.GetGenericArguments().Length == 1);
             var fromPoolableMemoryPoolMethod = typeof(FactoryFromBinder0Extensions).GetMethods()
-                                                                                   .First(methodInfo => methodInfo.Name.Equals("FromPoolableMemoryPool") &&
-                                                                                                        methodInfo.GetGenericArguments().Length == 1 && methodInfo.GetParameters().Length == 1);
+                .First(methodInfo => methodInfo.Name.Equals("FromPoolableMemoryPool") && methodInfo.GetGenericArguments().Length == 1 && methodInfo.GetParameters().Length == 1);
 
             // Bind pool for all http request
             var allDriveType = ReflectionUtils.GetAllDerivedTypes<T>();
@@ -63,27 +62,6 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 diContainer.BindInterfacesAndSelfTo(type).AsCached().NonLazy();
             }
         }
-
-        private static SceneContext currentSceneContext;
-
-        /// <summary>
-        /// Get DiContainer from Scene context in the current active scene
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public static DiContainer GetCurrentContainer(this object obj)
-        {
-            return GetCurrentContainer();
-        }
-
-        public static DiContainer GetCurrentContainer()
-        {
-            if (currentSceneContext == null)
-            {
-                currentSceneContext = Object.FindObjectOfType<SceneContext>();
-            }
-
-            return currentSceneContext.Container;
-        }
     }
 }
+#endif

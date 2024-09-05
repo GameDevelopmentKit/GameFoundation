@@ -8,8 +8,14 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
     /// <summary>Catch application event ex pause, focus and more.... </summary>
     public class MinimizeAppService : MonoBehaviour
     {
-        [Inject] private SignalBus               signalBus;
-        [Inject] private IHandleUserDataServices handleUserDataServices;
+        private SignalBus               signalBus;
+        private IHandleUserDataServices handleUserDataServices;
+
+        public void Construct(SignalBus signalBus, IHandleUserDataServices handleUserDataServices)
+        {
+            this.signalBus              = signalBus;
+            this.handleUserDataServices = handleUserDataServices;
+        }
 
         private readonly ApplicationPauseSignal     applicationPauseSignal     = new(false);
         private readonly ApplicationQuitSignal      applicationQuitSignal      = new();
@@ -35,7 +41,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
             else
             {
                 //TODO: Reload when open minimized game
-                
+
                 var intervalTimeMinimize = DateTime.Now - this.timeBeforeAppPause;
 
                 if (MinimizeTimeToReload > 0 && intervalTimeMinimize.TotalMinutes >= MinimizeTimeToReload)
