@@ -1,4 +1,4 @@
-namespace Zenject
+namespace GameFoundation.Signals
 {
     using System;
     using System.Collections.Generic;

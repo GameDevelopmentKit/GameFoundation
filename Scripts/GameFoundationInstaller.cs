@@ -14,6 +14,7 @@ namespace GameFoundation.Scripts
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
+    using GameFoundation.Signals;
     using global::Models;
     using Zenject;
 

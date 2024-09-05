@@ -4,15 +4,15 @@
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using DigitalRuby.SoundManagerNamespace;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
+    using GameFoundation.Signals;
     using R3;
     using UnityEngine;
-    using Zenject;
-    using IInitializable = GameFoundation.DI.IInitializable;
 
     public interface IAudioService
     {

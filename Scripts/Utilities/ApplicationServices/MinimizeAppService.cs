@@ -2,8 +2,8 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
     using System;
     using GameFoundation.Scripts.Utilities.UserData;
+    using GameFoundation.Signals;
     using UnityEngine;
-    using Zenject;
 
     /// <summary>Catch application event ex pause, focus and more.... </summary>
     public class MinimizeAppService : MonoBehaviour

@@ -2,8 +2,8 @@
 {
     using System;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
+    using GameFoundation.Signals;
     using R3;
-    using Zenject;
 
     /// <summary>
     /// A timer cooldown by cycle automatically, mainly use for UI

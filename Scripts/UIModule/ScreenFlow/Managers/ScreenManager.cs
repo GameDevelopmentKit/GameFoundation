@@ -13,10 +13,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
+    using GameFoundation.Signals;
     using R3;
     using UnityEditor;
     using UnityEngine;
-    using Zenject;
     using IInitializable = GameFoundation.DI.IInitializable;
     using ITickable = GameFoundation.DI.ITickable;
     using Object = UnityEngine.Object;

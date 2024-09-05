@@ -5,6 +5,7 @@ namespace BlueprintFlow.BlueprintControlFlow
     using BlueprintFlow.BlueprintReader;
     using BlueprintFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Signals;
     using Models;
     using Zenject;
 

@@ -2,6 +2,7 @@
 namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
     using GameFoundation.Scripts.Utilities.UserData;
+    using GameFoundation.Signals;
     using Zenject;
 
     public class ApplicationServiceInstaller : Installer<ApplicationServiceInstaller>

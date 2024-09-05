@@ -4,21 +4,21 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Signals;
     using R3;
-    using Zenject;
 
     public class GameQueueActionServices
     {
         public static GameQueueActionServices Instance { get; private set; }
 
-        private          IScreenManager screenManager;
+        private readonly IScreenManager screenManager;
         private readonly SignalBus      signalBus;
 
+        private readonly Dictionary<string, List<IGameQueueAction>> queueActions           = new Dictionary<string, List<IGameQueueAction>>();
+        private readonly HashSet<string>                            trackUnCompleteActions = new HashSet<string>();
 
-        private Dictionary<string, List<IGameQueueAction>> queueActions           = new Dictionary<string, List<IGameQueueAction>>();
-        private HashSet<string>                            trackUnCompleteActions = new HashSet<string>();
-        private bool                                       isDequeuing;
-        private string                                     curLocation;
+        private bool   isDequeuing;
+        private string curLocation;
 
         public GameQueueActionServices(IScreenManager screenManager, SignalBus signalBus)
         {
@@ -27,6 +27,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             Instance           = this;
             this.screenManager.CurrentActiveScreen.Subscribe(this.OnStartAtLocation);
         }
+
         private void OnStartAtLocation(IScreenPresenter currentScreen)
         {
             this.curLocation = currentScreen == null ? string.Empty : currentScreen.ScreenId;
@@ -38,7 +39,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         public bool Insert(string location, IGameQueueAction action, int index = -1)
         {
-//        Debug.Log($"<color=red> GameQueueActionServices: add action {action.actionId} at {location}, index = {index} </color>");
+            //        Debug.Log($"<color=red> GameQueueActionServices: add action {action.actionId} at {location}, index = {index} </color>");
 
             var isAdded = false;
             if (this.queueActions.TryGetValue(location, out var listAction))
@@ -149,7 +150,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             }
             else
             {
-//            Debug.Log($"<color=red> GameQueueActionServices: empty queue at {curLocation}</color>");
+                //            Debug.Log($"<color=red> GameQueueActionServices: empty queue at {curLocation}</color>");
                 this.isDequeuing = false;
             }
         }

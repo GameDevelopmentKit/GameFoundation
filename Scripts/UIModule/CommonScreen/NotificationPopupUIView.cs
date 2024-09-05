@@ -4,13 +4,12 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.Utilities;
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.LogService;
+    using GameFoundation.Signals;
     using TMPro;
     using UnityEngine;
     using UnityEngine.UI;
-    using Zenject;
 
     public enum NotificationType
     {
@@ -78,7 +77,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
             this.CloseView();
             this.Model.OkAction?.Invoke();
         }
-        
+
         private void OkNoticeAction()
         {
             this.audioManager.PlaySound("button_click");

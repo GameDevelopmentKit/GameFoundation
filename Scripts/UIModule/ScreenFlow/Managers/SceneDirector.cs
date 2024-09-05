@@ -4,10 +4,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
+    using GameFoundation.Signals;
     using UnityEngine;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
-    using Zenject;
 
     /// <summary>Load, unload scenes are wrapped here </summary>
     public class SceneDirector

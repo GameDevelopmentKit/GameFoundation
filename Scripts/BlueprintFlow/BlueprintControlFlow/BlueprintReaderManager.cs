@@ -12,8 +12,8 @@ namespace BlueprintFlow.BlueprintControlFlow
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.UserData;
+    using GameFoundation.Signals;
     using UnityEngine;
-    using Zenject;
 
     /// <summary>
     ///  The main manager for reading blueprints pipeline/>.

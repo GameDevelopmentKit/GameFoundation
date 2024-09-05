@@ -5,6 +5,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
     using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.MVP;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Signals;
     using UnityEngine;
     using UnityEngine.UI;
     #if GDK_ZENJECT

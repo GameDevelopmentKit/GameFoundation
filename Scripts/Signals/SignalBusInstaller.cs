@@ -1,7 +1,8 @@
 #if GDK_ZENJECT
-namespace Zenject
+namespace GameFoundation.Signals
 {
     using MessagePipe;
+    using Zenject;
 
     public class SignalBusInstaller : Installer<SignalBusInstaller>
     {
