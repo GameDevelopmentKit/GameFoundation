@@ -4,6 +4,7 @@ namespace GameFoundation.DI
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Zenject;
 
     public sealed class ZenjectAdapter : Zenject.IInitializable, Zenject.ITickable, Zenject.ILateTickable, Zenject.IFixedTickable, Zenject.ILateDisposable
     {
@@ -14,11 +15,11 @@ namespace GameFoundation.DI
         private readonly IReadOnlyCollection<ILateDisposable> lateDisposables;
 
         public ZenjectAdapter(
-            IEnumerable<IInitializable>  initializables,
-            IEnumerable<ITickable>       tickables,
-            IEnumerable<ILateTickable>   lateTickables,
-            IEnumerable<IFixedTickable>  fixedTickables,
-            IEnumerable<ILateDisposable> lateDisposables
+            [Inject(Source = InjectSources.Local)] IEnumerable<IInitializable>  initializables,
+            [Inject(Source = InjectSources.Local)] IEnumerable<ITickable>       tickables,
+            [Inject(Source = InjectSources.Local)] IEnumerable<ILateTickable>   lateTickables,
+            [Inject(Source = InjectSources.Local)] IEnumerable<IFixedTickable>  fixedTickables,
+            [Inject(Source = InjectSources.Local)] IEnumerable<ILateDisposable> lateDisposables
         )
         {
             this.initializables  = initializables.ToArray();
