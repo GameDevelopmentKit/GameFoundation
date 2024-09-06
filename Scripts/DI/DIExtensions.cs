@@ -10,15 +10,15 @@ namespace GameFoundation.DI
         private static SceneContext? CurrentSceneContext;
 
         /// <summary>
-        ///     Get DiContainer from Scene context in the current active scene
+        ///     Get current scene <see cref="IDependencyContainer"/>
         /// </summary>
         public static IDependencyContainer GetCurrentContainer()
         {
-            if (!CurrentSceneContext)
+            if (CurrentSceneContext == null)
             {
                 CurrentSceneContext = Object.FindObjectOfType<SceneContext>();
             }
-            return (CurrentSceneContext?.Container ?? ProjectContext.Instance.Container).Resolve<IDependencyContainer>();
+            return CurrentSceneContext.Container.Resolve<IDependencyContainer>();
         }
 
         /// <inheritdoc cref="GetCurrentContainer()"/>
