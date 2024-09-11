@@ -7,17 +7,23 @@
     "GameFoundation.BlueprintFlow",
     "GameFoundation.Models",
     "GameFoundation.UIModule",
+    "GameFoundation.Signals",
+    "GameFoundation.DI",
     "MasterAAASound.Scripts",
     "I2Localization.Scripts",
     "Zenject",
-    "GameFoundation.Signals",
-    "GameFoundation.DI"
+    "VContainer"
   ],
   "versionDefines": [
     {
       "name": "com.svermeulen.extenject",
       "expression": "",
       "define": "GDK_ZENJECT"
+    },
+    {
+      "name": "jp.hadashikick.vcontainer",
+      "expression": "",
+      "define": "GDK_VCONTAINER"
     }
   ]
 }

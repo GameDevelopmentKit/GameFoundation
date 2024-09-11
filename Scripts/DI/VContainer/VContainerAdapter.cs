@@ -1,12 +1,13 @@
-﻿#if GDK_ZENJECT
+﻿#if GDK_VCONTAINER
 #nullable enable
 namespace GameFoundation.DI
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Zenject;
+    using VContainer.Unity;
 
-    public sealed class ZenjectAdapter : Zenject.IInitializable, Zenject.ITickable, Zenject.ILateTickable, Zenject.IFixedTickable, Zenject.ILateDisposable
+    public sealed class VContainerAdapter : IStartable, VContainer.Unity.ITickable, VContainer.Unity.ILateTickable, VContainer.Unity.IFixedTickable, IDisposable
     {
         private readonly IReadOnlyList<IInitializable>  initializables;
         private readonly IReadOnlyList<ITickable>       tickables;
@@ -14,12 +15,12 @@ namespace GameFoundation.DI
         private readonly IReadOnlyList<IFixedTickable>  fixedTickables;
         private readonly IReadOnlyList<ILateDisposable> lateDisposables;
 
-        public ZenjectAdapter(
-            [Inject(Source = InjectSources.Local)] IEnumerable<IInitializable>  initializables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<ITickable>       tickables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<ILateTickable>   lateTickables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<IFixedTickable>  fixedTickables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<ILateDisposable> lateDisposables
+        public VContainerAdapter(
+            IEnumerable<IInitializable>  initializables,
+            IEnumerable<ITickable>       tickables,
+            IEnumerable<ILateTickable>   lateTickables,
+            IEnumerable<IFixedTickable>  fixedTickables,
+            IEnumerable<ILateDisposable> lateDisposables
         )
         {
             this.initializables  = initializables.ToArray();
@@ -29,7 +30,7 @@ namespace GameFoundation.DI
             this.lateDisposables = lateDisposables.ToArray();
         }
 
-        void Zenject.IInitializable.Initialize()
+        void IStartable.Start()
         {
             foreach (var initializable in this.initializables)
             {
@@ -37,7 +38,7 @@ namespace GameFoundation.DI
             }
         }
 
-        void Zenject.ITickable.Tick()
+        void VContainer.Unity.ITickable.Tick()
         {
             foreach (var tickable in this.tickables)
             {
@@ -45,7 +46,7 @@ namespace GameFoundation.DI
             }
         }
 
-        void Zenject.ILateTickable.LateTick()
+        void VContainer.Unity.ILateTickable.LateTick()
         {
             foreach (var lateTickable in this.lateTickables)
             {
@@ -53,7 +54,7 @@ namespace GameFoundation.DI
             }
         }
 
-        void Zenject.IFixedTickable.FixedTick()
+        void VContainer.Unity.IFixedTickable.FixedTick()
         {
             foreach (var fixedTickable in this.fixedTickables)
             {
@@ -61,7 +62,7 @@ namespace GameFoundation.DI
             }
         }
 
-        void Zenject.ILateDisposable.LateDispose()
+        void IDisposable.Dispose()
         {
             foreach (var lateDisposable in this.lateDisposables)
             {

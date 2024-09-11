@@ -15,6 +15,7 @@
     "Unity.ResourceManager",
     "Unity.Addressables",
     "Zenject",
+    "VContainer",
     "BuildScript.Runtime"
   ],
   "versionDefines": [
@@ -22,6 +23,11 @@
       "name": "com.svermeulen.extenject",
       "expression": "",
       "define": "GDK_ZENJECT"
+    },
+    {
+      "name": "jp.hadashikick.vcontainer",
+      "expression": "",
+      "define": "GDK_VCONTAINER"
     }
   ]
 }
