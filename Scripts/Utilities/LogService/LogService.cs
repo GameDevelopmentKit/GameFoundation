@@ -9,10 +9,14 @@ namespace GameFoundation.Scripts.Utilities.LogService
     {
         /// <summary>Init some service here, maybe FileLog, BackTrace,.... </summary>
         [Inject]
-        private void Init() { this.Log("--Init Log service!--"); }
+        private void Init()
+        {
+            this.Log("--Init Log service!--");
+        }
 
         public void Log(string logContent, LogLevel logLevel = LogLevel.LOG)
         {
+#if ENABLE_LOG || UNITY_EDITOR || DEVELOPMENT_BUILD
             switch (logLevel)
             {
                 case LogLevel.LOG:
@@ -29,27 +33,48 @@ namespace GameFoundation.Scripts.Utilities.LogService
                 default:
                     throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
             }
+#endif
         }
 
         public void LogWithColor(string logContent, Color? c = null)
         {
+#if ENABLE_LOG || UNITY_EDITOR || DEVELOPMENT_BUILD
             Color color = Color.white;
             if (c != null)
             {
                 color = (Color)c;
             }
             Debug.Log($"<color=#{(byte)(color.r * 255f):X2}{(byte)(color.g * 255f):X2}{(byte)(color.b * 255f):X2}>{logContent}</color>");
+#endif
         }
 
-        public void Warning(string logContent) => this.Log(logContent, LogLevel.WARNING);
+        public void Warning(string logContent)
+        {
+#if ENABLE_LOG || UNITY_EDITOR || DEVELOPMENT_BUILD
+            this.Log(logContent, LogLevel.WARNING);
+#endif
+        }
 
-        public void Error(string logContent)       => this.Log(logContent, LogLevel.ERROR);
-        public void Exception(Exception exception) { Debug.LogException(exception); }
+        public void Error(string logContent)
+        {
+#if ENABLE_LOG || UNITY_EDITOR || DEVELOPMENT_BUILD
+            this.Log(logContent, LogLevel.ERROR);
+#endif
+        }
+
+        public void Exception(Exception exception)
+        {
+#if ENABLE_LOG || UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogException(exception);
+#endif
+        }
+
         public void Exception(Exception exception, string message)
         {
+#if ENABLE_LOG || UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.LogError(message);
             Debug.LogException(exception);
+#endif
         }
-
     }
 }
