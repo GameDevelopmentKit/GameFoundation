@@ -28,6 +28,7 @@
         void  SetPlayListLoop(bool isLoop);
         void  PausePlayList();
         void  ResumePlayList();
+        bool  IsPlayingPlayList();
         void  StopAllPlayList();
         void  PauseEverything();
         void  ResumeEverything();
@@ -206,6 +207,11 @@
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.Play();
+        }
+        public bool IsPlayingPlayList()
+        {
+            if (this.MusicAudioSource == null) return false;
+            return this.MusicAudioSource.isPlaying;
         }
 
         public void StopAllPlayList() { this.StopPlayList(); }
