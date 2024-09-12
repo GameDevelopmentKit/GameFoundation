@@ -5,6 +5,7 @@ namespace GameFoundation.DI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using UnityEngine.Scripting;
     using VContainer.Unity;
 
     public sealed class VContainerAdapter : IStartable, VContainer.Unity.ITickable, VContainer.Unity.ILateTickable, VContainer.Unity.IFixedTickable, IDisposable
@@ -15,6 +16,7 @@ namespace GameFoundation.DI
         private readonly IReadOnlyList<IFixedTickable>  fixedTickables;
         private readonly IReadOnlyList<ILateDisposable> lateDisposables;
 
+        [Preserve]
         public VContainerAdapter(
             IEnumerable<IInitializable>  initializables,
             IEnumerable<ITickable>       tickables,

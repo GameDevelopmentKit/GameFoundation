@@ -13,6 +13,7 @@ namespace GameFoundation.DI
     {
         private readonly IObjectResolver container;
 
+        [UnityEngine.Scripting.Preserve]
         public VContainerContainer(IObjectResolver container) => this.container = container;
 
         bool IDependencyContainer.TryResolve(Type type, [MaybeNullWhen(false)] out object instance) => this.container.TryResolve(type, out instance);

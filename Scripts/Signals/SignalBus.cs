@@ -4,6 +4,7 @@ namespace GameFoundation.Signals
     using System.Collections.Generic;
     using GameFoundation.DI;
     using MessagePipe;
+    using UnityEngine.Scripting;
 
     public class SignalBus : ILateDisposable
     {
@@ -11,6 +12,7 @@ namespace GameFoundation.Signals
 
         private readonly Dictionary<(Type SignalType, Delegate Callback), IDisposable> subscriptions = new();
 
+        [Preserve]
         public SignalBus(IDependencyContainer container)
         {
             this.container = container;
