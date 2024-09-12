@@ -242,7 +242,7 @@ public static class Build
         bool buildAppBundle = false, string packageName = "")
     {
         PlayerSettings.Android.minSdkVersion    = AndroidSdkVersions.AndroidApiLevel24;
-        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel34;
+        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel35;
         
         BuildTools.ResetBuildSettings();
         EditorUserBuildSettings.buildAppBundle = buildAppBundle;
