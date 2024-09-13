@@ -25,7 +25,7 @@ namespace GameFoundation.Scripts
     {
         public static void RegisterGameFoundation(this IContainerBuilder builder)
         {
-            builder.Register<VContainerContainer>(Lifetime.Scoped).AsImplementedInterfaces();
+            builder.Register<VContainerWrapper>(Lifetime.Scoped).AsImplementedInterfaces();
             builder.Register<VContainerAdapter>(Lifetime.Scoped).AsImplementedInterfaces();
 
             builder.RegisterSignalBus();

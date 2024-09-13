@@ -6,9 +6,9 @@ namespace GameFoundation.DI
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine.Scripting;
-    using VContainer.Unity;
+    using VContainer.Internal;
 
-    public sealed class VContainerAdapter : IStartable, VContainer.Unity.ITickable, VContainer.Unity.ILateTickable, VContainer.Unity.IFixedTickable, IDisposable
+    public sealed class VContainerAdapter : VContainer.Unity.IInitializable, VContainer.Unity.ITickable, VContainer.Unity.ILateTickable, VContainer.Unity.IFixedTickable, IDisposable
     {
         private readonly IReadOnlyList<IInitializable>  initializables;
         private readonly IReadOnlyList<ITickable>       tickables;
@@ -18,21 +18,21 @@ namespace GameFoundation.DI
 
         [Preserve]
         public VContainerAdapter(
-            IEnumerable<IInitializable>  initializables,
-            IEnumerable<ITickable>       tickables,
-            IEnumerable<ILateTickable>   lateTickables,
-            IEnumerable<IFixedTickable>  fixedTickables,
-            IEnumerable<ILateDisposable> lateDisposables
+            ContainerLocal<IEnumerable<IInitializable>>  initializables,
+            ContainerLocal<IEnumerable<ITickable>>       tickables,
+            ContainerLocal<IEnumerable<ILateTickable>>   lateTickables,
+            ContainerLocal<IEnumerable<IFixedTickable>>  fixedTickables,
+            ContainerLocal<IEnumerable<ILateDisposable>> lateDisposables
         )
         {
-            this.initializables  = initializables.ToArray();
-            this.tickables       = tickables.ToArray();
-            this.lateTickables   = lateTickables.ToArray();
-            this.fixedTickables  = fixedTickables.ToArray();
-            this.lateDisposables = lateDisposables.ToArray();
+            this.initializables  = initializables.Value.ToArray();
+            this.tickables       = tickables.Value.ToArray();
+            this.lateTickables   = lateTickables.Value.ToArray();
+            this.fixedTickables  = fixedTickables.Value.ToArray();
+            this.lateDisposables = lateDisposables.Value.ToArray();
         }
 
-        void IStartable.Start()
+        void VContainer.Unity.IInitializable.Initialize()
         {
             foreach (var initializable in this.initializables)
             {
