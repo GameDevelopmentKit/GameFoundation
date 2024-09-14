@@ -1,18 +1,15 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System.Collections.Generic;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Signals;
     using R3;
 
-    public class GameQueueActionServices
+    public class GameQueueActionServices : IInitializable
     {
-        public static GameQueueActionServices Instance { get; private set; }
-
         private readonly IScreenManager screenManager;
-        private readonly SignalBus      signalBus;
 
         private readonly Dictionary<string, List<IGameQueueAction>> queueActions           = new Dictionary<string, List<IGameQueueAction>>();
         private readonly HashSet<string>                            trackUnCompleteActions = new HashSet<string>();
@@ -20,11 +17,13 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         private bool   isDequeuing;
         private string curLocation;
 
-        public GameQueueActionServices(IScreenManager screenManager, SignalBus signalBus)
+        public GameQueueActionServices(IScreenManager screenManager)
         {
             this.screenManager = screenManager;
-            this.signalBus     = signalBus;
-            Instance           = this;
+        }
+
+        public void Initialize()
+        {
             this.screenManager.CurrentActiveScreen.Subscribe(this.OnStartAtLocation);
         }
 

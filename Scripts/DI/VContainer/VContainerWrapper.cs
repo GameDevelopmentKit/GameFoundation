@@ -1,5 +1,6 @@
 ﻿#if GDK_VCONTAINER
 #nullable enable
+#nullable enable
 namespace GameFoundation.DI
 {
     using System;
@@ -7,14 +8,18 @@ namespace GameFoundation.DI
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using UnityEngine;
     using VContainer;
     using VContainer.Internal;
+    using VContainer.Unity;
+    using Object = UnityEngine.Object;
+    using PreserveAttribute = UnityEngine.Scripting.PreserveAttribute;
 
     public sealed class VContainerWrapper : IDependencyContainer
     {
         private readonly IObjectResolver container;
 
-        [UnityEngine.Scripting.Preserve]
+        [Preserve]
         public VContainerWrapper(IObjectResolver container) => this.container = container;
 
         bool IDependencyContainer.TryResolve(Type type, [MaybeNullWhen(false)] out object instance) => this.container.TryResolve(type, out instance);
@@ -29,9 +34,47 @@ namespace GameFoundation.DI
 
         T[] IDependencyContainer.ResolveAll<T>() => this.container.Resolve<IEnumerable<T>>().ToArray();
 
-        object IDependencyContainer.Instantiate(Type type) => InjectorCache.GetOrBuild(type).CreateInstance(this.container, null);
+        object IDependencyContainer.Instantiate(Type type) => this.container.Instantiate(type);
 
-        T IDependencyContainer.Instantiate<T>() => (T)InjectorCache.GetOrBuild(typeof(T)).CreateInstance(this.container, null);
+        T IDependencyContainer.Instantiate<T>() => this.container.Instantiate<T>();
+    }
+
+    public static class VContainerExtensions
+    {
+        public static ComponentRegistrationBuilder RegisterComponentInNewPrefabResource<T>(this IContainerBuilder builder, string path, Lifetime lifetime) where T : Component
+        {
+            return builder.RegisterComponentInNewPrefab(_ => Resources.Load<T>(path), lifetime);
+        }
+
+        public static RegistrationBuilder RegisterResource<T>(this IContainerBuilder builder, string path, Lifetime lifetime) where T : Object
+        {
+            return builder.Register(_ => Resources.Load<T>(path), lifetime);
+        }
+
+        public static RegistrationBuilder AsInterfacesAndSelf(this RegistrationBuilder registrationBuilder)
+        {
+            return registrationBuilder.AsImplementedInterfaces().AsSelf();
+        }
+
+        public static void AutoResolve(this IContainerBuilder builder, Type type)
+        {
+            builder.RegisterBuildCallback(container => container.Resolve(type));
+        }
+
+        public static void AutoResolve<T>(this IContainerBuilder builder)
+        {
+            builder.AutoResolve(typeof(T));
+        }
+
+        public static object Instantiate(this IObjectResolver container, Type type, IReadOnlyList<IInjectParameter>? parameters = null)
+        {
+            return InjectorCache.GetOrBuild(type).CreateInstance(container, parameters);
+        }
+
+        public static T Instantiate<T>(this IObjectResolver container, IReadOnlyList<IInjectParameter>? parameters = null)
+        {
+            return (T)container.Instantiate(typeof(T), parameters);
+        }
     }
 }
 #endif

@@ -12,6 +12,7 @@ using ReadBlueprintProgressSignal = BlueprintFlow.Signals.ReadBlueprintProgressS
 
 namespace GameFoundation.BlueprintFlow
 {
+    using GameFoundation.DI;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Signals;
     using Models;
@@ -27,7 +28,7 @@ namespace GameFoundation.BlueprintFlow
             builder.Register<BlueprintReaderManager>(Lifetime.Singleton);
             builder.Register(container => container.Resolve<GDKConfig>().GetGameConfig<BlueprintConfig>(), Lifetime.Singleton);
 
-            typeof(IGenericBlueprintReader).GetDerivedTypes().ForEach(type => builder.Register(type, Lifetime.Singleton).AsSelf().AsImplementedInterfaces());
+            typeof(IGenericBlueprintReader).GetDerivedTypes().ForEach(type => builder.Register(type, Lifetime.Singleton).AsInterfacesAndSelf());
 
             builder.DeclareSignal<ReadBlueprintProgressSignal>();
             builder.DeclareSignal<LoadBlueprintDataProgressSignal>();

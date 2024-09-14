@@ -2,6 +2,7 @@
   "name": "GameFoundation.BlueprintFlow",
   "rootNamespace": "GameFoundation.BlueprintFlow",
   "references": [
+    "GameFoundation.DI",
     "GameFoundation.Signals",
     "GameFoundation.Models",
     "GameFoundation.Utilities",

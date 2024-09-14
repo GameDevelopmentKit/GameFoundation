@@ -23,7 +23,7 @@ namespace GameFoundation.Scripts
 
     public static class GameFoundationVContainer
     {
-        public static void RegisterGameFoundation(this IContainerBuilder builder)
+        public static void RegisterGameFoundation(this IContainerBuilder builder, Transform rootTransform)
         {
             builder.Register<VContainerWrapper>(Lifetime.Scoped).AsImplementedInterfaces();
             builder.Register<VContainerAdapter>(Lifetime.Scoped).AsImplementedInterfaces();
@@ -31,7 +31,7 @@ namespace GameFoundation.Scripts
             builder.RegisterSignalBus();
             builder.RegisterBlueprints();
             builder.RegisterScreenManager();
-            builder.RegisterApplicationServices();
+            builder.RegisterApplicationServices(rootTransform);
             builder.RegisterGameQueueActionService();
 
             builder.RegisterInstance(Resources.Load<GDKConfig>("GameConfigs/GDKConfig"));
@@ -42,7 +42,8 @@ namespace GameFoundation.Scripts
             builder.Register<LogService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<HandleLocalUserDataServices>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LoadImageHelper>(Lifetime.Singleton);
-            builder.RegisterComponentOnNewGameObject<Fps>(Lifetime.Singleton);
+            builder.RegisterComponentOnNewGameObject<Fps>(Lifetime.Singleton).UnderTransform(rootTransform);
+            builder.AutoResolve<Fps>();
 
             builder.DeclareSignal<UserDataLoadedSignal>();
         }
