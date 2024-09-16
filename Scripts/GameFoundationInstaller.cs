@@ -1,7 +1,9 @@
-﻿#if GDK_ZENJECT
+﻿using BlueprintServicesInstaller = BlueprintFlow.BlueprintControlFlow.BlueprintServicesInstaller;
+using GDKConfig = Models.GDKConfig;
+
+#if GDK_ZENJECT
 namespace GameFoundation.Scripts
 {
-    using BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
@@ -15,7 +17,6 @@ namespace GameFoundation.Scripts
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
-    using global::Models;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
