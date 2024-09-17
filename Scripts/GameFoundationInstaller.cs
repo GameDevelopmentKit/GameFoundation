@@ -1,7 +1,7 @@
-﻿using BlueprintServicesInstaller = BlueprintFlow.BlueprintControlFlow.BlueprintServicesInstaller;
+﻿#if GDK_ZENJECT
+using BlueprintServicesInstaller = BlueprintFlow.BlueprintControlFlow.BlueprintServicesInstaller;
 using GDKConfig = Models.GDKConfig;
 
-#if GDK_ZENJECT
 namespace GameFoundation.Scripts
 {
     using GameFoundation.DI;

@@ -4,14 +4,17 @@ namespace GameFoundation.Scripts.UIModule.Utilities
     using Cysharp.Threading.Tasks;
     using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.MVP;
+    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Signals;
     using UnityEngine;
     using UnityEngine.UI;
     #if GDK_ZENJECT
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using Zenject;
+    #endif
+    #if GDK_VCONTAINER
+    using VContainer;
     #endif
 
     public static class ExtensionMethod
@@ -84,6 +87,17 @@ namespace GameFoundation.Scripts.UIModule.Utilities
                     IncludingBindData = autoBindData,
                 });
             }).NonLazy();
+        }
+        #endif
+
+        #if GDK_VCONTAINER
+        public static void InitScreenManually<T>(this IContainerBuilder builder, bool autoBindData = false) where T : IScreenPresenter
+        {
+            builder.RegisterBuildCallback(container => container.Resolve<SignalBus>().Fire(new ManualInitScreenSignal
+            {
+                ScreenPresenter   = container.Instantiate<T>(),
+                IncludingBindData = autoBindData,
+            }));
         }
         #endif
     }
