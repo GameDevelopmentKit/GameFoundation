@@ -34,21 +34,21 @@ namespace GameFoundation.DI
 
         T[] IDependencyContainer.ResolveAll<T>() => this.container.Resolve<IEnumerable<T>>().ToArray();
 
-        object IDependencyContainer.Instantiate(Type type) => this.container.Instantiate(type);
+        object IDependencyContainer.Instantiate(Type type, params object[] @params) => this.container.Instantiate(type, @params.Select(param => new Parameter(param)).ToArray());
 
-        T IDependencyContainer.Instantiate<T>() => this.container.Instantiate<T>();
+        T IDependencyContainer.Instantiate<T>(params object[] @params) => this.container.Instantiate<T>(@params.Select(param => new Parameter(param)).ToArray());
     }
 
     public static class VContainerExtensions
     {
+        public static RegistrationBuilder RegisterResource<T>(this IContainerBuilder builder, string path, Lifetime lifetime) where T : Object
+        {
+            return builder.Register(_ => Object.Instantiate(Resources.Load<T>(path)), lifetime);
+        }
+
         public static ComponentRegistrationBuilder RegisterComponentInNewPrefabResource<T>(this IContainerBuilder builder, string path, Lifetime lifetime) where T : Component
         {
             return builder.RegisterComponentInNewPrefab(_ => Resources.Load<T>(path), lifetime);
-        }
-
-        public static RegistrationBuilder RegisterResource<T>(this IContainerBuilder builder, string path, Lifetime lifetime) where T : Object
-        {
-            return builder.Register(_ => Resources.Load<T>(path), lifetime);
         }
 
         public static RegistrationBuilder AsInterfacesAndSelf(this RegistrationBuilder registrationBuilder)
@@ -75,6 +75,17 @@ namespace GameFoundation.DI
         {
             return (T)container.Instantiate(typeof(T), parameters);
         }
+    }
+
+    public sealed class Parameter : IInjectParameter
+    {
+        private readonly object value;
+
+        public Parameter(object value) => this.value = value;
+
+        bool IInjectParameter.Match(Type parameterType, string _) => parameterType.IsInstanceOfType(this.value);
+
+        object IInjectParameter.GetValue(IObjectResolver _) => this.value;
     }
 }
 #endif
