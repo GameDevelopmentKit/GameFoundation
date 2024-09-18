@@ -10,22 +10,19 @@
     /// </summary>
     public class AutoCooldownTimer : IDisposable
     {
-        private readonly int  minDays;
-        private readonly int  minHours;
-        private readonly int  minMinutes;
-        private          long currentCooldownTime;
+        private const int MIN_DAYS    = 30;
+        private const int MIN_HOURS   = 24;
+        private const int MIN_MINUTES = 60;
+
+        private long currentCooldownTime;
 
         private IDisposable observableTimer;
 
         private Action<long> onEveryCycle;
         private Action       onComplete;
 
-        public AutoCooldownTimer(SignalBus signalBus, int minMinutes = 60, int minHours = 24, int minDays = 30)
+        public AutoCooldownTimer(SignalBus signalBus)
         {
-            this.minDays    = minDays;
-            this.minHours   = minHours;
-            this.minMinutes = minMinutes;
-
             signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
         }
 
@@ -85,19 +82,19 @@
         {
             var  timeSpan = TimeSpan.FromSeconds(time);
             long cycle    = 0;
-            if (timeSpan.TotalDays > this.minDays)
+            if (timeSpan.TotalDays > MIN_DAYS)
             {
                 cycle = 86400;
             }
-            else if (timeSpan.TotalHours > this.minHours)
+            else if (timeSpan.TotalHours > MIN_HOURS)
             {
                 cycle = 3600;
             }
-            else if (timeSpan.TotalMinutes > this.minMinutes)
+            else if (timeSpan.TotalMinutes > MIN_MINUTES)
             {
                 cycle = 60;
             }
-            else if (timeSpan.Minutes <= this.minMinutes)
+            else if (timeSpan.Minutes <= MIN_MINUTES)
             {
                 cycle = 1;
             }
