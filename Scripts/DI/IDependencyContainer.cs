@@ -3,6 +3,7 @@ namespace GameFoundation.DI
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using UnityEngine;
 
     public interface IDependencyContainer
     {
@@ -23,5 +24,7 @@ namespace GameFoundation.DI
         public T Instantiate<T>(params object[] @params);
 
         public void Inject(object instance);
+
+        public void InjectGameObject(GameObject instance);
     }
 }
