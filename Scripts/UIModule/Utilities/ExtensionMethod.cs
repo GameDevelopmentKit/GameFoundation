@@ -11,7 +11,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities
     using TMPro;
     using UnityEngine;
     using UnityEngine.UI;
-    using Zenject;
+    using VContainer;
+    using VContainer.Internal;
 
     public static class ExtensionMethod
     {
@@ -29,28 +30,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         //check Object trigger With other object
         public static bool CheckObjectOnBound(this BaseView view, Bounds bounds, Bounds g) { return bounds.Intersects(g); }
 
-        public static void InstantiateUIPresenter<TPresenter, TView, TModel>(this IInstantiator instantiator, ref TPresenter presenter, TView view, TModel model)
-            where TPresenter : IUIItemPresenter<TView, TModel> where TView : IUIView
-        {
-            if (presenter == null)
-            {
-                presenter = instantiator.Instantiate<TPresenter>();
-                presenter.SetView(view);
-            }
-
-            presenter.BindData(model);
-        }
-
-        public static async Task<TPresenter> InstantiateUIPresenter<TPresenter, TModel>(this IInstantiator instantiator, Transform parentView, TModel model)
-            where TPresenter : IUIItemPresenter<IUIView, TModel>
-        {
-            var presenter = instantiator.Instantiate<TPresenter>();
-            await presenter.SetView(parentView);
-            presenter.BindData(model);
-
-            return presenter;
-        }
-
         //FillChild Width with parent Width
         public static void FillChildWidthWithParentWidth(this IUIPresenter presenter, RectTransform childRect, RectTransform parentRect)
         {
@@ -65,25 +44,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             await presenter.SetView(parentView);
             presenter.BindData(model);
             listPresenter.Add(presenter);
-        }
-
-        /// <summary>
-        /// Utils use to initialize a screen presenter manually, and the view is already initialized on the scene
-        /// </summary>
-        /// <param name="container"></param>
-        /// <param name="autoBindData"></param>
-        /// <typeparam name="T"> Type of screen presenter</typeparam>
-        public static void InitScreenManually<T>(this DiContainer container, bool autoBindData = false) where T : IScreenPresenter
-        {
-            container.Bind<T>().AsSingle().OnInstantiated<T>((context, presenter) =>
-                {
-                    context.Container.Resolve<SignalBus>().Fire(new ManualInitScreenSignal()
-                    {
-                        ScreenPresenter   = presenter,
-                        IncludingBindData = autoBindData
-                    });
-                })
-                .NonLazy();
         }
     }
 }

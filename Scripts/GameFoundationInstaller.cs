@@ -2,30 +2,36 @@
 {
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
+    using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities;
-    using GameFoundation.Scripts.Utilities.ApplicationServices;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
-    using Zenject;
+    using VContainer;
+    using VContainer.Signals.GameFoundation.Signals;
 
-    public class GameFoundationInstaller : Installer<GameFoundationInstaller>
+    public static class GameFoundationInstaller
     {
-        public override void InstallBindings()
+        public static void InstallGameFoundation(this IContainerBuilder builder)
         {
-            SignalBusInstaller.Install(this.Container);
+            builder.RegisterBuildCallback(VContainerExtensions.SetCurrentContainer);
+            builder.InstallSignalBus();
+            builder.Register<GameAssets>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<ObjectPoolManager>(Lifetime.Singleton).AsSelf();
 
-            this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
-            this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
+            builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<LogService>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<SceneDirector>(Lifetime.Singleton);
+            builder.Register<ScreenManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
-            //Audio service
-            this.Container.BindInterfacesTo<AudioService>().AsCached().NonLazy();
-
-            //Service
-            this.Container.Bind<ILogService>().To<LogService>().AsSingle().NonLazy();
-
-            //Installer
-            ScreenFlowInstaller.Install(this.Container);
-            ApplicationServiceInstaller.Install(this.Container);
+            builder.DeclareSignal<StartLoadingNewSceneSignal>();
+            builder.DeclareSignal<FinishLoadingNewSceneSignal>();
+            builder.DeclareSignal<ScreenCloseSignal>();
+            builder.DeclareSignal<ScreenShowSignal>();
+            builder.DeclareSignal<ScreenHideSignal>();
+            builder.DeclareSignal<ScreenSelfDestroyedSignal>();
+            builder.DeclareSignal<PopupShowedSignal>();
+            builder.DeclareSignal<PopupHiddenSignal>();
+            builder.DeclareSignal<PopupBlurBgShowedSignal>();
         }
     }
 }

@@ -2,18 +2,10 @@ namespace GameFoundation.Scripts.Utilities.LogService
 {
     using System;
     using UnityEngine;
-    using Zenject;
     using Color = UnityEngine.Color;
 
     public class LogService : ILogService
     {
-        /// <summary>Init some service here, maybe FileLog, BackTrace,.... </summary>
-        [Inject]
-        private void Init()
-        {
-            this.Log("--Init Log service!--");
-        }
-
         public void Log(string logContent, LogLevel logLevel = LogLevel.LOG)
         {
 #if ENABLE_LOG || UNITY_EDITOR || DEVELOPMENT_BUILD

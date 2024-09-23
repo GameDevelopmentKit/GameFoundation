@@ -4,7 +4,6 @@
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using UnityEngine;
-    using Zenject;
     using Object = UnityEngine.Object;
 
     public interface IUIItemPresenter : IUIPresenter
@@ -101,42 +100,6 @@
     {
         public abstract void BindData(TModel1     param1, TModel2 param2);
         protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets) { }
-    }
-
-    /// <summary>
-    /// Base UI presenter for item that can poolable
-    /// </summary>
-    /// <typeparam name="TView">Type of view</typeparam>
-    public abstract class BaseUIItemPoolablePresenter<TView> : BaseUIItemPresenter<TView>, IPoolable<IMemoryPool>, IDisposable where TView : MonoBehaviour, IUIView
-    {
-        private IMemoryPool pool;
-
-        public void OnDespawned()
-        {
-            this.pool = null;
-            this.SetActiveView(false);
-        }
-
-        public void OnSpawned(IMemoryPool pool)
-        {
-            this.pool = pool;
-            this.SetActiveView(true);
-        }
-
-        public virtual void Dispose() { this.pool.Despawn(this); }
-        protected BaseUIItemPoolablePresenter(IGameAssets gameAssets) : base(gameAssets) { }
-    }
-
-    public abstract class BaseUIItemPoolablePresenter<TView, TModel> : BaseUIItemPoolablePresenter<TView>, IUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
-    {
-        public abstract void BindData(TModel              param);
-        protected BaseUIItemPoolablePresenter(IGameAssets gameAssets) : base(gameAssets) { }
-    }
-
-    public abstract class BaseUIItemPoolablePresenter<TView, TModel1, TModel2> : BaseUIItemPoolablePresenter<TView> where TView : MonoBehaviour, IUIView
-    {
-        public abstract void BindData(TModel1             param1, TModel2 param2);
-        protected BaseUIItemPoolablePresenter(IGameAssets gameAssets) : base(gameAssets) { }
     }
 
     public class TViewMono : MonoBehaviour, IUIView

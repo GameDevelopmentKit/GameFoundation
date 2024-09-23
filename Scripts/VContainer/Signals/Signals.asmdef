@@ -1,17 +1,11 @@
 {
-    "name": "GameFoundation.Utilities",
+    "name": "Signals",
     "rootNamespace": "",
     "references": [
-        "UniRx",
-        "Unity.TextMeshPro",
         "UniTask",
-        "Unity.Timeline",
-        "GameFoundation.AssetLibrary",
-        "UniTask.Addressables",
-        "Unity.ResourceManager",
-        "Unity.Addressables",
-        "BuildScript.Runtime",
-        "VContainer"
+        "VContainer",
+        "MessagePipe",
+        "MessagePipe.VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

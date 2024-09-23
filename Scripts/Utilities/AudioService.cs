@@ -9,12 +9,12 @@
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using UniRx;
     using UnityEngine;
-    using Zenject;
+    using VContainer.Unity;
 
     public interface IAudioService
     {
         void PlaySound(string name, AudioSource sender);
-        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
+        void PlaySound(string name, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
         void StopAllSound();
         void StopAll();
         void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
@@ -29,20 +29,17 @@
         public static string       AudioSourceKey = "AudioSource";
         public static AudioService Instance { get; private set; }
 
-        private readonly SignalBus         signalBus;
         private readonly IGameAssets       gameAssets;
         private readonly ObjectPoolManager objectPoolManager;
         private readonly ILogService       logService;
 
         private CompositeDisposable             compositeDisposable;
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
-        private List<AudioSource>               oneShotSources = new();
+        private List<AudioSource>               oneShotSources            = new();
         private AudioSource                     MusicAudioSource;
 
-        public AudioService(SignalBus signalBus, IGameAssets gameAssets,
-            ObjectPoolManager objectPoolManager, ILogService logService)
+        public AudioService(IGameAssets gameAssets, ObjectPoolManager objectPoolManager, ILogService logService)
         {
-            this.signalBus         = signalBus;
             this.gameAssets        = gameAssets;
             this.objectPoolManager = objectPoolManager;
             this.logService        = logService;
@@ -60,6 +57,7 @@
             var audioSource = await this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
             audioSource.clip   = null;
             audioSource.volume = 1;
+
             return audioSource;
         }
 
@@ -78,6 +76,7 @@
                 if (this.loopingSoundNameToSources.ContainsKey(name))
                 {
                     this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
+
                     return;
                 }
 
@@ -104,7 +103,7 @@
             {
                 audioSource.gameObject.Recycle();
             }
-            
+
             foreach (var audioSource in this.loopingSoundNameToSources.Values)
             {
                 audioSource.gameObject.Recycle();
@@ -145,7 +144,10 @@
             this.MusicAudioSource = null;
         }
 
-        public void StopAllPlayList() { this.StopPlayList(); }
+        public void StopAllPlayList()
+        {
+            this.StopPlayList();
+        }
 
         public void PauseEverything()
         {
@@ -159,10 +161,19 @@
             SoundManager.ResumeAll();
         }
 
-        protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
+        protected virtual void SetSoundValue(float value)
+        {
+            SoundManager.SoundVolume = value;
+        }
 
-        protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
+        protected virtual void SetMusicValue(float value)
+        {
+            SoundManager.MusicVolume = value;
+        }
 
-        public void Dispose() { this.compositeDisposable?.Dispose(); }
+        public void Dispose()
+        {
+            this.compositeDisposable?.Dispose();
+        }
     }
 }

@@ -1,0 +1,6 @@
+{
+  "name": "GameFoundation.Script.VContainer",
+  "references": [
+    "VContainer"
+  ]
+}

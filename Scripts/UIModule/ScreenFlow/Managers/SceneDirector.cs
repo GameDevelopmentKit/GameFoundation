@@ -7,7 +7,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using UnityEngine;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
-    using Zenject;
+    using VContainer.Signals;
 
     /// <summary>Load, unload scenes are wrapped here </summary>
     public class SceneDirector

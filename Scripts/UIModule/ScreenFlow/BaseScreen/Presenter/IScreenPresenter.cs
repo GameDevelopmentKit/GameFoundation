@@ -4,7 +4,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
-    using Zenject;
+    using VContainer.Unity;
 
     /// <summary>
     /// The Presenter is the link between the Model and the View. It holds the state of the View and updates it depending on that state and on external events:
