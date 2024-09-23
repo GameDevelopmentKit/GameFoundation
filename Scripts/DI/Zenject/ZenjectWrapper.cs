@@ -46,6 +46,12 @@ namespace GameFoundation.DI
         object IDependencyContainer.Instantiate(Type type, params object[] @params) => this.container.Instantiate(type, @params);
 
         T IDependencyContainer.Instantiate<T>(params object[] @params) => this.container.Instantiate<T>(@params);
+
+        void IDependencyContainer.Inject(object instance) => this.container.Inject(instance);
+    }
+
+    public sealed class InjectAttribute : Zenject.InjectAttribute
+    {
     }
 }
 #endif

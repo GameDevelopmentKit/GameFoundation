@@ -37,6 +37,12 @@ namespace GameFoundation.DI
         object IDependencyContainer.Instantiate(Type type, params object[] @params) => this.container.Instantiate(type, @params.Select(param => new Parameter(param)).ToArray());
 
         T IDependencyContainer.Instantiate<T>(params object[] @params) => this.container.Instantiate<T>(@params.Select(param => new Parameter(param)).ToArray());
+
+        void IDependencyContainer.Inject(object instance) => this.container.Inject(instance);
+    }
+
+    public sealed class InjectAttribute : VContainer.InjectAttribute
+    {
     }
 
     public static class VContainerExtensions

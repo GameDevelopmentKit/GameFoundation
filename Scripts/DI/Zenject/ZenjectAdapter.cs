@@ -15,11 +15,11 @@ namespace GameFoundation.DI
         private readonly IReadOnlyList<ILateDisposable> lateDisposables;
 
         public ZenjectAdapter(
-            [Inject(Source = InjectSources.Local)] IEnumerable<IInitializable>  initializables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<ITickable>       tickables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<ILateTickable>   lateTickables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<IFixedTickable>  fixedTickables,
-            [Inject(Source = InjectSources.Local)] IEnumerable<ILateDisposable> lateDisposables
+            [InjectLocal] IEnumerable<IInitializable>  initializables,
+            [InjectLocal] IEnumerable<ITickable>       tickables,
+            [InjectLocal] IEnumerable<ILateTickable>   lateTickables,
+            [InjectLocal] IEnumerable<IFixedTickable>  fixedTickables,
+            [InjectLocal] IEnumerable<ILateDisposable> lateDisposables
         )
         {
             this.initializables  = initializables.ToArray();

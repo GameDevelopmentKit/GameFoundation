@@ -21,5 +21,7 @@ namespace GameFoundation.DI
         public object Instantiate(Type type, params object[] @params);
 
         public T Instantiate<T>(params object[] @params);
+
+        public void Inject(object instance);
     }
 }
