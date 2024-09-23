@@ -34,9 +34,9 @@ namespace GameFoundation.DI
 
         T[] IDependencyContainer.ResolveAll<T>() => this.container.Resolve<IEnumerable<T>>().ToArray();
 
-        object IDependencyContainer.Instantiate(Type type, params object[] @params) => this.container.Instantiate(type, @params);
+        object IDependencyContainer.Instantiate(Type type, params object[] @params) => this.container.Instantiate(type, @params.Select(param => new Parameter(param)).ToArray());
 
-        T IDependencyContainer.Instantiate<T>(params object[] @params) => this.container.Instantiate<T>(@params);
+        T IDependencyContainer.Instantiate<T>(params object[] @params) => this.container.Instantiate<T>(@params.Select(param => new Parameter(param)).ToArray());
     }
 
     public static class VContainerExtensions
@@ -74,16 +74,6 @@ namespace GameFoundation.DI
         public static T Instantiate<T>(this IObjectResolver container, IReadOnlyList<IInjectParameter>? parameters = null)
         {
             return (T)container.Instantiate(typeof(T), parameters);
-        }
-
-        public static object Instantiate(this IObjectResolver container, Type type, params object[] @params)
-        {
-            return container.Instantiate(type, (IReadOnlyList<IInjectParameter>)@params.Select(param => new Parameter(param)).ToArray());
-        }
-
-        public static T Instantiate<T>(this IObjectResolver container, params object[] @params)
-        {
-            return (T)container.Instantiate(typeof(T), @params);
         }
     }
 
