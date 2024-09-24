@@ -10,11 +10,11 @@ namespace BlueprintFlow.BlueprintControlFlow
     [Serializable]
     public class BlueprintConfig : ScriptableObject, IGameConfig
     {
-        [SerializeField] private string currentBlueprintVersion = "0.0.1";
-        [SerializeField] private bool   isResourceMode          = true;
-        [SerializeField] private string fetchBlueprintUri       = "https://dqp03g2hg3.execute-api.ap-southeast-1.amazonaws.com/api/v1/projects/vampire-survivor-development/blueprints/{0}/info";
-        [SerializeField] private string resourceBlueprintPath   = "BlueprintData/";
-        [SerializeField] private string blueprintFileType       = ".csv";
+        public string currentBlueprintVersion = "0.0.1";
+        public bool   isResourceMode          = true;
+        public string fetchBlueprintUri       = "https://dqp03g2hg3.execute-api.ap-southeast-1.amazonaws.com/api/v1/projects/vampire-survivor-development/blueprints/{0}/info";
+        public string resourceBlueprintPath   = "BlueprintData/";
+        public string blueprintFileType       = ".csv";
 
         private string persistentDataPath;
 
