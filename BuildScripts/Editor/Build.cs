@@ -313,7 +313,10 @@ public static class Build
 #if UNITY_WEBGL
             case BuildTarget.WebGL:
 #if DEVELOPMENT_BUILD
-                PlayerSettings.WebGL.showDiagnostics = true;
+                PlayerSettings.WebGL.showDiagnostics                  = true;
+                EditorUserBuildSettings.development                   = true;
+                EditorUserBuildSettings.connectProfiler               = true;
+                EditorUserBuildSettings.buildWithDeepProfilingSupport = true;
 #else
                 PlayerSettings.WebGL.showDiagnostics = false;
 #endif
