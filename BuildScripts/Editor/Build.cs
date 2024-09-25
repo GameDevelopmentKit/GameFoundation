@@ -184,11 +184,10 @@ public static class Build
             }
         }
 
-
+            PlayerSettings.SetStackTraceLogType(LogType.Log,     StackTraceLogType.None);
 #if PRODUCTION
             PlayerSettings.SetStackTraceLogType(LogType.Assert,  StackTraceLogType.None);
             PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
-            PlayerSettings.SetStackTraceLogType(LogType.Log,     StackTraceLogType.None);
 #endif
         if (!string.IsNullOrEmpty(remoteAddressableBuildPath) && !string.IsNullOrEmpty(remoteAddressableLoadPath))
         {
