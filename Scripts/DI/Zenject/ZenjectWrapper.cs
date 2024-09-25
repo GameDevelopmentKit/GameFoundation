@@ -5,6 +5,7 @@ namespace GameFoundation.DI
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using UnityEngine;
     using Zenject;
 
     public sealed class ZenjectWrapper : IDependencyContainer
