@@ -43,6 +43,7 @@ namespace BlueprintFlow.APIHandler
     using UnityEngine;
     using UnityEngine.Scripting;
 
+    [Preserve]
     public class BlueprintInfoData : ILocalData
     {
         public string Version;
