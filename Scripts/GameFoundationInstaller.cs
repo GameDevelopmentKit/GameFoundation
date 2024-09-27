@@ -52,6 +52,9 @@ namespace GameFoundation.Scripts
             //Helper
             this.Container.Bind<LoadImageHelper>().AsCached();
 
+            //Logging manager
+            this.Container.BindLoggerManager();
+
             //Installer
             BlueprintServicesInstaller.Install(this.Container);
             ScreenFlowInstaller.Install(this.Container);

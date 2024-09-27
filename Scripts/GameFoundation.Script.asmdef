@@ -12,7 +12,8 @@
     "MasterAAASound.Scripts",
     "I2Localization.Scripts",
     "Zenject",
-    "VContainer"
+    "VContainer",
+    "TheOne.Logging.DI"
   ],
   "versionDefines": [
     {
