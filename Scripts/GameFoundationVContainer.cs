@@ -17,6 +17,7 @@ namespace GameFoundation.Scripts
     using GameFoundation.UIModule.UIModule;
     using GameFoundation.Utilities.ApplicationServices;
     using GameFoundation.Utilities.GameQueueAction;
+    using TheOne.Logging.DI;
     using UnityEngine;
     using VContainer;
     using VContainer.Unity;
@@ -44,6 +45,9 @@ namespace GameFoundation.Scripts
             builder.Register<LoadImageHelper>(Lifetime.Singleton);
             builder.RegisterComponentOnNewGameObject<Fps>(Lifetime.Singleton).UnderTransform(rootTransform);
             builder.AutoResolve<Fps>();
+            
+            // Logging manager
+            builder.RegisterLoggerManager();
 
             builder.DeclareSignal<UserDataLoadedSignal>();
         }
