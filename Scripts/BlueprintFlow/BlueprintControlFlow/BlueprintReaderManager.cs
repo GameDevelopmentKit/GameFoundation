@@ -14,6 +14,7 @@ namespace BlueprintFlow.BlueprintControlFlow
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
     using UnityEngine;
+    using UnityEngine.Scripting;
 
     /// <summary>
     ///  The main manager for reading blueprints pipeline/>.
@@ -30,6 +31,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         private readonly BlueprintDownloader                          blueprintDownloader;
         private readonly IReadOnlyCollection<IGenericBlueprintReader> blueprints;
 
+        [Preserve]
         public BlueprintReaderManager(
             SignalBus                            signalBus,
             ILogService                          logService,

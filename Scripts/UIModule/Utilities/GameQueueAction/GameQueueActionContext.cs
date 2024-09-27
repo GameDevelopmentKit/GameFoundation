@@ -7,11 +7,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using UnityEngine.Playables;
+    using UnityEngine.Scripting;
 
     public class GameQueueActionContext
     {
         private readonly GameQueueActionServices gameQueueActionServices;
         private readonly IScreenManager          screenManager;
+
+        [Preserve]
         public GameQueueActionContext(GameQueueActionServices gameQueueActionServices, IScreenManager screenManager)
         {
             this.gameQueueActionServices = gameQueueActionServices;

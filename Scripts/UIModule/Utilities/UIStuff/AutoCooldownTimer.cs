@@ -4,6 +4,7 @@
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using GameFoundation.Signals;
     using R3;
+    using UnityEngine.Scripting;
 
     /// <summary>
     /// A timer cooldown by cycle automatically, mainly use for UI
@@ -21,6 +22,7 @@
         private Action<long> onEveryCycle;
         private Action       onComplete;
 
+        [Preserve]
         public AutoCooldownTimer(SignalBus signalBus)
         {
             signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);

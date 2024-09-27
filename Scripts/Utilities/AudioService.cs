@@ -13,6 +13,7 @@
     using GameFoundation.Signals;
     using R3;
     using UnityEngine;
+    using UnityEngine.Scripting;
 
     public interface IAudioService
     {
@@ -50,6 +51,7 @@
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
+        [Preserve]
         public AudioService(
             SignalBus         signalBus,
             SoundSetting      SoundSetting,

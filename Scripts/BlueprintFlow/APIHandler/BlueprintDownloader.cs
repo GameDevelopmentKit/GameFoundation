@@ -3,6 +3,7 @@ namespace BlueprintFlow.APIHandler
     using System;
     using BlueprintFlow.BlueprintControlFlow;
     using Cysharp.Threading.Tasks;
+    using UnityEngine.Scripting;
     #if !GDK_NETWORK_ENABLE
     using System.Net;
     using GameFoundation.Scripts.Utilities.LogService;
@@ -18,6 +19,7 @@ namespace BlueprintFlow.APIHandler
         #if !GDK_NETWORK_ENABLE
         private readonly ILogService logService;
 
+        [Preserve]
         public BlueprintDownloader(ILogService logService)
         {
             this.logService = logService;
@@ -42,6 +44,7 @@ namespace BlueprintFlow.APIHandler
         #else
         private readonly IHttpService httpService;
 
+        [Preserve]
         public BlueprintDownloader(IHttpService httpService)
         {
             this.httpService = httpService;

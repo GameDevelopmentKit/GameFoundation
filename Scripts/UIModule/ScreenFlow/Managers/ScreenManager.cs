@@ -17,6 +17,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using R3;
     using UnityEditor;
     using UnityEngine;
+    using UnityEngine.Scripting;
     using IInitializable = GameFoundation.DI.IInitializable;
     using ITickable = GameFoundation.DI.ITickable;
     using Object = UnityEngine.Object;
@@ -95,6 +96,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private readonly Dictionary<Type, IScreenPresenter>       typeToLoadedScreenPresenter = new();
         private readonly Dictionary<Type, Task<IScreenPresenter>> typeToPendingScreen         = new();
 
+        [Preserve]
         public ScreenManager(SignalBus signalBus, ILogService logger, IGameAssets gameAssets)
         {
             this.signalBus  = signalBus;

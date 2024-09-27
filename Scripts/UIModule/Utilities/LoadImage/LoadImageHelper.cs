@@ -10,6 +10,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using UnityEngine;
     using UnityEngine.Networking;
+    using UnityEngine.Scripting;
     using UnityEngine.UI;
 
     public class LoadImageHelper
@@ -29,6 +30,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         private string iconLoadingAssetPath = "LoadingIcon";
 
+        [Preserve]
         private LoadImageHelper(IGameAssets gameAssets, ILogService logger, ObjectPoolManager objectPoolManager)
         {
             this.gameAssets        = gameAssets;

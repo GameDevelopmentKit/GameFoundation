@@ -2,11 +2,13 @@ namespace GameFoundation.Scripts.Utilities.LogService
 {
     using System;
     using UnityEngine;
+    using UnityEngine.Scripting;
     using Color = UnityEngine.Color;
 
     public class LogService : ILogService
     {
         /// <summary>Init some service here, maybe FileLog, BackTrace,.... </summary>
+        [Preserve]
         public LogService()
         {
             this.Log("--Init Log service!--");

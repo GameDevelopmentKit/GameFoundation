@@ -7,6 +7,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
+    using UnityEngine.Scripting;
     using Object = UnityEngine.Object;
 
     public sealed class ObjectPoolManager
@@ -28,6 +29,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         private GameObject defaultRoot;
 
+        [Preserve]
         public ObjectPoolManager(IGameAssets gameAssets)
         {
             this.gameAssets = gameAssets;

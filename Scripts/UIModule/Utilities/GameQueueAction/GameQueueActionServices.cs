@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.Utilities.Extension;
     using R3;
+    using UnityEngine.Scripting;
 
     public class GameQueueActionServices : IInitializable
     {
@@ -17,6 +18,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         private bool   isDequeuing;
         private string curLocation;
 
+        [Preserve]
         public GameQueueActionServices(IScreenManager screenManager)
         {
             this.screenManager = screenManager;
