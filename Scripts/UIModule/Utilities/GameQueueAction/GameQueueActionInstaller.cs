@@ -1,3 +1,4 @@
+#if GDK_ZENJECT
 namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using Zenject;
@@ -6,8 +7,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     {
         public override void InstallBindings()
         {
-            this.Container.Bind<GameQueueActionServices>().AsCached();
+            this.Container.BindInterfacesAndSelfTo<GameQueueActionServices>().AsCached();
             this.Container.Bind<GameQueueActionContext>().AsCached();
         }
     }
 }
+#endif

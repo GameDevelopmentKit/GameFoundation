@@ -1,6 +1,8 @@
-namespace Zenject
+#if GDK_ZENJECT
+namespace GameFoundation.Signals
 {
     using MessagePipe;
+    using Zenject;
 
     public static class SignalExtensions
     {
@@ -12,3 +14,4 @@ namespace Zenject
         }
     }
 }
+#endif

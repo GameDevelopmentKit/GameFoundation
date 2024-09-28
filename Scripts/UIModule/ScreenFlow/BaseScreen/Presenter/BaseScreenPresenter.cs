@@ -5,27 +5,26 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.LogService;
-    using global::UIModule.ScreenFlow;
+    using GameFoundation.Signals;
     using UnityEngine;
-    using Zenject;
 
     public abstract class BaseScreenPresenter<TView> : IScreenPresenter where TView : IScreenView
     {
+        protected SignalBus   SignalBus { get; }
+        protected ILogService Logger    { get; }
+
+        protected BaseScreenPresenter(SignalBus signalBus, ILogService logger)
+        {
+            this.SignalBus = signalBus;
+            this.Logger    = logger;
+        }
+
+        public         TView        View            { get; private set; }
         public         string       ScreenId        { get; private set; }
         public virtual bool         IsClosePrevious { get; protected set; } = false;
         public         ScreenStatus ScreenStatus    { get; protected set; } = ScreenStatus.Closed;
 
-        public             TView     View;
-        protected readonly SignalBus SignalBus;
-
-        public BaseScreenPresenter(SignalBus signalBus) { this.SignalBus = signalBus; }
-
         #region Implement IUIPresenter
-
-        [Inject] private ILogService logger;
-
-        [Inject]
-        public virtual void Initialize() { }
 
         public async void SetView(IUIView viewInstance)
         {
@@ -46,13 +45,14 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         {
             if (parent == null)
             {
-                this.logger.LogWithColor(parent.name + "is null", Color.green);
+                this.Logger.LogWithColor(parent.name + "is null", Color.green);
                 return;
             }
 
             if (this.View.Equals(null)) return;
             this.View.RectTransform.SetParent(parent);
         }
+
         public Transform GetViewParent()  { return this.View.RectTransform.parent; }
         public Transform CurrentTransform => this.View.RectTransform;
 
@@ -88,6 +88,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             // this.SignalBus.Fire(new ScreenHideSignal() { ScreenPresenter = this }); // Active this signal later, when need
             this.Dispose();
         }
+
         public virtual void DestroyView()
         {
             if (this.ScreenStatus == ScreenStatus.Destroyed) return;
@@ -102,7 +103,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         #endregion
 
-
         protected virtual void OnViewReady()     { this.View.ViewDidDestroy += this.OnViewDestroyed; }
         protected virtual void OnViewDestroyed() { this.SignalBus.Fire(new ScreenSelfDestroyedSignal() { ScreenPresenter = this }); }
 
@@ -111,9 +111,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
     public abstract class BaseScreenPresenter<TView, TModel> : BaseScreenPresenter<TView>, IScreenPresenter<TModel> where TView : IScreenView
     {
-        protected readonly ILogService Logger;
-        protected          TModel      Model;
-        protected BaseScreenPresenter(SignalBus signalBus, ILogService logger) : base(signalBus) { this.Logger = logger; }
+        protected TModel Model { get; private set; }
+
+        protected BaseScreenPresenter(SignalBus signalBus, ILogService logger) : base(signalBus, logger)
+        {
+        }
 
         public override async UniTask OpenViewAsync()
         {
@@ -127,6 +129,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             }
             await base.OpenViewAsync();
         }
+
         public virtual async UniTask OpenView(TModel model)
         {
             if (model != null)

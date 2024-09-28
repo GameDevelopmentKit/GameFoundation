@@ -1,15 +1,16 @@
 namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 {
-    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.LogService;
-    using Zenject;
+    using GameFoundation.Signals;
 
     public abstract class BasePopupPresenter<TView> : BaseScreenPresenter<TView> where TView : IScreenView
     {
-        public BasePopupPresenter(SignalBus signalBus) : base(signalBus) { }
+        protected BasePopupPresenter(SignalBus signalBus, ILogService logger) : base(signalBus, logger)
+        {
+        }
 
         public override async UniTask OpenViewAsync()
         {
@@ -33,6 +34,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.SignalBus.Fire(new ScreenCloseSignal() { ScreenPresenter = this });
             this.Dispose();
         }
+
         public override void HideView()
         {
             if (this.ScreenStatus == ScreenStatus.Hide) return;
@@ -45,10 +47,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
     public abstract class BasePopupPresenter<TView, TModel> : BasePopupPresenter<TView>, IScreenPresenter<TModel> where TView : IScreenView
     {
-        protected readonly ILogService logService;
-        protected          TModel      Model;
+        protected TModel Model { get; private set; }
 
-        protected BasePopupPresenter(SignalBus signalBus, ILogService logService) : base(signalBus) { this.logService = logService; }
+        protected BasePopupPresenter(SignalBus signalBus, ILogService logger) : base(signalBus, logger)
+        {
+        }
 
         public async UniTask OpenView(TModel model)
         {
@@ -68,7 +71,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             }
             else
             {
-                this.logService.Warning($"{this.GetType().Name} don't have Model!!!");
+                this.Logger.Warning($"{this.GetType().Name} don't have Model!!!");
             }
 
             await base.OpenViewAsync();

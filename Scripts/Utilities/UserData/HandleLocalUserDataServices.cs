@@ -5,9 +5,11 @@ namespace GameFoundation.Scripts.Utilities.UserData
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
+    using UnityEngine.Scripting;
 
     public class HandleLocalUserDataServices : BaseHandleUserDataServices
     {
+        [Preserve]
         public HandleLocalUserDataServices(ILogService logService) : base(logService)
         {
         }

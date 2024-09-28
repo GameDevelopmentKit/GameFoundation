@@ -1,0 +1,25 @@
+{
+  "name": "GameFoundation.Signals",
+  "rootNamespace": "GameFoundation.Signals",
+  "references": [
+    "GameFoundation.DI",
+    "MessagePipe",
+    "UniTask",
+    "Zenject",
+    "MessagePipe.Zenject",
+    "VContainer",
+    "MessagePipe.VContainer"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "GDK_ZENJECT"
+    },
+    {
+      "name": "jp.hadashikick.vcontainer",
+      "expression": "",
+      "define": "GDK_VCONTAINER"
+    }
+  ]
+}

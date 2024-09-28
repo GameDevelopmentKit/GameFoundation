@@ -1,9 +1,11 @@
+#if GDK_ZENJECT
 namespace BlueprintFlow.BlueprintControlFlow
 {
     using BlueprintFlow.APIHandler;
     using BlueprintFlow.BlueprintReader;
     using BlueprintFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Signals;
     using Models;
     using Zenject;
 
@@ -21,7 +23,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             this.Container.Bind<BlueprintReaderManager>().AsCached();
             this.Container.Bind<BlueprintConfig>().FromResolveGetter<GDKConfig>(config => config.GetGameConfig<BlueprintConfig>()).AsCached();
 
-            this.Container.BindAllTypeDriveFrom<IGenericBlueprintReader>();
+            typeof(IGenericBlueprintReader).GetDerivedTypes().ForEach(type => this.Container.BindInterfacesAndSelfTo(type).AsSingle());
 
             this.Container.DeclareSignal<LoadBlueprintDataSucceedSignal>();
             this.Container.DeclareSignal<LoadBlueprintDataProgressSignal>();
@@ -29,3 +31,4 @@ namespace BlueprintFlow.BlueprintControlFlow
         }
     }
 }
+#endif

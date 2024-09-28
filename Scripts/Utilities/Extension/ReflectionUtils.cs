@@ -27,20 +27,6 @@ namespace GameFoundation.Scripts.Utilities.Extension
                             .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type));
         }
 
-        public static void CopyTo(this object from, object to)
-        {
-            var fromFieldInfos = from.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            var toFieldInfos   = to.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            foreach (var fromField in fromFieldInfos)
-            {
-                var toField = toFieldInfos.FirstOrDefault(toField => toField.Name == fromField.Name && toField.FieldType.IsAssignableFrom(fromField.FieldType));
-                if (toField != null)
-                {
-                    toField.SetValue(to, fromField.GetValue(from));
-                }
-            }
-        }
-        
         public static IEnumerable<FieldInfo> GetRecursiveFields(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
         {
             return type.GetFields(bindingFlags)

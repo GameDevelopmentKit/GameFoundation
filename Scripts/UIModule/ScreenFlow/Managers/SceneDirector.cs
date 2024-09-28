@@ -4,10 +4,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
+    using GameFoundation.Signals;
     using UnityEngine;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
-    using Zenject;
+    using UnityEngine.Scripting;
 
     /// <summary>Load, unload scenes are wrapped here </summary>
     public class SceneDirector
@@ -15,6 +16,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private readonly   SignalBus   signalBus;
         protected readonly IGameAssets GameAssets;
         public static      string      CurrentSceneName;
+
+        [Preserve]
         public SceneDirector(SignalBus signalBus, IGameAssets gameAssets)
         {
             this.signalBus  = signalBus;

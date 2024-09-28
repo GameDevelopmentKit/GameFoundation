@@ -5,6 +5,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using System.Linq;
     using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.CommonScreen;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
@@ -12,10 +13,14 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
+    using GameFoundation.Signals;
     using R3;
     using UnityEditor;
     using UnityEngine;
-    using Zenject;
+    using UnityEngine.Scripting;
+    using IInitializable = GameFoundation.DI.IInitializable;
+    using ITickable = GameFoundation.DI.ITickable;
+    using Object = UnityEngine.Object;
 
     /// <summary>
     /// Control open and close flow of all screens
@@ -23,16 +28,38 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     public interface IScreenManager
     {
         /// <summary>
+        /// Current screen shown on top.
+        /// </summary>
+        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; }
+
+        /// <summary>
+        /// Get root canvas of all screen, use to disable UI for creative purpose
+        /// </summary>
+        public RootUICanvas RootUICanvas { get; }
+
+        /// <summary>
+        /// Get root transform of all screen, used as the parent transform of each screen
+        /// </summary>
+        public Transform CurrentRootScreen { get; }
+
+        public Transform CurrentHiddenRoot { get; }
+
+        /// <summary>
+        /// Get overlay transform
+        /// </summary>
+        public Transform CurrentOverlayRoot { get; }
+
+        /// <summary>
         /// Get instance of a screen
         /// </summary>
-        /// <typeparam name="T">Type of screen presenter</typeparam>
-        public UniTask<T> GetScreen<T>() where T : IScreenPresenter;
+        /// <typeparam name="TPresenter">Type of screen presenter</typeparam>
+        public UniTask<TPresenter> GetScreen<TPresenter>() where TPresenter : IScreenPresenter;
 
         /// <summary>
         /// Open a screen by type
         /// </summary>
-        /// <typeparam name="T">Type of screen presenter</typeparam>
-        public UniTask<T> OpenScreen<T>() where T : IScreenPresenter;
+        /// <typeparam name="TPresenter">Type of screen presenter</typeparam>
+        public UniTask<TPresenter> OpenScreen<TPresenter>() where TPresenter : IScreenPresenter;
 
         public UniTask<TPresenter> OpenScreen<TPresenter, TModel>(TModel model) where TPresenter : IScreenPresenter<TModel>;
 
@@ -55,67 +82,26 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// Cleanup/ destroy all screen on current scene
         /// </summary>
         public void CleanUpAllScreen();
-
-        /// <summary>
-        /// Get root transform of all screen, used as the parent transform of each screen
-        /// </summary>
-        public Transform CurrentRootScreen { get; set; }
-
-        public Transform CurrentHiddenRoot { get; set; }
-
-        /// <summary>
-        /// Get overlay transform
-        /// </summary>
-        public Transform CurrentOverlayRoot { get; set; }
-
-        /// <summary>
-        /// Get root canvas of all screen, use to disable UI for creative purpose
-        /// </summary>
-        public RootUICanvas RootUICanvas { get; set; }
-
-        /// <summary>
-        /// Current screen shown on top.
-        /// </summary>
-        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; }
     }
 
-    public class ScreenManager : MonoBehaviour, IScreenManager, IDisposable
+    public class ScreenManager : IScreenManager, ITickable, IInitializable, IDisposable
     {
-        #region Properties
+        #region Constructors
 
-        /// <summary>
-        /// List of active screens
-        /// </summary>
-        [SerializeField] private List<IScreenPresenter> activeScreens;
+        private readonly SignalBus   signalBus;
+        private readonly ILogService logger;
+        private readonly IGameAssets gameAssets;
 
-        /// <summary>
-        /// Current screen shown on top.
-        /// </summary>
-        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; private set; } = new ReactiveProperty<IScreenPresenter>();
+        private readonly List<IScreenPresenter>                   activeScreens               = new();
+        private readonly Dictionary<Type, IScreenPresenter>       typeToLoadedScreenPresenter = new();
+        private readonly Dictionary<Type, Task<IScreenPresenter>> typeToPendingScreen         = new();
 
-        private IScreenPresenter previousActiveScreen;
-
-        private Dictionary<Type, IScreenPresenter>       typeToLoadedScreenPresenter;
-        private Dictionary<Type, Task<IScreenPresenter>> typeToPendingScreen;
-
-        private SignalBus    signalBus;
-        private RootUICanvas rootUICanvas;
-        private ILogService  logService;
-        private IGameAssets  gameAssets;
-        private bool         enableBackToClose = false;
-
-        #endregion
-
-        [Inject]
-        public void Init(SignalBus signalBusParam, ILogService logServiceParam, IGameAssets gameAssetsParam)
+        [Preserve]
+        public ScreenManager(SignalBus signalBus, ILogService logger, IGameAssets gameAssets)
         {
-            this.signalBus  = signalBusParam;
-            this.logService = logServiceParam;
-            this.gameAssets = gameAssetsParam;
-
-            this.activeScreens               = new List<IScreenPresenter>();
-            this.typeToLoadedScreenPresenter = new Dictionary<Type, IScreenPresenter>();
-            this.typeToPendingScreen         = new Dictionary<Type, Task<IScreenPresenter>>();
+            this.signalBus  = signalBus;
+            this.logger     = logger;
+            this.gameAssets = gameAssets;
 
             this.signalBus.Subscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
             this.signalBus.Subscribe<ScreenShowSignal>(this.OnShowScreen);
@@ -125,24 +111,31 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.signalBus.Subscribe<PopupBlurBgShowedSignal>(this.OnPopupBlurBgShowed);
         }
 
-        public void Dispose()
-        {
-            this.signalBus.Unsubscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
-            this.signalBus.Unsubscribe<ScreenShowSignal>(this.OnShowScreen);
-            this.signalBus.Unsubscribe<ScreenCloseSignal>(this.OnCloseScreen);
-            this.signalBus.Unsubscribe<ManualInitScreenSignal>(this.OnManualInitScreen);
-            this.signalBus.Unsubscribe<ScreenSelfDestroyedSignal>(this.OnDestroyScreen);
-            this.signalBus.Unsubscribe<PopupBlurBgShowedSignal>(this.OnPopupBlurBgShowed);
-        }
-
-        public void EnableBackToClose(bool enable) { this.enableBackToClose = enable; }
+        #endregion
 
         #region Implement IScreenManager
 
-        public Transform    CurrentRootScreen  { get; set; }
-        public Transform    CurrentHiddenRoot  { get; set; }
-        public Transform    CurrentOverlayRoot { get; set; }
-        public RootUICanvas RootUICanvas       { get; set; }
+        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; } = new();
+
+        private RootUICanvas rootUICanvas;
+
+        public RootUICanvas RootUICanvas
+        {
+            get
+            {
+                if (!this.rootUICanvas)
+                {
+                    this.rootUICanvas = Object.FindObjectOfType<RootUICanvas>();
+                }
+                return this.rootUICanvas;
+            }
+        }
+
+        public Transform CurrentRootScreen  => this.RootUICanvas.RootUIShowTransform;
+        public Transform CurrentHiddenRoot  => this.RootUICanvas.RootUIClosedTransform;
+        public Transform CurrentOverlayRoot => this.RootUICanvas.RootUIOverlayTransform;
+
+        private IScreenPresenter previousActiveScreen;
 
         public async UniTask<T> OpenScreen<T>() where T : IScreenPresenter
         {
@@ -205,7 +198,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 screenPresenter = this.GetCurrentContainer().Instantiate<T>();
                 var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
 
-                var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
+                var viewObject = Object.Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
                     this.CheckPopupIsOverlay(screenPresenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
 
                 screenPresenter.SetView(viewObject);
@@ -228,7 +221,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             foreach (var screen in cacheActiveScreens)
             {
-                screen.CloseViewAsync();
+                screen.CloseViewAsync().Forget();
             }
 
             this.CurrentActiveScreen.Value = null;
@@ -269,8 +262,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #endregion
 
-        #region Handle events
-
         #region Check Overlay Popup
 
         private bool CheckScreenIsPopup(IScreenPresenter screenPresenter) { return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>)); }
@@ -278,6 +269,22 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter) { return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay; }
 
         #endregion
+
+        #region Handle events
+
+        void IInitializable.Initialize()
+        {
+        }
+
+        void IDisposable.Dispose()
+        {
+            this.signalBus.Unsubscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
+            this.signalBus.Unsubscribe<ScreenShowSignal>(this.OnShowScreen);
+            this.signalBus.Unsubscribe<ScreenCloseSignal>(this.OnCloseScreen);
+            this.signalBus.Unsubscribe<ManualInitScreenSignal>(this.OnManualInitScreen);
+            this.signalBus.Unsubscribe<ScreenSelfDestroyedSignal>(this.OnDestroyScreen);
+            this.signalBus.Unsubscribe<PopupBlurBgShowedSignal>(this.OnPopupBlurBgShowed);
+        }
 
         private void OnShowScreen(ScreenShowSignal signal)
         {
@@ -325,7 +332,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     var nextScreen = this.activeScreens.Last();
 
                     if (nextScreen.ScreenStatus == ScreenStatus.Opened)
-                        this.OnShowScreen(new ScreenShowSignal() { ScreenPresenter = nextScreen });
+                        this.OnShowScreen(new() { ScreenPresenter = nextScreen });
                     else
                         nextScreen.OpenViewAsync();
                 }
@@ -343,8 +350,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var screenPresenter = signal.ScreenPresenter;
             var screenType      = screenPresenter.GetType();
 
-            if (this.typeToLoadedScreenPresenter.ContainsKey(screenType)) return;
-            this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
+            if (!this.typeToLoadedScreenPresenter.TryAdd(screenType, screenPresenter)) return;
             var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
 
             var viewObj = this.CurrentRootScreen.Find(screenInfo.AddressableScreenPath);
@@ -359,7 +365,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 }
             }
             else
-                this.logService.Error($"The {screenInfo.AddressableScreenPath} object may be not instantiated in the RootUICanvas!!!");
+                this.logger.Error($"The {screenInfo.AddressableScreenPath} object may be not instantiated in the RootUICanvas!!!");
         }
 
         private void OnDestroyScreen(ScreenSelfDestroyedSignal signal)
@@ -382,9 +388,16 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #endregion
 
-        #region Monobehaviour
+        #region BackToClose
 
-        private void Update()
+        private bool enableBackToClose = false;
+
+        public void EnableBackToClose(bool enable)
+        {
+            this.enableBackToClose = enable;
+        }
+
+        void ITickable.Tick()
         {
             // back button flow
             if (!Input.GetKeyDown(KeyCode.Escape) || !this.enableBackToClose) return;
@@ -398,23 +411,23 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             {
                 Debug.Log("Show popup confirm quit app");
 
-                _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
+                this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new()
                 {
                     Content        = "Do you really want to quit?",
                     Title          = "Are you sure?",
                     Type           = NotificationType.Option,
                     OkNoticeAction = this.QuitApplication,
-                });
+                }).Forget();
             }
         }
 
         private void QuitApplication()
         {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             EditorApplication.isPlaying = false;
-#else
-                             Application.Quit();
-#endif
+            #else
+            Application.Quit();
+            #endif
         }
 
         #endregion

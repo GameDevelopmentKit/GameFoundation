@@ -12,39 +12,48 @@ namespace BlueprintFlow.BlueprintControlFlow
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.UserData;
+    using GameFoundation.Signals;
     using UnityEngine;
-    using Zenject;
+    using UnityEngine.Scripting;
 
     /// <summary>
     ///  The main manager for reading blueprints pipeline/>.
     /// </summary>
     public class BlueprintReaderManager
     {
-        #region zeject
+        #region Constructor
 
-        private readonly SignalBus               signalBus;
-        private readonly ILogService             logService;
-        private readonly DiContainer             diContainer;
-        private readonly IHandleUserDataServices handleUserDataServices;
-        private readonly BlueprintConfig         blueprintConfig;
-        private readonly FetchBlueprintInfo      fetchBlueprintInfo;
-        private readonly BlueprintDownloader     blueprintDownloader;
+        private readonly SignalBus                                    signalBus;
+        private readonly ILogService                                  logService;
+        private readonly IHandleUserDataServices                      handleUserDataServices;
+        private readonly BlueprintConfig                              blueprintConfig;
+        private readonly FetchBlueprintInfo                           fetchBlueprintInfo;
+        private readonly BlueprintDownloader                          blueprintDownloader;
+        private readonly IReadOnlyCollection<IGenericBlueprintReader> blueprints;
+
+        [Preserve]
+        public BlueprintReaderManager(
+            SignalBus                            signalBus,
+            ILogService                          logService,
+            IHandleUserDataServices              handleUserDataServices,
+            BlueprintConfig                      blueprintConfig,
+            FetchBlueprintInfo                   fetchBlueprintInfo,
+            BlueprintDownloader                  blueprintDownloader,
+            IEnumerable<IGenericBlueprintReader> blueprints
+        )
+        {
+            this.signalBus              = signalBus;
+            this.logService             = logService;
+            this.handleUserDataServices = handleUserDataServices;
+            this.blueprintConfig        = blueprintConfig;
+            this.fetchBlueprintInfo     = fetchBlueprintInfo;
+            this.blueprintDownloader    = blueprintDownloader;
+            this.blueprints             = blueprints.ToArray();
+        }
 
         #endregion
 
         private readonly ReadBlueprintProgressSignal readBlueprintProgressSignal = new();
-
-        public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer, IHandleUserDataServices handleUserDataServices, BlueprintConfig blueprintConfig,
-            FetchBlueprintInfo fetchBlueprintInfo, BlueprintDownloader blueprintDownloader)
-        {
-            this.signalBus               = signalBus;
-            this.logService              = logService;
-            this.diContainer             = diContainer;
-            this.handleUserDataServices = handleUserDataServices;
-            this.blueprintConfig         = blueprintConfig;
-            this.fetchBlueprintInfo      = fetchBlueprintInfo;
-            this.blueprintDownloader     = blueprintDownloader;
-        }
 
         public virtual async UniTask LoadBlueprint()
         {
@@ -53,7 +62,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             if (this.blueprintConfig.IsResourceMode)
             {
                 listRawBlueprints = new Dictionary<string, string>();
-                this.signalBus.Fire(new LoadBlueprintDataProgressSignal {Percent = 1f});
+                this.signalBus.Fire(new LoadBlueprintDataProgressSignal { Percent = 1f });
             }
             else
             {
@@ -70,12 +79,11 @@ namespace BlueprintFlow.BlueprintControlFlow
                     this.handleUserDataServices.Save(newBlueprintInfo, true);
 
                     // Unzip file to memory
-#if !UNITY_WEBGL
+                    #if !UNITY_WEBGL
                     listRawBlueprints = await UniTask.RunOnThreadPool(this.UnzipBlueprint);
-
-#else
+                    #else
                     listRawBlueprints = await UniTask.Create(this.UnzipBlueprint);
-#endif
+                    #endif
                 }
             }
 
@@ -101,9 +109,8 @@ namespace BlueprintFlow.BlueprintControlFlow
         }
 
         protected virtual async UniTask<bool> IsCachedBlueprintUpToDate(string url, string hash) =>
-            (await this.handleUserDataServices.Load<BlueprintInfoData>()).Url == url &&
-            MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
-
+            (await this.handleUserDataServices.Load<BlueprintInfoData>()).Url == url
+            && MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
 
         //Download new blueprints version from remote
         private async UniTask DownloadBlueprint(string blueprintDownloadLink)
@@ -146,29 +153,18 @@ namespace BlueprintFlow.BlueprintControlFlow
                     $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
             }
 
-            var listReadTask    = new List<UniTask>();
-            var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>();
-            this.readBlueprintProgressSignal.MaxBlueprint = allDerivedTypes.Count();
+            this.readBlueprintProgressSignal.MaxBlueprint    = this.blueprints.Count;
             this.readBlueprintProgressSignal.CurrentProgress = 0;
             this.signalBus.Fire(this.readBlueprintProgressSignal); // Inform that we just start reading blueprint
-            foreach (var blueprintType in allDerivedTypes)
-            {
-                var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);
-                if (blueprintInstance != null)
-                {
-#if !UNITY_WEBGL
-                    listReadTask.Add(UniTask.RunOnThreadPool(() => this.OpenReadBlueprint(blueprintInstance, listRawBlueprints)));
-#else
-                    listReadTask.Add(UniTask.Create(() => this.OpenReadBlueprint(blueprintInstance, listRawBlueprints)));
-#endif
-                }
-                else
-                {
-                    this.logService.Log($"Can not resolve blueprint {blueprintType.Name}");
-                }
-            }
 
-            return UniTask.WhenAll(listReadTask);
+            return UniTask.WhenAll(this.blueprints.Select(blueprint =>
+            {
+                #if !UNITY_WEBGL
+                return UniTask.RunOnThreadPool(() => this.OpenReadBlueprint(blueprint, listRawBlueprints));
+                #else
+                return UniTask.Create(() => this.OpenReadBlueprint(blueprint, listRawBlueprints));
+                #endif
+            }));
         }
 
         private async UniTask OpenReadBlueprint(IGenericBlueprintReader blueprintReader, Dictionary<string, string> listRawBlueprints)
@@ -207,14 +203,14 @@ namespace BlueprintFlow.BlueprintControlFlow
                         this.logService.Exception(e);
                     }
 
-#if !UNITY_WEBGL
+                    #if !UNITY_WEBGL
                     await UniTask.SwitchToThreadPool();
-#endif
+                    #endif
                     return result;
                 }
 
                 // Deserialize the raw blueprint to the blueprint reader instance
-                
+
                 if (!string.IsNullOrEmpty(rawCsv))
                 {
                     await blueprintReader.DeserializeFromCsv(rawCsv);

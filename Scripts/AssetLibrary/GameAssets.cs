@@ -11,6 +11,7 @@ namespace GameFoundation.Scripts.AssetLibrary
     using UnityEngine.ResourceManagement.AsyncOperations;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
+    using UnityEngine.Scripting;
     using Object = UnityEngine.Object;
 
     public interface IGameAssets
@@ -85,13 +86,14 @@ namespace GameFoundation.Scripts.AssetLibrary
         UniTask<GameObject> InstantiateAsync(object key, Vector3 position, Quaternion rotation, Transform parent = null, bool trackHandle = true);
 
         public bool DestroyGameObject(GameObject gameObject);
-        
+
         Dictionary<object, AsyncOperationHandle> GetLoadingAssets();
     }
 
     /// <summary>
     /// Utilities class to manage and load assets from Addressable
     /// </summary>
+    [Preserve]
     public class GameAssets : IGameAssets
     {
         /// <summary>
@@ -285,7 +287,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         {
             //For loading scene
             if (string.IsNullOrEmpty(sceneName)) return;
-            
+
             if (!this.assetsAutoUnloadByScene.TryGetValue(sceneName, out var listAsset)) return;
             foreach (var asset in listAsset)
             {
@@ -408,7 +410,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         {
             return await Addressables.InstantiateAsync(key, position, rotation, parent, trackHandle);
         }
-        
+
         /// <summary>
         /// Destroy game object and decrease ref count of assets
         /// </summary>

@@ -1,16 +1,19 @@
-namespace Zenject
+namespace GameFoundation.Signals
 {
     using System;
     using System.Collections.Generic;
+    using GameFoundation.DI;
     using MessagePipe;
+    using UnityEngine.Scripting;
 
     public class SignalBus : ILateDisposable
     {
-        private readonly DiContainer container;
+        private readonly IDependencyContainer container;
 
         private readonly Dictionary<(Type SignalType, Delegate Callback), IDisposable> subscriptions = new();
 
-        public SignalBus(DiContainer container)
+        [Preserve]
+        public SignalBus(IDependencyContainer container)
         {
             this.container = container;
         }
@@ -67,13 +70,13 @@ namespace Zenject
 
         private IPublisher<TSignal> GetPublisher<TSignal>()
         {
-            if (this.container.TryResolve<IPublisher<TSignal>>() is not { } publisher) throw new("Signal not declared");
+            if (!this.container.TryResolve<IPublisher<TSignal>>(out var publisher)) throw new("Signal not declared");
             return publisher;
         }
 
         private ISubscriber<TSignal> GetSubscriber<TSignal>()
         {
-            if (this.container.TryResolve<ISubscriber<TSignal>>() is not { } subscriber) throw new("Signal not declared");
+            if (!this.container.TryResolve<ISubscriber<TSignal>>(out var subscriber)) throw new("Signal not declared");
             return subscriber;
         }
 
@@ -89,7 +92,7 @@ namespace Zenject
                 Action<TSignal> action => action,
                 _                      => throw new ArgumentException("Callback type not supported"),
             };
-            var subscription  = this.GetSubscriber<TSignal>().Subscribe(wrapper);
+            var subscription = this.GetSubscriber<TSignal>().Subscribe(wrapper);
             this.subscriptions.Add(key, subscription);
             return true;
         }

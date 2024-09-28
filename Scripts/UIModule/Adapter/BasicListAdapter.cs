@@ -6,9 +6,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     using Com.ForbiddenByte.OSA.CustomParams;
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
-    using Zenject;
 
     // There are 2 important callbacks you need to implement, apart from Start(): CreateViewsHolder() and UpdateViewsHolder()
     // See explanations below
@@ -17,29 +17,21 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        private SimpleDataHelper<TModel> Models { get; set; }
-        private CanvasGroup              canvasGroup;
-        private List<TPresenter>         presenters;
-        private HashSet<TView>           readiedViewSet = new();
-
-        private DiContainer diContainer;
+        public           SimpleDataHelper<TModel> Models { get; private set; }
+        private          IDependencyContainer     container;
+        private readonly List<TPresenter>         presenters     = new();
+        private readonly HashSet<TView>           readiedViewSet = new();
 
         #region OSA implementation
 
-        protected override void Start()
+        protected override void Awake()
         {
-            this.Models = new SimpleDataHelper<TModel>(this);
-
-            // Calling this initializes internal data and prepares the adapter to handle item count changes
-            base.Start();
-
-            // Retrieve the models from your data source and set the items count
-            /*
-            RetrieveDataAndUpdate(500);
-            */
+            base.Awake();
+            this.container = this.GetCurrentContainer();
+            this.Models    = new(this);
         }
 
-        // This is called initially, as many times as needed to fill the viewport, 
+        // This is called initially, as many times as needed to fill the viewport,
         // and anytime the viewport's size grows, thus allowing more items to be displayed
         // Here you create the "ViewsHolder" instance whose views will be re-used
         // *For the method's full description check the base implementation
@@ -52,7 +44,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             return instance;
         }
 
-        // This is called anytime a previously invisible item become visible, or after it's created, 
+        // This is called anytime a previously invisible item become visible, or after it's created,
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
         // *For the method's full description check the base implementation
@@ -66,7 +58,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             if (this.presenters.Count <= index)
             {
-                var presenter = this.diContainer.Instantiate<TPresenter>();
+                var presenter = this.container.Instantiate<TPresenter>();
                 presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
@@ -99,21 +91,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
+        public async UniTask InitItemAdapter(List<TModel> modelList)
         {
-            this.diContainer = diContainer;
-            this.Models      = new SimpleDataHelper<TModel>(this);
-
-            if (this.presenters != null)
+            foreach (var baseUIItemPresenter in this.presenters)
             {
-                foreach (var baseUIItemPresenter in this.presenters)
-                {
-                    baseUIItemPresenter.Dispose();
-                }
+                baseUIItemPresenter.Dispose();
             }
-
-            this.presenters = new List<TPresenter>();
-
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
@@ -140,8 +123,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public List<TPresenter> GetPresenters() => this.presenters;
     }
 
-// This class keeps references to an item's views.
-// Your views holder should extend BaseItemViewsHolder for ListViews and CellViewsHolder for GridViews
+    // This class keeps references to an item's views.
+    // Your views holder should extend BaseItemViewsHolder for ListViews and CellViewsHolder for GridViews
     public class MyListItemViewsHolder : BaseItemViewsHolder
     {
     }

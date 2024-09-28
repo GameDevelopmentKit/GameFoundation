@@ -1,31 +1,30 @@
 {
-    "name": "GameFoundation.BlueprintFlow",
-    "rootNamespace": "",
-    "references": [
-        "UniTask",
-        "GameFoundation.Utilities",
-        "Zenject",
-        "Zenject-Signals",
-        "GameFoundation.Models"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "Sylvan.Data.Csv.dll",
-        "Newtonsoft.Json.dll",
-        "Zenject-usage.dll",
-        "Sirenix.Serialization.dll"
-    ],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.gdk.network",
-            "expression": "",
-            "define": "GDK_NETWORK_ENABLE"
-        }
-    ],
-    "noEngineReferences": false
+  "name": "GameFoundation.BlueprintFlow",
+  "rootNamespace": "GameFoundation.BlueprintFlow",
+  "references": [
+    "GameFoundation.DI",
+    "GameFoundation.Signals",
+    "GameFoundation.Models",
+    "GameFoundation.Utilities",
+    "UniTask",
+    "Zenject",
+    "VContainer"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.gdk.network",
+      "expression": "",
+      "define": "GDK_NETWORK_ENABLE"
+    },
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "GDK_ZENJECT"
+    },
+    {
+      "name": "jp.hadashikick.vcontainer",
+      "expression": "",
+      "define": "GDK_VCONTAINER"
+    }
+  ]
 }

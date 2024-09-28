@@ -1,10 +1,11 @@
 namespace BlueprintFlow.APIHandler
 {
-#if GDK_NETWORK_ENABLE
+    #if GDK_NETWORK_ENABLE
     using GameFoundation.Scripts.BlueprintFlow.BlueprintControlFlow;
     using GameFoundation.Scripts.Network.WebService;
     using GameFoundation.Scripts.Network.WebService.Requests;
     using GameFoundation.Scripts.Utilities.LogService;
+    using UnityEngine.Scripting;
 
     /// <summary>
     /// Get blueprint download link from server
@@ -17,6 +18,7 @@ namespace BlueprintFlow.APIHandler
 
         #endregion
 
+        [Preserve]
         public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) :
             base(logger)
         {
@@ -30,7 +32,7 @@ namespace BlueprintFlow.APIHandler
         }
     }
 
-#else
+    #else
     using System;
     using System.IO;
     using System.Net;
@@ -39,7 +41,9 @@ namespace BlueprintFlow.APIHandler
     using GameFoundation.Scripts.Utilities.UserData;
     using Newtonsoft.Json;
     using UnityEngine;
+    using UnityEngine.Scripting;
 
+    [Preserve]
     public class BlueprintInfoData : ILocalData
     {
         public string Version;
@@ -51,7 +55,13 @@ namespace BlueprintFlow.APIHandler
     public class FetchBlueprintInfo
     {
         private readonly IHandleUserDataServices handleUserDataServices;
-        public FetchBlueprintInfo(IHandleUserDataServices handleUserDataServices) { this.handleUserDataServices = handleUserDataServices; }
+
+        [Preserve]
+        public FetchBlueprintInfo(IHandleUserDataServices handleUserDataServices)
+        {
+            this.handleUserDataServices = handleUserDataServices;
+        }
+
         public async Task<BlueprintInfoData> GetBlueprintInfo(string fetchUri)
         {
             try
@@ -60,9 +70,9 @@ namespace BlueprintFlow.APIHandler
                 var response     = (HttpWebResponse)(await request.GetResponseAsync());
                 var reader       = new StreamReader(response.GetResponseStream());
                 var jsonResponse = await reader.ReadToEndAsync();
-                var definition   = new { data = new {blueprint = new BlueprintInfoData()} };
+                var definition   = new { data = new { blueprint = new BlueprintInfoData() } };
                 var responseData = JsonConvert.DeserializeAnonymousType(jsonResponse, definition);
-                return responseData?.data.blueprint ;
+                return responseData?.data.blueprint;
             }
             catch (Exception e)
             {
@@ -72,5 +82,5 @@ namespace BlueprintFlow.APIHandler
             }
         }
     }
-#endif
+    #endif
 }

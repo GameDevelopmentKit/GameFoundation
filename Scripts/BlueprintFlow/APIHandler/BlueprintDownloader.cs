@@ -3,22 +3,33 @@ namespace BlueprintFlow.APIHandler
     using System;
     using BlueprintFlow.BlueprintControlFlow;
     using Cysharp.Threading.Tasks;
+    using UnityEngine.Scripting;
+    #if !GDK_NETWORK_ENABLE
+    using System.Net;
     using GameFoundation.Scripts.Utilities.LogService;
-    using Zenject;
+    #else
+    using Network.WebService;
+    #endif
 
     /// <summary>
-    /// Class uses for downloading the blueprint zip file from <see cref="BlueprintConfig.BlueprintS3Link"/> and put it in the <see cref="BlueprintConfig.BlueprintZipFilepath"/>
+    /// Class uses for downloading the blueprint zip file from <see cref="BlueprintConfig.FetchBlueprintUri"/> and put it in the <see cref="BlueprintConfig.BlueprintZipFilepath"/>
     /// </summary>
     public class BlueprintDownloader
     {
-        [Inject] private ILogService     logService;
-        
-#if !GDK_NETWORK_ENABLE
-        public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
+        #if !GDK_NETWORK_ENABLE
+        private readonly ILogService logService;
+
+        [Preserve]
+        public BlueprintDownloader(ILogService logService)
+        {
+            this.logService = logService;
+        }
+
+        public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long, long> onDownloadProgress)
         {
             try
             {
-                using var client = new System.Net.WebClient();
+                using var client = new WebClient();
                 var       uri    = new Uri(blueprintDownloadUrl);
                 var       task   = client.DownloadFileTaskAsync(uri, filePath);
                 client.DownloadProgressChanged += (sender, args) => onDownloadProgress.Invoke(args.BytesReceived, args.TotalBytesToReceive);
@@ -30,14 +41,19 @@ namespace BlueprintFlow.APIHandler
                 throw;
             }
         }
-        
-#else
-        [Inject] private Network.WebService.IHttpService httpService;
-        public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long,long> onDownloadProgress)
+        #else
+        private readonly IHttpService httpService;
+
+        [Preserve]
+        public BlueprintDownloader(IHttpService httpService)
+        {
+            this.httpService = httpService;
+        }
+
+        public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long, long> onDownloadProgress)
         {
             return this.httpService.Download(blueprintDownloadUrl, filePath, onDownloadProgress.Invoke);
         }
-        
-#endif
+        #endif
     }
 }

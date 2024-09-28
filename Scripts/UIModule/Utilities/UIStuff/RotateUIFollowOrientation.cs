@@ -3,23 +3,26 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
     using System.Collections.Generic;
     using DG.Tweening;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
+    using R3;
     using Sirenix.OdinInspector;
     using UnityEngine;
-    using Zenject;
-    using R3;
 
     public class RotateUIFollowOrientation : MonoBehaviour
     {
         [SerializeField] private List<GameObject> listObjects;
 
-        [Inject] private DetectRotateOrientation detectRotateOrientation;
+        private DetectRotateOrientation detectRotateOrientation;
 
-        
+        private void Awake()
+        {
+            this.detectRotateOrientation = FindObjectOfType<DetectRotateOrientation>();
+        }
+
         private void Start()
         {
             this.detectRotateOrientation.state.Subscribe(this.OnChangeOrientation);
         }
-        
+
         private void OnChangeOrientation(DeviceOrientation value)
         {
             var rotate = 0;

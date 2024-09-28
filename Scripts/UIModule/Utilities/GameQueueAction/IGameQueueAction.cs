@@ -1,10 +1,8 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System;
-    using Zenject;
-    using Zenject.Internal;
 
-    public interface IGameQueueAction : IDisposable, IPoolable<IMemoryPool,string, string>
+    public interface IGameQueueAction : IDisposable
     {
         string                         actionId      { get; }
         string[]                       dependActions { get; }

@@ -4,10 +4,12 @@ namespace BlueprintFlow.BlueprintControlFlow
     using System.IO;
     using Cysharp.Threading.Tasks;
     using UnityEngine;
+    using UnityEngine.Scripting;
 
     /// <summary>
     /// We need it to pre process read blueprint from mobile
     /// </summary>
+    [Preserve]
     public class PreProcessBlueprintMobile
     {
         private const string FileName = "Blueprints_v1.0.zip";

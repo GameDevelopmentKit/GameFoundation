@@ -14,15 +14,13 @@
     "email": "ninhnv15@gmail.com"
   },
   "dependencies": {
-    "com.unity.addressables": "1.21.21",
+    "com.unity.addressables": "1.22.2",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
-    "com.svermeulen.extenject": "10.0.0",
-    "com.cysharp.r3": "1.1.12",
-    "com.cysharp.unitask": "2.5.4",
+    "com.cysharp.r3": "1.2.8",
+    "com.cysharp.unitask": "2.5.5",
     "com.cysharp.messagepipe": "1.8.1",
-    "com.cysharp.messagepipe.zenject": "1.8.1",
-    "org.nuget.r3": "1.1.12",
-    "org.nuget.sylvan.data.csv": "1.3.8"
+    "org.nuget.r3": "1.2.8",
+    "org.nuget.sylvan.data.csv": "1.3.9"
   },
   "keywords": [
     "SDK",

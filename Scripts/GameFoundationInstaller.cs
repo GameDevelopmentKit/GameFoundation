@@ -1,6 +1,10 @@
-﻿namespace GameFoundation.Scripts
+﻿#if GDK_ZENJECT
+using BlueprintServicesInstaller = BlueprintFlow.BlueprintControlFlow.BlueprintServicesInstaller;
+using GDKConfig = Models.GDKConfig;
+
+namespace GameFoundation.Scripts
 {
-    using BlueprintFlow.BlueprintControlFlow;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
@@ -12,13 +16,16 @@
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
-    using global::Models;
+    using GameFoundation.Signals;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
     {
         public override void InstallBindings()
         {
+            this.Container.BindInterfacesTo<ZenjectWrapper>().AsSingle().CopyIntoAllSubContainers();
+            this.Container.BindInterfacesTo<ZenjectAdapter>().AsSingle().CopyIntoAllSubContainers();
+
             SignalBusInstaller.Install(this.Container);
 
             this.Container.Bind<GDKConfig>().FromResource("GameConfigs/GDKConfig").AsSingle().NonLazy();
@@ -53,3 +60,4 @@
         }
     }
 }
+#endif

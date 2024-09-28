@@ -1,8 +1,9 @@
-namespace Zenject
+#if GDK_ZENJECT
+namespace GameFoundation.Signals
 {
     using MessagePipe;
+    using Zenject;
 
-    // Note that you only need to install this once
     public class SignalBusInstaller : Installer<SignalBusInstaller>
     {
         public override void InstallBindings()
@@ -12,3 +13,4 @@ namespace Zenject
         }
     }
 }
+#endif

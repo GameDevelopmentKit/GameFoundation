@@ -2,14 +2,17 @@ namespace GameFoundation.Scripts.Utilities.LogService
 {
     using System;
     using UnityEngine;
-    using Zenject;
+    using UnityEngine.Scripting;
     using Color = UnityEngine.Color;
 
     public class LogService : ILogService
     {
         /// <summary>Init some service here, maybe FileLog, BackTrace,.... </summary>
-        [Inject]
-        private void Init() { this.Log("--Init Log service!--"); }
+        [Preserve]
+        public LogService()
+        {
+            this.Log("--Init Log service!--");
+        }
 
         public void Log(string logContent, LogLevel logLevel = LogLevel.LOG)
         {
@@ -33,7 +36,7 @@ namespace GameFoundation.Scripts.Utilities.LogService
 
         public void LogWithColor(string logContent, Color? c = null)
         {
-            Color color = Color.white;
+            var color = Color.white;
             if (c != null)
             {
                 color = (Color)c;
@@ -43,13 +46,14 @@ namespace GameFoundation.Scripts.Utilities.LogService
 
         public void Warning(string logContent) => this.Log(logContent, LogLevel.WARNING);
 
-        public void Error(string logContent)       => this.Log(logContent, LogLevel.ERROR);
-        public void Exception(Exception exception) { Debug.LogException(exception); }
+        public void Error(string logContent) => this.Log(logContent, LogLevel.ERROR);
+
+        public void Exception(Exception exception) => Debug.LogException(exception);
+
         public void Exception(Exception exception, string message)
         {
             Debug.LogError(message);
             Debug.LogException(exception);
         }
-
     }
 }

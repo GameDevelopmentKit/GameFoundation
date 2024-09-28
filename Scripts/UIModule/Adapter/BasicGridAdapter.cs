@@ -5,9 +5,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     using Com.ForbiddenByte.OSA.CustomAdapters.GridView;
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
-    using Zenject;
 
     // There is 1 important callback you need to implement, apart from Start(): UpdateCellViewsHolder()
     // See explanations below
@@ -15,41 +15,33 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public  SimpleDataHelper<TModel> Models { get; private set; }
-        private CanvasGroup              canvasGroup;
-        private List<TPresenter>         presenters;
-        private HashSet<TView>           readiedViewSet = new();
-
-        private DiContainer diContainer;
+        public           SimpleDataHelper<TModel> Models { get; private set; }
+        private          IDependencyContainer     container;
+        private readonly List<TPresenter>         presenters     = new();
+        private readonly HashSet<TView>           readiedViewSet = new();
 
         #region GridAdapter implementation
 
-        protected override void Start()
+        protected override void Awake()
         {
-            this.Models = new SimpleDataHelper<TModel>(this);
-
-            // Calling this initializes internal data and prepares the adapter to handle item count changes
-            base.Start();
-
-            // Retrieve the models from your data source and set the items count
-            /*
-            RetrieveDataAndUpdate(1500);
-            */
+            base.Awake();
+            this.container = this.GetCurrentContainer();
+            this.Models    = new(this);
         }
 
-        // This is called anytime a previously invisible item become visible, or after it's created, 
+        // This is called anytime a previously invisible item become visible, or after it's created,
         // or when anything that requires a refresh happens
         // Here you bind the data from the model to the item's views
         // *For the method's full description check the base implementation
         protected override void UpdateCellViewsHolder(MyGridItemViewsHolder viewHolder)
         {
-            var index      = viewHolder.ItemIndex;
+            var index = viewHolder.ItemIndex;
             if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
             var viewObject = viewHolder.root.GetComponentInChildren<TView>(true);
             if (this.presenters.Count <= index)
             {
-                var presenter = this.diContainer.Instantiate<TPresenter>();
+                var presenter = this.container.Instantiate<TPresenter>();
                 presenter.SetView(viewObject);
                 presenter.BindData(model);
                 this.presenters.Add(presenter);
@@ -63,7 +55,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.BindData(model);
                 CallOnViewReady(viewObject, presenter);
             }
-            
+
             return;
 
             void CallOnViewReady(TView view, TPresenter presenter)
@@ -79,28 +71,20 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         // These are common data manipulation methods
         // The list containing the models is managed by you. The adapter only manages the items' sizes and the count
-        // The adapter needs to be notified of any change that occurs in the data list. 
+        // The adapter needs to be notified of any change that occurs in the data list.
         // For GridAdapters, only Refresh and ResetItems work for now
 
-        public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
+        public async UniTask InitItemAdapter(List<TModel> modelList)
         {
-            this.diContainer = diContainer;
-            this.Models      = new SimpleDataHelper<TModel>(this);
-            
-            if (this.presenters != null)
+            foreach (var baseUIItemPresenter in this.presenters)
             {
-                foreach (var baseUIItemPresenter in this.presenters)
-                {
-                    baseUIItemPresenter.Dispose();
-                } 
+                baseUIItemPresenter.Dispose();
             }
-            this.presenters  = new List<TPresenter>();
-
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
-        
+
         /// <summary>
         /// We need this because the original method only update to  this.VisibleItemsCount - 1
         /// </summary>
@@ -118,13 +102,13 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         }
 
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
-        
+
         public List<TPresenter> GetPresenters() => this.presenters;
     }
 
     // This class keeps references to an item's views.
     // Your views holder should extend BaseItemViewsHolder for ListViews and CellViewsHolder for GridViews
-    // The cell views holder should have a single child (usually named "Views"), which contains the actual 
+    // The cell views holder should have a single child (usually named "Views"), which contains the actual
     // UI elements. A cell's root is never disabled - when a cell is removed, only its "views" GameObject will be disabled
     public class MyGridItemViewsHolder : CellViewsHolder
     {
