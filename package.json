@@ -20,7 +20,8 @@
     "com.cysharp.unitask": "2.5.5",
     "com.cysharp.messagepipe": "1.8.1",
     "org.nuget.r3": "1.2.8",
-    "org.nuget.sylvan.data.csv": "1.3.9"
+    "org.nuget.sylvan.data.csv": "1.3.9",
+    "com.theone.logging": "1.0.0"
   },
   "keywords": [
     "SDK",
