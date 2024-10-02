@@ -17,6 +17,7 @@ namespace GameFoundation.Scripts
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
+    using TheOne.Logging.DI;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
