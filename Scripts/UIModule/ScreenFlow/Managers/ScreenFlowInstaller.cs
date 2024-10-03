@@ -4,8 +4,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
     using GameFoundation.Signals;
+    using UnityEngine.Scripting;
     using Zenject;
 
+    [Preserve]
     public class ScreenFlowInstaller : Installer<ScreenFlowInstaller>
     {
         public override void InstallBindings()

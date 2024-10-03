@@ -7,11 +7,13 @@ namespace BlueprintFlow.BlueprintControlFlow
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Signals;
     using Models;
+    using UnityEngine.Scripting;
     using Zenject;
 
     /// <summary>
     /// Binding all services of the blueprint control flow at here
     /// </summary>
+    [Preserve]
     public class BlueprintServicesInstaller : Installer<BlueprintServicesInstaller>
     {
         public override void InstallBindings()
