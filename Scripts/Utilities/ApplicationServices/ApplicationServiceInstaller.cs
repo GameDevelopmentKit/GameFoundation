@@ -3,8 +3,10 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 {
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
+    using UnityEngine.Scripting;
     using Zenject;
 
+    [Preserve]
     public class ApplicationServiceInstaller : Installer<ApplicationServiceInstaller>
     {
         public override void InstallBindings()

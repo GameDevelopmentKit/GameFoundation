@@ -18,8 +18,10 @@ namespace GameFoundation.Scripts
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
     using TheOne.Logging.DI;
+    using UnityEngine.Scripting;
     using Zenject;
 
+    [Preserve]
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
     {
         public override void InstallBindings()
