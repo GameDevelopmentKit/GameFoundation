@@ -8,7 +8,7 @@ namespace GameFoundation.DI
     using UnityEngine.Scripting;
     using VContainer.Internal;
 
-    public sealed class VContainerAdapter : VContainer.Unity.IInitializable, VContainer.Unity.ITickable, VContainer.Unity.ILateTickable, VContainer.Unity.IFixedTickable, IDisposable
+    public sealed class VContainerAdapter : VContainer.Unity.IStartable, VContainer.Unity.ITickable, VContainer.Unity.ILateTickable, VContainer.Unity.IFixedTickable, IDisposable
     {
         private readonly IReadOnlyList<IInitializable>  initializables;
         private readonly IReadOnlyList<ITickable>       tickables;
@@ -32,7 +32,7 @@ namespace GameFoundation.DI
             this.lateDisposables = lateDisposables.Value.ToArray();
         }
 
-        void VContainer.Unity.IInitializable.Initialize()
+        void VContainer.Unity.IStartable.Start()
         {
             foreach (var initializable in this.initializables)
             {
