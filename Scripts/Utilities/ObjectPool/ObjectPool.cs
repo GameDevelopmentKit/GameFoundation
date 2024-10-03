@@ -16,6 +16,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (this.pooledObjects.Count == 0)
             {
                 obj = Instantiate(this.prefab, position, rotation, this.transform);
+                obj.SetActive(true);
             }
             else
             {
