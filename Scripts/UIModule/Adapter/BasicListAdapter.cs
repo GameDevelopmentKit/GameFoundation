@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Com.ForbiddenByte.OSA.Core;
     using Com.ForbiddenByte.OSA.CustomParams;
     using Com.ForbiddenByte.OSA.DataHelpers;
@@ -17,10 +18,11 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public           SimpleDataHelper<TModel> Models { get; private set; }
-        private          IDependencyContainer     container;
-        private readonly List<TPresenter>         presenters     = new();
-        private readonly HashSet<TView>           readiedViewSet = new();
+        public  SimpleDataHelper<TModel> Models { get; private set; }
+        private IDependencyContainer     container;
+
+        private readonly Dictionary<TView, TPresenter> viewToPresenter  = new();
+        private readonly Dictionary<int, TPresenter>   indexToPresenter = new();
 
         #region OSA implementation
 
@@ -53,35 +55,23 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             var index = v.ItemIndex;
 
             if (this.Models.Count <= index || index < 0) return;
-            var model      = this.Models[index];
-            var viewObject = v.root.GetComponentInChildren<TView>(true);
+            var model = this.Models[index];
+            var view  = v.root.GetComponentInChildren<TView>(true);
 
-            if (this.presenters.Count <= index)
+            if (this.viewToPresenter.TryGetValue(view, out var presenter))
             {
-                var presenter = this.container.Instantiate<TPresenter>();
-                presenter.SetView(viewObject);
-                presenter.BindData(model);
-                this.presenters.Add(presenter);
-                CallOnViewReady(viewObject, presenter);
+                presenter.Dispose();
             }
             else
             {
-                var presenter = this.presenters[index];
-                presenter.SetView(viewObject);
-                presenter.Dispose();
-                presenter.BindData(model);
-                CallOnViewReady(viewObject, presenter);
+                presenter = this.viewToPresenter[view] = this.container.Instantiate<TPresenter>();
+                presenter.SetView(view);
+                presenter.OnViewReady();
             }
 
-            return;
+            this.indexToPresenter[index] = presenter;
 
-            void CallOnViewReady(TView view, TPresenter presenter)
-            {
-                if (this.readiedViewSet.Add(view))
-                {
-                    presenter.OnViewReady();
-                }
-            }
+            presenter.BindData(model);
         }
 
         #endregion
@@ -93,10 +83,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> modelList)
         {
-            foreach (var baseUIItemPresenter in this.presenters)
-            {
-                baseUIItemPresenter.Dispose();
-            }
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
@@ -112,15 +98,15 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             if (twinPassScheduledBefore)
                 throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 
-            for (var i = 0; i < this.presenters.Count; i++)
+            for (var i = 0; i < this.viewToPresenter.Count; i++)
             {
                 this.ForceUpdateViewsHolderIfVisible(i);
             }
         }
 
-        public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
+        public TPresenter GetPresenterAtIndex(int index) => this.indexToPresenter[index];
 
-        public List<TPresenter> GetPresenters() => this.presenters;
+        public List<TPresenter> GetPresenters() => this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
     }
 
     // This class keeps references to an item's views.
