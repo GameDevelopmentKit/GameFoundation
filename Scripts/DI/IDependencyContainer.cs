@@ -26,5 +26,7 @@ namespace GameFoundation.DI
         public void Inject(object instance);
 
         public void InjectGameObject(GameObject instance);
+
+        public GameObject InstantiatePrefab(GameObject prefab);
     }
 }
