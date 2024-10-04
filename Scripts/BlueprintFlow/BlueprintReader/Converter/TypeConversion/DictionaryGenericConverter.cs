@@ -8,7 +8,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     {
         private readonly char delimiterItem;
         private readonly char delimiterPair;
-        public DictionaryGenericConverter(char delimiterItem = ',', char delimiterPair = ':')
+        public DictionaryGenericConverter(char delimiterItem = '|', char delimiterPair = ':')
         {
             this.delimiterItem = delimiterItem;
             this.delimiterPair = delimiterPair;
