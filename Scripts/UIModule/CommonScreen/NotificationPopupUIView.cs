@@ -9,6 +9,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     using GameFoundation.Signals;
     using TMPro;
     using UnityEngine;
+    using UnityEngine.Scripting;
     using UnityEngine.UI;
 
     public enum NotificationType
@@ -40,6 +41,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     public class NotificationPopupPresenter : BasePopupPresenter<NotificationPopupUIView, NotificationPopupModel>
     {
         private readonly IAudioService audioManager;
+
+        [Preserve]
         public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioService audioManager) : base(signalBus, logService) { this.audioManager = audioManager; }
 
         public override UniTask BindData(NotificationPopupModel popupPopupModel)
