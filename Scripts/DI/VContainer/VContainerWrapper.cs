@@ -42,7 +42,7 @@ namespace GameFoundation.DI
 
         void IDependencyContainer.InjectGameObject(GameObject instance) => this.container.InjectGameObject(instance);
 
-        GameObject IDependencyContainer.InstantiatePrefab(GameObject prefab) => this.container.InstantiatePrefab(prefab);
+        GameObject IDependencyContainer.InstantiatePrefab(GameObject prefab) => this.container.Instantiate(prefab);
     }
 
     public sealed class InjectAttribute : VContainer.InjectAttribute
