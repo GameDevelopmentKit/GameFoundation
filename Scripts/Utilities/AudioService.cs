@@ -116,7 +116,7 @@
             {
                 audioSource.PlayOneShotSoundManaged(audioClip);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
-                audioSource.Recycle();
+                if(audioSource.isActiveAndEnabled) audioSource.Recycle();
             }
         }
 
