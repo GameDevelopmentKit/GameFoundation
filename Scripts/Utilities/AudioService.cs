@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.DI;
@@ -68,14 +69,11 @@
             Instance               = this;
         }
 
-        public void Initialize()
-        {
-            this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio);
-        }
+        public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
 
         private void SubscribeMasterAudio()
         {
-            this.compositeDisposable = new()
+            this.compositeDisposable = new CompositeDisposable
             {
                 this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
                 this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
@@ -127,7 +125,10 @@
             SoundManager.StopAllLoopingSounds();
             SoundManager.StopAllNonLoopingSounds();
 
-            foreach (var audioSource in this.loopingSoundNameToSources.Values) audioSource.gameObject.Recycle();
+            foreach (var audioSource in this.loopingSoundNameToSources.Values.Where(audioSource => audioSource.isActiveAndEnabled))
+            {
+                audioSource.gameObject.Recycle();
+            }
 
             this.loopingSoundNameToSources.Clear();
         }
@@ -212,17 +213,13 @@
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.Play();
         }
-
         public bool IsPlayingPlayList()
         {
             if (this.MusicAudioSource == null) return false;
             return this.MusicAudioSource.isPlaying;
         }
 
-        public void StopAllPlayList()
-        {
-            this.StopPlayList();
-        }
+        public void StopAllPlayList() { this.StopPlayList(); }
 
         public void PauseEverything()
         {
@@ -236,19 +233,10 @@
             SoundManager.ResumeAll();
         }
 
-        protected virtual void SetSoundValue(float value)
-        {
-            SoundManager.SoundVolume = value;
-        }
+        protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
-        protected virtual void SetMusicValue(float value)
-        {
-            SoundManager.MusicVolume = value;
-        }
+        protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
 
-        public void Dispose()
-        {
-            this.compositeDisposable?.Dispose();
-        }
+        public void Dispose() { this.compositeDisposable?.Dispose(); }
     }
 }
