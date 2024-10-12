@@ -7,7 +7,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     public class ListGenericConverter : DefaultTypeConverter
     {
         private readonly char delimiter;
-        public ListGenericConverter(char delimiter = ',') { this.delimiter = delimiter; }
+
+        public ListGenericConverter(char delimiter = ',')
+        {
+            this.delimiter = delimiter;
+        }
 
         public override string ConvertToString(object value, Type typeInfo)
         {

@@ -26,7 +26,6 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         // attributeNamesByEnumValues
         // 1:[Name("Foo")]
 
-
         /// <inheritdoc />
         public override object ConvertFromString(string text, Type typeInfo)
         {
@@ -34,7 +33,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
                 if (this.enumNamesByAttributeNames.ContainsKey(text))
                     return Enum.Parse(typeInfo, this.enumNamesByAttributeNames[text]);
 
-#if NET45 || NET47 || NETSTANDARD2_0
+            #if NET45 || NET47 || NETSTANDARD2_0
 			try
 			{
 				return Enum.Parse(type, text, ignoreCase);
@@ -43,18 +42,16 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 			{
 				return base.ConvertFromString(text, row, memberMapData);
 			}
-#else
-            if (Enum.TryParse(typeInfo, text, false, out var value))
-                return value;
+            #else
+            if (Enum.TryParse(typeInfo, text, false, out var value)) return value;
             return base.ConvertFromString(text, typeInfo);
-#endif
+            #endif
         }
 
         /// <inheritdoc />
         public override string ConvertToString(object value, Type typeInfo)
         {
-            if (value != null && this.attributeNamesByEnumValues.ContainsKey(value))
-                return this.attributeNamesByEnumValues[value];
+            if (value != null && this.attributeNamesByEnumValues.ContainsKey(value)) return this.attributeNamesByEnumValues[value];
 
             if (value == null) return string.Empty;
 

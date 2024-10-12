@@ -17,7 +17,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public PriorityQueue(IComparer<TPriority> comparer)
         {
-            this.items = new SortedList<TPriority, TElement>(Comparer<TPriority>.Create((i1, i2) =>
+            this.items = new(Comparer<TPriority>.Create((i1, i2) =>
             {
                 var result = comparer.Compare(i1, i2);
                 return result != 0 ? result : 1;

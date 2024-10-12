@@ -1,19 +1,19 @@
 {
-    "name": "GameFoundation.AssetLibrary",
-    "rootNamespace": "",
-    "references": [
-        "UniTask.Addressables",
-        "Unity.Addressables",
-        "Unity.ResourceManager",
-        "UniTask"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "GameFoundation.AssetLibrary",
+  "rootNamespace": "",
+  "references": [
+    "UniTask.Addressables",
+    "Unity.Addressables",
+    "Unity.ResourceManager",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

@@ -61,16 +61,13 @@ namespace BlueprintFlow.BlueprintControlFlow
             Dictionary<string, string> listRawBlueprints = null;
             if (this.blueprintConfig.IsResourceMode)
             {
-                listRawBlueprints = new Dictionary<string, string>();
+                listRawBlueprints = new();
                 this.signalBus.Fire(new LoadBlueprintDataProgressSignal { Percent = 1f });
             }
             else
             {
                 var newBlueprintInfo = await this.fetchBlueprintInfo.GetBlueprintInfo(this.blueprintConfig.FetchBlueprintUri);
-                if (!await this.IsCachedBlueprintUpToDate(newBlueprintInfo.Url, newBlueprintInfo.Hash))
-                {
-                    await this.DownloadBlueprint(newBlueprintInfo.Url);
-                }
+                if (!await this.IsCachedBlueprintUpToDate(newBlueprintInfo.Url, newBlueprintInfo.Hash)) await this.DownloadBlueprint(newBlueprintInfo.Url);
 
                 //Is blueprint zip file exists in storage
                 if (File.Exists(this.blueprintConfig.BlueprintZipFilepath))
@@ -88,10 +85,8 @@ namespace BlueprintFlow.BlueprintControlFlow
             }
 
             if (listRawBlueprints == null)
-            {
                 //Show warning popup
                 return;
-            }
 
             //Load all blueprints to instances
             try
@@ -108,35 +103,35 @@ namespace BlueprintFlow.BlueprintControlFlow
             this.signalBus.Fire<LoadBlueprintDataSucceedSignal>();
         }
 
-        protected virtual async UniTask<bool> IsCachedBlueprintUpToDate(string url, string hash) =>
-            (await this.handleUserDataServices.Load<BlueprintInfoData>()).Url == url
-            && MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
+        protected virtual async UniTask<bool> IsCachedBlueprintUpToDate(string url, string hash)
+        {
+            return (await this.handleUserDataServices.Load<BlueprintInfoData>()).Url == url
+                && MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
+        }
 
         //Download new blueprints version from remote
         private async UniTask DownloadBlueprint(string blueprintDownloadLink)
         {
             var progressSignal = new LoadBlueprintDataProgressSignal { Percent = 0f };
             this.signalBus.Fire(progressSignal); //Inform that we just starting dowloading blueprint
-            await this.blueprintDownloader.DownloadBlueprintAsync(blueprintDownloadLink, this.blueprintConfig.BlueprintZipFilepath, (downloaded, length) =>
-            {
-                progressSignal.Percent = downloaded / (float)length * 100f;
-                this.signalBus.Fire(progressSignal);
-            });
+            await this.blueprintDownloader.DownloadBlueprintAsync(blueprintDownloadLink,
+                this.blueprintConfig.BlueprintZipFilepath,
+                (downloaded, length) =>
+                {
+                    progressSignal.Percent = downloaded / (float)length * 100f;
+                    this.signalBus.Fire(progressSignal);
+                });
         }
 
         protected virtual async UniTask<Dictionary<string, string>> UnzipBlueprint()
         {
             var result = new Dictionary<string, string>();
-            if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
-            {
-                return result;
-            }
+            if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath)) return result;
 
             using var archive = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath);
             foreach (var entry in archive.Entries)
             {
-                if (!entry.FullName.EndsWith(this.blueprintConfig.BlueprintFileType, StringComparison.OrdinalIgnoreCase))
-                    continue;
+                if (!entry.FullName.EndsWith(this.blueprintConfig.BlueprintFileType, StringComparison.OrdinalIgnoreCase)) continue;
                 using var streamReader   = new StreamReader(entry.Open());
                 var       readToEndAsync = await streamReader.ReadToEndAsync();
                 result.Add(entry.Name, readToEndAsync);
@@ -148,10 +143,8 @@ namespace BlueprintFlow.BlueprintControlFlow
         private UniTask ReadAllBlueprint(Dictionary<string, string> listRawBlueprints)
         {
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
-            {
                 this.logService.Warning(
                     $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
-            }
 
             this.readBlueprintProgressSignal.MaxBlueprint    = this.blueprints.Count;
             this.readBlueprintProgressSignal.CurrentProgress = 0;
@@ -221,7 +214,9 @@ namespace BlueprintFlow.BlueprintControlFlow
                     }
                 }
                 else
+                {
                     this.logService.Warning($"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");
+                }
             }
             else
             {

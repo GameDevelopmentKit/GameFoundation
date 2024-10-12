@@ -9,7 +9,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         {
             Awake,
             Start,
-            CallManually
+            CallManually,
         };
 
         [Serializable]
@@ -26,16 +26,14 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         private void Awake()
         {
-            if (this.startupPoolMode == StartupPoolMode.Awake)
-                this.CreateStartupPools();
+            if (this.startupPoolMode == StartupPoolMode.Awake) this.CreateStartupPools();
         }
 
         private void Start()
         {
-            if (this.startupPoolMode == StartupPoolMode.Start)
-                this.CreateStartupPools();
+            if (this.startupPoolMode == StartupPoolMode.Start) this.CreateStartupPools();
         }
-        
+
         public void CreateStartupPools()
         {
             if (!this.startupPoolsCreated)

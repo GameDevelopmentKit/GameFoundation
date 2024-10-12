@@ -22,10 +22,10 @@ namespace GameFoundation.DI
             [InjectLocal] IEnumerable<ILateDisposable> lateDisposables
         )
         {
-            this.initializables  = initializables.ToArray();
-            this.tickables       = tickables.ToArray();
-            this.lateTickables   = lateTickables.ToArray();
-            this.fixedTickables  = fixedTickables.ToArray();
+            this.initializables = initializables.ToArray();
+            this.tickables = tickables.ToArray();
+            this.lateTickables = lateTickables.ToArray();
+            this.fixedTickables = fixedTickables.ToArray();
             this.lateDisposables = lateDisposables.ToArray();
         }
 

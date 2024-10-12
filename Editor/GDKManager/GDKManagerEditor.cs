@@ -13,14 +13,13 @@ public class GDKManagerEditor : EditorWindow
     private VisualElement initPanel;
     private VisualElement configPanel;
 
-
     private List<IGameConfigEditor> listGameConfigEditors = new();
 
     [MenuItem("GDK/GDKManager")]
     public static void ShowExample()
     {
-        GDKManagerEditor wnd = GetWindow<GDKManagerEditor>();
-        wnd.titleContent = new GUIContent("GDKManager");
+        var wnd = GetWindow<GDKManagerEditor>();
+        wnd.titleContent = new("GDKManager");
     }
 
     public void CreateGUI()
@@ -72,9 +71,6 @@ public class GDKManagerEditor : EditorWindow
         this.configPanel.SetActive(true);
         this.initPanel.SetActive(false);
 
-        foreach (var configEditor in this.listGameConfigEditors)
-        {
-            this.configPanel.Add(configEditor.LoadView());
-        }
+        foreach (var configEditor in this.listGameConfigEditors) this.configPanel.Add(configEditor.LoadView());
     }
 }

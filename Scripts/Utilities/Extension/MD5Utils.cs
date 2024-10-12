@@ -17,10 +17,7 @@
                 var       hash   = md5.ComputeHash(stream);
 
                 var sb = new StringBuilder();
-                foreach (var t in hash)
-                {
-                    sb.Append(t.ToString("X2"));
-                }
+                foreach (var t in hash) sb.Append(t.ToString("X2"));
                 return sb.ToString();
             }
             catch (Exception ex)

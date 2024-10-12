@@ -6,15 +6,13 @@ using UnityEngine.Timeline;
 [Serializable]
 public class LightControlClip : PlayableAsset, ITimelineClipAsset
 {
-    public LightControlBehaviour template = new LightControlBehaviour ();
+    public LightControlBehaviour template = new();
 
-    public ClipCaps clipCaps
+    public ClipCaps clipCaps => ClipCaps.Blending;
+
+    public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
     {
-        get { return ClipCaps.Blending; }
+        var playable = ScriptPlayable<LightControlBehaviour>.Create(graph, this.template);
+        return playable;
     }
-
-    public override Playable CreatePlayable (PlayableGraph graph, GameObject owner)
-    {
-        var playable = ScriptPlayable<LightControlBehaviour>.Create (graph, template);
-        return playable;    }
 }

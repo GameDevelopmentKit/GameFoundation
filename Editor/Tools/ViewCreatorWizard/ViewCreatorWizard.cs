@@ -49,26 +49,26 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
             if (!ValidateOpenWindow(out var reason))
             {
-                SceneView.lastActiveSceneView.ShowNotification(new GUIContent(reason), 1.5f);
+                SceneView.lastActiveSceneView.ShowNotification(new(reason), 1.5f);
                 Debug.Log(LOG_TAG + reason);
 
                 return;
             }
 
             var wnd = GetWindow<ViewCreatorWizard>();
-            wnd.titleContent = new GUIContent("ViewCreatorWizard");
+            wnd.titleContent = new("ViewCreatorWizard");
         }
 
-        private static bool IsAssetPath() { return File.Exists($"{Application.dataPath}{UI_BASE_POPUP_PATH}"); }
+        private static bool IsAssetPath()
+        {
+            return File.Exists($"{Application.dataPath}{UI_BASE_POPUP_PATH}");
+        }
 
         private static void ReplacePackagePath()
         {
             var isAssetPath = IsAssetPath();
 
-            if (isAssetPath)
-            {
-              return;
-            }
+            if (isAssetPath) return;
             UI_BASE_POPUP_PATH  = "Packages/com.gdk.core/Prefabs/CommonUIPrefab/UIBasePopup.prefab";
             UI_BASE_SCREEN_PATH = "Packages/com.gdk.core/Prefabs/CommonUIPrefab/UIBaseScreen.prefab";
             ViewXml             = "Packages/com.gdk.core/Editor/Tools/ViewCreatorWizard/ViewCreatorWizard.uxml";
@@ -95,7 +95,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         public void CreateGUI()
         {
             ReplacePackagePath();
-            this.taskCreateView = EditorPrefs.HasKey(TASK_CREATE_VIEW_KEY) ? JsonConvert.DeserializeObject<TaskCreateView>(EditorPrefs.GetString(TASK_CREATE_VIEW_KEY)) : new TaskCreateView();
+            this.taskCreateView = EditorPrefs.HasKey(TASK_CREATE_VIEW_KEY) ? JsonConvert.DeserializeObject<TaskCreateView>(EditorPrefs.GetString(TASK_CREATE_VIEW_KEY)) : new();
 
             var root       = this.rootVisualElement;
             var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(ViewXml);
@@ -135,7 +135,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
             this.GeneratePrefab();
             EditorPrefs.DeleteKey(TASK_CREATE_VIEW_KEY);
-            this.taskCreateView = new TaskCreateView();
+            this.taskCreateView = new();
         }
 
         #endregion
@@ -152,7 +152,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
             if (this.taskCreateView.ViewType == ViewType.Item)
             {
-                objSource = new GameObject();
+                objSource = new();
                 objSource.AddComponent<RectTransform>();
             }
             else
@@ -181,7 +181,6 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             }
 
             if (!Directory.Exists(genScriptDirectoryPath))
-            {
                 try
                 {
                     Directory.CreateDirectory(genScriptDirectoryPath);
@@ -192,7 +191,6 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
                     return false;
                 }
-            }
 
             try
             {
@@ -227,27 +225,27 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
                 var sTemplate = type switch
                 {
-                    ViewType.Item => ITEM_VIEW_TEMPLATE,
-                    ViewType.Popup => this.toggleSettingHasModel.value ? POPUP_VIEW_TEMPLATE : POPUP_VIEW_NON_MODEL_TEMPLATE,
+                    ViewType.Item   => ITEM_VIEW_TEMPLATE,
+                    ViewType.Popup  => this.toggleSettingHasModel.value ? POPUP_VIEW_TEMPLATE : POPUP_VIEW_NON_MODEL_TEMPLATE,
                     ViewType.Screen => this.toggleSettingHasModel.value ? SCREEN_VIEW_TEMPLATE : SCREEN_VIEW_NON_MODEL_TEMPLATE,
-                    _ => throw new ArgumentOutOfRangeException()
+                    _               => throw new ArgumentOutOfRangeException(),
                 };
 
                 var viewName = this.inputViewName.value; // PlayerItemView
 
                 var projectRelativeScriptPath                                          = this.inputSettingScriptPath.value; // Assets or Assets/Phuong/Doan/
-                if (projectRelativeScriptPath.EndsWith('/')) projectRelativeScriptPath = projectRelativeScriptPath[..^1]; // Assets or Assets/Phuong/Doan
+                if (projectRelativeScriptPath.EndsWith('/')) projectRelativeScriptPath = projectRelativeScriptPath[..^1];   // Assets or Assets/Phuong/Doan
 
                 var projectRelativePrefabPath                                          = this.inputSettingPrefabPath.value; // Assets or Assets/Phuong/Doan/
-                if (projectRelativePrefabPath.EndsWith('/')) projectRelativePrefabPath = projectRelativePrefabPath[..^1]; // Assets or Assets/Phuong/Doan
+                if (projectRelativePrefabPath.EndsWith('/')) projectRelativePrefabPath = projectRelativePrefabPath[..^1];   // Assets or Assets/Phuong/Doan
 
                 var nameSpaceScriptPath = projectRelativeScriptPath.Replace("Assets/", ""); // Assets or Phuong/Doan
-                nameSpaceScriptPath = nameSpaceScriptPath.Replace("Assets", ""); // "" or Phuong/Doan
+                nameSpaceScriptPath = nameSpaceScriptPath.Replace("Assets", "");            // "" or Phuong/Doan
 
                 var genScriptPath =
-                    Application.dataPath + (string.IsNullOrWhiteSpace(nameSpaceScriptPath) ? "" : ("/" + nameSpaceScriptPath)); // C:UnityProject/Assets or C:UnityProject/Assets/Phuong/Doan
+                    Application.dataPath + (string.IsNullOrWhiteSpace(nameSpaceScriptPath) ? "" : "/" + nameSpaceScriptPath); // C:UnityProject/Assets or C:UnityProject/Assets/Phuong/Doan
 
-                var genScriptFullPath = genScriptPath + "/" + viewName + ".cs"; // C:UnityProject/Assets/PlayerItemView.cs or C:UnityProject/Assets/Phuong/Doan/PlayerItemView.cs
+                var genScriptFullPath = genScriptPath + "/" + viewName + ".cs";                                                       // C:UnityProject/Assets/PlayerItemView.cs or C:UnityProject/Assets/Phuong/Doan/PlayerItemView.cs
                 var nameSpace         = string.IsNullOrWhiteSpace(nameSpaceScriptPath) ? "A" : nameSpaceScriptPath.Replace("/", "."); // A or Phuong.Doan
                 nameSpace = nameSpace.Replace(" ", "_");
 
@@ -265,7 +263,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                         IsTaskComplete  = false,
                         PrefabAssetPath = $"{projectRelativePrefabPath}/{viewName}.prefab",
                         TypeFullName    = $"{nameSpace}.{viewName}",
-                        ViewType        = type
+                        ViewType        = type,
                     });
 
                     EditorPrefs.SetString(TASK_CREATE_VIEW_KEY, serializeObject);
@@ -287,10 +285,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         {
             inputPath.RegisterValueChangedCallback(evt =>
             {
-                if (string.IsNullOrWhiteSpace(evt.newValue))
-                {
-                    inputPath.value = FOLDER_PATH_DEFAULT;
-                }
+                if (string.IsNullOrWhiteSpace(evt.newValue)) inputPath.value = FOLDER_PATH_DEFAULT;
 
                 inputPath.value = inputPath.value.Trim();
             });
@@ -300,13 +295,9 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                 var path = EditorUtility.OpenFolderPanel("Choose path", FOLDER_PATH_DEFAULT, "");
 
                 if (path.Length != 0 && path.Contains("Assets"))
-                {
                     inputPath.value = FileUtil.GetProjectRelativePath(path);
-                }
                 else
-                {
                     Debug.Log(LOG_TAG + "Invalid path");
-                }
             };
         }
 
@@ -322,7 +313,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
         private void InitViewTypeSetting()
         {
-            this.dropdownSettingType.choices = new List<string>();
+            this.dropdownSettingType.choices = new();
             this.dropdownSettingType.choices = Enum.GetNames(typeof(ViewType)).ToList();
 
             this.dropdownSettingType.RegisterValueChangedCallback(evt =>
@@ -370,8 +361,12 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
             return AppDomain.CurrentDomain.GetAssemblies().Select(assembly => assembly.GetType(typeFullName)).FirstOrDefault(type => type != null);
         }
 
-        private static readonly Regex  SWhitespace = new Regex(@"\s+");
-        private static          string RemoveWhitespace(string input) { return SWhitespace.Replace(input, ""); }
+        private static readonly Regex SWhitespace = new(@"\s+");
+
+        private static string RemoveWhitespace(string input)
+        {
+            return SWhitespace.Replace(input, "");
+        }
 
         #endregion
     }
@@ -380,7 +375,7 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
     {
         Item,
         Popup,
-        Screen
+        Screen,
     }
 
     public class TaskCreateView
@@ -390,6 +385,9 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         public string   TypeFullName;
         public string   PrefabAssetPath;
 
-        public TaskCreateView() { this.IsTaskComplete = true; }
+        public TaskCreateView()
+        {
+            this.IsTaskComplete = true;
+        }
     }
 }

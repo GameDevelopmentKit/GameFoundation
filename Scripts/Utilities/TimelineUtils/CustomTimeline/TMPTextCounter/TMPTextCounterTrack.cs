@@ -1,4 +1,5 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextCounter {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextCounter
+{
     using TMPro;
     using UnityEngine;
     using UnityEngine.Playables;
@@ -7,8 +8,10 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextC
     [TrackColor(0.0479686f, 0f, 0.9811321f)]
     [TrackClipType(typeof(TMPTextCounterClip))]
     [TrackBindingType(typeof(TextMeshPro))]
-    public class TMPTextCounterTrack : TrackAsset {
-        public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount) {
+    public class TMPTextCounterTrack : TrackAsset
+    {
+        public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
+        {
             return ScriptPlayable<TMPTextCounterMixerBehaviour>.Create(graph, inputCount);
         }
     }

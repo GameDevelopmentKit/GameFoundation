@@ -23,7 +23,8 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <param name="options">The options.</param>
         public ByteArrayConverter(
             ByteArrayConverterOptions options =
-                ByteArrayConverterOptions.Hexadecimal | ByteArrayConverterOptions.HexInclude0x)
+                ByteArrayConverterOptions.Hexadecimal | ByteArrayConverterOptions.HexInclude0x
+        )
         {
             // Defaults to the literal format used by C# for whole numbers, and SQL Server for binary data.
             this.options = options;
@@ -74,13 +75,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         {
             var hexString = new StringBuilder();
 
-            if ((this.options & ByteArrayConverterOptions.HexInclude0x) == ByteArrayConverterOptions.HexInclude0x)
-                hexString.Append("0x");
+            if ((this.options & ByteArrayConverterOptions.HexInclude0x) == ByteArrayConverterOptions.HexInclude0x) hexString.Append("0x");
 
             if (byteArray.Length >= 1) hexString.Append(byteArray[0].ToString("X2"));
 
-            for (var i = 1; i < byteArray.Length; i++)
-                hexString.Append(this.HexStringPrefix + byteArray[i].ToString("X2"));
+            for (var i = 1; i < byteArray.Length; i++) hexString.Append(this.HexStringPrefix + byteArray[i].ToString("X2"));
 
             return hexString.ToString();
         }
@@ -96,8 +95,10 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             var has0xOffset = has0x ? 1 : 0;
 
             for (var stringIndex = has0xOffset * 2; stringIndex < hex.Length; stringIndex += this.ByteLength)
+            {
                 byteArray[(stringIndex - has0xOffset) / this.ByteLength] =
                     Convert.ToByte(hex.Substring(stringIndex, 2), 16);
+            }
 
             return byteArray;
         }
@@ -105,12 +106,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         private void ValidateOptions()
         {
             if ((this.options & ByteArrayConverterOptions.Base64) == ByteArrayConverterOptions.Base64)
-                if ((this.options & (ByteArrayConverterOptions.HexInclude0x | ByteArrayConverterOptions.HexDashes |
-                                     ByteArrayConverterOptions.Hexadecimal)) != ByteArrayConverterOptions.None)
+                if ((this.options & (ByteArrayConverterOptions.HexInclude0x | ByteArrayConverterOptions.HexDashes | ByteArrayConverterOptions.Hexadecimal)) != ByteArrayConverterOptions.None)
                     throw new ArgumentException(
                         $"{nameof(ByteArrayConverter)} must be configured exclusively with HexDecimal options, or exclusively with Base64 options.  Was {this.options.ToString()}")
                     {
-                        Data = { { "options", this.options } }
+                        Data = { { "options", this.options } },
                     };
         }
     }

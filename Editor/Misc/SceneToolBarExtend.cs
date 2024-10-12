@@ -4,27 +4,27 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(SceneToolBarExtend))]
-public class SceneToolbarCustomeEditor : UnityEditor.Editor
+public class SceneToolbarCustomeEditor : Editor
 {
     private SceneToolBarExtend sceneToolBarExtend;
-    private void               OnEnable() { this.sceneToolBarExtend = SceneToolBarExtend.Instance; }
+
+    private void OnEnable()
+    {
+        this.sceneToolBarExtend = SceneToolBarExtend.Instance;
+    }
 
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
 
-        if (GUILayout.Button("Save", GUILayout.Height(50)))
-        {
-            this.sceneToolBarExtend.Save();
-        }
-
+        if (GUILayout.Button("Save", GUILayout.Height(50))) this.sceneToolBarExtend.Save();
     }
 }
 
 public class SceneToolBarExtend : ScriptableObject
 {
     private static string             fileName = "SceneToolBarExtend";
-    static         SceneToolBarExtend instance;
+    private static SceneToolBarExtend instance;
 
     public static SceneToolBarExtend Instance
     {
@@ -45,7 +45,10 @@ public class SceneToolBarExtend : ScriptableObject
         }
     }
 
-    private static SceneToolBarExtend LoadSettingsAsset() { return Resources.Load(fileName) as SceneToolBarExtend; }
+    private static SceneToolBarExtend LoadSettingsAsset()
+    {
+        return Resources.Load(fileName) as SceneToolBarExtend;
+    }
 
     private static void SaveToResources()
     {

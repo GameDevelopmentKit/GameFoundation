@@ -1,4 +1,5 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimelineEvents {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimelineEvents
+{
     using System;
     using System.Linq;
     using System.Reflection;
@@ -6,7 +7,8 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
     using UnityEngine.Playables;
 
     [Serializable]
-    public class TimelineEventBehaviour : PlayableBehaviour {
+    public class TimelineEventBehaviour : PlayableBehaviour
+    {
         /// <summary>
         /// Key for the current event handler - used to track changes 
         /// </summary>
@@ -31,21 +33,24 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
 
         private EventInvocationInfo invocationInfo;
 
-        public override void OnBehaviourPlay(Playable playable, FrameData info) {
+        public override void OnBehaviourPlay(Playable playable, FrameData info)
+        {
             // Only invoke if time has passed to avoid invoking
             // repeatedly after resume
-            if (info.frameId == 0 || info.deltaTime > 0) {
+            if (info.frameId == 0 || info.deltaTime > 0)
+            {
                 this.UpdateDelegates();
-                if (this.invocationInfo != null) {
-                    this.invocationInfo.Invoke(this.IsMethodWithParam, this.ArgValue);
-                }
+                if (this.invocationInfo != null) this.invocationInfo.Invoke(this.IsMethodWithParam, this.ArgValue);
             }
         }
 
-        private void UpdateDelegates() {
-            bool enableByMode = Application.isPlaying || this.InvokeEventsInEditMode;
+        private void UpdateDelegates()
+        {
+            var enableByMode = Application.isPlaying || this.InvokeEventsInEditMode;
 
-            this.invocationInfo = this.GetInvocationInfo(enableByMode, this.HandlerKey, this.invocationInfo,
+            this.invocationInfo = this.GetInvocationInfo(enableByMode,
+                this.HandlerKey,
+                this.invocationInfo,
                 this.IsMethodWithParam);
         }
 
@@ -58,25 +63,27 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
         /// <param name="currentInfo"></param>
         /// <param name="methodWitharg"></param>
         /// <returns></returns>
-        private EventInvocationInfo GetInvocationInfo(bool isEnabled, string methodKey, EventInvocationInfo currentInfo,
-            bool methodWitharg) {
-            if (currentInfo != null && currentInfo.Key == methodKey &&
-                !(string.IsNullOrEmpty(methodKey) || (methodKey.ToLower() == "none"))) {
-                return currentInfo;
-            }
+        private EventInvocationInfo GetInvocationInfo(
+            bool                isEnabled,
+            string              methodKey,
+            EventInvocationInfo currentInfo,
+            bool                methodWitharg
+        )
+        {
+            if (currentInfo != null && currentInfo.Key == methodKey && !(string.IsNullOrEmpty(methodKey) || methodKey.ToLower() == "none")) return currentInfo;
 
             Behaviour targetBehaviour = null;
-            string methodName = null;
+            string    methodName      = null;
             this.GetBehaviourAndMethod(isEnabled, methodKey, ref targetBehaviour, ref methodName);
 
-            if (targetBehaviour != null) {
+            if (targetBehaviour != null)
+            {
                 //get the method info
                 var methodInfo = targetBehaviour
                     .GetType()
                     .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                    .FirstOrDefault(m => m.Name == methodName && m.ReturnType == typeof(void) &&
-                                         m.GetParameters().Length == (methodWitharg ? 1 : 0));
-                return new EventInvocationInfo(methodKey, targetBehaviour, methodInfo);
+                    .FirstOrDefault(m => m.Name == methodName && m.ReturnType == typeof(void) && m.GetParameters().Length == (methodWitharg ? 1 : 0));
+                return new(methodKey, targetBehaviour, methodInfo);
             }
 
             return null;
@@ -90,42 +97,40 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
         /// <param name="targetBehaviour"></param>
         /// <param name="methodName"></param>
         /// <exception cref="Exception"></exception>
-        private void GetBehaviourAndMethod(bool isEnabled, string key, ref Behaviour targetBehaviour,
-            ref string methodName) {
-            if ((!isEnabled) || string.IsNullOrEmpty(key) || (key.ToLower() == "none")) {
-                return;
-            }
+        private void GetBehaviourAndMethod(
+            bool          isEnabled,
+            string        key,
+            ref Behaviour targetBehaviour,
+            ref string    methodName
+        )
+        {
+            if (!isEnabled || string.IsNullOrEmpty(key) || key.ToLower() == "none") return;
 
             //TODO do not do this if the method is the same
-            if ((!string.IsNullOrEmpty(key))) {
-                int splitIndex = key.LastIndexOf('.');
-                string typeName = key.Substring(0, splitIndex);
+            if (!string.IsNullOrEmpty(key))
+            {
+                var splitIndex = key.LastIndexOf('.');
+                var typeName   = key.Substring(0, splitIndex);
                 methodName =
                     key.Substring(splitIndex + 1, key.Length - (splitIndex + 1));
 
-                if (string.IsNullOrEmpty(typeName) || string.IsNullOrEmpty(methodName)) {
-                    throw new Exception("Unable to parse callback method: " + key);
-                }
+                if (string.IsNullOrEmpty(typeName) || string.IsNullOrEmpty(methodName)) throw new("Unable to parse callback method: " + key);
 
                 targetBehaviour = null;
 
-                if (this.TargetObject == null) {
-                    throw new Exception("No target set for key " + key);
-                }
+                if (this.TargetObject == null) throw new("No target set for key " + key);
 
-                foreach (var behaviour in this.TargetObject.GetComponents<Behaviour>()) {
-                    if (typeName == behaviour.GetType().ToString() || typeName == behaviour.GetType().BaseType.ToString()) {
-                        
+                foreach (var behaviour in this.TargetObject.GetComponents<Behaviour>())
+                {
+                    if (typeName == behaviour.GetType().ToString() || typeName == behaviour.GetType().BaseType.ToString())
+                    {
                         targetBehaviour = behaviour;
                         break;
                     }
                 }
 
-                if (targetBehaviour == null) {
-                    throw new Exception("Unable to find target behaviour: key " + key + " typename " + typeName);
-                }
+                if (targetBehaviour == null) throw new("Unable to find target behaviour: key " + key + " typename " + typeName);
             }
         }
-
     }
 }

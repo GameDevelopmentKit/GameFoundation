@@ -28,10 +28,8 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             catch (Exception)
             {
                 var message =
-                    $"The conversion cannot be performed.{Environment.NewLine}" +
-                    $"    Text: '{text}'{Environment.NewLine}" +
-                    $"    MemberType: {typeInfo.FullName}{Environment.NewLine}";
-                throw new Exception(message);
+                    $"The conversion cannot be performed.{Environment.NewLine}" + $"    Text: '{text}'{Environment.NewLine}" + $"    MemberType: {typeInfo.FullName}{Environment.NewLine}";
+                throw new(message);
             }
         }
 

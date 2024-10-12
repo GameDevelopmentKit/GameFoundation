@@ -5,7 +5,11 @@ namespace GameFoundation.Scripts.Utilities.Utils
     [AttributeUsage(AttributeTargets.Class)]
     public class HttpRequestDefinitionAttribute : Attribute
     {
-        public HttpRequestDefinitionAttribute(string route) { this.Route = route; }
+        public HttpRequestDefinitionAttribute(string route)
+        {
+            this.Route = route;
+        }
+
         public string Route { get; set; }
     }
 }

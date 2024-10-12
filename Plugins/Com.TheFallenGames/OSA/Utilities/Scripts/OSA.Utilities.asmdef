@@ -1,8 +1,8 @@
 {
-    "name": "OSA.Utilities",
-    "references": [
-        "OSA.Core"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": []
+  "name": "OSA.Utilities",
+  "references": [
+    "OSA.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": []
 }

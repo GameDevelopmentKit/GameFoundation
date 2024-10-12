@@ -6,7 +6,6 @@ Source code may no longer be redistributed in source format. Using this in apps 
 */
 
 using UnityEngine;
-
 using System.Collections;
 using System.Collections.Generic;
 
@@ -52,7 +51,7 @@ namespace DigitalRuby.SoundManagerNamespace
         private float stopMultiplier;
         private float currentMultiplier;
         private float timestamp;
-        private bool paused;
+        private bool  paused;
 
         /// <summary>
         /// Constructor
@@ -63,17 +62,17 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="persist">Whether to persist the looping audio source between scene changes</param>
         public LoopingAudioSource(AudioSource audioSource, float startMultiplier, float stopMultiplier, bool persist)
         {
-            AudioSource = audioSource;
+            this.AudioSource = audioSource;
             if (audioSource != null)
             {
-                AudioSource.loop = true;
-                AudioSource.volume = 0.0f;
-                AudioSource.Stop();
+                this.AudioSource.loop   = true;
+                this.AudioSource.volume = 0.0f;
+                this.AudioSource.Stop();
             }
 
-            this.startMultiplier = currentMultiplier = startMultiplier;
-            this.stopMultiplier = stopMultiplier;
-            Persist = persist;
+            this.startMultiplier = this.currentMultiplier = startMultiplier;
+            this.stopMultiplier  = stopMultiplier;
+            this.Persist         = persist;
         }
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="isMusic">True if music, false if sound effect</param>
         public void Play(bool isMusic)
         {
-            Play(1.0f, isMusic);
+            this.Play(1.0f, isMusic);
         }
 
         /// <summary>
@@ -93,22 +92,22 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <returns>True if played, false if already playing or error</returns>
         public bool Play(float targetVolume, bool isMusic)
         {
-            if (AudioSource != null)
+            if (this.AudioSource != null)
             {
-                var audioSourceVolume              = (this.AudioSource.isPlaying ? this.AudioSource.volume : 0.0f);
-            #if UNITY_IOS
+                var audioSourceVolume = this.AudioSource.isPlaying ? this.AudioSource.volume : 0.0f;
+                #if UNITY_IOS
                 audioSourceVolume = 1;
-            #endif
-                AudioSource.volume   = startVolume = audioSourceVolume;
-                AudioSource.loop     = true;
-                currentMultiplier    = startMultiplier;
-                OriginalTargetVolume = targetVolume;
-                TargetVolume         = targetVolume;
-                Stopping             = false;
-                timestamp            = 0.0f;
-                if (!AudioSource.isPlaying)
+                #endif
+                this.AudioSource.volume   = this.startVolume = audioSourceVolume;
+                this.AudioSource.loop     = true;
+                this.currentMultiplier    = this.startMultiplier;
+                this.OriginalTargetVolume = targetVolume;
+                this.TargetVolume         = targetVolume;
+                this.Stopping             = false;
+                this.timestamp            = 0.0f;
+                if (!this.AudioSource.isPlaying)
                 {
-                    AudioSource.Play();
+                    this.AudioSource.Play();
                     return true;
                 }
             }
@@ -120,13 +119,13 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public void Stop()
         {
-            if (AudioSource != null && AudioSource.isPlaying && !Stopping)
+            if (this.AudioSource != null && this.AudioSource.isPlaying && !this.Stopping)
             {
-                startVolume = AudioSource.volume;
-                TargetVolume = 0.0f;
-                currentMultiplier = stopMultiplier;
-                Stopping = true;
-                timestamp = 0.0f;
+                this.startVolume       = this.AudioSource.volume;
+                this.TargetVolume      = 0.0f;
+                this.currentMultiplier = this.stopMultiplier;
+                this.Stopping          = true;
+                this.timestamp         = 0.0f;
             }
         }
 
@@ -135,10 +134,10 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public void Pause()
         {
-            if (AudioSource != null && !paused && AudioSource.isPlaying)
+            if (this.AudioSource != null && !this.paused && this.AudioSource.isPlaying)
             {
-                paused = true;
-                AudioSource.Pause();
+                this.paused = true;
+                this.AudioSource.Pause();
             }
         }
 
@@ -147,10 +146,10 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public void Resume()
         {
-            if (AudioSource != null && paused)
+            if (this.AudioSource != null && this.paused)
             {
-                paused = false;
-                AudioSource.UnPause();
+                this.paused = false;
+                this.AudioSource.UnPause();
             }
         }
 
@@ -160,12 +159,12 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <returns>True if finished playing, false otherwise</returns>
         public bool Update(bool isMusic = false)
         {
-            if (AudioSource != null && AudioSource.isPlaying)
+            if (this.AudioSource != null && this.AudioSource.isPlaying)
             {
-                if ((AudioSource.volume = Mathf.Lerp(startVolume, TargetVolume, (timestamp += Time.unscaledDeltaTime) / currentMultiplier)) == 0.0f && Stopping)
+                if ((this.AudioSource.volume = Mathf.Lerp(this.startVolume, this.TargetVolume, (this.timestamp += Time.unscaledDeltaTime) / this.currentMultiplier)) == 0.0f && this.Stopping)
                 {
-                    AudioSource.Stop();
-                    Stopping = false;
+                    this.AudioSource.Stop();
+                    this.Stopping = false;
                     return true;
                 }
                 else
@@ -290,28 +289,28 @@ namespace DigitalRuby.SoundManagerNamespace
     /// </summary>
     public class SoundManager : MonoBehaviour
     {
-        private static int persistTag = 0;
-        private static bool needsInitialize = true;
-        private static GameObject root;
-        private static SoundManager instance;
-        private static readonly List<LoopingAudioSource> music = new List<LoopingAudioSource>();
-        private static readonly List<AudioSource> musicOneShot = new List<AudioSource>();
-        private static readonly List<LoopingAudioSource> sounds = new List<LoopingAudioSource>();
-        private static readonly HashSet<LoopingAudioSource> persistedSounds = new HashSet<LoopingAudioSource>();
-        private static readonly Dictionary<AudioClip, List<float>> soundsOneShot = new Dictionary<AudioClip, List<float>>();
-        private static float soundVolume = 1.0f;
-        private static float musicVolume = 1.0f;
-        private static bool updated;
-        private static bool pauseSoundsOnApplicationPause = true;
+        private static          int                                persistTag      = 0;
+        private static          bool                               needsInitialize = true;
+        private static          GameObject                         root;
+        private static          SoundManager                       instance;
+        private static readonly List<LoopingAudioSource>           music           = new();
+        private static readonly List<AudioSource>                  musicOneShot    = new();
+        private static readonly List<LoopingAudioSource>           sounds          = new();
+        private static readonly HashSet<LoopingAudioSource>        persistedSounds = new();
+        private static readonly Dictionary<AudioClip, List<float>> soundsOneShot   = new();
+        private static          float                              soundVolume     = 1.0f;
+        private static          float                              musicVolume     = 1.0f;
+        private static          bool                               updated;
+        private static          bool                               pauseSoundsOnApplicationPause = true;
 
         [RuntimeInitializeOnLoadMethod]
-        static void RunOnRuntimeInitialized()
+        private static void RunOnRuntimeInitialized()
         {
             persistTag      = 0;
             needsInitialize = true;
-            music.Clear();           
-            musicOneShot.Clear();   
-            sounds.Clear();        
+            music.Clear();
+            musicOneShot.Clear();
+            sounds.Clear();
             persistedSounds.Clear();
             soundsOneShot.Clear();
             soundVolume                   = 1.0f;
@@ -334,34 +333,26 @@ namespace DigitalRuby.SoundManagerNamespace
             if (needsInitialize)
             {
                 needsInitialize = false;
-                root = new GameObject();
-                root.name = "DigitalRubySoundManager";
+                root            = new();
+                root.name       = "DigitalRubySoundManager";
                 // root.hideFlags = HideFlags.HideAndDontSave;
                 instance = root.AddComponent<SoundManager>();
-                GameObject.DontDestroyOnLoad(root);
+                DontDestroyOnLoad(root);
             }
         }
 
         private void StopLoopingListOnLevelLoad(IList<LoopingAudioSource> list)
         {
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
+            for (var i = list.Count - 1; i >= 0; i--)
                 if (!list[i].Persist || !list[i].AudioSource.isPlaying)
-                {
                     list.RemoveAt(i);
-                }
-            }
         }
 
         private void ClearPersistedSounds()
         {
-            foreach (LoopingAudioSource s in persistedSounds)
-            {
+            foreach (var s in persistedSounds)
                 if (!s.AudioSource.isPlaying)
-                {
-                    GameObject.Destroy(s.AudioSource.gameObject);
-                }
-            }
+                    Destroy(s.AudioSource.gameObject);
             persistedSounds.Clear();
         }
 
@@ -377,32 +368,28 @@ namespace DigitalRuby.SoundManagerNamespace
                 Debug.LogWarningFormat("Reloaded level, new sound manager persist tag: {0}", persistTag);
 
                 StopAllNonLoopingSounds();
-                StopLoopingListOnLevelLoad(sounds);
-                StopLoopingListOnLevelLoad(music);
+                this.StopLoopingListOnLevelLoad(sounds);
+                this.StopLoopingListOnLevelLoad(music);
                 soundsOneShot.Clear();
-                ClearPersistedSounds();
+                this.ClearPersistedSounds();
             }
         }
 
         private void Start()
         {
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += SceneManagerSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += this.SceneManagerSceneLoaded;
         }
 
         private void Update()
         {
             updated = true;
 
-            for (int i = sounds.Count - 1; i >= 0; i--)
-            {
+            for (var i = sounds.Count - 1; i >= 0; i--)
                 if (sounds[i].Update())
-                {
                     sounds.RemoveAt(i);
-                }
-            }
-            for (int i = music.Count - 1; i >= 0; i--)
+            for (var i = music.Count - 1; i >= 0; i--)
             {
-                bool nullMusic = (music[i] == null || music[i].AudioSource == null);
+                var nullMusic = music[i] == null || music[i].AudioSource == null;
                 if (nullMusic || music[i].Update(true))
                 {
                     if (!nullMusic && music[i].Tag != persistTag)
@@ -410,56 +397,38 @@ namespace DigitalRuby.SoundManagerNamespace
                         Debug.LogWarning("Destroying persisted audio from previous scene: " + music[i].AudioSource.gameObject.name);
 
                         // cleanup persisted audio from previous scenes
-                        GameObject.Destroy(music[i].AudioSource.gameObject);
+                        Destroy(music[i].AudioSource.gameObject);
                     }
                     music.RemoveAt(i);
                 }
             }
-            for (int i = musicOneShot.Count - 1; i >= 0; i--)
-            {
+            for (var i = musicOneShot.Count - 1; i >= 0; i--)
                 if (!musicOneShot[i].isPlaying)
-                {
                     musicOneShot.RemoveAt(i);
-                }
-            }
         }
 
         private void OnApplicationFocus(bool paused)
         {
-            if (SoundManager.PauseSoundsOnApplicationPause)
+            if (PauseSoundsOnApplicationPause)
             {
                 if (paused)
-                {
-                    SoundManager.ResumeAll();
-                }
+                    ResumeAll();
                 else
-                {
-                    SoundManager.PauseAll();
-                }
+                    PauseAll();
             }
         }
 
         private static void UpdateSounds()
         {
-            foreach (LoopingAudioSource s in sounds)
-            {
-                s.TargetVolume = s.OriginalTargetVolume * soundVolume;
-            }
+            foreach (var s in sounds) s.TargetVolume = s.OriginalTargetVolume * soundVolume;
         }
 
         private static void UpdateMusic()
         {
-            foreach (LoopingAudioSource s in music)
-            {
+            foreach (var s in music)
                 if (!s.Stopping)
-                {
                     s.TargetVolume = s.OriginalTargetVolume * musicVolume;
-                }
-            }
-            foreach (AudioSource s in musicOneShot)
-            {
-                s.volume = musicVolume;
-            }
+            foreach (var s in musicOneShot) s.volume = musicVolume;
         }
 
         private static IEnumerator RemoveVolumeFromClip(AudioClip clip, float volume)
@@ -467,43 +436,31 @@ namespace DigitalRuby.SoundManagerNamespace
             yield return new WaitForSeconds(clip.length);
 
             List<float> volumes;
-            if (soundsOneShot.TryGetValue(clip, out volumes))
-            {
-                volumes.Remove(volume);
-            }
+            if (soundsOneShot.TryGetValue(clip, out volumes)) volumes.Remove(volume);
         }
 
         private static void PlayLooping(AudioSource source, List<LoopingAudioSource> sources, float volumeScale, float fadeSeconds, bool persist, bool stopAll)
         {
             EnsureCreated();
 
-            for (int i = sources.Count - 1; i >= 0; i--)
+            for (var i = sources.Count - 1; i >= 0; i--)
             {
-                LoopingAudioSource s = sources[i];
-                if (s.AudioSource == source)
-                {
-                    sources.RemoveAt(i);
-                }
-                if (stopAll)
-                {
-                    s.Stop();
-                }
+                var s = sources[i];
+                if (s.AudioSource == source) sources.RemoveAt(i);
+                if (stopAll) s.Stop();
             }
             {
                 source.gameObject.SetActive(true);
-                LoopingAudioSource s = new LoopingAudioSource(source, fadeSeconds, fadeSeconds, persist);
+                var s = new LoopingAudioSource(source, fadeSeconds, fadeSeconds, persist);
                 s.Play(volumeScale, true);
                 s.Tag = persistTag;
                 sources.Add(s);
 
                 if (persist)
                 {
-                    if (!source.gameObject.name.StartsWith("PersistedBySoundManager-"))
-                    {
-                        source.gameObject.name = "PersistedBySoundManager-" + source.gameObject.name + "-" + source.gameObject.GetInstanceID();
-                    }
+                    if (!source.gameObject.name.StartsWith("PersistedBySoundManager-")) source.gameObject.name = "PersistedBySoundManager-" + source.gameObject.name + "-" + source.gameObject.GetInstanceID();
                     source.gameObject.transform.parent = null;
-                    GameObject.DontDestroyOnLoad(source.gameObject);
+                    DontDestroyOnLoad(source.gameObject);
                     persistedSounds.Add(s);
                 }
             }
@@ -511,7 +468,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void StopLooping(AudioSource source, List<LoopingAudioSource> sources)
         {
-            foreach (LoopingAudioSource s in sources)
+            foreach (var s in sources)
             {
                 if (s.AudioSource == source)
                 {
@@ -520,10 +477,7 @@ namespace DigitalRuby.SoundManagerNamespace
                     break;
                 }
             }
-            if (source != null)
-            {
-                source.Stop();
-            }
+            if (source != null) source.Stop();
         }
 
         /// <summary>
@@ -549,30 +503,27 @@ namespace DigitalRuby.SoundManagerNamespace
             List<float> volumes;
             if (!soundsOneShot.TryGetValue(clip, out volumes))
             {
-                volumes = new List<float>();
+                volumes             = new();
                 soundsOneShot[clip] = volumes;
             }
             else if (volumes.Count == MaxDuplicateAudioClips)
             {
                 return;
             }
-            
-            float requestedVolume = (volumeScale * soundVolume);
+
+            var requestedVolume = volumeScale * soundVolume;
 
             if (isAverage)
             {
-                float minVolume = float.MaxValue;
-                float maxVolume = float.MinValue;
-                foreach (float volume in volumes)
+                var minVolume = float.MaxValue;
+                var maxVolume = float.MinValue;
+                foreach (var volume in volumes)
                 {
                     minVolume = Mathf.Min(minVolume, volume);
                     maxVolume = Mathf.Max(maxVolume, volume);
                 }
-            
-                if (maxVolume > 0.5f)
-                {
-                    requestedVolume = (minVolume + maxVolume) / (float)(volumes.Count + 2);
-                }
+
+                if (maxVolume > 0.5f) requestedVolume = (minVolume + maxVolume) / (float)(volumes.Count + 2);
             }
 
             volumes.Add(requestedVolume);
@@ -621,11 +572,8 @@ namespace DigitalRuby.SoundManagerNamespace
         {
             EnsureCreated();
 
-            int index = musicOneShot.IndexOf(source);
-            if (index >= 0)
-            {
-                musicOneShot.RemoveAt(index);
-            }
+            var index = musicOneShot.IndexOf(source);
+            if (index >= 0) musicOneShot.RemoveAt(index);
             source.PlayOneShot(clip, volumeScale * musicVolume);
             musicOneShot.Add(source);
         }
@@ -685,10 +633,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void StopAllLoopingSounds()
         {
-            foreach (LoopingAudioSource s in sounds)
-            {
-                s.Stop();
-            }
+            foreach (var s in sounds) s.Stop();
         }
 
         /// <summary>
@@ -696,10 +641,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void StopAllLoopingMusics()
         {
-            foreach (LoopingAudioSource s in music)
-            {
-                s.Stop();
-            }
+            foreach (var s in music) s.Stop();
         }
 
         /// <summary>
@@ -707,10 +649,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void StopAllNonLoopingSounds()
         {
-            foreach (AudioSource s in musicOneShot)
-            {
-                s.Stop();
-            }
+            foreach (var s in musicOneShot) s.Stop();
         }
 
         /// <summary>
@@ -718,14 +657,8 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void PauseAll()
         {
-            foreach (LoopingAudioSource s in sounds)
-            {
-                s.Pause();
-            }
-            foreach (LoopingAudioSource s in music)
-            {
-                s.Pause();
-            }
+            foreach (var s in sounds) s.Pause();
+            foreach (var s in music) s.Pause();
         }
 
         /// <summary>
@@ -733,14 +666,8 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void ResumeAll()
         {
-            foreach (LoopingAudioSource s in sounds)
-            {
-                s.Resume();
-            }
-            foreach (LoopingAudioSource s in music)
-            {
-                s.Resume();
-            }
+            foreach (var s in sounds) s.Resume();
+            foreach (var s in music) s.Resume();
         }
 
         /// <summary>
@@ -748,7 +675,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static float MusicVolume
         {
-            get { return musicVolume; }
+            get => musicVolume;
             set
             {
                 if (value != musicVolume)
@@ -764,7 +691,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static float SoundVolume
         {
-            get { return soundVolume; }
+            get => soundVolume;
             set
             {
                 if (value != soundVolume)
@@ -779,10 +706,6 @@ namespace DigitalRuby.SoundManagerNamespace
         /// Whether to pause sounds when the application is paused and resume them when the application is activated.
         /// Player option "Run In Background" must be selected to enable this. Default is true.
         /// </summary>
-        public static bool PauseSoundsOnApplicationPause
-        {
-            get { return pauseSoundsOnApplicationPause; }
-            set { pauseSoundsOnApplicationPause = value; }
-        }
+        public static bool PauseSoundsOnApplicationPause { get => pauseSoundsOnApplicationPause; set => pauseSoundsOnApplicationPause = value; }
     }
 }

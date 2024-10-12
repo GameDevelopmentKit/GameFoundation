@@ -6,33 +6,33 @@ using Com.ForbiddenByte.OSA.Core;
 
 namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView
 {
-	public enum TableValueType
-	{
-		/// <summary>
-		/// Will try to call <see cref="String.ToString"/> on the value
-		/// </summary>
-		RAW,
+    public enum TableValueType
+    {
+        /// <summary>
+        /// Will try to call <see cref="String.ToString"/> on the value
+        /// </summary>
+        RAW,
 
-		STRING,
+        STRING,
 
-		INT,
+        INT,
 
-		LONG_INT,
+        LONG_INT,
 
-		FLOAT,
+        FLOAT,
 
-		DOUBLE,
+        DOUBLE,
 
-		/// <summary>
-		/// Will try to cast the value to an integer, then retrieve its enum value using the <see cref="IColumnInfo.EnumValueType"/>. 
-		/// If not successful, the raw integer will be shown
-		/// </summary>
-		ENUMERATION,
+        /// <summary>
+        /// Will try to cast the value to an integer, then retrieve its enum value using the <see cref="IColumnInfo.EnumValueType"/>. 
+        /// If not successful, the raw integer will be shown
+        /// </summary>
+        ENUMERATION,
 
-		BOOL,
+        BOOL,
 
-		TEXTURE,
-		// TBA
-		//ARRAY
-	}
+        TEXTURE,
+        // TBA
+        //ARRAY
+    }
 }

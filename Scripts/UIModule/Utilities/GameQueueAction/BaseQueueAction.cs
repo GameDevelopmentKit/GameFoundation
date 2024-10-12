@@ -16,7 +16,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         public event Action<IGameQueueAction> OnStart;
         public event Action<IGameQueueAction> OnComplete;
 
-
         public BaseQueueAction(string actionId, string location)
         {
             this.actionId      = actionId;
@@ -33,16 +32,18 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.OnExecute?.Invoke(this);
             this.isExecuting = true;
             if (this.delay > 0)
-            {
-                Observable.Timer(TimeSpan.FromSeconds(this.delay)).Subscribe(l => { this.Action(); });
-            }
+                Observable.Timer(TimeSpan.FromSeconds(this.delay)).Subscribe(l =>
+                {
+                    this.Action();
+                });
             else
-            {
                 this.Action();
-            }
         }
 
-        protected virtual void Action() { this.OnStart?.Invoke(this); }
+        protected virtual void Action()
+        {
+            this.OnStart?.Invoke(this);
+        }
 
         // Need to call this somewhere in derived class
         public virtual void Complete()

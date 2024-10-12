@@ -24,10 +24,8 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
-            var message = "Converting IEnumerable types is not supported for a single field. " +
-                          "If you want to do this, create your own ITypeConverter and register " +
-                          "it in the TypeConverterFactory by calling AddConverter.";
-            throw new Exception(message);
+            var message = "Converting IEnumerable types is not supported for a single field. " + "If you want to do this, create your own ITypeConverter and register " + "it in the TypeConverterFactory by calling AddConverter.";
+            throw new(message);
         }
 
         /// <summary>
@@ -38,10 +36,8 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The string representation of the object.</returns>
         public override string ConvertToString(object value, Type typeInfo)
         {
-            var message = "Converting IEnumerable types is not supported for a single field. " +
-                          "If you want to do this, create your own ITypeConverter and register " +
-                          "it in the TypeConverterFactory by calling AddConverter.";
-            throw new Exception(message);
+            var message = "Converting IEnumerable types is not supported for a single field. " + "If you want to do this, create your own ITypeConverter and register " + "it in the TypeConverterFactory by calling AddConverter.";
+            throw new(message);
         }
     }
 }

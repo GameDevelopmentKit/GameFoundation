@@ -39,9 +39,9 @@ using Com.ForbiddenByte.OSA.Util;
 
 namespace Com.ForbiddenByte.OSA.Editor.Util
 {
-	[CustomEditor(typeof(PackedGridLayoutGroup), true)]
-	[CanEditMultipleObjects]
-	public class PackedGridLayoutGroupEditor : UnityEditor.Editor
-	{
-	}
+    [CustomEditor(typeof(PackedGridLayoutGroup), true)]
+    [CanEditMultipleObjects]
+    public class PackedGridLayoutGroupEditor : UnityEditor.Editor
+    {
+    }
 }

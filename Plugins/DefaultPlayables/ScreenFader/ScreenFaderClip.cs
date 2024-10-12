@@ -6,15 +6,13 @@ using UnityEngine.Timeline;
 [Serializable]
 public class ScreenFaderClip : PlayableAsset, ITimelineClipAsset
 {
-    public ScreenFaderBehaviour template = new ScreenFaderBehaviour ();
+    public ScreenFaderBehaviour template = new();
 
-    public ClipCaps clipCaps
+    public ClipCaps clipCaps => ClipCaps.Blending;
+
+    public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
     {
-        get { return ClipCaps.Blending; }
+        var playable = ScriptPlayable<ScreenFaderBehaviour>.Create(graph, this.template);
+        return playable;
     }
-
-    public override Playable CreatePlayable (PlayableGraph graph, GameObject owner)
-    {
-        var playable = ScriptPlayable<ScreenFaderBehaviour>.Create (graph, template);
-        return playable;    }
 }

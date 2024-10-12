@@ -4,6 +4,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
+
     // using UnityEngine.Rendering.Universal;
 
     /// <summary>
@@ -17,19 +18,17 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
         private static           CameraStacker       baseCamera; // Universal Render Pipeline base camera. This camera will manage the camera stack.
         private static           List<CameraStacker> cameraStackers;
-        private static           List<CameraStacker> CameraStackers => cameraStackers ??= new List<CameraStacker>(); // Store list of CameraStacker for management. 
-        [SerializeField] private bool                isBaseCameraStack; // Tick to this if this is a base camera that manages camera stack.
+        private static           List<CameraStacker> CameraStackers => cameraStackers ??= new(); // Store list of CameraStacker for management. 
+        [SerializeField] private bool                isBaseCameraStack;                          // Tick to this if this is a base camera that manages camera stack.
         [SerializeField] private int                 orderInCameraStack;
 
         private void OnEnable()
         {
-            if (this.curCamera == null)
-                this.curCamera = this.GetComponent<Camera>();
+            if (this.curCamera == null) this.curCamera = this.GetComponent<Camera>();
 
             if (this.isBaseCameraStack)
             {
-                if (baseCamera != null && baseCamera != this)
-                    Debug.LogWarning("Have 2 camera base on scene");
+                if (baseCamera != null && baseCamera != this) Debug.LogWarning("Have 2 camera base on scene");
                 baseCamera = this;
                 this.UpdateCameraStack();
             }
@@ -37,8 +36,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             {
                 // var cameraData = this.curCamera.GetUniversalAdditionalCameraData();
                 // cameraData.renderType = CameraRenderType.Overlay;
-                if (baseCamera != null)
-                    baseCamera.AddToCameraStack(this);
+                if (baseCamera != null) baseCamera.AddToCameraStack(this);
             }
         }
 
@@ -60,15 +58,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             var currentCameraStackers = FindObjectsOfType<CameraStacker>().Where(cameraStacker => cameraStacker != this && cameraStacker.curCamera != null)
                 .OrderBy(cameraStacker => cameraStacker.orderInCameraStack).ToList();
 
-//        Func<CameraStacker, string> toStringFunction = cameraStacker => cameraStacker != null ? $"{cameraStacker.gameObject.name}-{cameraStacker.orderInCameraStack}" : "null";
-//        Debug.Log($"<color=magenta>{gameObject.name} CameraStackers={CameraStackers.ToString2(toStringFunction)} vs currentCameraStackers={currentCameraStackers.ToString2(toStringFunction)}</color>");
+            //        Func<CameraStacker, string> toStringFunction = cameraStacker => cameraStacker != null ? $"{cameraStacker.gameObject.name}-{cameraStacker.orderInCameraStack}" : "null";
+            //        Debug.Log($"<color=magenta>{gameObject.name} CameraStackers={CameraStackers.ToString2(toStringFunction)} vs currentCameraStackers={currentCameraStackers.ToString2(toStringFunction)}</color>");
 
             // Compare with current list to see if any changes.
             var cameraStackChanged = false;
             if (CameraStackers.Count != currentCameraStackers.Count)
                 cameraStackChanged = true;
             else
-            {
                 for (var i = 0; i < CameraStackers.Count; i++)
                 {
                     if (CameraStackers[i] != currentCameraStackers[i])
@@ -77,7 +74,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities
                         break;
                     }
                 }
-            }
 
             // If there are changes, update the camera stack
             if (cameraStackChanged)
@@ -94,14 +90,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
             if (CameraStackers.Contains(cameraStacker)) return;
 
-//        Func<CameraStacker, string> toStringFunction = cr => cr != null ? $"{cr.gameObject.name}-{cr.orderInCameraStack}" : "null";
-//        Debug.Log($"<color=magenta>{gameObject.name} [1] CameraStackers={CameraStackers.ToString2(toStringFunction)}</color>");
+            //        Func<CameraStacker, string> toStringFunction = cr => cr != null ? $"{cr.gameObject.name}-{cr.orderInCameraStack}" : "null";
+            //        Debug.Log($"<color=magenta>{gameObject.name} [1] CameraStackers={CameraStackers.ToString2(toStringFunction)}</color>");
             // Add to corresponding index in list, ordered by orderInCameraStack.
             CameraStackers.Add(cameraStacker);
             CameraStackers.OrderBy(cr => cr.orderInCameraStack);
 
             this.UpdateCameraStackInternal();
-//        Debug.Log($"<color=magenta>{gameObject.name} [2] CameraStackers={CameraStackers.ToString2()}</color>");
+            //        Debug.Log($"<color=magenta>{gameObject.name} [2] CameraStackers={CameraStackers.ToString2()}</color>");
         }
 
         // Set base camera's stack to camera in CameraStackers.
@@ -112,7 +108,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             // var cameraData = this.curCamera.GetUniversalAdditionalCameraData();
             // cameraData.cameraStack.Clear();
             // foreach (var cameraStacker in CameraStackers)
-                // cameraData.cameraStack.Add(cameraStacker.curCamera);
+            // cameraData.cameraStack.Add(cameraStacker.curCamera);
 
             // Debug.Break();
         }

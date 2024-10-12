@@ -6,370 +6,356 @@ using frame8.Logic.Misc.Visual.UI.MonoBehaviours;
 
 namespace Com.ForbiddenByte.OSA.Core
 {
-	/// <summary>
-	/// Script that enables snapping on a <see cref="OSA{TParams, TItemViewsHolder}"/>. Attach it to the ScrollView's game object.
-	/// </summary>
-	public class Snapper8 : MonoBehaviour
-	{
-		public float snapWhenSpeedFallsBelow = 50f;
-		public float viewportSnapPivot01 = .5f;
-		public float itemSnapPivot01 = .5f;
-		//public float snapOnlyIfSpeedIsAbove = 20f;
-		public float snapDuration = .3f;
-		public float snapAllowedError = 1f;
-		//[Tooltip("This will be disabled during snapping animation")]
-		public Scrollbar scrollbar;
-		//public int maxNeighborsToSnapToRegardlessOfSpeed;
-		[Tooltip("If the current drag distance is not enough to change the currently centered item, " +
-				"snapping to the next item will still occur if the current speed is bigger than this. " +
-				"Set to a negative value to disable (default). This was initially useful for things like page views")]
-		public float minSpeedToAllowSnapToNext = -1;
-		public bool skipIfReachedExtremity = true;
+    /// <summary>
+    /// Script that enables snapping on a <see cref="OSA{TParams, TItemViewsHolder}"/>. Attach it to the ScrollView's game object.
+    /// </summary>
+    public class Snapper8 : MonoBehaviour
+    {
+        public float snapWhenSpeedFallsBelow = 50f;
+        public float viewportSnapPivot01     = .5f;
 
-		public event Action SnappingStarted;
-		public event Action SnappingEndedOrCancelled;
+        public float itemSnapPivot01 = .5f;
 
-		/// <summary>This needs to be set externally</summary>
-		public IOSA Adapter
-		{
-			set
-			{
-				if (_Adapter == value)
-					return;
+        //public float snapOnlyIfSpeedIsAbove = 20f;
+        public float snapDuration = .3f;
 
-				if (_Adapter != null)
-				{
-					_Adapter.ScrollPositionChanged -= OnScrolled;
-					_Adapter.ItemsRefreshed -= OnItemsRefreshed;
-				}
-				_Adapter = value;
-				if (_Adapter != null)
-				{
-					_Adapter.ScrollPositionChanged += OnScrolled;
-					_Adapter.ItemsRefreshed += OnItemsRefreshed;
-				}
-			}
-		}
-		public bool SnappingInProgress { get; private set; }
+        public float snapAllowedError = 1f;
 
-		//bool IsAdapterDragInProgress { get { return _ScrollRect != null && Utils.GetPointerEventDataWithPointerDragGO(_ScrollRect.gameObject, false) != null; } }
-		bool IsAdapterDragInProgress { get { return _Adapter != null && _Adapter.IsDragging; } }
-		//bool IsScrollbarDragInProgress { get { return scrollbar != null && Utils.GetPointerEventDataWithPointerDragGO(scrollbar.gameObject, false) != null; } }
-		bool IsScrollbarDragInProgress { get { return _ScrollbarFixer != null && _ScrollbarFixer.IsDraggingOrPreDragging; } }
-		
-		IOSA _Adapter;
-		ScrollbarFixer8 _ScrollbarFixer;
-		bool _SnappingDoneAndEndSnappingEventPending;
-		bool _SnapNeeded; // a new snap will only start if after the las snap the scrollrect's scroll position has changed
-		bool _SnappingCancelled;
-		//bool _PointerDown;
-		Func<float> _GetSignedAbstractSpeed;
-		int _LastSnappedItemIndex = -1;
-		bool _SnapToNextOnlyEnabled;
-		bool _StartCalled;
-		Canvas _Canvas;
-		RectTransform _CanvasRT;
-		bool _TriedToGetCanvasAtLeastOnce;
-		int _LastItemIndexUnFinishedSnap = -1;
+        //[Tooltip("This will be disabled during snapping animation")]
+        public Scrollbar scrollbar;
 
+        //public int maxNeighborsToSnapToRegardlessOfSpeed;
+        [Tooltip("If the current drag distance is not enough to change the currently centered item, " + "snapping to the next item will still occur if the current speed is bigger than this. " + "Set to a negative value to disable (default). This was initially useful for things like page views")]
+        public float minSpeedToAllowSnapToNext = -1;
 
-		void Start()
-		{
-			//if (maxNeighborsToSnapToRegardlessOfSpeed < 0)
-			//	maxNeighborsToSnapToRegardlessOfSpeed = 0;
-			if (minSpeedToAllowSnapToNext < 0)
-				minSpeedToAllowSnapToNext = float.MaxValue;
-			_SnapToNextOnlyEnabled = minSpeedToAllowSnapToNext != float.MaxValue;
+        public bool skipIfReachedExtremity = true;
 
-			if (scrollbar)
-			{
-				_ScrollbarFixer = scrollbar.GetComponent<ScrollbarFixer8>();
-				if (!_ScrollbarFixer)
-					throw new OSAException("ScrollbarFixer8 should be attached to Scrollbar");
-			}
+        public event Action SnappingStarted;
+        public event Action SnappingEndedOrCancelled;
 
-			if (scrollbar)
-				scrollbar.onValueChanged.AddListener(OnScrollbarValueChanged);
-			_StartCalled = true;
-		}
+        /// <summary>This needs to be set externally</summary>
+        public IOSA Adapter
+        {
+            set
+            {
+                if (this._Adapter == value) return;
 
-		void OnDisable() { CancelSnappingIfInProgress(); }
+                if (this._Adapter != null)
+                {
+                    this._Adapter.ScrollPositionChanged -= this.OnScrolled;
+                    this._Adapter.ItemsRefreshed        -= this.OnItemsRefreshed;
+                }
+                this._Adapter = value;
+                if (this._Adapter != null)
+                {
+                    this._Adapter.ScrollPositionChanged += this.OnScrolled;
+                    this._Adapter.ItemsRefreshed        += this.OnItemsRefreshed;
+                }
+            }
+        }
 
-		void OnDestroy()
-		{
-			if (scrollbar)
-				scrollbar.onValueChanged.RemoveListener(OnScrollbarValueChanged);
-			//if (_ScrollRect)
-			//	_ScrollRect.onValueChanged.RemoveListener(OnScrolled);
+        public bool SnappingInProgress { get; private set; }
 
-			Adapter = null; // will unregister listeners
+        //bool IsAdapterDragInProgress { get { return _ScrollRect != null && Utils.GetPointerEventDataWithPointerDragGO(_ScrollRect.gameObject, false) != null; } }
+        private bool IsAdapterDragInProgress => this._Adapter != null && this._Adapter.IsDragging;
 
-			SnappingStarted = null;
-			SnappingEndedOrCancelled = null;
-		}
+        //bool IsScrollbarDragInProgress { get { return scrollbar != null && Utils.GetPointerEventDataWithPointerDragGO(scrollbar.gameObject, false) != null; } }
+        private bool IsScrollbarDragInProgress => this._ScrollbarFixer != null && this._ScrollbarFixer.IsDraggingOrPreDragging;
 
-		internal void CancelSnappingIfInProgress()
-		{
-			//Debug.Log(
-			//	"CancelSnappingIfInProgress:\n" +
-			//	"_SnappingDoneAndEndSnappingEventPending=" + _SnappingDoneAndEndSnappingEventPending +
-			//	", _SnapNeeded=" + _SnapNeeded +
-			//	", SnappingInProgress=" + SnappingInProgress);
+        private IOSA            _Adapter;
+        private ScrollbarFixer8 _ScrollbarFixer;
+        private bool            _SnappingDoneAndEndSnappingEventPending;
+        private bool            _SnapNeeded; // a new snap will only start if after the las snap the scrollrect's scroll position has changed
 
-			_SnappingDoneAndEndSnappingEventPending = false;
-			_SnapNeeded = false;
+        private bool _SnappingCancelled;
 
-			//Debug.Log("cancel: inProg=" + SnappingInProgress);
-			if (!SnappingInProgress)
-				return;
+        //bool _PointerDown;
+        private Func<float>   _GetSignedAbstractSpeed;
+        private int           _LastSnappedItemIndex = -1;
+        private bool          _SnapToNextOnlyEnabled;
+        private bool          _StartCalled;
+        private Canvas        _Canvas;
+        private RectTransform _CanvasRT;
+        private bool          _TriedToGetCanvasAtLeastOnce;
+        private int           _LastItemIndexUnFinishedSnap = -1;
 
-			_SnappingCancelled = true;
-			SnappingInProgress = false;
-		}
+        private void Start()
+        {
+            //if (maxNeighborsToSnapToRegardlessOfSpeed < 0)
+            //	maxNeighborsToSnapToRegardlessOfSpeed = 0;
+            if (this.minSpeedToAllowSnapToNext < 0) this.minSpeedToAllowSnapToNext = float.MaxValue;
+            this._SnapToNextOnlyEnabled = this.minSpeedToAllowSnapToNext != float.MaxValue;
 
-		internal void StartSnappingIfNeeded()
-		{
-			if (!_StartCalled)
-				return;
+            if (this.scrollbar)
+            {
+                this._ScrollbarFixer = this.scrollbar.GetComponent<ScrollbarFixer8>();
+                if (!this._ScrollbarFixer) throw new OSAException("ScrollbarFixer8 should be attached to Scrollbar");
+            }
 
-			// Disabling the script should make it unoperable
-			if (!enabled)
-				return;
+            if (this.scrollbar) this.scrollbar.onValueChanged.AddListener(this.OnScrollbarValueChanged);
+            this._StartCalled = true;
+        }
 
-			if (_SnappingDoneAndEndSnappingEventPending)
-			{
-				OnSnappingEndedOrCancelled();
-				return;
-			}
+        private void OnDisable()
+        {
+            this.CancelSnappingIfInProgress();
+        }
 
-			if (_Adapter == null || !_Adapter.IsInitialized)
-				return;
+        private void OnDestroy()
+        {
+            if (this.scrollbar) this.scrollbar.onValueChanged.RemoveListener(this.OnScrollbarValueChanged);
+            //if (_ScrollRect)
+            //	_ScrollRect.onValueChanged.RemoveListener(OnScrolled);
 
-			// Commented: this now works
-			//if (_Adapter.GetItemsCount() > OSAConst.MAX_ITEMS_TO_SUPPORT_SMOOTH_SCROLL_AND_ITEM_RESIZING)
-			//	return;
+            this.Adapter = null; // will unregister listeners
 
-			// Initializing it here, because in Start the adapter may not be initialized
-			if (_GetSignedAbstractSpeed == null)
-			{
-				// _ScrollRect.velocity doesn't reflect <curNormPos-prevNormPos>, as it would be expected, but the opposite of that (opposite sign)
-				// Returning: negative, if towards end; positive, else.
-				if (_Adapter.BaseParameters.IsHorizontal)
-					_GetSignedAbstractSpeed = () => _Adapter.Velocity[0];
-				else
-					_GetSignedAbstractSpeed = () => -_Adapter.Velocity[1];
-			}
-			float signedSpeed = _GetSignedAbstractSpeed();
-			float speed = Mathf.Abs(signedSpeed);
+            this.SnappingStarted          = null;
+            this.SnappingEndedOrCancelled = null;
+        }
 
-			if (SnappingInProgress || !_SnapNeeded || speed >= snapWhenSpeedFallsBelow || IsAdapterDragInProgress || IsScrollbarDragInProgress)
-				return;
+        internal void CancelSnappingIfInProgress()
+        {
+            //Debug.Log(
+            //	"CancelSnappingIfInProgress:\n" +
+            //	"_SnappingDoneAndEndSnappingEventPending=" + _SnappingDoneAndEndSnappingEventPending +
+            //	", _SnapNeeded=" + _SnapNeeded +
+            //	", SnappingInProgress=" + SnappingInProgress);
 
-			if (skipIfReachedExtremity)
-			{
-				double maxAllowedDistFromExtremity = Mathf.Clamp(snapAllowedError, 1f, 20f);
-				double insetStartOrEnd = Math.Max(_Adapter.ContentVirtualInsetFromViewportStart, _Adapter.ContentVirtualInsetFromViewportEnd);
-				if (Math.Abs(insetStartOrEnd) <= maxAllowedDistFromExtremity) // Content is at start/end => don't force any snapping
-					return;
-			}
-			
-			float distanceToTarget;
-			var middle = GetMiddleVH(out distanceToTarget);
-			if (middle == null)
-				return;
+            this._SnappingDoneAndEndSnappingEventPending = false;
+            this._SnapNeeded                             = false;
 
-			_SnapNeeded = false;
-			if (distanceToTarget <= snapAllowedError)
-				return;
+            //Debug.Log("cancel: inProg=" + SnappingInProgress);
+            if (!this.SnappingInProgress) return;
 
-			//Debug.Log(middle.ItemIndex);
+            this._SnappingCancelled = true;
+            this.SnappingInProgress = false;
+        }
 
-			int indexToSnapTo = middle.ItemIndex;
-			bool snapToNextOnly = 
-				speed >= minSpeedToAllowSnapToNext
-				// Not allowed to skip neighbors. Snapping to neigbors is only allowed if the current middle is the previous middle
-				&& (indexToSnapTo == _LastSnappedItemIndex
-					// Update: Allowing skipping neighbors if no snapping occurred yet
-					|| _LastSnappedItemIndex == -1
-					// Update: Allowing skipping neighbors if the previous snap didn't finish naturally (most probably, the user swapped again fast, with the sole intent of skipping an item )
-					|| _LastItemIndexUnFinishedSnap == indexToSnapTo
-				);
+        internal void StartSnappingIfNeeded()
+        {
+            if (!this._StartCalled) return;
 
-			if (snapToNextOnly)
-			{
+            // Disabling the script should make it unoperable
+            if (!this.enabled) return;
 
-				bool loopingEnabled = _Adapter.BaseParameters.effects.LoopItems && _Adapter.GetContentSizeToViewportRatio() > 1d;
-				int count = _Adapter.GetItemsCount();
-				if (signedSpeed < 0) // going towards end => snap to bigger indexInView
-				{
-					if (indexToSnapTo == count - 1 && !loopingEnabled)
-						return;
-					indexToSnapTo = (indexToSnapTo + 1) % count;
-				}
-				else // going towards start => snap to smaller indexInView
-				{
-					if (indexToSnapTo == 0 && !loopingEnabled)
-						return;
-					indexToSnapTo = ((indexToSnapTo + count)/*adding count to prevent a negative dividend*/ - 1) % count;
-				}
-			}
-			else
-				indexToSnapTo = middle.ItemIndex;
+            if (this._SnappingDoneAndEndSnappingEventPending)
+            {
+                this.OnSnappingEndedOrCancelled();
+                return;
+            }
 
-			//Debug.Log(
-			//	"StartSnappingIfNeeded:\n" +
-			//	"SnappingInProgress=" + SnappingInProgress +
-			//	", _SnapNeeded=" + _SnapNeeded +
-			//	", magnitude=" + _Adapter.Velocity.magnitude +
-			//	", IsPointerDraggingOnScrollRect=" + IsAdapterDragInProgress +
-			//	", IsPointerDraggingOnScrollbar=" + IsScrollbarDragInProgress +
-			//	", signedSpeed " + signedSpeed +
-			//	", snapWhenSpeedFallsBelow " + snapWhenSpeedFallsBelow +
-			//	", indexToSnapTo Bef (middle.ItemIndex) " + middle.ItemIndex +
-			//	", indexToSnapTo Aft (middle.ItemIndex) " + indexToSnapTo +
-			//	", _LastSnappedItemIndex " + _LastSnappedItemIndex +
-			//	", _LastItemIndexUnFinishedSnap " + _LastItemIndexUnFinishedSnap,
-			//	middle.root.gameObject
-			//);
+            if (this._Adapter == null || !this._Adapter.IsInitialized) return;
 
-			//Debug.Log("start: " + s);
-			_SnappingCancelled = false;
-			bool continuteAnimation;
-			bool cancelledOrEnded = false; // used to check if the scroll was cancelled immediately after calling SmoothScrollTo (i.e. without first setting SnappingInProgress = true)
-			bool doneNaturally = false;
-			_LastItemIndexUnFinishedSnap = indexToSnapTo;
-			_Adapter.SmoothScrollTo(
-				indexToSnapTo,
-				snapDuration,
-				viewportSnapPivot01,
-				itemSnapPivot01,
-				progress =>
-				{
-					continuteAnimation = true;
-					doneNaturally = progress == 1f;
-					if (doneNaturally || _SnappingCancelled || IsAdapterDragInProgress || IsScrollbarDragInProgress) // done. last iteration
-					{
-						cancelledOrEnded = true;
-						continuteAnimation = false;
+            // Commented: this now works
+            //if (_Adapter.GetItemsCount() > OSAConst.MAX_ITEMS_TO_SUPPORT_SMOOTH_SCROLL_AND_ITEM_RESIZING)
+            //	return;
 
-						//Debug.Log(
-						//	"received end callback: SnappingInProgress=" + SnappingInProgress +
-						//	", doneNaturally=" + doneNaturally +
-						//	", _SnappingCancelled=" + _SnappingCancelled +
-						//	", IsPointerDraggingOnScrollRect=" + IsPointerDraggingOnScrollRect +
-						//	", IsPointerDraggingOnScrollbar=" + IsPointerDraggingOnScrollbar
-						//);
-						if (SnappingInProgress)
-						{
-							_LastSnappedItemIndex = indexToSnapTo;
-							SnappingInProgress = false;
-							_SnappingDoneAndEndSnappingEventPending = true;
+            // Initializing it here, because in Start the adapter may not be initialized
+            if (this._GetSignedAbstractSpeed == null)
+            {
+                // _ScrollRect.velocity doesn't reflect <curNormPos-prevNormPos>, as it would be expected, but the opposite of that (opposite sign)
+                // Returning: negative, if towards end; positive, else.
+                if (this._Adapter.BaseParameters.IsHorizontal)
+                    this._GetSignedAbstractSpeed = () => this._Adapter.Velocity[0];
+                else
+                    this._GetSignedAbstractSpeed = () => -this._Adapter.Velocity[1];
+            }
+            var signedSpeed = this._GetSignedAbstractSpeed();
+            var speed       = Mathf.Abs(signedSpeed);
 
-							if (doneNaturally)
-							{
-								_LastItemIndexUnFinishedSnap = -1;
-							}
-						}
-					}
+            if (this.SnappingInProgress || !this._SnapNeeded || speed >= this.snapWhenSpeedFallsBelow || this.IsAdapterDragInProgress || this.IsScrollbarDragInProgress) return;
 
-					// If the items were refreshed while the snap animation was playing or if the user touched the scrollview, don't continue;
-					return continuteAnimation;
-				},
-				null,
-				true
-			);
+            if (this.skipIfReachedExtremity)
+            {
+                double maxAllowedDistFromExtremity = Mathf.Clamp(this.snapAllowedError, 1f, 20f);
+                var    insetStartOrEnd             = Math.Max(this._Adapter.ContentVirtualInsetFromViewportStart, this._Adapter.ContentVirtualInsetFromViewportEnd);
+                if (Math.Abs(insetStartOrEnd) <= maxAllowedDistFromExtremity) // Content is at start/end => don't force any snapping
+                    return;
+            }
 
-			// The scroll was cancelled immediately after calling SmoothScrollTo => cancel
-			if (cancelledOrEnded)
-			{
-				if (doneNaturally)
-				{
-					_LastItemIndexUnFinishedSnap = -1;
-				}
+            float distanceToTarget;
+            var   middle = this.GetMiddleVH(out distanceToTarget);
+            if (middle == null) return;
 
-				return;
-			}
+            this._SnapNeeded = false;
+            if (distanceToTarget <= this.snapAllowedError) return;
 
-			SnappingInProgress = true; //always true, because we're overriding the previous scroll
+            //Debug.Log(middle.ItemIndex);
 
-			if (SnappingInProgress)
-				OnSnappingStarted();
-		}
+            var indexToSnapTo = middle.ItemIndex;
+            var snapToNextOnly =
+                speed >= this.minSpeedToAllowSnapToNext
+                // Not allowed to skip neighbors. Snapping to neigbors is only allowed if the current middle is the previous middle
+                && (indexToSnapTo == this._LastSnappedItemIndex
+                    // Update: Allowing skipping neighbors if no snapping occurred yet
+                    || this._LastSnappedItemIndex == -1
+                    // Update: Allowing skipping neighbors if the previous snap didn't finish naturally (most probably, the user swapped again fast, with the sole intent of skipping an item )
+                    || this._LastItemIndexUnFinishedSnap == indexToSnapTo
+                );
 
-		Canvas FindOrGetCanvas()
-		{
-			if (_TriedToGetCanvasAtLeastOnce)
-				return _Canvas;
-			_TriedToGetCanvasAtLeastOnce = true;
+            if (snapToNextOnly)
+            {
+                var loopingEnabled = this._Adapter.BaseParameters.effects.LoopItems && this._Adapter.GetContentSizeToViewportRatio() > 1d;
+                var count          = this._Adapter.GetItemsCount();
+                if (signedSpeed < 0) // going towards end => snap to bigger indexInView
+                {
+                    if (indexToSnapTo == count - 1 && !loopingEnabled) return;
+                    indexToSnapTo = (indexToSnapTo + 1) % count;
+                }
+                else // going towards start => snap to smaller indexInView
+                {
+                    if (indexToSnapTo == 0 && !loopingEnabled) return;
+                    indexToSnapTo = (indexToSnapTo + count /*adding count to prevent a negative dividend*/ - 1) % count;
+                }
+            }
+            else
+            {
+                indexToSnapTo = middle.ItemIndex;
+            }
 
-			return _Canvas = GetComponentInParent<Canvas>();
-		}
+            //Debug.Log(
+            //	"StartSnappingIfNeeded:\n" +
+            //	"SnappingInProgress=" + SnappingInProgress +
+            //	", _SnapNeeded=" + _SnapNeeded +
+            //	", magnitude=" + _Adapter.Velocity.magnitude +
+            //	", IsPointerDraggingOnScrollRect=" + IsAdapterDragInProgress +
+            //	", IsPointerDraggingOnScrollbar=" + IsScrollbarDragInProgress +
+            //	", signedSpeed " + signedSpeed +
+            //	", snapWhenSpeedFallsBelow " + snapWhenSpeedFallsBelow +
+            //	", indexToSnapTo Bef (middle.ItemIndex) " + middle.ItemIndex +
+            //	", indexToSnapTo Aft (middle.ItemIndex) " + indexToSnapTo +
+            //	", _LastSnappedItemIndex " + _LastSnappedItemIndex +
+            //	", _LastItemIndexUnFinishedSnap " + _LastItemIndexUnFinishedSnap,
+            //	middle.root.gameObject
+            //);
 
-		RectTransform FindOrGetCanvasRT()
-		{
-			if (_TriedToGetCanvasAtLeastOnce)
-				return _CanvasRT;
-			_TriedToGetCanvasAtLeastOnce = true;
+            //Debug.Log("start: " + s);
+            this._SnappingCancelled = false;
+            bool continuteAnimation;
+            var  cancelledOrEnded = false; // used to check if the scroll was cancelled immediately after calling SmoothScrollTo (i.e. without first setting SnappingInProgress = true)
+            var  doneNaturally    = false;
+            this._LastItemIndexUnFinishedSnap = indexToSnapTo;
+            this._Adapter.SmoothScrollTo(
+                indexToSnapTo,
+                this.snapDuration,
+                this.viewportSnapPivot01,
+                this.itemSnapPivot01,
+                progress =>
+                {
+                    continuteAnimation = true;
+                    doneNaturally      = progress == 1f;
+                    if (doneNaturally || this._SnappingCancelled || this.IsAdapterDragInProgress || this.IsScrollbarDragInProgress) // done. last iteration
+                    {
+                        cancelledOrEnded   = true;
+                        continuteAnimation = false;
 
-			return _CanvasRT = FindOrGetCanvas().transform as RectTransform;
-		}
+                        //Debug.Log(
+                        //	"received end callback: SnappingInProgress=" + SnappingInProgress +
+                        //	", doneNaturally=" + doneNaturally +
+                        //	", _SnappingCancelled=" + _SnappingCancelled +
+                        //	", IsPointerDraggingOnScrollRect=" + IsPointerDraggingOnScrollRect +
+                        //	", IsPointerDraggingOnScrollbar=" + IsPointerDraggingOnScrollbar
+                        //);
+                        if (this.SnappingInProgress)
+                        {
+                            this._LastSnappedItemIndex                   = indexToSnapTo;
+                            this.SnappingInProgress                      = false;
+                            this._SnappingDoneAndEndSnappingEventPending = true;
 
-		public AbstractViewsHolder GetMiddleVH(out float distanceToTarget)
-		{
-			return _Adapter.GetViewsHolderClosestToViewportLongitudinalNormalizedAbstractPoint(FindOrGetCanvas(), FindOrGetCanvasRT(), viewportSnapPivot01, itemSnapPivot01, out distanceToTarget);
-		}
+                            if (doneNaturally) this._LastItemIndexUnFinishedSnap = -1;
+                        }
+                    }
 
-		//void OnScrolled(Vector2 _) { if (!SnappingInProgress) _SnapNeeded = true; }
-		void OnScrolled(double _)
-		{
-			if (!SnappingInProgress)
-			{
-				_SnapNeeded = true;
+                    // If the items were refreshed while the snap animation was playing or if the user touched the scrollview, don't continue;
+                    return continuteAnimation;
+                },
+                null,
+                true
+            );
 
-				if (_SnapToNextOnlyEnabled && !IsScrollbarDragInProgress && !IsAdapterDragInProgress)
-					UpdateLastSnappedIndexFromMiddleVH();
-			}
-		} // from adapter
+            // The scroll was cancelled immediately after calling SmoothScrollTo => cancel
+            if (cancelledOrEnded)
+            {
+                if (doneNaturally) this._LastItemIndexUnFinishedSnap = -1;
 
-		void OnScrollbarValueChanged(float _) { if (IsScrollbarDragInProgress) CancelSnappingIfInProgress(); } // from scrollbar
+                return;
+            }
 
-		void OnItemsRefreshed(int newCount, int prevCount)
-		{
-			if (newCount == prevCount)
-				return;
+            this.SnappingInProgress = true; //always true, because we're overriding the previous scroll
 
-			if (_SnapToNextOnlyEnabled)
-				UpdateLastSnappedIndexFromMiddleVH();
-		}
+            if (this.SnappingInProgress) this.OnSnappingStarted();
+        }
 
-		void UpdateLastSnappedIndexFromMiddleVH()
-		{
-			float _;
-			var middleVH = GetMiddleVH(out _);
-			_LastSnappedItemIndex = middleVH == null ? -1 : middleVH.ItemIndex;
-			_LastItemIndexUnFinishedSnap = -1;
-		}
+        private Canvas FindOrGetCanvas()
+        {
+            if (this._TriedToGetCanvasAtLeastOnce) return this._Canvas;
+            this._TriedToGetCanvasAtLeastOnce = true;
 
-		void OnSnappingStarted()
-		{
-			//Debug.Log("start");
-			//if (scrollbar)
-			//	scrollbar.interactable = false;
+            return this._Canvas = this.GetComponentInParent<Canvas>();
+        }
 
-			if (SnappingStarted != null)
-				SnappingStarted();
-		}
+        private RectTransform FindOrGetCanvasRT()
+        {
+            if (this._TriedToGetCanvasAtLeastOnce) return this._CanvasRT;
+            this._TriedToGetCanvasAtLeastOnce = true;
 
-		void OnSnappingEndedOrCancelled()
-		{
-			//Debug.Log("end");
-			//if (scrollbar)
-			//	scrollbar.interactable = true;
+            return this._CanvasRT = this.FindOrGetCanvas().transform as RectTransform;
+        }
 
-			_SnappingDoneAndEndSnappingEventPending = false;
+        public AbstractViewsHolder GetMiddleVH(out float distanceToTarget)
+        {
+            return this._Adapter.GetViewsHolderClosestToViewportLongitudinalNormalizedAbstractPoint(this.FindOrGetCanvas(), this.FindOrGetCanvasRT(), this.viewportSnapPivot01, this.itemSnapPivot01, out distanceToTarget);
+        }
 
-			if (SnappingEndedOrCancelled != null)
-				SnappingEndedOrCancelled();
-		}
-	}
+        //void OnScrolled(Vector2 _) { if (!SnappingInProgress) _SnapNeeded = true; }
+        private void OnScrolled(double _)
+        {
+            if (!this.SnappingInProgress)
+            {
+                this._SnapNeeded = true;
+
+                if (this._SnapToNextOnlyEnabled && !this.IsScrollbarDragInProgress && !this.IsAdapterDragInProgress) this.UpdateLastSnappedIndexFromMiddleVH();
+            }
+        } // from adapter
+
+        private void OnScrollbarValueChanged(float _)
+        {
+            if (this.IsScrollbarDragInProgress) this.CancelSnappingIfInProgress();
+        } // from scrollbar
+
+        private void OnItemsRefreshed(int newCount, int prevCount)
+        {
+            if (newCount == prevCount) return;
+
+            if (this._SnapToNextOnlyEnabled) this.UpdateLastSnappedIndexFromMiddleVH();
+        }
+
+        private void UpdateLastSnappedIndexFromMiddleVH()
+        {
+            float _;
+            var   middleVH = this.GetMiddleVH(out _);
+            this._LastSnappedItemIndex        = middleVH == null ? -1 : middleVH.ItemIndex;
+            this._LastItemIndexUnFinishedSnap = -1;
+        }
+
+        private void OnSnappingStarted()
+        {
+            //Debug.Log("start");
+            //if (scrollbar)
+            //	scrollbar.interactable = false;
+
+            if (this.SnappingStarted != null) this.SnappingStarted();
+        }
+
+        private void OnSnappingEndedOrCancelled()
+        {
+            //Debug.Log("end");
+            //if (scrollbar)
+            //	scrollbar.interactable = true;
+
+            this._SnappingDoneAndEndSnappingEventPending = false;
+
+            if (this.SnappingEndedOrCancelled != null) this.SnappingEndedOrCancelled();
+        }
+    }
 }

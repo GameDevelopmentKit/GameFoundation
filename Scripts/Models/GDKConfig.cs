@@ -3,9 +3,9 @@ namespace Models
     using System;
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
     using UnityEditor;
-#endif
+    #endif
     using UnityEngine;
 
     public class GDKConfig : SerializedScriptableObject
@@ -34,7 +34,6 @@ namespace Models
 
         #endregion
 
-
         #region private feild
 
         [SerializeField] private string configVersion;
@@ -48,16 +47,16 @@ namespace Models
 
         #endregion
 
-        private void OnEnable() { this.RefreshData(); }
+        private void OnEnable()
+        {
+            this.RefreshData();
+        }
 
         private void RefreshData()
         {
             if (this.gameConfigs == null || this.gameConfigs.Count == 0) return;
-            this.typeToGameConfig = new Dictionary<Type, IGameConfig>();
-            foreach (var gameConfig in this.gameConfigs)
-            {
-                this.typeToGameConfig.Add(gameConfig.GetType(), gameConfig);
-            }
+            this.typeToGameConfig = new();
+            foreach (var gameConfig in this.gameConfigs) this.typeToGameConfig.Add(gameConfig.GetType(), gameConfig);
         }
 
         public T GetGameConfig<T>() where T : IGameConfig
@@ -73,14 +72,20 @@ namespace Models
             }
         }
 
-        public bool HasGameConfig<T>() where T : IGameConfig { return HasGameConfig(typeof(T)); }
+        public bool HasGameConfig<T>() where T : IGameConfig
+        {
+            return this.HasGameConfig(typeof(T));
+        }
 
-        public bool HasGameConfig(Type type) { return this.typeToGameConfig != null && this.typeToGameConfig.ContainsKey(type); }
+        public bool HasGameConfig(Type type)
+        {
+            return this.typeToGameConfig != null && this.typeToGameConfig.ContainsKey(type);
+        }
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public void AddGameConfig(IGameConfig gameConfig)
         {
-            if (this.gameConfigs == null) this.gameConfigs = new List<IGameConfig>();
+            if (this.gameConfigs == null) this.gameConfigs = new();
             this.gameConfigs.Add(gameConfig);
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
@@ -96,6 +101,6 @@ namespace Models
             AssetDatabase.Refresh();
             this.RefreshData();
         }
-#endif
+        #endif
     }
 }

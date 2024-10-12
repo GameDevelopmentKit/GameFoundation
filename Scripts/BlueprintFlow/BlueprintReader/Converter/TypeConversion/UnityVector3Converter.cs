@@ -6,7 +6,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     public class UnityVector3Converter : DefaultTypeConverter
     {
         private readonly char delimiter;
-        public UnityVector3Converter(char delimiter = '|') { this.delimiter = delimiter; }
+
+        public UnityVector3Converter(char delimiter = '|')
+        {
+            this.delimiter = delimiter;
+        }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {

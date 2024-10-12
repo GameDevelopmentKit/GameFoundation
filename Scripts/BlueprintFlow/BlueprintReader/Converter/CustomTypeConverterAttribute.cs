@@ -30,7 +30,6 @@ namespace BlueprintFlow.BlueprintReader.Converter
         string ConvertToString(object value);
     }
 
-
     /// <summary>
     /// Specifies the <see cref="TypeConverter"/> to use
     /// when converting the member to and from a CSV field.
@@ -48,7 +47,9 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// when converting the member to and from a CSV field.
         /// </summary>
         /// <param name="typeConverterType">The type of the <see cref="ITypeConverter"/>.</param>
-        public CustomTypeConverterAttribute(Type typeConverterType) : this(typeConverterType, new object[0]) { }
+        public CustomTypeConverterAttribute(Type typeConverterType) : this(typeConverterType, new object[0])
+        {
+        }
 
         /// <summary>
         /// Specifies the <see cref="TypeConverter"/> to use
@@ -58,8 +59,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// <param name="constructorArgs">Type constructor arguments for the type converter.</param>
         public CustomTypeConverterAttribute(Type typeConverterType, params object[] constructorArgs)
         {
-            TypeConverter = Activator.CreateInstance(typeConverterType, constructorArgs) as ICustomTypeConverter ??
-                            throw new ArgumentException($"Type '{typeConverterType.FullName}' does not implement {nameof(ITypeConverter)}");
+            this.TypeConverter = Activator.CreateInstance(typeConverterType, constructorArgs) as ICustomTypeConverter ?? throw new ArgumentException($"Type '{typeConverterType.FullName}' does not implement {nameof(ITypeConverter)}");
         }
     }
 }

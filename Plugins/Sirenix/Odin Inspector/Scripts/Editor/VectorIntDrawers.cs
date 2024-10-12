@@ -23,21 +23,17 @@ namespace Sirenix.OdinInspector.Editor.Drawers
         protected override void DrawPropertyLayout(GUIContent label)
         {
             Rect labelRect;
-            var contentRect = SirenixEditorGUI.BeginHorizontalPropertyLayout(label, out labelRect);
+            var  contentRect = SirenixEditorGUI.BeginHorizontalPropertyLayout(label, out labelRect);
             {
                 EditorGUI.BeginChangeCheck();
-                var val = SirenixEditorFields.VectorPrefixSlideRect(labelRect, (Vector2)this.ValueEntry.SmartValue);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    this.ValueEntry.SmartValue = new Vector2Int((int)val.x, (int)val.y);
-                }
+                var val                                                    = SirenixEditorFields.VectorPrefixSlideRect(labelRect, (Vector2)this.ValueEntry.SmartValue);
+                if (EditorGUI.EndChangeCheck()) this.ValueEntry.SmartValue = new((int)val.x, (int)val.y);
 
                 var showLabels = SirenixEditorFields.ResponsiveVectorComponentFields && contentRect.width >= 185;
                 GUIHelper.PushLabelWidth(SirenixEditorFields.SingleLetterStructLabelWidth);
                 this.ValueEntry.Property.Children[0].Draw(showLabels ? GUIHelper.TempContent("X") : null);
                 this.ValueEntry.Property.Children[1].Draw(showLabels ? GUIHelper.TempContent("Y") : null);
                 GUIHelper.PopLabelWidth();
-
             }
             SirenixEditorGUI.EndHorizontalPropertyLayout();
         }
@@ -47,29 +43,23 @@ namespace Sirenix.OdinInspector.Editor.Drawers
         /// </summary>
         public void PopulateGenericMenu(InspectorProperty property, GenericMenu genericMenu)
         {
-            Vector2Int value = (Vector2Int)property.ValueEntry.WeakSmartValue;
+            var value = (Vector2Int)property.ValueEntry.WeakSmartValue;
 
-            if (genericMenu.GetItemCount() > 0)
-            {
-                genericMenu.AddSeparator("");
-            }
-            genericMenu.AddItem(new GUIContent("Zero", "Set the vector to (0, 0)"), value == Vector2Int.zero, () => SetVector(property, Vector2Int.zero));
-            genericMenu.AddItem(new GUIContent("One", "Set the vector to (1, 1)"), value == Vector2Int.one, () => SetVector(property, Vector2Int.one));
+            if (genericMenu.GetItemCount() > 0) genericMenu.AddSeparator("");
+            genericMenu.AddItem(new("Zero", "Set the vector to (0, 0)"), value == Vector2Int.zero, () => this.SetVector(property, Vector2Int.zero));
+            genericMenu.AddItem(new("One", "Set the vector to (1, 1)"), value == Vector2Int.one, () => this.SetVector(property, Vector2Int.one));
             genericMenu.AddSeparator("");
-            genericMenu.AddItem(new GUIContent("Right", "Set the vector to (1, 0)"), value == Vector2Int.right, () => SetVector(property, Vector2Int.right));
-            genericMenu.AddItem(new GUIContent("Left", "Set the vector to (-1, 0)"), value == Vector2Int.left, () => SetVector(property, Vector2Int.left));
-            genericMenu.AddItem(new GUIContent("Up", "Set the vector to (0, 1)"), value == Vector2Int.up, () => SetVector(property, Vector2Int.up));
-            genericMenu.AddItem(new GUIContent("Down", "Set the vector to (0, -1)"), value == Vector2Int.down, () => SetVector(property, Vector2Int.down));
+            genericMenu.AddItem(new("Right", "Set the vector to (1, 0)"), value == Vector2Int.right, () => this.SetVector(property, Vector2Int.right));
+            genericMenu.AddItem(new("Left", "Set the vector to (-1, 0)"), value == Vector2Int.left, () => this.SetVector(property, Vector2Int.left));
+            genericMenu.AddItem(new("Up", "Set the vector to (0, 1)"), value == Vector2Int.up, () => this.SetVector(property, Vector2Int.up));
+            genericMenu.AddItem(new("Down", "Set the vector to (0, -1)"), value == Vector2Int.down, () => this.SetVector(property, Vector2Int.down));
         }
 
         private void SetVector(InspectorProperty property, Vector2Int value)
         {
             property.Tree.DelayActionUntilRepaint(() =>
             {
-                for (int i = 0; i < property.ValueEntry.ValueCount; i++)
-                {
-                    property.ValueEntry.WeakValues[i] = value;
-                }
+                for (var i = 0; i < property.ValueEntry.ValueCount; i++) property.ValueEntry.WeakValues[i] = value;
             });
         }
     }
@@ -85,14 +75,11 @@ namespace Sirenix.OdinInspector.Editor.Drawers
         protected override void DrawPropertyLayout(GUIContent label)
         {
             Rect labelRect;
-            var contentRect = SirenixEditorGUI.BeginHorizontalPropertyLayout(label, out labelRect);
+            var  contentRect = SirenixEditorGUI.BeginHorizontalPropertyLayout(label, out labelRect);
             {
                 EditorGUI.BeginChangeCheck();
-                var val = SirenixEditorFields.VectorPrefixSlideRect(labelRect, (Vector3)this.ValueEntry.SmartValue);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    this.ValueEntry.SmartValue = new Vector3Int((int)val.x, (int)val.y, (int)val.z);
-                }
+                var val                                                    = SirenixEditorFields.VectorPrefixSlideRect(labelRect, (Vector3)this.ValueEntry.SmartValue);
+                if (EditorGUI.EndChangeCheck()) this.ValueEntry.SmartValue = new((int)val.x, (int)val.y, (int)val.z);
 
                 var showLabels = SirenixEditorFields.ResponsiveVectorComponentFields && contentRect.width >= 185;
                 GUIHelper.PushLabelWidth(SirenixEditorFields.SingleLetterStructLabelWidth);
@@ -100,7 +87,6 @@ namespace Sirenix.OdinInspector.Editor.Drawers
                 this.ValueEntry.Property.Children[1].Draw(showLabels ? GUIHelper.TempContent("Y") : null);
                 this.ValueEntry.Property.Children[2].Draw(showLabels ? GUIHelper.TempContent("Z") : null);
                 GUIHelper.PopLabelWidth();
-
             }
             SirenixEditorGUI.EndHorizontalPropertyLayout();
         }
@@ -110,22 +96,19 @@ namespace Sirenix.OdinInspector.Editor.Drawers
         /// </summary>
         public void PopulateGenericMenu(InspectorProperty property, GenericMenu genericMenu)
         {
-            Vector3Int value = (Vector3Int)property.ValueEntry.WeakSmartValue;
+            var value = (Vector3Int)property.ValueEntry.WeakSmartValue;
 
-            if (genericMenu.GetItemCount() > 0)
-            {
-                genericMenu.AddSeparator("");
-            }
+            if (genericMenu.GetItemCount() > 0) genericMenu.AddSeparator("");
 
-            genericMenu.AddItem(new GUIContent("Zero", "Set the vector to (0, 0, 0)"), value == Vector3Int.zero, () => SetVector(property, Vector3Int.zero));
-            genericMenu.AddItem(new GUIContent("One", "Set the vector to (1, 1, 1)"), value == Vector3Int.one, () => SetVector(property, Vector3Int.one));
+            genericMenu.AddItem(new("Zero", "Set the vector to (0, 0, 0)"), value == Vector3Int.zero, () => this.SetVector(property, Vector3Int.zero));
+            genericMenu.AddItem(new("One", "Set the vector to (1, 1, 1)"), value == Vector3Int.one, () => this.SetVector(property, Vector3Int.one));
             genericMenu.AddSeparator("");
-            genericMenu.AddItem(new GUIContent("Right", "Set the vector to (1, 0, 0)"), value == Vector3Int.right, () => SetVector(property, Vector3Int.right));
-            genericMenu.AddItem(new GUIContent("Left", "Set the vector to (-1, 0, 0)"), value == Vector3Int.left, () => SetVector(property, Vector3Int.left));
-            genericMenu.AddItem(new GUIContent("Up", "Set the vector to (0, 1, 0)"), value == Vector3Int.up, () => SetVector(property, Vector3Int.up));
-            genericMenu.AddItem(new GUIContent("Down", "Set the vector to (0, -1, 0)"), value == Vector3Int.down, () => SetVector(property, Vector3Int.down));
-            genericMenu.AddItem(new GUIContent("Forward", "Set the vector property to (0, 0, 1)"), value == new Vector3Int(0, 0, 1), () => SetVector(property, new Vector3Int(0, 0, 1)));
-            genericMenu.AddItem(new GUIContent("Back", "Set the vector property to (0, 0, -1)"), value == new Vector3Int(0, 0, -1), () => SetVector(property, new Vector3Int(0, 0, -1)));
+            genericMenu.AddItem(new("Right", "Set the vector to (1, 0, 0)"), value == Vector3Int.right, () => this.SetVector(property, Vector3Int.right));
+            genericMenu.AddItem(new("Left", "Set the vector to (-1, 0, 0)"), value == Vector3Int.left, () => this.SetVector(property, Vector3Int.left));
+            genericMenu.AddItem(new("Up", "Set the vector to (0, 1, 0)"), value == Vector3Int.up, () => this.SetVector(property, Vector3Int.up));
+            genericMenu.AddItem(new("Down", "Set the vector to (0, -1, 0)"), value == Vector3Int.down, () => this.SetVector(property, Vector3Int.down));
+            genericMenu.AddItem(new("Forward", "Set the vector property to (0, 0, 1)"), value == new Vector3Int(0, 0, 1), () => this.SetVector(property, new(0, 0, 1)));
+            genericMenu.AddItem(new("Back", "Set the vector property to (0, 0, -1)"), value == new Vector3Int(0, 0, -1), () => this.SetVector(property, new(0, 0, -1)));
         }
 
         private void SetVector(InspectorProperty property, Vector3Int value)

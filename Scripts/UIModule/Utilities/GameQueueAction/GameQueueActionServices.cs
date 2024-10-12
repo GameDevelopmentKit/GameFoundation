@@ -12,8 +12,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     {
         private readonly IScreenManager screenManager;
 
-        private readonly Dictionary<string, List<IGameQueueAction>> queueActions           = new Dictionary<string, List<IGameQueueAction>>();
-        private readonly HashSet<string>                            trackUnCompleteActions = new HashSet<string>();
+        private readonly Dictionary<string, List<IGameQueueAction>> queueActions           = new();
+        private readonly HashSet<string>                            trackUnCompleteActions = new();
 
         private bool   isDequeuing;
         private string curLocation;
@@ -35,7 +35,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.isDequeuing = false;
             if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0) return;
             this.isDequeuing = true;
-            Observable.TimerFrame(1, UnityFrameProvider.PostLateUpdate).ObserveOnMainThread().Subscribe(l => { this.Dequeue(listAction); });
+            Observable.TimerFrame(1, UnityFrameProvider.PostLateUpdate).ObserveOnMainThread().Subscribe(l =>
+            {
+                this.Dequeue(listAction);
+            });
         }
 
         public bool Insert(string location, IGameQueueAction action, int index = -1)
@@ -68,7 +71,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             }
             else
             {
-                this.queueActions.Add(location, new List<IGameQueueAction> { action });
+                this.queueActions.Add(location, new() { action });
                 isAdded = true;
             }
 
@@ -76,18 +79,21 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             {
                 this.trackUnCompleteActions.Add(action.actionId);
 
-                if (location == this.curLocation && !this.isDequeuing)
-                {
-                    this.OnStartAtLocation(this.screenManager.CurrentActiveScreen.Value);
-                }
+                if (location == this.curLocation && !this.isDequeuing) this.OnStartAtLocation(this.screenManager.CurrentActiveScreen.Value);
             }
 
             return isAdded;
         }
 
-        public void Append(string location, IGameQueueAction action) { this.Insert(location, action); }
+        public void Append(string location, IGameQueueAction action)
+        {
+            this.Insert(location, action);
+        }
 
-        public void Append(IGameQueueAction action) { this.Append(action.location, action); }
+        public void Append(IGameQueueAction action)
+        {
+            this.Append(action.location, action);
+        }
 
         public bool Remove(IGameQueueAction action)
         {
@@ -107,25 +113,18 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         public void UpdateIndexInQueue(IGameQueueAction action, int index)
         {
             if (this.queueActions.TryGetValue(action.location, out var listAction))
-            {
                 if (this.Remove(action))
                 {
                     if (index >= 0 && index < listAction.Count)
-                    {
                         listAction.Insert(index, action);
-                    }
                     else
-                    {
                         listAction.Add(action);
-                    }
                 }
-            }
         }
 
         private void Dequeue(List<IGameQueueAction> listAction)
         {
             if (listAction.Count > 0)
-            {
                 //Debug.Log($"<color=red> GameQueueActionServices: dequeue action, list action = {listAction.ToString2(action => action.actionId)}</color>");
                 foreach (var gameQueueAction in listAction)
                 {
@@ -148,21 +147,17 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                         break;
                     }
                 }
-            }
             else
-            {
                 //            Debug.Log($"<color=red> GameQueueActionServices: empty queue at {curLocation}</color>");
                 this.isDequeuing = false;
-            }
         }
 
         private bool CheckAllDependActionComplete(IGameQueueAction action)
         {
             if (action.dependActions == null || action.dependActions.Length <= 0) return true;
             foreach (var dependAction in action.dependActions)
-            {
-                if (this.trackUnCompleteActions.Contains(dependAction)) return false;
-            }
+                if (this.trackUnCompleteActions.Contains(dependAction))
+                    return false;
 
             return true;
         }

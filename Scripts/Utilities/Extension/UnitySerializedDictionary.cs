@@ -5,19 +5,14 @@
 
     public abstract class UnitySerializedDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
-        [SerializeField, HideInInspector]
-        private List<TKey> keyData = new List<TKey>();
-	
-        [SerializeField, HideInInspector]
-        private List<TValue> valueData = new List<TValue>();
+        [SerializeField] [HideInInspector] private List<TKey> keyData = new();
+
+        [SerializeField] [HideInInspector] private List<TValue> valueData = new();
 
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             this.Clear();
-            for (int i = 0; i < this.keyData.Count && i < this.valueData.Count; i++)
-            {
-                this[this.keyData[i]] = this.valueData[i];
-            }
+            for (var i = 0; i < this.keyData.Count && i < this.valueData.Count; i++) this[this.keyData[i]] = this.valueData[i];
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()

@@ -19,19 +19,19 @@ namespace Sirenix.OdinInspector.Editor.Drawers
 
     [DrawerPriority(0.001, 0, 0)]
     public class FixBrokenUnityObjectWrapperDrawer<T> : OdinValueDrawer<T>, IDefinesGenericMenuItems
-        where T : UnityEngine.Component
+        where T : Component
     {
         private const string AUTO_FIX_PREFS_KEY = "TemporarilyBrokenUnityObjectWrapperDrawer.autoFix";
 
-        private bool isBroken = false;
-        private T realWrapperInstance;
-        private bool allowSceneViewObjects;
+        private        bool isBroken = false;
+        private        T    realWrapperInstance;
+        private        bool allowSceneViewObjects;
         private static bool autoFix;
 
         protected override void Initialize()
         {
             this.allowSceneViewObjects = this.ValueEntry.Property.GetAttribute<AssetsOnlyAttribute>() == null;
-            autoFix = EditorPrefs.HasKey(AUTO_FIX_PREFS_KEY);
+            autoFix                    = EditorPrefs.HasKey(AUTO_FIX_PREFS_KEY);
         }
 
         protected override void DrawPropertyLayout(GUIContent label)
@@ -46,7 +46,7 @@ namespace Sirenix.OdinInspector.Editor.Drawers
             {
                 this.isBroken = false;
                 var count = this.ValueEntry.ValueCount;
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
                     var component = this.ValueEntry.Values[i];
 
@@ -61,13 +61,10 @@ namespace Sirenix.OdinInspector.Editor.Drawers
                 {
                     this.isBroken = false;
 
-                    for (int i = 0; i < this.ValueEntry.ValueCount; i++)
+                    for (var i = 0; i < this.ValueEntry.ValueCount; i++)
                     {
                         T fixedComponent = null;
-                        if (ComponentIsBroken(this.ValueEntry.Values[i], ref fixedComponent) && fixedComponent)
-                        {
-                            (this.ValueEntry as IValueEntryActualValueSetter<T>).SetActualValue(i, fixedComponent);
-                        }
+                        if (ComponentIsBroken(this.ValueEntry.Values[i], ref fixedComponent) && fixedComponent) (this.ValueEntry as IValueEntryActualValueSetter<T>).SetActualValue(i, fixedComponent);
                     }
 
                     this.ValueEntry.Update();
@@ -80,8 +77,8 @@ namespace Sirenix.OdinInspector.Editor.Drawers
                 return;
             }
 
-            var rect = EditorGUILayout.GetControlRect(label != null);
-            var btnRect = rect.AlignRight(20);
+            var rect        = EditorGUILayout.GetControlRect(label != null);
+            var btnRect     = rect.AlignRight(20);
             var controlRect = rect.SetXMax(btnRect.xMin - 5);
 
             object newInstance = null;
@@ -89,27 +86,20 @@ namespace Sirenix.OdinInspector.Editor.Drawers
             EditorGUI.BeginChangeCheck();
             {
                 if (this.ValueEntry.BaseValueType.IsInterface)
-                {
                     newInstance = SirenixEditorFields.PolymorphicObjectField(controlRect,
                         label,
                         this.realWrapperInstance,
                         this.ValueEntry.BaseValueType,
                         this.allowSceneViewObjects);
-                }
                 else
-                {
                     newInstance = SirenixEditorFields.UnityObjectField(
                         controlRect,
                         label,
                         this.realWrapperInstance,
                         this.ValueEntry.BaseValueType,
                         this.allowSceneViewObjects) as Component;
-                }
             }
-            if (EditorGUI.EndChangeCheck())
-            {
-                this.ValueEntry.WeakSmartValue = newInstance;
-            }
+            if (EditorGUI.EndChangeCheck()) this.ValueEntry.WeakSmartValue = newInstance;
 
             if (GUI.Button(btnRect, " ", EditorStyles.miniButton))
             {
@@ -117,10 +107,7 @@ namespace Sirenix.OdinInspector.Editor.Drawers
                 OdinEditorWindow.InspectObjectInDropDown(popup, 300);
             }
 
-            if (Event.current.type == EventType.Repaint)
-            {
-                GUI.DrawTexture(btnRect, EditorIcons.ConsoleWarnicon, ScaleMode.ScaleToFit);
-            }
+            if (Event.current.type == EventType.Repaint) GUI.DrawTexture(btnRect, EditorIcons.ConsoleWarnicon, ScaleMode.ScaleToFit);
         }
 
         private static bool ComponentIsBroken(T component, ref T realInstance)
@@ -133,7 +120,7 @@ namespace Sirenix.OdinInspector.Editor.Drawers
                 var instanceId = uObj.GetInstanceID();
                 if (AssetDatabase.Contains(instanceId))
                 {
-                    var path = AssetDatabase.GetAssetPath(instanceId);
+                    var path        = AssetDatabase.GetAssetPath(instanceId);
                     var realWrapper = AssetDatabase.LoadAllAssetsAtPath(path).FirstOrDefault(n => n.GetInstanceID() == instanceId) as T;
                     if (realWrapper)
                     {
@@ -149,13 +136,14 @@ namespace Sirenix.OdinInspector.Editor.Drawers
         public void PopulateGenericMenu(InspectorProperty property, GenericMenu genericMenu)
         {
             if (EditorPrefs.HasKey(AUTO_FIX_PREFS_KEY))
-            {
-                genericMenu.AddItem(new GUIContent("Disable auto-fix of broken prefab instance references"), false, (x) =>
-                {
-                    EditorPrefs.DeleteKey(AUTO_FIX_PREFS_KEY);
-                    autoFix = false;
-                }, null);
-            }
+                genericMenu.AddItem(new("Disable auto-fix of broken prefab instance references"),
+                    false,
+                    (x) =>
+                    {
+                        EditorPrefs.DeleteKey(AUTO_FIX_PREFS_KEY);
+                        autoFix = false;
+                    },
+                    null);
         }
 
         [TypeInfoBox("This asset reference is temporarily broken until the next reload, because of an error in Unity where the C# wrapper object of a prefab asset is destroyed when changes are made to that prefab asset. This error has been reported to Unity.\n\nMeanwhile, Odin can fix this for you by getting a new, valid wrapper object from the asset database and replacing the broken wrapper instance with the new one.")]
@@ -168,38 +156,32 @@ namespace Sirenix.OdinInspector.Editor.Drawers
                 this.valueEntry = valueEntry;
             }
 
-            [HorizontalGroup, Button(ButtonSizes.Large)]
+            [HorizontalGroup]
+            [Button(ButtonSizes.Large)]
             public void FixItThisTime()
             {
-                for (int i = 0; i < this.valueEntry.ValueCount; i++)
+                for (var i = 0; i < this.valueEntry.ValueCount; i++)
                 {
-                    var localI = i;
-                    T fixedComponent = null;
+                    var localI         = i;
+                    T   fixedComponent = null;
                     if (ComponentIsBroken(this.valueEntry.Values[i], ref fixedComponent) && fixedComponent)
-                    {
                         this.valueEntry.Property.Tree.DelayActionUntilRepaint(() =>
                         {
                             (this.valueEntry as IValueEntryActualValueSetter<T>).SetActualValue(localI, fixedComponent);
                         });
-                    }
                 }
 
-                if (GUIHelper.CurrentWindow) 
-                {
-                    EditorApplication.delayCall += GUIHelper.CurrentWindow.Close;
-                }
+                if (GUIHelper.CurrentWindow) EditorApplication.delayCall += GUIHelper.CurrentWindow.Close;
             }
 
-            [HorizontalGroup, Button(ButtonSizes.Large)]
+            [HorizontalGroup]
+            [Button(ButtonSizes.Large)]
             public void FixItAlways()
             {
                 EditorPrefs.SetBool(AUTO_FIX_PREFS_KEY, true);
                 autoFix = true;
 
-                if (GUIHelper.CurrentWindow) 
-                {
-                    EditorApplication.delayCall += GUIHelper.CurrentWindow.Close;
-                }
+                if (GUIHelper.CurrentWindow) EditorApplication.delayCall += GUIHelper.CurrentWindow.Close;
             }
         }
     }

@@ -10,6 +10,5 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Model
     /// </summary>
     public interface IScreenModel : IUIModel
     {
-        
     }
 }

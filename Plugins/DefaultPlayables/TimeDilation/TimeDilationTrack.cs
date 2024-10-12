@@ -8,6 +8,6 @@ public class TimeDilationTrack : TrackAsset
 {
     public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
     {
-        return ScriptPlayable<TimeDilationMixerBehaviour>.Create (graph, inputCount);
+        return ScriptPlayable<TimeDilationMixerBehaviour>.Create(graph, inputCount);
     }
 }

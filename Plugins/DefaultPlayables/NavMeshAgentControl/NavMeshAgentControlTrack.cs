@@ -10,6 +10,6 @@ public class NavMeshAgentControlTrack : TrackAsset
 {
     public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
     {
-        return ScriptPlayable<NavMeshAgentControlMixerBehaviour>.Create (graph, inputCount);
+        return ScriptPlayable<NavMeshAgentControlMixerBehaviour>.Create(graph, inputCount);
     }
 }

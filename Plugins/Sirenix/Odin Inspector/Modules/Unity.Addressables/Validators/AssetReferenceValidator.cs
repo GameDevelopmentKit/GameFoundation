@@ -35,17 +35,14 @@ using Sirenix.OdinInspector.Modules.Addressables.Editor;
 
 namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 {
-	public class AssetReferenceValidator : ValueValidator<AssetReference>
+    public class AssetReferenceValidator : ValueValidator<AssetReference>
     {
-        [Tooltip("If true and the AssetReference is not marked with the Optional attribute, " +
-            "the validator will display an error message if the AssetReference is not set. " +
-            "If false, the validator will only display an error message if the AssetReference is set, " +
-            "but the assigned asset does not exist.")]
+        [Tooltip("If true and the AssetReference is not marked with the Optional attribute, " + "the validator will display an error message if the AssetReference is not set. " + "If false, the validator will only display an error message if the AssetReference is set, " + "but the assigned asset does not exist.")]
         [ToggleLeft]
         public bool RequiredByDefault;
 
-        private bool required;
-        private bool optional;
+        private bool   required;
+        private bool   optional;
         private string requiredMessage;
 
         private List<AssetReferenceUIRestriction> restrictions;
@@ -67,14 +64,10 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 this.optional = false;
             }
 
-            this.restrictions = new List<AssetReferenceUIRestriction>();
+            this.restrictions = new();
             foreach (var attr in this.Property.Attributes)
-            {
                 if (attr is AssetReferenceUIRestriction r)
-                {
                     this.restrictions.Add(r);
-                }
-            }
         }
 
         protected override void Validate(ValidationResult result)
@@ -87,16 +80,14 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 return;
             }
 
-            var assetReference = this.Value;
+            var assetReference                = this.Value;
             var assetReferenceHasBeenAssigned = !string.IsNullOrEmpty(assetReference?.AssetGUID);
 
             // No item has been assigned.
             if (!assetReferenceHasBeenAssigned)
             {
-                if (optional == false && required) // Optional == false & required? Nice.
-                {
+                if (this.optional == false && this.required) // Optional == false & required? Nice.
                     result.AddError(this.requiredMessage).EnableRichText();
-                }
 
                 return;
             }
@@ -112,7 +103,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             }
 
             var addressableAssetEntry = AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(assetReference.AssetGUID, true);
-            var isAddressable = addressableAssetEntry != null;
+            var isAddressable         = addressableAssetEntry != null;
 
             // Somehow an item sneaked through all of unity's validation measures and ended up not being addressable
             // while still ending up in the asset reference object field.
@@ -124,17 +115,13 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             // Check the assigned item against any and all label restrictions.
             else
             {
-                if (OdinAddressableUtility.ValidateAssetReferenceRestrictions(restrictions, mainAsset, out var failedRestriction) == false)
+                if (OdinAddressableUtility.ValidateAssetReferenceRestrictions(this.restrictions, mainAsset, out var failedRestriction) == false)
                 {
                     if (failedRestriction is AssetReferenceUILabelRestriction labelRestriction)
-                    {
                         result.AddError($"Asset reference is restricted to items with these specific labels <b>'{string.Join(", ", labelRestriction.m_AllowedLabels)}'</b>. The currently assigned item has none of them.")
                             .WithFix<AddLabelsFixArgs>("Add Labels", args => SetLabels(mainAsset, args.AssetLabels));
-                    }
                     else
-                    {
                         result.AddError("Restriction failed: " + failedRestriction.ToString());
-                    }
                 }
             }
 
@@ -154,42 +141,32 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                     }
                 }
 
-                if (hasMissingSubObject)
-                {
-                    result.AddError($"The previously assigned sub asset with name <b>'{assetReference.SubObjectName}'</b> is missing.").EnableRichText();
-                }
+                if (hasMissingSubObject) result.AddError($"The previously assigned sub asset with name <b>'{assetReference.SubObjectName}'</b> is missing.").EnableRichText();
             }
 
-            if (assetReference.ValidateAsset(mainAsset) || assetReference.ValidateAsset(assetPath))
-                return;
+            if (assetReference.ValidateAsset(mainAsset) || assetReference.ValidateAsset(assetPath)) return;
 
-            if (assetReference is AssetReferenceSprite && assetReference.editorAsset is Sprite)
-                return;
+            if (assetReference is AssetReferenceSprite && assetReference.editorAsset is Sprite) return;
 
             result.AddError($"{assetReference.GetType().GetNiceFullName()}.ValidateAsset failed to validate assigned asset.");
         }
 
-        private static void SetLabels(UnityEngine.Object obj, List<AssetLabel> assetLabels)
+        private static void SetLabels(Object obj, List<AssetLabel> assetLabels)
         {
             if (!AddressableAssetSettingsDefaultObject.SettingsExists) return;
 
             var settings = AddressableAssetSettingsDefaultObject.Settings;
-            var guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(obj));
-            var entry = settings.FindAssetEntry(guid, false);
+            var guid     = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(obj));
+            var entry    = settings.FindAssetEntry(guid, false);
 
-            foreach (var assetLabel in assetLabels.Where(a => a.Toggled))
-            {
-                entry.SetLabel(assetLabel.Label, true, false, false);
-            }
+            foreach (var assetLabel in assetLabels.Where(a => a.Toggled)) entry.SetLabel(assetLabel.Label, true, false, false);
 
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.LabelAdded, entry, false, true);
         }
 
         private class MakeAddressableFixArgs
         {
-            [ValueDropdown(nameof(GetGroups))]
-            [OnInspectorInit(nameof(SelectDefault))]
-            public AddressableAssetGroup Group;
+            [ValueDropdown(nameof(GetGroups))] [OnInspectorInit(nameof(SelectDefault))] public AddressableAssetGroup Group;
 
             private void SelectDefault()
             {
@@ -207,8 +184,12 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                         .Select(group => new ValueDropdownItem(group.Name, group));
             }
 
-            [Button(SdfIconType.ListNested), PropertySpace(8f)]
-            private void OpenAddressablesGroups() => OdinAddressableUtility.OpenGroupsWindow();
+            [Button(SdfIconType.ListNested)]
+            [PropertySpace(8f)]
+            private void OpenAddressablesGroups()
+            {
+                OdinAddressableUtility.OpenGroupsWindow();
+            }
         }
 
         private class AddLabelsFixArgs
@@ -230,10 +211,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                     {
                         var label = labels.FirstOrDefault(l => l.Label == assetLabel.Label);
 
-                        if (label != null)
-                        {
-                            label.Toggled = assetLabel.Toggled;
-                        }
+                        if (label != null) label.Toggled = assetLabel.Toggled;
                     }
 
                     this.assetLabels = labels;
@@ -241,7 +219,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 }
             }
 
-            private List<AssetLabel> assetLabels = new List<AssetLabel>();
+            private List<AssetLabel> assetLabels = new();
 
             [OnInspectorGUI]
             private void Draw()
@@ -261,20 +239,16 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 
                 var buttonsRect = EditorGUILayout.GetControlRect(false, 20f);
 
-                if (SirenixEditorGUI.SDFIconButton(buttonsRect, "Open Addressables Labels", SdfIconType.TagsFill))
-                {
-                    OdinAddressableUtility.OpenLabelsWindow();
-                }
+                if (SirenixEditorGUI.SDFIconButton(buttonsRect, "Open Addressables Labels", SdfIconType.TagsFill)) OdinAddressableUtility.OpenLabelsWindow();
             }
         }
 
         private class AssetLabel
         {
-            public bool Toggled;
+            public bool   Toggled;
             public string Label;
         }
     }
-
 }
 
 #endif

@@ -28,14 +28,20 @@ namespace GameFoundation.Scripts.Utilities.Extension
             return dictionary.ContainsKey(key) ? dictionary[key] : default;
         }
 
-        public static (List<T> passes, List<T> fails) SplitOnPredicate<T>(this IEnumerable<T> list,
-            Func<T, bool> predicate)
+        public static (List<T> passes, List<T> fails) SplitOnPredicate<T>(
+            this IEnumerable<T> list,
+            Func<T, bool>       predicate
+        )
         {
             var passes = new List<T>();
             var fails  = new List<T>();
             foreach (var entry in list)
-                if (predicate(entry)) passes.Add(entry);
-                else fails.Add(entry);
+            {
+                if (predicate(entry))
+                    passes.Add(entry);
+                else
+                    fails.Add(entry);
+            }
             return (passes, fails);
         }
 
@@ -66,8 +72,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var index = 0;
             foreach (var entry in list)
             {
-                if (test(entry))
-                    return index;
+                if (test(entry)) return index;
                 index++;
             }
 
@@ -80,8 +85,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var enumerable = set as T[] ?? set.ToArray();
             if (!enumerable.Any()) return (false, default);
             var val = enumerable.First();
-            if (enumerable.All(x => EqualityComparer<T>.Default.Equals(x, val)))
-                return (true, val);
+            if (enumerable.All(x => EqualityComparer<T>.Default.Equals(x, val))) return (true, val);
             return (false, default);
         }
 #nullable enable
@@ -108,16 +112,15 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 count++;
             }
         }
+
         public static int Count(this IEnumerable source)
         {
             var col = source as ICollection;
-            if (col != null)
-                return col.Count;
+            if (col != null) return col.Count;
 
             var c = 0;
             var e = source.GetEnumerator();
-            while (e.MoveNext())
-                c++;
+            while (e.MoveNext()) c++;
             return c;
         }
 
@@ -135,20 +138,23 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static T GetOrAdd<T>(this IList<T> list, Func<T, bool> match) where T : new()
         {
-            return GetOrAdd(list, match, () => new T());
+            return GetOrAdd(list, match, () => new());
         }
+
         public static T GetOrAdd<T>(this IList<T> list, Func<T, bool> match, Func<T> create)
         {
             var entry = list.FirstOrDefault(match);
-            if (entry != null)
-                return entry;
+            if (entry != null) return entry;
 
             var item = create();
             list.Add(item);
             return item;
         }
 
-        public static T Random<T>(this IList<T> list, Random random) { return list[random.Next(0, list.Count)]; }
+        public static T Random<T>(this IList<T> list, Random random)
+        {
+            return list[random.Next(0, list.Count)];
+        }
 
         public static T MinObj<T>(this IList<T> list, Func<T, float> distanceFunc)
         {
@@ -223,8 +229,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static int MinIndex<T>(this IList<T> list, IComparer<T> comparer)
         {
-            if (list.Count == 0)
-                return -1;
+            if (list.Count == 0) return -1;
 
             var lowestIndex = 0;
             var lowest      = list[0];
@@ -244,20 +249,17 @@ namespace GameFoundation.Scripts.Utilities.Extension
         public static void ForEachIndex<T>(this IList<T> list, Action<T, int> handler)
         {
             var idx = 0;
-            foreach (var item in list)
-                handler(item, idx++);
+            foreach (var item in list) handler(item, idx++);
         }
 
         public static void ForEach<T>(this IList<T> list, Action<T> action)
         {
-            foreach (var item in list)
-                action(item);
+            foreach (var item in list) action(item);
         }
 
         public static bool AddOnce<T>(this IList<T> list, T entry)
         {
-            if (list.Contains(entry))
-                return false;
+            if (list.Contains(entry)) return false;
             list.Add(entry);
             return true;
         }
@@ -289,8 +291,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             using var leftE  = left.GetEnumerator();
             using var rightE = right.GetEnumerator();
-            while (leftE.MoveNext() && rightE.MoveNext())
-                zipFunc.Invoke(leftE.Current, rightE.Current);
+            while (leftE.MoveNext() && rightE.MoveNext()) zipFunc.Invoke(leftE.Current, rightE.Current);
         }
 
         /// <summary>
@@ -312,8 +313,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// </summary>
         public static T Median<T>(this IList<T> list, bool sorted = false) where T : IComparable<T>
         {
-            if (list.Count == 0)
-                return default!;
+            if (list.Count == 0) return default!;
 
             var mid = list.Count / 2;
             T   result;
@@ -340,8 +340,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var i = 0;
             foreach (var item in list)
             {
-                if (item == null)
-                    yield return i;
+                if (item == null) yield return i;
                 i++;
             }
         }
@@ -351,20 +350,17 @@ namespace GameFoundation.Scripts.Utilities.Extension
     {
         public static void PushRange<T>(this Stack<T> source, IEnumerable<T> enumerable)
         {
-            foreach (var item in enumerable)
-                source.Push(item);
+            foreach (var item in enumerable) source.Push(item);
         }
 
         public static void PushRange<T>(this Stack<T> source, List<T> list)
         {
-            foreach (var item in list)
-                source.Push(item);
+            foreach (var item in list) source.Push(item);
         }
 
         public static void PushRange<T>(this Stack<T> source, T[] array)
         {
-            foreach (var item in array)
-                source.Push(item);
+            foreach (var item in array) source.Push(item);
         }
     }
 
@@ -473,26 +469,23 @@ namespace GameFoundation.Scripts.Utilities.Extension
         public static void ForEachIndex<T>(this T[] array, Action<T, int> handler)
         {
             var idx = 0;
-            foreach (var item in array)
-                handler(item, idx++);
+            foreach (var item in array) handler(item, idx++);
         }
 
         public static int GetArrayHashCode<T>(this T[] array) where T : notnull
         {
             unchecked
             {
-                var code             = array.Length;
-                var equalityComparer = EqualityComparer<T>.Default;
-                for (var i = 0; i < array.Length; i++)
-                    code = code * 314159 + equalityComparer.GetHashCode(array[i]);
+                var code                                    = array.Length;
+                var equalityComparer                        = EqualityComparer<T>.Default;
+                for (var i = 0; i < array.Length; i++) code = code * 314159 + equalityComparer.GetHashCode(array[i]);
                 return code;
             }
         }
 
         public static bool ArrayEquals<T>(this T[] array, T[] otherArray)
         {
-            if (array.Length != otherArray.Length)
-                return false;
+            if (array.Length != otherArray.Length) return false;
 
             var equalityComparer = EqualityComparer<T>.Default;
             for (var i = 0; i < array.Length; i++)
@@ -509,15 +502,13 @@ namespace GameFoundation.Scripts.Utilities.Extension
         public static List<T> DequeueIntoList<T>(this Queue<T> queue, int count)
         {
             var list = new List<T>();
-            for (var i = 0; i < count; i++)
-                list.Add(queue.Dequeue());
+            for (var i = 0; i < count; i++) list.Add(queue.Dequeue());
             return list;
         }
 
         public static void AddRange<T>(this Queue<T> queue, IEnumerable<T> enu)
         {
-            foreach (var obj in enu)
-                queue.Enqueue(obj);
+            foreach (var obj in enu) queue.Enqueue(obj);
         }
 
         /// <summary>
@@ -532,11 +523,10 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// <typeparam name="T">item type.</typeparam>
         public static void AddRange<T>(this Queue<T> queue, List<T> list)
         {
-            foreach (var obj in list)
-                queue.Enqueue(obj);
+            foreach (var obj in list) queue.Enqueue(obj);
         }
 
-#if NETSTANDARD2_0
+        #if NETSTANDARD2_0
         /// <summary> Make Queue.TryDequeue .NET Core 2.1 available in .NET Core 2.0. </summary>
         [PublicAPI] public static bool TryDequeue<T>(this Queue<T> queue, [MaybeNullWhen(false)] out T value)
         {
@@ -549,7 +539,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             value = queue.Dequeue();
             return true;
         }
-#endif
+        #endif
     }
 
     public static class CollectionExtension
@@ -562,8 +552,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static bool AddUnique<T>(this ICollection<T> col, T item)
         {
-            if (col.Contains(item))
-                return false;
+            if (col.Contains(item)) return false;
             col.Add(item);
             return true;
         }
@@ -583,10 +572,12 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             return (list.HasIndex(index) ? list.ElementAt(index) : default)!;
         }
+
         public static T IndexOrDefault<T>(this ICollection<T> list, int index, T defaultVal)
         {
             return list.HasIndex(index) ? list.ElementAt(index) : defaultVal;
         }
+
         public static bool HasIndex<T>(this ICollection<T> list, int index)
         {
             return !(index < 0 || index >= list.Count);
@@ -609,39 +600,37 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// <summary>Returns the columns of the given row index</summary>
         public static IEnumerable<T> ValuesAtX<T>(this T[,] array, int x)
         {
-            for (var i = 0; i < array.GetLength(1); i++)
-                yield return array[x, i];
+            for (var i = 0; i < array.GetLength(1); i++) yield return array[x, i];
         }
 
         /// <summary>Returns the rows of the given column index</summary>
         public static IEnumerable<T> ValuesAtY<T>(this T[,] array, int y)
         {
-            for (var i = 0; i < array.GetLength(0); i++)
-                yield return array[i, y];
+            for (var i = 0; i < array.GetLength(0); i++) yield return array[i, y];
         }
 
         /// <summary>Assigns the given value to the whole row</summary>
         public static void SetValuesAtX<T>(this T[,] array, int x, T val)
         {
-            for (var i = 0; i < array.GetLength(1); i++)
-                array[x, i] = val;
+            for (var i = 0; i < array.GetLength(1); i++) array[x, i] = val;
         }
 
         /// <summary>Assigns the given value to the whole column</summary>
         public static void SetValuesAtY<T>(this T[,] array, int y, T val)
         {
-            for (var i = 0; i < array.GetLength(0); i++)
-                array[i, y] = val;
+            for (var i = 0; i < array.GetLength(0); i++) array[i, y] = val;
         }
 
-        public static T SecondLast<T>(this T[] array) { return array[array.Length - 1]; }
+        public static T SecondLast<T>(this T[] array)
+        {
+            return array[array.Length - 1];
+        }
 
         /// <summary> Make an array and fill it with 'new'd entries. </summary>
         public static T[] MakeNew<T>(int count) where T : new()
         {
-            var array = new T[count];
-            for (var i = 0; i < count; i++)
-                array[i] = new T();
+            var array                                = new T[count];
+            for (var i = 0; i < count; i++) array[i] = new();
             return array;
         }
     }
@@ -649,15 +638,18 @@ namespace GameFoundation.Scripts.Utilities.Extension
     public static class ListUtil
     {
         //Return entries until finding one that has a different testsame value.
-        public static IEnumerable<TEntry> TakeSame<TEntry, TVal>(this IEnumerable<TEntry> list,
-            Func<TEntry, TVal> testSame) where TVal : IComparable
+        public static IEnumerable<TEntry> TakeSame<TEntry, TVal>(
+            this IEnumerable<TEntry> list,
+            Func<TEntry, TVal>       testSame
+        ) where TVal : IComparable
         {
             var firstVal = default(TVal);
             var set      = false;
             foreach (var entry in list)
             {
                 var entryVal = testSame(entry);
-                if (!set) firstVal = entryVal;
+                if (!set)
+                    firstVal = entryVal;
                 else if (firstVal?.CompareTo(entryVal) != 0) yield break;
 
                 yield return entry;
@@ -689,8 +681,10 @@ namespace GameFoundation.Scripts.Utilities.Extension
         }
 
         //Return each node and the level, with root = 0
-        public static IEnumerable<(T Node, int Level)> DepthFirstTraversal<T>(this T root,
-            Func<T, IEnumerable<T>> getChildren)
+        public static IEnumerable<(T Node, int Level)> DepthFirstTraversal<T>(
+            this T                  root,
+            Func<T, IEnumerable<T>> getChildren
+        )
         {
             var s = new Stack<(T Node, int Level)>();
             s.Push((root, 0));
@@ -702,17 +696,16 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
                 var children = getChildren(entry.Node);
                 if (children == null) continue;
-                foreach (var child in children.Reverse())
-                    s.Push((child, entry.Level + 1));
+                foreach (var child in children.Reverse()) s.Push((child, entry.Level + 1));
             }
         }
 
         //Syntactic sugary deliciousness
         public static IEnumerable<T> List<T>(params T[] list)
         {
-            foreach (var entry in list)
-                yield return entry;
+            foreach (var entry in list) yield return entry;
         }
+
         public static IEnumerable<T> NonNull<T>(params T[] list)
         {
             foreach (var entry in list)
@@ -725,21 +718,18 @@ namespace GameFoundation.Scripts.Utilities.Extension
     {
         public static void AddRange<T>(this ISet<T> set, IEnumerable<T> items)
         {
-            foreach (var item in items)
-                set.Add(item);
+            foreach (var item in items) set.Add(item);
         }
 
         public static void RemoveRange<T>(this ISet<T> set, IEnumerable<T> items)
         {
-            foreach (var item in items)
-                set.Remove(item);
+            foreach (var item in items) set.Remove(item);
         }
 
         public static HashSet<T> MakeHashSet<T>(params IEnumerable<T>[] lists)
         {
             var h = new HashSet<T>();
-            foreach (var entry in lists)
-                h.UnionWith(entry);
+            foreach (var entry in lists) h.UnionWith(entry);
             return h;
         }
 
@@ -749,8 +739,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             using (var enumerator = set.GetEnumerator())
             {
-                if (!enumerator.MoveNext())
-                    throw new InvalidOperationException("No elements.");
+                if (!enumerator.MoveNext()) throw new InvalidOperationException("No elements.");
                 return enumerator.Current;
             }
         }
@@ -764,8 +753,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var last = default(T);
             foreach (var entry in list)
             {
-                if (last == null || !entry.Equals(last))
-                    yield return entry;
+                if (last == null || !entry.Equals(last)) yield return entry;
                 last = entry;
             }
         }
@@ -795,24 +783,23 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var i = 0;
             foreach (var entry in list)
             {
-                if (entry == obj)
-                    return i;
+                if (entry == obj) return i;
                 i++;
             }
 
             return -1;
         }
 
-
         //Go through the groups and take up to 'getCountAllowed' entries from each, running the function on the first value.
-        public static IEnumerable<TValue> LimitGroups<TKey, TValue>(this IEnumerable<IGrouping<TKey, TValue>> groups,
-            Func<TValue, int> getCountAllowed)
+        public static IEnumerable<TValue> LimitGroups<TKey, TValue>(
+            this IEnumerable<IGrouping<TKey, TValue>> groups,
+            Func<TValue, int>                         getCountAllowed
+        )
         {
             foreach (var group in groups)
             {
                 var limit = getCountAllowed(group.First());
-                foreach (var entry in group.Take(limit))
-                    yield return entry;
+                foreach (var entry in group.Take(limit)) yield return entry;
             }
         }
     }
@@ -835,12 +822,15 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
     public static class EnumEnumerableExtensions
     {
-        public static void ForEachWithoutExclusions<TEnum>(this IEnumerable<TEnum> enums,
-            Action<TEnum> executionPerItem)
+        public static void ForEachWithoutExclusions<TEnum>(
+            this IEnumerable<TEnum> enums,
+            Action<TEnum>           executionPerItem
+        )
             where TEnum : Enum
         {
             var excludeAttribute = (EnumEnumerableExcludeAttribute)(Attribute.GetCustomAttribute(typeof(TEnum),
-                typeof(EnumEnumerableExcludeAttribute)) ?? new EnumEnumerableExcludeAttribute());
+                    typeof(EnumEnumerableExcludeAttribute))
+                ?? new EnumEnumerableExcludeAttribute());
 
             foreach (var enumValue in enums)
             {
@@ -850,12 +840,15 @@ namespace GameFoundation.Scripts.Utilities.Extension
             }
         }
 
-        public static IEnumerable<TEnum> WithoutExclusions<TEnum, TResult>(this IEnumerable<TEnum> enums,
-            Func<TEnum, TResult> selector)
+        public static IEnumerable<TEnum> WithoutExclusions<TEnum, TResult>(
+            this IEnumerable<TEnum> enums,
+            Func<TEnum, TResult>    selector
+        )
             where TEnum : Enum
         {
             var excludeAttribute = (EnumEnumerableExcludeAttribute)(Attribute.GetCustomAttribute(typeof(TEnum),
-                typeof(EnumEnumerableExcludeAttribute)) ?? new EnumEnumerableExcludeAttribute());
+                    typeof(EnumEnumerableExcludeAttribute))
+                ?? new EnumEnumerableExcludeAttribute());
 
             return enums.Where(enumValue => !excludeAttribute.IsExcluded(enumValue));
         }

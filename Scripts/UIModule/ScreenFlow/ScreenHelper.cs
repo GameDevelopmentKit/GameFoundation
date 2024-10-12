@@ -5,6 +5,9 @@
 
     public static class ScreenHelper
     {
-        public static string GetScreenId<TView>() where TView : IScreenView => $"{SceneDirector.CurrentSceneName}/{typeof(TView).Name}";
+        public static string GetScreenId<TView>() where TView : IScreenView
+        {
+            return $"{SceneDirector.CurrentSceneName}/{typeof(TView).Name}";
+        }
     }
 }

@@ -16,14 +16,14 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         public async UniTask LoadStreamAsset()
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+            #if UNITY_ANDROID && !UNITY_EDITOR
         var output = await LoadStreamingAssetMobile(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
-#endif
-#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+            #endif
+            #if UNITY_STANDALONE_WIN && !UNITY_EDITOR
         var output = await LoadStreamingAssetFromWindow(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
-#endif
+            #endif
         }
 
         [Obsolete]

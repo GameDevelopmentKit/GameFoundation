@@ -15,7 +15,7 @@
             "hr", "hr", "id", "id", "is", "is", "it", "it", "ja", "jp", "ka", "ge", "km", "kh", "kn", "in", "ko", "kr", "lo", "la",
             "lt", "lt", "mi", "nz", "ml", "in", "ms", "my", "nl", "nl", "nn", "no", "no", "no", "ph", "ph", "pt", "pt", "ro", "ro",
             "ru", "ru", "sk", "sk", "sl", "si", "so", "so", "sq", "al", "sv", "se", "ta", "in", "th", "th", "tr", "tr", "uk", "ua",
-            "vi", "vn", "zh", "cn"
+            "vi", "vn", "zh", "cn",
         };
 
         public static readonly string[] ListLang =
@@ -37,7 +37,7 @@
             "sinhala", "slovak", "slovenian", "somali", "southern sotho", "spanish", "sundanese", "swahili", "swati", "swedish",
             "tamil", "telugu", "tajik", "thai", "tigrinya", "tibetan standard", "turkmen", "tagalog", "tswana", "tonga", "turkish",
             "tsonga", "tatar", "twi", "tahitian", "uighur", "ukrainian", "urdu", "uzbek", "venda", "vietnamese", "volapã¼k",
-            "walloon", "welsh", "wolof", "western frisian", "xhosa", "yiddish", "yoruba", "zhuang, chuang"
+            "walloon", "welsh", "wolof", "western frisian", "xhosa", "yiddish", "yoruba", "zhuang, chuang",
         };
 
         public static readonly string[] ListLangCode =
@@ -51,7 +51,7 @@
             "or", "os", "pa", "pi", "fa", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "sa", "sc", "sd", "se", "sm", "sg", "sr",
             "gd", "sn", "si", "sk", "sl", "so", "st", "es", "su", "sw", "ss", "sv", "ta", "te", "tg", "th", "ti", "bo", "tk", "tl",
             "tn", "to", "tr", "ts", "tt", "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "cy", "wo", "fy", "xh", "yi",
-            "yo", "za"
+            "yo", "za",
         };
 
         public static readonly string[] ListEUCountryCode =
@@ -59,10 +59,16 @@
 
         public static readonly string[] ListEEACountryCode = { "no", "is", "li" };
 
-        public static bool IsEUAndEEACountry(string countryCode) => ListEUCountryCode.Contains(countryCode) || ListEEACountryCode.Contains(countryCode);
+        public static bool IsEUAndEEACountry(string countryCode)
+        {
+            return ListEUCountryCode.Contains(countryCode) || ListEEACountryCode.Contains(countryCode);
+        }
 
-        public static bool IsEUAndEEACountry() => IsEUAndEEACountry(GetCountryCodeByDeviceLang());
-        
+        public static bool IsEUAndEEACountry()
+        {
+            return IsEUAndEEACountry(GetCountryCodeByDeviceLang());
+        }
+
         //
         // Summary:
         //     The country code the user's operating system is running in.
@@ -92,6 +98,9 @@
         //
         // Summary:
         //     The country code the user's operating system is running in.
-        public static string GetCountryCodeByDeviceLang() { return GetCountryCodeByLang(Application.systemLanguage.ToString()); }
+        public static string GetCountryCodeByDeviceLang()
+        {
+            return GetCountryCodeByLang(Application.systemLanguage.ToString());
+        }
     }
 }

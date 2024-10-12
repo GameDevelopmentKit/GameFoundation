@@ -10,10 +10,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             using var e1 = first.GetEnumerator();
             using var e2 = second.GetEnumerator();
-            while (e1.MoveNext() && e2.MoveNext())
-            {
-                yield return resultSelector(e1.Current, e2.Current);
-            }
+            while (e1.MoveNext() && e2.MoveNext()) yield return resultSelector(e1.Current, e2.Current);
         }
 
         public static IEnumerable<TResult> Zip<TFirst, TSecond, TThird, TResult>(IEnumerable<TFirst> first, IEnumerable<TSecond> second, IEnumerable<TThird> third, Func<TFirst, TSecond, TThird, TResult> resultSelector)
@@ -21,10 +18,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             using var e1 = first.GetEnumerator();
             using var e2 = second.GetEnumerator();
             using var e3 = third.GetEnumerator();
-            while (e1.MoveNext() && e2.MoveNext() && e3.MoveNext())
-            {
-                yield return resultSelector(e1.Current, e2.Current, e3.Current);
-            }
+            while (e1.MoveNext() && e2.MoveNext() && e3.MoveNext()) yield return resultSelector(e1.Current, e2.Current, e3.Current);
         }
 
         public static IEnumerable<(TFirst, TSecond)> Zip<TFirst, TSecond>(IEnumerable<TFirst> first, IEnumerable<TSecond> second)
@@ -42,10 +36,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var enumerators = enumerables.GetEnumerators();
             try
             {
-                while (enumerators.MoveNexts().All(Item.IsTrue))
-                {
-                    yield return enumerators.GetCurrents();
-                }
+                while (enumerators.MoveNexts().All(Item.IsTrue)) yield return enumerators.GetCurrents();
             }
             finally
             {
@@ -254,14 +245,29 @@ namespace GameFoundation.Scripts.Utilities.Extension
             while (count-- > 0) action();
         }
 
-        private static IEnumerator<T>[] GetEnumerators<T>(this IEnumerable<T>[] enumerables) => enumerables.Select(e => e.GetEnumerator()).ToArray();
+        private static IEnumerator<T>[] GetEnumerators<T>(this IEnumerable<T>[] enumerables)
+        {
+            return enumerables.Select(e => e.GetEnumerator()).ToArray();
+        }
 
-        private static bool[] MoveNexts<T>(this IEnumerator<T>[] enumerators) => enumerators.Select(e => e.MoveNext()).ToArray();
+        private static bool[] MoveNexts<T>(this IEnumerator<T>[] enumerators)
+        {
+            return enumerators.Select(e => e.MoveNext()).ToArray();
+        }
 
-        private static T[] GetCurrents<T>(this IEnumerator<T>[] enumerators) => enumerators.Select(e => e.Current).ToArray();
+        private static T[] GetCurrents<T>(this IEnumerator<T>[] enumerators)
+        {
+            return enumerators.Select(e => e.Current).ToArray();
+        }
 
-        private static void Dispose<T>(this IEnumerator<T>[] enumerators) => enumerators.ForEach(e => e.Dispose());
+        private static void Dispose<T>(this IEnumerator<T>[] enumerators)
+        {
+            enumerators.ForEach(e => e.Dispose());
+        }
 
-        private static T GetCurrentOrDefault<T>(IEnumerator<T> enumerator, bool hasValue) => hasValue ? enumerator.Current : default;
+        private static T GetCurrentOrDefault<T>(IEnumerator<T> enumerator, bool hasValue)
+        {
+            return hasValue ? enumerator.Current : default;
+        }
     }
 }

@@ -40,6 +40,6 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <summary>
         ///     Prefix hex number with 0x.
         /// </summary>
-        HexInclude0x = 8
+        HexInclude0x = 8,
     }
 }

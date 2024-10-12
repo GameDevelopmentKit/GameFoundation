@@ -4,6 +4,8 @@ namespace BlueprintFlow.BlueprintReader
 
     public class FieldDontExistInBlueprint : Exception
     {
-        public FieldDontExistInBlueprint(string message) : base(message) { }
+        public FieldDontExistInBlueprint(string message) : base(message)
+        {
+        }
     }
 }

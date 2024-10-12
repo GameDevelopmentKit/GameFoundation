@@ -7,6 +7,7 @@
     using UnityEditor;
     using UnityEditor.SceneManagement;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
     using UnityEngine.UIElements;
     using Object = UnityEngine.Object;
 
@@ -14,7 +15,7 @@
     public enum ToolbarZone
     {
         ToolbarZoneRightAlign,
-        ToolbarZoneLeftAlign
+        ToolbarZoneLeftAlign,
     }
 
     [InitializeOnLoad]
@@ -37,9 +38,9 @@
         {
             if (_toolbar == null)
             {
-                Assembly editorAssembly = typeof(Editor).Assembly;
+                var editorAssembly = typeof(Editor).Assembly;
 
-                Object[] toolbars = Resources.FindObjectsOfTypeAll(editorAssembly.GetType("UnityEditor.Toolbar"));
+                var toolbars = Resources.FindObjectsOfTypeAll(editorAssembly.GetType("UnityEditor.Toolbar"));
                 _toolbar = toolbars.Length > 0 ? (ScriptableObject)toolbars[0] : null;
 
                 if (_toolbar != null)
@@ -61,11 +62,14 @@
                                 {
                                     flexGrow      = 1,
                                     flexDirection = FlexDirection.Row,
-                                }
+                                },
                             };
 
                             var container = new IMGUIContainer();
-                            container.onGUIHandler += () => { cb?.Invoke(); };
+                            container.onGUIHandler += () =>
+                            {
+                                cb?.Invoke();
+                            };
                             parent.Add(container);
                             toolbarZone.Add(parent);
                         }
@@ -75,12 +79,12 @@
 
             if (_scenePaths == null)
             {
-                List<string> scenePaths = new List<string>();
-                List<string> sceneNames = new List<string>();
+                var scenePaths = new List<string>();
+                var sceneNames = new List<string>();
 
-                string folderName   = Application.dataPath + "/Scenes";
-                var    dirInfo      = new DirectoryInfo(folderName);
-                var    allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
+                var folderName   = Application.dataPath + "/Scenes";
+                var dirInfo      = new DirectoryInfo(folderName);
+                var allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
 
                 foreach (var fileInfo in allFileInfos)
                 {
@@ -103,30 +107,24 @@
         {
             using (new EditorGUI.DisabledScope(Application.isPlaying))
             {
+                var sceneName  = SceneManager.GetActiveScene().name;
+                var sceneIndex = -1;
+
+                for (var i = 0; i < _sceneNames.Length; ++i)
                 {
-                    string sceneName  = EditorSceneManager.GetActiveScene().name;
-                    int    sceneIndex = -1;
-
-                    for (int i = 0; i < _sceneNames.Length; ++i)
+                    if (sceneName == _sceneNames[i])
                     {
-                        if (sceneName == _sceneNames[i])
-                        {
-                            sceneIndex = i;
+                        sceneIndex = i;
 
-                            break;
-                        }
-                    }
-
-                    int newSceneIndex = EditorGUILayout.Popup(sceneIndex, _sceneNames, GUILayout.Width(200.0f));
-
-                    if (newSceneIndex != sceneIndex)
-                    {
-                        if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-                        {
-                            EditorSceneManager.OpenScene(_scenePaths[newSceneIndex], OpenSceneMode.Single);
-                        }
+                        break;
                     }
                 }
+
+                var newSceneIndex = EditorGUILayout.Popup(sceneIndex, _sceneNames, GUILayout.Width(200.0f));
+
+                if (newSceneIndex != sceneIndex)
+                    if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                        EditorSceneManager.OpenScene(_scenePaths[newSceneIndex], OpenSceneMode.Single);
             }
         }
     }

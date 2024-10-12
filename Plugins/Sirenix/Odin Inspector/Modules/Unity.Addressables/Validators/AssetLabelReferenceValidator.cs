@@ -24,19 +24,17 @@ using Sirenix.OdinInspector.Modules.Addressables.Editor;
 
 namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 {
-	/// <summary>
-	/// Validator for AssetLabelReference values.
-	/// </summary>
-	public class AssetLabelReferenceValidator : ValueValidator<AssetLabelReference>
+    /// <summary>
+    /// Validator for AssetLabelReference values.
+    /// </summary>
+    public class AssetLabelReferenceValidator : ValueValidator<AssetLabelReference>
     {
-        [Tooltip("If enabled, the validator will display an error message if the AssetLabelReference is not set. " +
-            "If disabled, the validator will only display an error message if the AssetLabelReference is set, but the " +
-            "assigned label does not exist.")]
+        [Tooltip("If enabled, the validator will display an error message if the AssetLabelReference is not set. " + "If disabled, the validator will only display an error message if the AssetLabelReference is set, but the " + "assigned label does not exist.")]
         [ToggleLeft]
         public bool RequiredByDefault;
 
-        private bool required;
-        private bool optional;
+        private bool   required;
+        private bool   optional;
         private string requiredMessage;
 
         protected override void Initialize()
@@ -47,13 +45,13 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 
             if (this.RequiredByDefault)
             {
-                required = true;
-                optional = Property.GetAttribute<OptionalAttribute>() != null;
+                this.required = true;
+                this.optional = this.Property.GetAttribute<OptionalAttribute>() != null;
             }
             else
             {
-                required = requiredAttr != null;
-                optional = false;
+                this.required = requiredAttr != null;
+                this.optional = false;
             }
         }
 
@@ -67,28 +65,23 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 return;
             }
 
-            var value = Value?.labelString;
+            var value = this.Value?.labelString;
 
             if (string.IsNullOrEmpty(value))
             {
-                if (optional == false && required) // Optional == false & required? Nice.
-                {
-                    result.AddError(requiredMessage).EnableRichText();
-                }
+                if (this.optional == false && this.required) // Optional == false & required? Nice.
+                    result.AddError(this.requiredMessage).EnableRichText();
             }
             else
             {
                 var labels = AddressableAssetSettingsDefaultObject.Settings.GetLabels();
 
                 if (labels.Contains(value) == false)
-                {
                     result.AddError($"Label <i>{value}</i> has not been created as a label.")
                         .WithButton("Open Label Settings", () => OdinAddressableUtility.OpenLabelsWindow());
-                }
             }
         }
     }
-
 }
 
 #endif

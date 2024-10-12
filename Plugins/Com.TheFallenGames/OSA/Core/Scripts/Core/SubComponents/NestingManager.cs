@@ -5,229 +5,208 @@ using UnityEngine.EventSystems;
 
 namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
-	internal class NestingManager<TParams, TItemViewsHolder> : IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
-		where TParams : BaseParams
-		where TItemViewsHolder : BaseItemViewsHolder
-	{
-		public bool SearchedParentAtLeastOnce { get { return _SearchedAtLeastOnce; } }
-		public bool CurrentDragCapturedByParent { get { return _CurrentDragCapturedByParent; } }
-		public bool CurrentScrollConsumedByParent { get { return _CurrentScrollConsumedByParent; } }
+    internal class NestingManager<TParams, TItemViewsHolder> : IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
+        where TParams : BaseParams
+        where TItemViewsHolder : BaseItemViewsHolder
+    {
+        public bool SearchedParentAtLeastOnce     => this._SearchedAtLeastOnce;
+        public bool CurrentDragCapturedByParent   => this._CurrentDragCapturedByParent;
+        public bool CurrentScrollConsumedByParent => this._CurrentScrollConsumedByParent;
 
+        private OSA<TParams, TItemViewsHolder>  _Adapter;
+        private InternalState<TItemViewsHolder> _InternalState;
+        private IInitializePotentialDragHandler parentInitializePotentialDragHandler;
+        private IBeginDragHandler               parentBeginDragHandler;
+        private IDragHandler                    parentDragHandler;
+        private IEndDragHandler                 parentEndDragHandler;
+        private IScrollHandler                  parentScrollHandler;
+        private bool                            _SearchedAtLeastOnce;
+        private bool                            _CurrentDragCapturedByParent;
+        private bool                            _CurrentScrollConsumedByParent;
 
-		OSA<TParams, TItemViewsHolder> _Adapter;
-		InternalState<TItemViewsHolder> _InternalState;
-		IInitializePotentialDragHandler parentInitializePotentialDragHandler;
-		IBeginDragHandler parentBeginDragHandler;
-		IDragHandler parentDragHandler;
-		IEndDragHandler parentEndDragHandler;
-		IScrollHandler parentScrollHandler;
-		bool _SearchedAtLeastOnce;
-		bool _CurrentDragCapturedByParent;
-		bool _CurrentScrollConsumedByParent;
+        public NestingManager(OSA<TParams, TItemViewsHolder> adapter)
+        {
+            this._Adapter       = adapter;
+            this._InternalState = this._Adapter._InternalState;
+        }
 
+        public void FindAndStoreNestedParent()
+        {
+            this.parentInitializePotentialDragHandler = null;
+            this.parentBeginDragHandler               = null;
+            this.parentDragHandler                    = null;
+            this.parentEndDragHandler                 = null;
+            this.parentScrollHandler                  = null;
 
-		public NestingManager(OSA<TParams, TItemViewsHolder> adapter)
-		{
-			_Adapter = adapter;
-			_InternalState = _Adapter._InternalState;
-		}
+            var tr = this._Adapter.transform;
+            // Find the first parent that implements all of the interfaces
+            while ((tr = tr.parent) && this.parentInitializePotentialDragHandler == null)
+            {
+                this.parentInitializePotentialDragHandler = tr.GetComponent(typeof(IInitializePotentialDragHandler)) as IInitializePotentialDragHandler;
+                if (this.parentInitializePotentialDragHandler == null) continue;
 
+                this.parentBeginDragHandler = this.parentInitializePotentialDragHandler as IBeginDragHandler;
+                if (this.parentBeginDragHandler == null)
+                {
+                    this.parentInitializePotentialDragHandler = null;
+                    continue;
+                }
 
-		public void FindAndStoreNestedParent()
-		{
-			parentInitializePotentialDragHandler = null;
-			parentBeginDragHandler = null;
-			parentDragHandler = null;
-			parentEndDragHandler = null;
-			parentScrollHandler = null;
+                this.parentDragHandler = this.parentInitializePotentialDragHandler as IDragHandler;
+                if (this.parentDragHandler == null)
+                {
+                    this.parentInitializePotentialDragHandler = null;
+                    this.parentBeginDragHandler               = null;
+                    continue;
+                }
 
-			var tr = _Adapter.transform;
-			// Find the first parent that implements all of the interfaces
-			while ((tr = tr.parent) && parentInitializePotentialDragHandler == null)
-			{
-				parentInitializePotentialDragHandler = tr.GetComponent(typeof(IInitializePotentialDragHandler)) as IInitializePotentialDragHandler;
-				if (parentInitializePotentialDragHandler == null)
-					continue;
+                this.parentEndDragHandler = this.parentInitializePotentialDragHandler as IEndDragHandler;
+                if (this.parentEndDragHandler == null)
+                {
+                    this.parentInitializePotentialDragHandler = null;
+                    this.parentBeginDragHandler               = null;
+                    this.parentDragHandler                    = null;
+                    continue;
+                }
+            }
 
-				parentBeginDragHandler = parentInitializePotentialDragHandler as IBeginDragHandler;
-				if (parentBeginDragHandler == null)
-				{
-					parentInitializePotentialDragHandler = null;
-					continue;
-				}
+            if (this.parentInitializePotentialDragHandler == null)
+            {
+                // Search for the scroll handler separately, if no drag handlers present
+                tr = this._Adapter.transform;
+                while ((tr = tr.parent) && this.parentScrollHandler == null) this.parentScrollHandler = tr.GetComponent(typeof(IScrollHandler)) as IScrollHandler;
+            }
+            else
+                // Only allow the scroll handler to be taken from the drag handler, if any, so all handlers will come from the same object
+            {
+                this.parentScrollHandler = this.parentInitializePotentialDragHandler as IScrollHandler;
+            }
 
-				parentDragHandler = parentInitializePotentialDragHandler as IDragHandler;
-				if (parentDragHandler == null)
-				{
-					parentInitializePotentialDragHandler = null;
-					parentBeginDragHandler = null;
-					continue;
-				}
+            this._SearchedAtLeastOnce = true;
+        }
 
-				parentEndDragHandler = parentInitializePotentialDragHandler as IEndDragHandler;
-				if (parentEndDragHandler == null)
-				{
-					parentInitializePotentialDragHandler = null;
-					parentBeginDragHandler = null;
-					parentDragHandler = null;
-					continue;
-				}
-			}
+        public void OnInitializePotentialDrag(PointerEventData eventData)
+        {
+            this._CurrentDragCapturedByParent = false;
 
-			if (parentInitializePotentialDragHandler == null)
-			{
-				// Search for the scroll handler separately, if no drag handlers present
-				tr = _Adapter.transform;
-				while ((tr = tr.parent) && parentScrollHandler == null)
-				{
-					parentScrollHandler = tr.GetComponent(typeof(IScrollHandler)) as IScrollHandler;
-				}
-			}
-			else
-			{
-				// Only allow the scroll handler to be taken from the drag handler, if any, so all handlers will come from the same object
-				parentScrollHandler = parentInitializePotentialDragHandler as IScrollHandler;
-			}
+            if (!this._SearchedAtLeastOnce) this.FindAndStoreNestedParent();
 
-			_SearchedAtLeastOnce = true;
-		}
+            if (this.parentInitializePotentialDragHandler == null) return;
 
-		public void OnInitializePotentialDrag(PointerEventData eventData)
-		{
-			_CurrentDragCapturedByParent = false;
+            this.parentInitializePotentialDragHandler.OnInitializePotentialDrag(eventData);
+        }
 
-			if (!_SearchedAtLeastOnce)
-				FindAndStoreNestedParent();
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            if (this.parentInitializePotentialDragHandler == null) return;
 
-			if (parentInitializePotentialDragHandler == null)
-				return;
+            if (this._Adapter.Parameters.DragEnabled)
+            {
+                var delta    = eventData.delta;
+                var dyExcess = Mathf.Abs(delta.y) - Mathf.Abs(delta.x);
 
-			parentInitializePotentialDragHandler.OnInitializePotentialDrag(eventData);
-		}
+                this._CurrentDragCapturedByParent = this._InternalState.hor1_vertMinus1 * dyExcess >= 0f; // parents have priority when dx == dy, since they are supposed to be more important
 
-		public void OnBeginDrag(PointerEventData eventData)
-		{
-			if (parentInitializePotentialDragHandler == null)
-				return;
+                if (!this._CurrentDragCapturedByParent)
+                    // The drag direction is bigger in the child adapter's scroll direction than in the perpendicular one,
+                    // i.e. the drag is 'intended' for the child adapter.
+                    // But if the child adapter is at boundary and ForwardDragSameDirectionAtBoundary, still forward the event to the parent
+                    this._CurrentDragCapturedByParent = this.CheckForForwardingToParent(delta);
+            }
+            else
+                // When the child ScrollView has its drag disabled, forward the event to the parent without further checks
+            {
+                this._CurrentDragCapturedByParent = true;
+            }
 
-			if (_Adapter.Parameters.DragEnabled)
-			{
-				var delta = eventData.delta;
-				float dyExcess = Mathf.Abs(delta.y) - Mathf.Abs(delta.x);
+            if (!this._CurrentDragCapturedByParent) return;
 
-				_CurrentDragCapturedByParent = _InternalState.hor1_vertMinus1 * dyExcess >= 0f; // parents have priority when dx == dy, since they are supposed to be more important
+            this.parentBeginDragHandler.OnBeginDrag(eventData);
+        }
 
-				if (!_CurrentDragCapturedByParent)
-				{
-					// The drag direction is bigger in the child adapter's scroll direction than in the perpendicular one,
-					// i.e. the drag is 'intended' for the child adapter.
-					// But if the child adapter is at boundary and ForwardDragSameDirectionAtBoundary, still forward the event to the parent
-					_CurrentDragCapturedByParent = CheckForForwardingToParent(delta);
-				}
-			}
-			else
-				// When the child ScrollView has its drag disabled, forward the event to the parent without further checks
-				_CurrentDragCapturedByParent = true;
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (this.parentInitializePotentialDragHandler == null) return;
 
-			if (!_CurrentDragCapturedByParent)
-				return;
+            this.parentDragHandler.OnDrag(eventData);
+        }
 
-			parentBeginDragHandler.OnBeginDrag(eventData);
-		}
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (this.parentInitializePotentialDragHandler == null) return;
 
-		public void OnDrag(PointerEventData eventData)
-		{
-			if (parentInitializePotentialDragHandler == null)
-				return;
+            this.parentEndDragHandler.OnEndDrag(eventData);
+            this._CurrentDragCapturedByParent = false;
+        }
 
-			parentDragHandler.OnDrag(eventData);
-		}
+        public void OnScroll(PointerEventData eventData)
+        {
+            this._CurrentScrollConsumedByParent = false;
 
-		public void OnEndDrag(PointerEventData eventData)
-		{
-			if (parentInitializePotentialDragHandler == null)
-				return;
+            if (!this._SearchedAtLeastOnce) this.FindAndStoreNestedParent();
 
-			parentEndDragHandler.OnEndDrag(eventData);
-			_CurrentDragCapturedByParent = false;
-		}
+            if (this.parentScrollHandler == null) return;
 
-		public void OnScroll(PointerEventData eventData)
-		{
-			_CurrentScrollConsumedByParent = false;
+            if (this._Adapter.Parameters.ScrollEnabled)
+            {
+                var scrollDeltaRaw = eventData.scrollDelta;
 
-			if (!_SearchedAtLeastOnce)
-				FindAndStoreNestedParent();
+                var scrollDeltaWithoutSensitivity = scrollDeltaRaw;
+                scrollDeltaWithoutSensitivity.y *= -1f;
+                var scrollDeltaWithSensitivity = scrollDeltaWithoutSensitivity;
+                this._Adapter.Parameters.ApplyScrollSensitivityTo(ref scrollDeltaWithSensitivity);
 
-			if (parentScrollHandler == null)
-				return;
+                var scrollInChildDirectionExist_AfterSensitivity = scrollDeltaWithSensitivity[this._InternalState.hor0_vert1] != 0f;
+                //bool b = scrollDeltaRaw[_InternalState.hor0_vert1] != 0f && scrollDelta[_InternalState.hor0_vert1] == 0f;
+                if (scrollInChildDirectionExist_AfterSensitivity)
+                {
+                    // Scrolled in the child's orientation => forward if child adapter is at boundary
+                    if (!this.CheckForForwardingToParent(scrollDeltaWithSensitivity)) return;
+                }
+                else
+                {
+                    // Sensivity in child's orientation disabled (it's set to 0) => forward the event to parent without further checks
+                    var scrollInChildDirectionExist_BeforeSensitivity = scrollDeltaWithoutSensitivity[this._InternalState.hor0_vert1] != 0f;
+                    if (scrollInChildDirectionExist_BeforeSensitivity)
+                    {
+                    }
+                    else
+                    {
+                        // No scroll input in the child orientation
 
-			if (_Adapter.Parameters.ScrollEnabled)
-			{
-				var scrollDeltaRaw = eventData.scrollDelta;
+                        var scrollInChildTransversalDirectionExist_AfterSensitivity = scrollDeltaWithSensitivity[1 - this._InternalState.hor0_vert1] != 0f;
+                        if (scrollInChildTransversalDirectionExist_AfterSensitivity)
+                            // Child has priority, since it set a non-zero sensitivity for the received input axis
+                            return;
+                    }
+                }
+            }
+            else
+            {
+                // When the child ScrollView has its scroll disabled, forward the event to the parent without further checks
+            }
+            this._CurrentScrollConsumedByParent = true;
 
-				var scrollDeltaWithoutSensitivity = scrollDeltaRaw;
-				scrollDeltaWithoutSensitivity.y *= -1f;
-				var scrollDeltaWithSensitivity = scrollDeltaWithoutSensitivity;
-				_Adapter.Parameters.ApplyScrollSensitivityTo(ref scrollDeltaWithSensitivity);
+            this.parentScrollHandler.OnScroll(eventData);
+        }
 
-				bool scrollInChildDirectionExist_AfterSensitivity = scrollDeltaWithSensitivity[_InternalState.hor0_vert1] != 0f;
-				//bool b = scrollDeltaRaw[_InternalState.hor0_vert1] != 0f && scrollDelta[_InternalState.hor0_vert1] == 0f;
-				if (scrollInChildDirectionExist_AfterSensitivity)
-				{
-					// Scrolled in the child's orientation => forward if child adapter is at boundary
-					if (!CheckForForwardingToParent(scrollDeltaWithSensitivity))
-						return;
-				}
-				else
-				{
-					// Sensivity in child's orientation disabled (it's set to 0) => forward the event to parent without further checks
-					bool scrollInChildDirectionExist_BeforeSensitivity = scrollDeltaWithoutSensitivity[_InternalState.hor0_vert1] != 0f;
-					if (scrollInChildDirectionExist_BeforeSensitivity)
-					{
+        private bool CheckForForwardingToParent(Vector2 delta)
+        {
+            if (this._Adapter.Parameters.ForwardDragSameDirectionAtBoundary)
+            {
+                var deltaInScrollDir      = delta[this._InternalState.hor0_vert1];
+                var abstrDeltaInScrollDir = deltaInScrollDir * this._InternalState.hor1_vertMinus1;
 
-					}
-					else
-					{
-						// No scroll input in the child orientation
+                var acceptedError = 3f; // UI units
+                if (abstrDeltaInScrollDir < 0f)
+                    // Delta would drag the Scroll View in a negative direction (towards end)
+                    return this._Adapter.ContentVirtualInsetFromViewportEnd >= -acceptedError;
+                else
+                    // Postive direction (towards start)
+                    return this._Adapter.ContentVirtualInsetFromViewportStart >= -acceptedError;
+            }
 
-						bool scrollInChildTransversalDirectionExist_AfterSensitivity = scrollDeltaWithSensitivity[1 - _InternalState.hor0_vert1] != 0f;
-						if (scrollInChildTransversalDirectionExist_AfterSensitivity)
-							// Child has priority, since it set a non-zero sensitivity for the received input axis
-							return;
-					}
-				}
-			}
-			else
-			{
-				// When the child ScrollView has its scroll disabled, forward the event to the parent without further checks
-			}
-			_CurrentScrollConsumedByParent = true;
-
-			parentScrollHandler.OnScroll(eventData);
-		}
-
-		bool CheckForForwardingToParent(Vector2 delta)
-		{
-			if (_Adapter.Parameters.ForwardDragSameDirectionAtBoundary)
-			{
-				float deltaInScrollDir = delta[_InternalState.hor0_vert1];
-				float abstrDeltaInScrollDir = deltaInScrollDir * _InternalState.hor1_vertMinus1;
-
-				float acceptedError = 3f; // UI units
-				if (abstrDeltaInScrollDir < 0f)
-				{
-					// Delta would drag the Scroll View in a negative direction (towards end)
-					return _Adapter.ContentVirtualInsetFromViewportEnd >= -acceptedError;
-				}
-				else
-				{
-					// Postive direction (towards start)
-					return _Adapter.ContentVirtualInsetFromViewportStart >= -acceptedError;
-				}
-			}
-
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 }

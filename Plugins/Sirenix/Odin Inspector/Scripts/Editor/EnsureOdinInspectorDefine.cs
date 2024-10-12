@@ -24,34 +24,25 @@ namespace Sirenix.Utilities
         {
             var currentTarget = EditorUserBuildSettings.selectedBuildTargetGroup;
 
-            if (currentTarget == BuildTargetGroup.Unknown)
-            {
-                return;
-            }
+            if (currentTarget == BuildTargetGroup.Unknown) return;
 
             var definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(currentTarget).Trim();
-            var defines = definesString.Split(';');
+            var defines       = definesString.Split(';');
 
-            bool changed = false;
+            var changed = false;
 
             foreach (var define in DEFINES)
             {
                 if (defines.Contains(define) == false)
                 {
-                    if (definesString.EndsWith(";", StringComparison.InvariantCulture) == false)
-                    {
-                        definesString += ";";
-                    }
+                    if (definesString.EndsWith(";", StringComparison.InvariantCulture) == false) definesString += ";";
 
                     definesString += define;
-                    changed = true;
+                    changed       =  true;
                 }
             }
 
-            if (changed)
-            {
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(currentTarget, definesString);
-            }
+            if (changed) PlayerSettings.SetScriptingDefineSymbolsForGroup(currentTarget, definesString);
         }
     }
 

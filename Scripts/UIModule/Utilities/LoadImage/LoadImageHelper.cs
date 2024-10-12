@@ -39,15 +39,13 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         }
 
         private bool inValidKey;
+
         public async UniTask<Sprite> LoadLocalSprite(object key)
         {
             try
             {
                 var sprite = await this.gameAssets.LoadAssetAsync<Sprite>(key);
-                if (sprite != null)
-                {
-                    return sprite;
-                }
+                if (sprite != null) return sprite;
 
                 key = "None_Texture";
             }
@@ -60,7 +58,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
             return await this.gameAssets.LoadAssetAsync<Sprite>(key);
         }
 
-
         public async UniTask LoadSpriteFromUrl(Image imageComponent, string url, Action<Image> onLoadingIconLoaded = null)
         {
             if (this.spriteCache.TryGetValue(url, out var sprite))
@@ -69,10 +66,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
                 return;
             }
 
-            if (this.DownloadingOperation.ContainsKey(url))
-            {
-                return;
-            }
+            if (this.DownloadingOperation.ContainsKey(url)) return;
 
             var loadTextureFromUrlTask = this.DownloadSpriteInternal(url);
             var originPreserveAspect   = imageComponent.preserveAspect;
@@ -103,10 +97,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         {
             if (string.IsNullOrEmpty(url) || texture == null) return;
             var outputSprite = this.CreateSpriteFromTexture((Texture2D)texture);
-            if (!this.spriteCache.ContainsKey(url))
-            {
-                this.spriteCache.Add(url, outputSprite);
-            }
+            if (!this.spriteCache.ContainsKey(url)) this.spriteCache.Add(url, outputSprite);
         }
 
         private async UniTask<Sprite> DownloadSpriteInternal(string url)
@@ -114,10 +105,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
             var texture = await this.LoadTextureFromUrl(url);
             if (texture == null) return null;
             var sprite = this.CreateSpriteFromTexture((Texture2D)texture);
-            if (!this.spriteCache.ContainsKey(url))
-            {
-                this.spriteCache.Add(url, sprite);
-            }
+            if (!this.spriteCache.ContainsKey(url)) this.spriteCache.Add(url, sprite);
 
             return sprite;
         }
@@ -132,10 +120,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
                 return null;
             }
 
-            if (!this.textureCache.ContainsKey(url))
-            {
-                this.textureCache.Add(url, texture);
-            }
+            if (!this.textureCache.ContainsKey(url)) this.textureCache.Add(url, texture);
 
             this.CacheSpriteWhenDownloadTextextComplete(url, texture);
             return texture;
@@ -171,6 +156,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
             return null;
         }
 
-        public Sprite CreateSpriteFromTexture(Texture2D tex) { return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0, 0)); }
+        public Sprite CreateSpriteFromTexture(Texture2D tex)
+        {
+            return Sprite.Create(tex, new(0, 0, tex.width, tex.height), new(0, 0));
+        }
     }
 }

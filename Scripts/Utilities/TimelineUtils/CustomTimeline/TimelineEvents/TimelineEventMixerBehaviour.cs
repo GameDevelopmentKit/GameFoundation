@@ -1,6 +1,8 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimelineEvents {
+namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimelineEvents
+{
     using UnityEngine.Playables;
 
-    public class TimelineEventMixerBehaviour : PlayableBehaviour {
+    public class TimelineEventMixerBehaviour : PlayableBehaviour
+    {
     }
 }
