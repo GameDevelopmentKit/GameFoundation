@@ -14,25 +14,20 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
         public event Action                         ViewDidOpen;
         public event Action                         ViewDidDestroy;
 
-        
         protected         UIScreenTransition ScreenTransition => this.screenTransition;
         protected virtual CanvasGroup        ViewRoot         { get => this.viewRoot; set => this.viewRoot = value; }
         public            RectTransform      RectTransform    { get;                  private set; }
-
 
         #region Unity3D Event
 
         private void Awake()
         {
             // This will allow to set the view in the inspector if we want to
-            if (!this.ViewRoot) this.ViewRoot                 = this.GetComponent<CanvasGroup>();
-            
+            if (!this.ViewRoot) this.ViewRoot = this.GetComponent<CanvasGroup>();
+
             this.screenTransition = this.ScreenTransition ? this.ScreenTransition : this.GetComponent<UIScreenTransition>();
 
-            if (this.ScreenTransition == null)
-            {
-                Debug.LogError($"Can not find UIScreenTransition component in {this.gameObject.name} screen", this);
-            }
+            if (this.ScreenTransition == null) Debug.LogError($"Can not find UIScreenTransition component in {this.gameObject.name} screen", this);
 
             this.RectTransform = this.GetComponent<RectTransform>();
 
@@ -45,7 +40,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
             this.IsReadyToUse = true;
         }
 
-        private void Start() { this.StartUnityEvent(); }
+        private void Start()
+        {
+            this.StartUnityEvent();
+        }
 
         private void OnDestroy()
         {
@@ -57,11 +55,17 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         #region Unity3D Messages propagation
 
-        protected virtual void AwakeUnityEvent() { }
+        protected virtual void AwakeUnityEvent()
+        {
+        }
 
-        protected virtual void StartUnityEvent() { }
+        protected virtual void StartUnityEvent()
+        {
+        }
 
-        protected virtual void OnDestroyUnityEvent() { }
+        protected virtual void OnDestroyUnityEvent()
+        {
+        }
 
         #endregion
 
@@ -82,10 +86,21 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
             this.UpdateAlpha(0);
             this.ViewDidClose?.Invoke();
         }
-        public void Hide() { this.UpdateAlpha(0); }
-        public void Show() { this.UpdateAlpha(1); }
 
-        public void DestroySelf() { Destroy(this.gameObject); }
+        public void Hide()
+        {
+            this.UpdateAlpha(0);
+        }
+
+        public void Show()
+        {
+            this.UpdateAlpha(1);
+        }
+
+        public void DestroySelf()
+        {
+            Destroy(this.gameObject);
+        }
 
         protected void UpdateAlpha(float value)
         {

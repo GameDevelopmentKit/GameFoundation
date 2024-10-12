@@ -25,10 +25,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         {
             this.OnPlaySfx();
             if (this.pressParticles.Count <= 0) return;
-            foreach (var pressParticle in this.pressParticles)
-            {
-                pressParticle.SetActive(true);
-            }
+            foreach (var pressParticle in this.pressParticles) pressParticle.SetActive(true);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -36,19 +33,13 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             if (!this.isActiveHover) return;
             if (!this.GetComponent<Button>().interactable) return;
             if (this.hoverParticles.Count <= 0) return;
-            foreach (var hoverParticle in this.hoverParticles)
-            {
-                hoverParticle.SetActive(true);
-            }
+            foreach (var hoverParticle in this.hoverParticles) hoverParticle.SetActive(true);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             if (this.hoverParticles.Count <= 0) return;
-            foreach (var hoverParticle in this.hoverParticles)
-            {
-                hoverParticle.SetActive(false);
-            }
+            foreach (var hoverParticle in this.hoverParticles) hoverParticle.SetActive(false);
         }
 
         public void SetDefaultParticleActive(bool isActive)
@@ -56,36 +47,27 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             this.SetActiveHover(isActive);
 
             if (this.defaultParticles.Count <= 0) return;
-            foreach (var defaultParticle in this.defaultParticles)
-            {
-                defaultParticle.SetActive(isActive);
-            }
+            foreach (var defaultParticle in this.defaultParticles) defaultParticle.SetActive(isActive);
         }
 
         public void EnableAppearParticle()
         {
             if (this.appearParticles.Count <= 0) return;
-            foreach (var appearParticle in this.appearParticles)
-            {
-                appearParticle.SetActive(true);
-            }
+            foreach (var appearParticle in this.appearParticles) appearParticle.SetActive(true);
         }
 
         public void SetDisableAllFx()
         {
-            foreach (var appearParticle in this.appearParticles)
-            {
-                appearParticle.SetActive(false);
-            }
+            foreach (var appearParticle in this.appearParticles) appearParticle.SetActive(false);
 
             this.SetDefaultParticleActive(false);
 
-            foreach (var pressParticle in this.pressParticles)
-            {
-                pressParticle.SetActive(false);
-            }
+            foreach (var pressParticle in this.pressParticles) pressParticle.SetActive(false);
         }
 
-        public void SetActiveHover(bool pIsActiveHover) { this.isActiveHover = pIsActiveHover; }
+        public void SetActiveHover(bool pIsActiveHover)
+        {
+            this.isActiveHover = pIsActiveHover;
+        }
     }
 }

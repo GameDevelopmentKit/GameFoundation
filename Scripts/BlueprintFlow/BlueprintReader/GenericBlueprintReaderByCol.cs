@@ -19,7 +19,8 @@ namespace BlueprintFlow.BlueprintReader
 
             while (await csv.ReadAsync())
                 if (allMembers.TryGetValue(csv.GetString(0), out var memberInfo))
-                    memberInfo.SetValue(this, CsvHelper.TypeConverterCache.GetConverter(memberInfo.MemberType)
+                    memberInfo.SetValue(this,
+                        CsvHelper.TypeConverterCache.GetConverter(memberInfo.MemberType)
                             .ConvertFromString(csv.GetString(1), memberInfo.MemberType));
         }
     }

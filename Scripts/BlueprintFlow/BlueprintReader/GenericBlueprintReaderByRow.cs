@@ -17,12 +17,16 @@ namespace BlueprintFlow.BlueprintReader
     {
         public readonly string HeaderKey;
 
-        public CsvHeaderKeyAttribute(string headerKey) { this.HeaderKey = headerKey; }
+        public CsvHeaderKeyAttribute(string headerKey)
+        {
+            this.HeaderKey = headerKey;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class NestedBlueprintAttribute : Attribute { }
-
+    public class NestedBlueprintAttribute : Attribute
+    {
+    }
 
     /// <summary>
     ///     An abstraction class for databases with row-based header fields
@@ -32,7 +36,7 @@ namespace BlueprintFlow.BlueprintReader
     public abstract class GenericBlueprintReaderByRow<T1, T2> : BlueprintByRow<T1, T2>, IGenericBlueprintReader
     {
         public new T2 this[T1 key] => this.GetDataById(key);
-        
+
         public virtual async UniTask DeserializeFromCsv(string rawCsv)
         {
             this.CleanUp();
@@ -41,12 +45,14 @@ namespace BlueprintFlow.BlueprintReader
             while (await csv.ReadAsync()) this.Add(csv);
         }
 
-        public virtual List<List<string>> SerializeToRawData() { return this.ToRawData(true); }
+        public virtual List<List<string>> SerializeToRawData()
+        {
+            return this.ToRawData(true);
+        }
 
         public virtual T2 GetDataById(T1 id)
         {
-            if (this.TryGetValue(id, out var result))
-                return result;
+            if (this.TryGetValue(id, out var result)) return result;
 
             throw new InvalidDataException($"Blueprint {this.GetType().Name} doesn't contain Id {id}");
         }
@@ -66,13 +72,17 @@ namespace BlueprintFlow.BlueprintReader
         private readonly BlueprintRecordReader<TRecord> blueprintRecordReader;
 
         // Need to be public due to reflection construction
-        public BlueprintByRow() { this.blueprintRecordReader = new BlueprintRecordReader<TRecord>(this.GetType()); }
+        public BlueprintByRow()
+        {
+            this.blueprintRecordReader = new(this.GetType());
+        }
 
         public void Add(CsvDataReader inputCsv)
         {
             var (hasValue, record) = this.blueprintRecordReader.GetRecord(inputCsv);
             if (hasValue) this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
         }
+
         public List<List<string>> ToRawData(bool containHeader = false)
         {
             var result    = new List<List<string>>();
@@ -86,9 +96,11 @@ namespace BlueprintFlow.BlueprintReader
             return result;
         }
 
-        public void CleanUp() { this.Clear(); }
+        public void CleanUp()
+        {
+            this.Clear();
+        }
     }
-
 
     // Need to be public due to reflection construction
     [Serializable]
@@ -97,7 +109,10 @@ namespace BlueprintFlow.BlueprintReader
         private readonly BlueprintRecordReader<TRecord> blueprintRecordReader;
 
         // Need to be public due to reflection construction
-        public BlueprintByRow() { this.blueprintRecordReader = new BlueprintRecordReader<TRecord>(this.GetType()); }
+        public BlueprintByRow()
+        {
+            this.blueprintRecordReader = new(this.GetType());
+        }
 
         public void Add(CsvDataReader inputCsv)
         {
@@ -118,7 +133,10 @@ namespace BlueprintFlow.BlueprintReader
             return result;
         }
 
-        public void CleanUp() { this.Clear(); }
+        public void CleanUp()
+        {
+            this.Clear();
+        }
     }
 
     public class BlueprintRecordReader
@@ -140,7 +158,7 @@ namespace BlueprintFlow.BlueprintReader
         {
             this.blueprintType      = blueprintType;
             this.recordType         = recordType;
-            this.fieldAndProperties = new List<MemberInfo>();
+            this.fieldAndProperties = new();
             this.Setup();
         }
 
@@ -150,25 +168,21 @@ namespace BlueprintFlow.BlueprintReader
                 (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.recordType, typeof(CsvHeaderKeyAttribute));
 
             //todo will remove later, should place all CsvHeaderKeyAttribute on record class instead of the blueprint class
-            if (csvHeaderKeyAttribute == null)
-            {
-                csvHeaderKeyAttribute = (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.blueprintType, typeof(CsvHeaderKeyAttribute));
-            }
-            
-            if (csvHeaderKeyAttribute != null)
-                this.RequireKey = csvHeaderKeyAttribute.HeaderKey;
+            if (csvHeaderKeyAttribute == null) csvHeaderKeyAttribute = (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.blueprintType, typeof(CsvHeaderKeyAttribute));
+
+            if (csvHeaderKeyAttribute != null) this.RequireKey = csvHeaderKeyAttribute.HeaderKey;
 
             var memberInfos = this.recordType.GetAllFieldAndProperties();
             foreach (var memberInfo in memberInfos)
                 if (this.IsBlueprintCollection(memberInfo.MemberType))
                 {
-                    this.blueprintCollectionMemberInfos ??= new List<MemberInfo>();
+                    this.blueprintCollectionMemberInfos ??= new();
                     this.blueprintCollectionMemberInfos.Add(memberInfo);
                 }
                 else if (this.IsBlueprintNested(memberInfo))
                 {
-                    this.nestedMemberInfoToRecordReader ??= new Dictionary<MemberInfo, BlueprintRecordReader>();
-                    this.nestedMemberInfoToRecordReader.Add(memberInfo, new BlueprintRecordReader(memberInfo.MemberType, memberInfo.MemberType));
+                    this.nestedMemberInfoToRecordReader ??= new();
+                    this.nestedMemberInfoToRecordReader.Add(memberInfo, new(memberInfo.MemberType, memberInfo.MemberType));
                 }
                 else
                 {
@@ -183,8 +197,7 @@ namespace BlueprintFlow.BlueprintReader
 
         public object GetRecord(CsvDataReader inputCsv)
         {
-            if (this.customTypeConverter != null)
-                return this.customTypeConverter.TypeConverter.ConvertFromCsv(inputCsv);
+            if (this.customTypeConverter != null) return this.customTypeConverter.TypeConverter.ConvertFromCsv(inputCsv);
 
             object record = null;
 
@@ -205,14 +218,13 @@ namespace BlueprintFlow.BlueprintReader
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"{this.blueprintType.FullName} - {memberInfo.MemberName}- {e}");
+                        throw new($"{this.blueprintType.FullName} - {memberInfo.MemberName}- {e}");
                     }
-
 
                 if (this.blueprintCollectionMemberInfos != null)
                 {
                     //Create new sub blueprints if exist
-                    this.listBlueprintCollections ??= new List<IBlueprintCollection>();
+                    this.listBlueprintCollections ??= new();
                     this.listBlueprintCollections.Clear();
 
                     foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
@@ -225,12 +237,8 @@ namespace BlueprintFlow.BlueprintReader
                 }
 
                 if (this.nestedMemberInfoToRecordReader != null)
-                {
                     foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
-                    {
                         nestedMemberInfo.SetValue(record, recordReader.GetRecord(inputCsv));
-                    }
-                }
             }
 
             if (this.listBlueprintCollections != null)
@@ -255,19 +263,13 @@ namespace BlueprintFlow.BlueprintReader
             }
 
             if (this.nestedMemberInfoToRecordReader != null)
-            {
                 foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
                 {
                     notCollectionFieldCount += recordReader.fieldAndProperties.Count;
                     var nestedObj              = nestedMemberInfo.GetValue(inputObject);
                     var nestedBlueprintRawData = recordReader.ToRawData(nestedObj, containHeader);
-                    for (int i = 0; i < nestedBlueprintRawData.Count; i++)
-                    {
-                        result[i].AddRange(nestedBlueprintRawData[i]);
-                    }
+                    for (var i = 0; i < nestedBlueprintRawData.Count; i++) result[i].AddRange(nestedBlueprintRawData[i]);
                 }
-            }
-
 
             if (this.blueprintCollectionMemberInfos != null)
                 foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
@@ -276,8 +278,7 @@ namespace BlueprintFlow.BlueprintReader
                     var subBlueprintRawData = subBlueprintData.ToRawData(containHeader);
                     for (var index = 0; index < subBlueprintRawData.Count; index++)
                     {
-                        if (index > result.Count - 1)
-                            result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
+                        if (index > result.Count - 1) result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
 
                         result[index].AddRange(subBlueprintRawData[index]);
                     }
@@ -286,16 +287,22 @@ namespace BlueprintFlow.BlueprintReader
             return result;
         }
 
-        private bool IsBlueprintCollection(Type type) =>
-            (type.IsGenericType || type.BaseType is { IsGenericType: true }) &&
-            typeof(IBlueprintCollection).IsAssignableFrom(type);
+        private bool IsBlueprintCollection(Type type)
+        {
+            return (type.IsGenericType || type.BaseType is { IsGenericType: true }) && typeof(IBlueprintCollection).IsAssignableFrom(type);
+        }
 
-        private bool IsBlueprintNested(MemberInfo typeInfo) => typeInfo.IsDefined(typeof(NestedBlueprintAttribute)) && (typeInfo.MemberType.IsClass || typeInfo.MemberType.IsValueType);
+        private bool IsBlueprintNested(MemberInfo typeInfo)
+        {
+            return typeInfo.IsDefined(typeof(NestedBlueprintAttribute)) && (typeInfo.MemberType.IsClass || typeInfo.MemberType.IsValueType);
+        }
     }
 
     public class BlueprintRecordReader<TRecord> : BlueprintRecordReader
     {
-        public BlueprintRecordReader(Type blueprintType) : base(blueprintType, typeof(TRecord)) { }
+        public BlueprintRecordReader(Type blueprintType) : base(blueprintType, typeof(TRecord))
+        {
+        }
 
         public new (bool, TRecord) GetRecord(CsvDataReader inputCsv)
         {

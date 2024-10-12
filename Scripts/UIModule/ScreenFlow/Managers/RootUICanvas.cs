@@ -17,7 +17,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public Transform RootUIClosedTransform  => this.rootUIClosedTransform;
         public Transform RootUIOverlayTransform => this.rootUIOverlayTransform;
 
-
         private void Awake()
         {
             this.rootUIShowTransform ??= this.transform;

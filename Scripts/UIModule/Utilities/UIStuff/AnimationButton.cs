@@ -22,13 +22,25 @@
             this.button       = this.GetComponent<Button>();
         }
 
-        private void OnEnable() { this.transform.localScale = this.initialScale; }
+        private void OnEnable()
+        {
+            this.transform.localScale = this.initialScale;
+        }
 
-        private void OnDisable() { this.transform.localScale = this.initialScale; }
+        private void OnDisable()
+        {
+            this.transform.localScale = this.initialScale;
+        }
 
-        public void OnPointerDown(PointerEventData eventData) { this.AnimatePressDown(); }
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            this.AnimatePressDown();
+        }
 
-        public void OnPointerUp(PointerEventData eventData) { this.AnimatePopup(); }
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            this.AnimatePopup();
+        }
 
         private void AnimatePressDown()
         {
@@ -42,12 +54,18 @@
             DOTween.Sequence()
                 .Append(this.SetScaleTween(this.maxSize, this.duration))
                 .Append(this.SetScaleTween(this.minSize, this.duration))
-                .Append(this.SetScaleTween(1,            this.duration))
+                .Append(this.SetScaleTween(1, this.duration))
                 .SetUpdate(true);
         }
 
-        private bool IgnoreAnimate() => this.ignoreAnimate || !this.button.interactable;
+        private bool IgnoreAnimate()
+        {
+            return this.ignoreAnimate || !this.button.interactable;
+        }
 
-        private Tween SetScaleTween(float endValue, float animDuration) => this.transform.transform.DOScale(endValue, animDuration).SetEase(Ease.Linear).SetUpdate(true);
+        private Tween SetScaleTween(float endValue, float animDuration)
+        {
+            return this.transform.transform.DOScale(endValue, animDuration).SetEase(Ease.Linear).SetUpdate(true);
+        }
     }
 }

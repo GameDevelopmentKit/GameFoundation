@@ -3,7 +3,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     public class GameQueueActionParam
     {
         #region Action id
-        public const string SHOW_POPUP_LOGIN_REWARD_ACTION   = "ShowPopupLoginRewardAction";
+
+        public const string SHOW_POPUP_LOGIN_REWARD_ACTION = "ShowPopupLoginRewardAction";
 
         public const string PLAY_FILLUP_LEAGUE_PROGRESS_ACTION = "PlayFillUpLeagueProgressAction";
         public const string PLAY_LEADERBOARD_SHORTCUT_ACTION   = "PlayLeaderBoardShortCutAction";

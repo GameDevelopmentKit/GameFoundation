@@ -6,73 +6,67 @@ using UnityEngine.UI;
 
 public class TextSwitcherMixerBehaviour : PlayableBehaviour
 {
-    Color m_DefaultColor;
-    int m_DefaultFontSize;
-    string m_DefaultText;
+    private Color  m_DefaultColor;
+    private int    m_DefaultFontSize;
+    private string m_DefaultText;
 
-    Text m_TrackBinding;
-    bool m_FirstFrameHappened;
+    private Text m_TrackBinding;
+    private bool m_FirstFrameHappened;
 
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
     {
-        m_TrackBinding = playerData as Text;
+        this.m_TrackBinding = playerData as Text;
 
-        if (m_TrackBinding == null)
-            return;
+        if (this.m_TrackBinding == null) return;
 
-        if (!m_FirstFrameHappened)
+        if (!this.m_FirstFrameHappened)
         {
-            m_DefaultColor = m_TrackBinding.color;
-            m_DefaultFontSize = m_TrackBinding.fontSize;
-            m_DefaultText = m_TrackBinding.text;
-            m_FirstFrameHappened = true;
+            this.m_DefaultColor       = this.m_TrackBinding.color;
+            this.m_DefaultFontSize    = this.m_TrackBinding.fontSize;
+            this.m_DefaultText        = this.m_TrackBinding.text;
+            this.m_FirstFrameHappened = true;
         }
 
-        int inputCount = playable.GetInputCount ();
+        var inputCount = playable.GetInputCount();
 
-        Color blendedColor = Color.clear;
-        float blendedFontSize = 0f;
-        float totalWeight = 0f;
-        float greatestWeight = 0f;
-        int currentInputs = 0;
+        var blendedColor    = Color.clear;
+        var blendedFontSize = 0f;
+        var totalWeight     = 0f;
+        var greatestWeight  = 0f;
+        var currentInputs   = 0;
 
-        for (int i = 0; i < inputCount; i++)
+        for (var i = 0; i < inputCount; i++)
         {
-            float inputWeight = playable.GetInputWeight(i);
-            ScriptPlayable<TextSwitcherBehaviour> inputPlayable = (ScriptPlayable<TextSwitcherBehaviour>)playable.GetInput(i);
-            TextSwitcherBehaviour input = inputPlayable.GetBehaviour ();
-            
-            blendedColor += input.color * inputWeight;
+            var inputWeight   = playable.GetInputWeight(i);
+            var inputPlayable = (ScriptPlayable<TextSwitcherBehaviour>)playable.GetInput(i);
+            var input         = inputPlayable.GetBehaviour();
+
+            blendedColor    += input.color * inputWeight;
             blendedFontSize += input.fontSize * inputWeight;
-            totalWeight += inputWeight;
+            totalWeight     += inputWeight;
 
             if (inputWeight > greatestWeight)
             {
-                m_TrackBinding.text = input.text;
-                greatestWeight = inputWeight;
+                this.m_TrackBinding.text = input.text;
+                greatestWeight           = inputWeight;
             }
 
-            if (!Mathf.Approximately (inputWeight, 0f))
-                currentInputs++;
+            if (!Mathf.Approximately(inputWeight, 0f)) currentInputs++;
         }
 
-        m_TrackBinding.color = blendedColor + m_DefaultColor * (1f - totalWeight);
-        m_TrackBinding.fontSize = Mathf.RoundToInt (blendedFontSize + m_DefaultFontSize * (1f - totalWeight));
-        if (currentInputs != 1 && 1f - totalWeight > greatestWeight)
-        {
-            m_TrackBinding.text = m_DefaultText;
-        }
+        this.m_TrackBinding.color    = blendedColor + this.m_DefaultColor * (1f - totalWeight);
+        this.m_TrackBinding.fontSize = Mathf.RoundToInt(blendedFontSize + this.m_DefaultFontSize * (1f - totalWeight));
+        if (currentInputs != 1 && 1f - totalWeight > greatestWeight) this.m_TrackBinding.text = this.m_DefaultText;
     }
 
-    public override void OnPlayableDestroy (Playable playable)
+    public override void OnPlayableDestroy(Playable playable)
     {
-        m_FirstFrameHappened = false;
+        this.m_FirstFrameHappened = false;
 
-        if (m_TrackBinding == null)
-            return;
+        if (this.m_TrackBinding == null) return;
 
-        m_TrackBinding.color = m_DefaultColor;
-        m_TrackBinding.fontSize = m_DefaultFontSize;
-        m_TrackBinding.text = m_DefaultText;
+        this.m_TrackBinding.color    = this.m_DefaultColor;
+        this.m_TrackBinding.fontSize = this.m_DefaultFontSize;
+        this.m_TrackBinding.text     = this.m_DefaultText;
     }
 }

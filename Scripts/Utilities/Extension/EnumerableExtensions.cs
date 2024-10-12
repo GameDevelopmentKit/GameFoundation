@@ -24,10 +24,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
         {
-            foreach (var item in enumerable)
-            {
-                action(item);
-            }
+            foreach (var item in enumerable) action(item);
         }
 
         public static void SafeForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
@@ -102,22 +99,21 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 cache.Add(item);
             }
             while (cache.Count > 0)
-            {
                 foreach (var item in cache)
-                {
                     yield return item;
-                }
-            }
         }
 
         public static (List<T> Matches, List<T> Mismatches) Split<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate)
         {
-            return enumerable.Aggregate((Matches: new List<T>(), Mismatches: new List<T>()), (lists, item) =>
-            {
-                if (predicate(item)) lists.Matches.Add(item);
-                else lists.Mismatches.Add(item);
-                return lists;
-            });
+            return enumerable.Aggregate((Matches: new List<T>(), Mismatches: new List<T>()),
+                (lists, item) =>
+                {
+                    if (predicate(item))
+                        lists.Matches.Add(item);
+                    else
+                        lists.Mismatches.Add(item);
+                    return lists;
+                });
         }
     }
 }

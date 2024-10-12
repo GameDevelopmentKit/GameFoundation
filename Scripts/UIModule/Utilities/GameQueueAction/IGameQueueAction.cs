@@ -17,8 +17,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         void Execute();
         void Complete();
 
-        IGameQueueAction SetState(object state);
-        IGameQueueAction SetDelay(float time);
+        IGameQueueAction SetState(object                  state);
+        IGameQueueAction SetDelay(float                   time);
         IGameQueueAction SetDependActions(params string[] dependActions);
     }
 }

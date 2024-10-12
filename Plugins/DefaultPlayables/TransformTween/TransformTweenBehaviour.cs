@@ -15,67 +15,61 @@ public class TransformTweenBehaviour : PlayableBehaviour
         Custom,
     }
 
-    public Transform startLocation;
-    public Transform endLocation;
-    public bool tweenPosition = true;
-    public bool tweenRotation = true;
-    public TweenType tweenType;
+    public Transform      startLocation;
+    public Transform      endLocation;
+    public bool           tweenPosition = true;
+    public bool           tweenRotation = true;
+    public TweenType      tweenType;
     public AnimationCurve customCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-    
-    public Vector3 startingPosition;
+
+    public Vector3    startingPosition;
     public Quaternion startingRotation = Quaternion.identity;
 
-    AnimationCurve m_LinearCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
-    AnimationCurve m_DecelerationCurve = new AnimationCurve
-    (
+    private AnimationCurve m_LinearCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+    private AnimationCurve m_DecelerationCurve = new(
         new Keyframe(0f, 0f, -k_RightAngleInRads, k_RightAngleInRads),
         new Keyframe(1f, 1f, 0f, 0f)
     );
-    AnimationCurve m_HarmonicCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-    const float k_RightAngleInRads = Mathf.PI * 0.5f;
+    private AnimationCurve m_HarmonicCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-    public override void PrepareFrame (Playable playable, FrameData info)
+    private const float k_RightAngleInRads = Mathf.PI * 0.5f;
+
+    public override void PrepareFrame(Playable playable, FrameData info)
     {
-        if (startLocation)
+        if (this.startLocation)
         {
-            startingPosition = startLocation.position;
-            startingRotation = startLocation.rotation;
+            this.startingPosition = this.startLocation.position;
+            this.startingRotation = this.startLocation.rotation;
         }
     }
 
-    public float EvaluateCurrentCurve (float time)
+    public float EvaluateCurrentCurve(float time)
     {
-        if (tweenType == TweenType.Custom && !IsCustomCurveNormalised ())
+        if (this.tweenType == TweenType.Custom && !this.IsCustomCurveNormalised())
         {
             Debug.LogError("Custom Curve is not normalised.  Curve must start at 0,0 and end at 1,1.");
             return 0f;
         }
-        
-        switch (tweenType)
+
+        switch (this.tweenType)
         {
-            case TweenType.Linear:
-                return m_LinearCurve.Evaluate (time);
-            case TweenType.Deceleration:
-                return m_DecelerationCurve.Evaluate (time);
-            case TweenType.Harmonic:
-                return m_HarmonicCurve.Evaluate (time);
-            default:
-                return customCurve.Evaluate (time);
+            case TweenType.Linear:       return this.m_LinearCurve.Evaluate(time);
+            case TweenType.Deceleration: return this.m_DecelerationCurve.Evaluate(time);
+            case TweenType.Harmonic:     return this.m_HarmonicCurve.Evaluate(time);
+            default:                     return this.customCurve.Evaluate(time);
         }
     }
 
-    bool IsCustomCurveNormalised ()
+    private bool IsCustomCurveNormalised()
     {
-        if (!Mathf.Approximately (customCurve[0].time, 0f))
-            return false;
-        
-        if (!Mathf.Approximately (customCurve[0].value, 0f))
-            return false;
-        
-        if (!Mathf.Approximately (customCurve[customCurve.length - 1].time, 1f))
-            return false;
-        
-        return Mathf.Approximately (customCurve[customCurve.length - 1].value, 1f);
+        if (!Mathf.Approximately(this.customCurve[0].time, 0f)) return false;
+
+        if (!Mathf.Approximately(this.customCurve[0].value, 0f)) return false;
+
+        if (!Mathf.Approximately(this.customCurve[this.customCurve.length - 1].time, 1f)) return false;
+
+        return Mathf.Approximately(this.customCurve[this.customCurve.length - 1].value, 1f);
     }
 }

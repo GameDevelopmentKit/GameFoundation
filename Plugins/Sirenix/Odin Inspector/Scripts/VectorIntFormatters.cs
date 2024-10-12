@@ -8,6 +8,7 @@
 
 [assembly: Sirenix.Serialization.RegisterFormatter(typeof(Sirenix.Serialization.Vector2IntFormatter))]
 [assembly: Sirenix.Serialization.RegisterFormatter(typeof(Sirenix.Serialization.Vector3IntFormatter))]
+
 namespace Sirenix.Serialization
 {
     using UnityEngine;
@@ -27,8 +28,8 @@ namespace Sirenix.Serialization
         /// <param name="reader">The reader to use.</param>
         protected override void Read(ref Vector2Int value, IDataReader reader)
         {
-            value.x = Vector2IntFormatter.Serializer.ReadValue(reader);
-            value.y = Vector2IntFormatter.Serializer.ReadValue(reader);
+            value.x = Serializer.ReadValue(reader);
+            value.y = Serializer.ReadValue(reader);
         }
 
         /// <summary>
@@ -38,8 +39,8 @@ namespace Sirenix.Serialization
         /// <param name="writer">The writer to use.</param>
         protected override void Write(ref Vector2Int value, IDataWriter writer)
         {
-            Vector2IntFormatter.Serializer.WriteValue(value.x, writer);
-            Vector2IntFormatter.Serializer.WriteValue(value.y, writer);
+            Serializer.WriteValue(value.x, writer);
+            Serializer.WriteValue(value.y, writer);
         }
     }
 
@@ -58,9 +59,9 @@ namespace Sirenix.Serialization
         /// <param name="reader">The reader to use.</param>
         protected override void Read(ref Vector3Int value, IDataReader reader)
         {
-            value.x = Vector3IntFormatter.Serializer.ReadValue(reader);
-            value.y = Vector3IntFormatter.Serializer.ReadValue(reader);
-            value.z = Vector3IntFormatter.Serializer.ReadValue(reader);
+            value.x = Serializer.ReadValue(reader);
+            value.y = Serializer.ReadValue(reader);
+            value.z = Serializer.ReadValue(reader);
         }
 
         /// <summary>
@@ -70,9 +71,9 @@ namespace Sirenix.Serialization
         /// <param name="writer">The writer to use.</param>
         protected override void Write(ref Vector3Int value, IDataWriter writer)
         {
-            Vector3IntFormatter.Serializer.WriteValue(value.x, writer);
-            Vector3IntFormatter.Serializer.WriteValue(value.y, writer);
-            Vector3IntFormatter.Serializer.WriteValue(value.z, writer);
+            Serializer.WriteValue(value.x, writer);
+            Serializer.WriteValue(value.y, writer);
+            Serializer.WriteValue(value.z, writer);
         }
     }
 }

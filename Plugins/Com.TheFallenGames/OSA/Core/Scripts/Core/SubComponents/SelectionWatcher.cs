@@ -4,59 +4,57 @@ using UnityEngine.EventSystems;
 
 namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
-	public class SelectionWatcher
-	{
-		public delegate void NewObjectSelectedDelegate(GameObject lastGO, GameObject newGO);
+    public class SelectionWatcher
+    {
+        public delegate void NewObjectSelectedDelegate(GameObject lastGO, GameObject newGO);
 
-		public event NewObjectSelectedDelegate NewObjectSelected;
+        public event NewObjectSelectedDelegate NewObjectSelected;
 
-		public bool Enabled { get; set; }
-		GameObject LastSelectedObject { get; set; }
+        public  bool       Enabled            { get; set; }
+        private GameObject LastSelectedObject { get; set; }
 
-		public void OnUpdate()
-		{
-			CheckNewObjectSelection();
-		}
+        public void OnUpdate()
+        {
+            this.CheckNewObjectSelection();
+        }
 
-		bool CheckNewObjectSelection()
-		{
-			var last = LastSelectedObject;
-			if (!Enabled)
-			{
-				LastSelectedObject = null;
-				return last != LastSelectedObject;
-			}
+        private bool CheckNewObjectSelection()
+        {
+            var last = this.LastSelectedObject;
+            if (!this.Enabled)
+            {
+                this.LastSelectedObject = null;
+                return last != this.LastSelectedObject;
+            }
 
-			var curSelected = GetCurrentlySelectedObject();
-			if (!curSelected)
-			{
-				LastSelectedObject = null;
-				return last != LastSelectedObject;
-			}
+            var curSelected = this.GetCurrentlySelectedObject();
+            if (!curSelected)
+            {
+                this.LastSelectedObject = null;
+                return last != this.LastSelectedObject;
+            }
 
-			if (LastSelectedObject != curSelected)
-			{
-				if (curSelected)
-					OnNewObjectSelected(curSelected);
+            if (this.LastSelectedObject != curSelected)
+            {
+                if (curSelected) this.OnNewObjectSelected(curSelected);
 
-				LastSelectedObject = curSelected;
-				return true;
-			}
+                this.LastSelectedObject = curSelected;
+                return true;
+            }
 
-			return false;
-		}
+            return false;
+        }
 
-		GameObject GetCurrentlySelectedObject()
-		{
-			if (!EventSystem.current)
-				return null;
+        private GameObject GetCurrentlySelectedObject()
+        {
+            if (!EventSystem.current) return null;
 
-			return EventSystem.current.currentSelectedGameObject;
-		}
+            return EventSystem.current.currentSelectedGameObject;
+        }
 
-		void OnNewObjectSelected(GameObject curSelected)
-		{
-			NewObjectSelected(LastSelectedObject, curSelected);
-		}
-	}
+        private void OnNewObjectSelected(GameObject curSelected)
+        {
+            this.NewObjectSelected(this.LastSelectedObject, curSelected);
+        }
+    }
 }

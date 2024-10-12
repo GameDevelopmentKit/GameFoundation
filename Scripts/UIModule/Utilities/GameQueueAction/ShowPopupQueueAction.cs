@@ -8,7 +8,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     {
         private readonly IScreenManager screenManager;
 
-        public ShowPopupQueueAction( IScreenManager screenManager, string actionId, string location) : base(actionId, location) { this.screenManager = screenManager; }
+        public ShowPopupQueueAction(IScreenManager screenManager, string actionId, string location) : base(actionId, location)
+        {
+            this.screenManager = screenManager;
+        }
 
         protected override async void Action()
         {
@@ -18,17 +21,20 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.Complete();
         }
     }
-    
+
     public class ShowPopupQueueAction<TPresenter, TModel> : BaseQueueAction where TPresenter : IScreenPresenter<TModel>
     {
         private readonly IScreenManager screenManager;
 
-        public ShowPopupQueueAction(IScreenManager screenManager, string actionId, string location) : base(actionId, location) { this.screenManager = screenManager; }
+        public ShowPopupQueueAction(IScreenManager screenManager, string actionId, string location) : base(actionId, location)
+        {
+            this.screenManager = screenManager;
+        }
 
         protected override async void Action()
         {
             base.Action();
-            var screenPresenter = await this.screenManager.OpenScreen<TPresenter,TModel>((TModel)this.state);
+            var screenPresenter = await this.screenManager.OpenScreen<TPresenter, TModel>((TModel)this.state);
             await UniTask.WaitUntil(() => screenPresenter.ScreenStatus != ScreenStatus.Opened);
             this.Complete();
         }

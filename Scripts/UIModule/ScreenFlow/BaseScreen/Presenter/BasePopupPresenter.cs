@@ -55,10 +55,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public async UniTask OpenView(TModel model)
         {
-            if (model != null)
-            {
-                this.Model = model;
-            }
+            if (model != null) this.Model = model;
 
             await this.OpenViewAsync();
         }
@@ -66,18 +63,17 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public override async UniTask OpenViewAsync()
         {
             if (this.Model != null)
-            {
                 await this.BindData(this.Model);
-            }
             else
-            {
                 this.Logger.Warning($"{this.GetType().Name} don't have Model!!!");
-            }
 
             await base.OpenViewAsync();
         }
 
-        public sealed override UniTask BindData() { return UniTask.CompletedTask; }
+        public sealed override UniTask BindData()
+        {
+            return UniTask.CompletedTask;
+        }
 
         public abstract UniTask BindData(TModel popupModel);
     }

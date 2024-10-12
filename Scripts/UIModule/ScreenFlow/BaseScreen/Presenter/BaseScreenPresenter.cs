@@ -31,9 +31,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.View     = (TView)viewInstance;
             this.ScreenId = ScreenHelper.GetScreenId<TView>();
             if (this.View.IsReadyToUse)
-            {
                 this.OnViewReady();
-            }
             else
             {
                 await UniTask.WaitUntil(() => this.View.IsReadyToUse);
@@ -53,7 +51,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.View.RectTransform.SetParent(parent);
         }
 
-        public Transform GetViewParent()  { return this.View.RectTransform.parent; }
+        public Transform GetViewParent()
+        {
+            return this.View.RectTransform.parent;
+        }
+
         public Transform CurrentTransform => this.View.RectTransform;
 
         public abstract UniTask BindData();
@@ -78,7 +80,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.Dispose();
         }
 
-        public virtual async void CloseView() { await this.CloseViewAsync(); }
+        public virtual async void CloseView()
+        {
+            await this.CloseViewAsync();
+        }
 
         public virtual void HideView()
         {
@@ -98,15 +103,27 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.View.DestroySelf();
         }
 
-        public virtual void OnOverlap()      { }
-        public         int  ViewSiblingIndex { get => this.View.RectTransform.GetSiblingIndex(); set => this.View.RectTransform.SetSiblingIndex(value); }
+        public virtual void OnOverlap()
+        {
+        }
+
+        public int ViewSiblingIndex { get => this.View.RectTransform.GetSiblingIndex(); set => this.View.RectTransform.SetSiblingIndex(value); }
 
         #endregion
 
-        protected virtual void OnViewReady()     { this.View.ViewDidDestroy += this.OnViewDestroyed; }
-        protected virtual void OnViewDestroyed() { this.SignalBus.Fire(new ScreenSelfDestroyedSignal() { ScreenPresenter = this }); }
+        protected virtual void OnViewReady()
+        {
+            this.View.ViewDidDestroy += this.OnViewDestroyed;
+        }
 
-        public virtual void Dispose() { }
+        protected virtual void OnViewDestroyed()
+        {
+            this.SignalBus.Fire(new ScreenSelfDestroyedSignal() { ScreenPresenter = this });
+        }
+
+        public virtual void Dispose()
+        {
+        }
     }
 
     public abstract class BaseScreenPresenter<TView, TModel> : BaseScreenPresenter<TView>, IScreenPresenter<TModel> where TView : IScreenView
@@ -120,27 +137,23 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public override async UniTask OpenViewAsync()
         {
             if (this.Model != null)
-            {
                 await this.BindData(this.Model);
-            }
             else
-            {
                 this.Logger.Warning($"{this.GetType().Name} don't have Model!!!");
-            }
             await base.OpenViewAsync();
         }
 
         public virtual async UniTask OpenView(TModel model)
         {
-            if (model != null)
-            {
-                this.Model = model;
-            }
+            if (model != null) this.Model = model;
 
             await this.OpenViewAsync();
         }
 
-        public sealed override UniTask BindData() { return UniTask.CompletedTask; }
+        public sealed override UniTask BindData()
+        {
+            return UniTask.CompletedTask;
+        }
 
         public abstract UniTask BindData(TModel screenModel);
     }

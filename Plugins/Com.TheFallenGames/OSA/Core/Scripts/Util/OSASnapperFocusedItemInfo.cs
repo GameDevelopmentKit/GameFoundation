@@ -11,10 +11,9 @@ namespace Com.ForbiddenByte.OSA.Util
     /// Utility providing a way of getting the currently focused item by a <see cref="Snapper8"/> on OSA. 
     /// Attach it to the same game object containing your OSA implementation.
     /// </summary>
-	public class OSASnapperFocusedItemInfo : MonoBehaviour
+    public class OSASnapperFocusedItemInfo : MonoBehaviour
     {
-        [SerializeField]
-        Snapper8 _Snapper = null;
+        [SerializeField] private Snapper8 _Snapper = null;
 
         /// <summary>Fired when the currently focused item changes. It passes the actual ViewsHolder instance as <see cref="AbstractViewsHolder"/> - simply cast it to your known VH type, if needed</summary>
         public FocusedItemChangedUnityEvent FocusedItemChanged;
@@ -25,65 +24,56 @@ namespace Com.ForbiddenByte.OSA.Util
         /// <summary>
         /// The "ItemIndex" of the focused item, if any. -1 if none focused
         /// </summary>
-        public int FocusedIndex { get { return _FocusedIndex; } }
+        public int FocusedIndex => this._FocusedIndex;
 
-        int _FocusedIndex = -1;
-        IOSA _OSA;
+        private int  _FocusedIndex = -1;
+        private IOSA _OSA;
 
-
-        void Start()
-		{
-            _OSA = GetComponent(typeof(IOSA)) as IOSA;
-			_OSA.ItemsRefreshed += OnItemsRefreshed;
+        private void Start()
+        {
+            this._OSA                =  this.GetComponent(typeof(IOSA)) as IOSA;
+            this._OSA.ItemsRefreshed += this.OnItemsRefreshed;
         }
 
-		void Update()
+        private void Update()
         {
             float _;
-            var vh = _Snapper.GetMiddleVH(out _);
-            int newIndex;
+            var   vh = this._Snapper.GetMiddleVH(out _);
+            int   newIndex;
             if (vh == null)
                 newIndex = -1;
             else
                 newIndex = vh.ItemIndex;
 
-            if (_FocusedIndex != newIndex)
-                ChangeFocusedItem(vh);
+            if (this._FocusedIndex != newIndex) this.ChangeFocusedItem(vh);
         }
 
-        void OnItemsRefreshed(int _, int __)
+        private void OnItemsRefreshed(int _, int __)
         {
-            if (_FocusedIndex != -1)
-                ChangeFocusedItem(null);
+            if (this._FocusedIndex != -1) this.ChangeFocusedItem(null);
         }
 
-        void ChangeFocusedItem(AbstractViewsHolder vh)
+        private void ChangeFocusedItem(AbstractViewsHolder vh)
         {
             if (vh == null)
-                _FocusedIndex = -1;
+                this._FocusedIndex = -1;
             else
-                _FocusedIndex = vh.ItemIndex;
+                this._FocusedIndex = vh.ItemIndex;
 
             // Normally, it's only 1 item with this index, so this is called only once in the loop
-            if (FocusedItemChanged != null)
-                FocusedItemChanged.Invoke(vh);
+            if (this.FocusedItemChanged != null) this.FocusedItemChanged.Invoke(vh);
 
-            if (FocusedItemIndexChanged != null)
-                FocusedItemIndexChanged.Invoke(_FocusedIndex);
+            if (this.FocusedItemIndexChanged != null) this.FocusedItemIndexChanged.Invoke(this._FocusedIndex);
         }
-
 
         [Serializable]
         public class FocusedItemChangedUnityEvent : UnityEvent<AbstractViewsHolder>
         {
-
         }
-
 
         [Serializable]
         public class FocusedItemIndexChangedUnityEvent : UnityEvent<int>
         {
-
         }
     }
 }

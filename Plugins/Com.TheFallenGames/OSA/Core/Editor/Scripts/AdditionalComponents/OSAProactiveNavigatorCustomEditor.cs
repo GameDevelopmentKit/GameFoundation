@@ -3,34 +3,33 @@ using Com.ForbiddenByte.OSA.AdditionalComponents;
 
 namespace Com.ForbiddenByte.OSA.Editor.Util
 {
-	[CustomEditor(typeof(OSAProactiveNavigator), true)]
-	public class OSAProactiveNavigatorCustomEditor : UnityEditor.Editor
+    [CustomEditor(typeof(OSAProactiveNavigator), true)]
+    public class OSAProactiveNavigatorCustomEditor : UnityEditor.Editor
     {
-        SerializedProperty _Selectables;
-        SerializedProperty _OnNoSelectableSpecified;
-        SerializedProperty _JoystickInputMultiplier;
-        SerializedProperty _ArrowsInputMultiplier;
-        SerializedProperty _LoopAtExtremity;
+        private SerializedProperty _Selectables;
+        private SerializedProperty _OnNoSelectableSpecified;
+        private SerializedProperty _JoystickInputMultiplier;
+        private SerializedProperty _ArrowsInputMultiplier;
+        private SerializedProperty _LoopAtExtremity;
 
-
-        void OnEnable()
+        private void OnEnable()
         {
-            _Selectables = serializedObject.FindProperty("_Selectables");
-            _OnNoSelectableSpecified = serializedObject.FindProperty("_OnNoSelectableSpecified");
-            _JoystickInputMultiplier = serializedObject.FindProperty("_JoystickInputMultiplier");
-            _ArrowsInputMultiplier = serializedObject.FindProperty("_ArrowsInputMultiplier");
-            _LoopAtExtremity = serializedObject.FindProperty("_LoopAtExtremity");
+            this._Selectables             = this.serializedObject.FindProperty("_Selectables");
+            this._OnNoSelectableSpecified = this.serializedObject.FindProperty("_OnNoSelectableSpecified");
+            this._JoystickInputMultiplier = this.serializedObject.FindProperty("_JoystickInputMultiplier");
+            this._ArrowsInputMultiplier   = this.serializedObject.FindProperty("_ArrowsInputMultiplier");
+            this._LoopAtExtremity         = this.serializedObject.FindProperty("_LoopAtExtremity");
         }
 
         public override void OnInspectorGUI()
         {
-            serializedObject.Update();
-            EditorGUILayout.PropertyField(_Selectables, true);
-            EditorGUILayout.PropertyField(_OnNoSelectableSpecified);
-            EditorGUILayout.PropertyField(_JoystickInputMultiplier);
-            EditorGUILayout.PropertyField(_ArrowsInputMultiplier);
-            EditorGUILayout.PropertyField(_LoopAtExtremity);
-            serializedObject.ApplyModifiedProperties();
+            this.serializedObject.Update();
+            EditorGUILayout.PropertyField(this._Selectables, true);
+            EditorGUILayout.PropertyField(this._OnNoSelectableSpecified);
+            EditorGUILayout.PropertyField(this._JoystickInputMultiplier);
+            EditorGUILayout.PropertyField(this._ArrowsInputMultiplier);
+            EditorGUILayout.PropertyField(this._LoopAtExtremity);
+            this.serializedObject.ApplyModifiedProperties();
         }
     }
 }

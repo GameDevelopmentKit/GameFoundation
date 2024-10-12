@@ -111,10 +111,7 @@ namespace GameFoundation.Signals
 
         void ILateDisposable.LateDispose()
         {
-            foreach (var subscription in this.subscriptions.Values)
-            {
-                subscription.Dispose();
-            }
+            foreach (var subscription in this.subscriptions.Values) subscription.Dispose();
             this.subscriptions.Clear();
             this.isDisposed = true;
         }

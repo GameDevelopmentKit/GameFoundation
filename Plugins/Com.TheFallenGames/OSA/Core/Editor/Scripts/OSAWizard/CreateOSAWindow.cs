@@ -10,213 +10,202 @@ using UnityEditor;
 
 namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
 {
-	public class CreateOSAWindow : BaseOSAWindow<CreateOSAWindow.Parameters>
-	{
-		public static bool IsOpen() { return Resources.FindObjectsOfTypeAll(typeof(CreateOSAWindow)).Length > 0; }
+    public class CreateOSAWindow : BaseOSAWindow<CreateOSAWindow.Parameters>
+    {
+        public static bool IsOpen()
+        {
+            return Resources.FindObjectsOfTypeAll(typeof(CreateOSAWindow)).Length > 0;
+        }
 
-		public static void Open(Parameters windowParams)
-		{
-			CreateOSAWindow windowInstance = GetWindow<CreateOSAWindow>();
-			windowInstance.InitWithNewParams(windowParams);
-		}
+        public static void Open(Parameters windowParams)
+        {
+            var windowInstance = GetWindow<CreateOSAWindow>();
+            windowInstance.InitWithNewParams(windowParams);
+        }
 
-		public static bool Validate(bool forOpeningWindow, out string reasonIfNotValid)
-		{
-			if (!BaseValidate(out reasonIfNotValid))
-				return false;
+        public static bool Validate(bool forOpeningWindow, out string reasonIfNotValid)
+        {
+            if (!BaseValidate(out reasonIfNotValid)) return false;
 
-			if (forOpeningWindow)
-			{
-				// Commented: it's safe to re-open the create window
-				//if (IsOpen())
-				//{
-				//	reasonIfNotValid = "Creation window already opened";
-				//	return false;
-				//}
-				if (InitOSAWindow.IsOpen())
-				{
-					reasonIfNotValid = "Initialization window already opened";
-					return false;
-				}
-			}
+            if (forOpeningWindow)
+                // Commented: it's safe to re-open the create window
+                //if (IsOpen())
+                //{
+                //	reasonIfNotValid = "Creation window already opened";
+                //	return false;
+                //}
+                if (InitOSAWindow.IsOpen())
+                {
+                    reasonIfNotValid = "Initialization window already opened";
+                    return false;
+                }
 
-			if (Selection.gameObjects.Length != 1)
-			{
-				reasonIfNotValid = "One UI Game Object needs to be selected";
-				return false;
-			}
+            if (Selection.gameObjects.Length != 1)
+            {
+                reasonIfNotValid = "One UI Game Object needs to be selected";
+                return false;
+            }
 
-			var asRT = Selection.gameObjects[0].transform as RectTransform;
-			if (!asRT)
-			{
-				reasonIfNotValid = "The selected Game Object doesn't have a RectTransform component";
-				return false;
-			}
+            var asRT = Selection.gameObjects[0].transform as RectTransform;
+            if (!asRT)
+            {
+                reasonIfNotValid = "The selected Game Object doesn't have a RectTransform component";
+                return false;
+            }
 
-			if (asRT.rect.height <= 0f)
-			{
-				reasonIfNotValid = "The selected Game Object has an invalid height";
-				return false;
-			}
+            if (asRT.rect.height <= 0f)
+            {
+                reasonIfNotValid = "The selected Game Object has an invalid height";
+                return false;
+            }
 
-			if (asRT.rect.width <= 0f)
-			{
-				reasonIfNotValid = "The selected Game Object has an invalid width";
-				return false;
-			}
+            if (asRT.rect.width <= 0f)
+            {
+                reasonIfNotValid = "The selected Game Object has an invalid width";
+                return false;
+            }
 
-			// Requiring an EventSystem in scenes to make sure the UI is interactive, but allowing prefab-editing scenes to not have one, since these are just temporary scenes
-			if (!CWiz.IsInsidePrefabEditingScene() && !GameObject.FindObjectOfType<EventSystem>())
-			{
-				reasonIfNotValid = "No EventSystem was found in the scene. Please add one";
-				return false;
-			}
+            // Requiring an EventSystem in scenes to make sure the UI is interactive, but allowing prefab-editing scenes to not have one, since these are just temporary scenes
+            if (!CWiz.IsInsidePrefabEditingScene() && !FindObjectOfType<EventSystem>())
+            {
+                reasonIfNotValid = "No EventSystem was found in the scene. Please add one";
+                return false;
+            }
 
-			reasonIfNotValid = null;
-			var tr = asRT as Transform;
-			while (tr)
-			{
-				if (!(tr is RectTransform))
-				{
-					reasonIfNotValid =
-							"Found a non-RectTransform intermediary parent before first Canvas ancestor. " +
-							"Your hierarchy may be something like: ...Canvas->...->Transform->...-><SelectedObject>. " +
-							"There should only be RectTransforms between the selected object and its most close Canvas ancestor";
-					return false;
-				}
+            reasonIfNotValid = null;
+            var tr = asRT as Transform;
+            while (tr)
+            {
+                if (!(tr is RectTransform))
+                {
+                    reasonIfNotValid =
+                        "Found a non-RectTransform intermediary parent before first Canvas ancestor. " + "Your hierarchy may be something like: ...Canvas->...->Transform->...-><SelectedObject>. " + "There should only be RectTransforms between the selected object and its most close Canvas ancestor";
+                    return false;
+                }
 
-				var c = tr.GetComponent<Canvas>();
-				if (c)
-					return true;
+                var c = tr.GetComponent<Canvas>();
+                if (c) return true;
 
-				tr = tr.parent;
-			}
+                tr = tr.parent;
+            }
 
-			reasonIfNotValid = "Couldn't find a Canvas in the parents of the selected Game Object";
-			return false;
-		}
+            reasonIfNotValid = "Couldn't find a Canvas in the parents of the selected Game Object";
+            return false;
+        }
 
+        protected override void InitWithNewParams(Parameters windowParams)
+        {
+            base.InitWithNewParams(windowParams);
 
-		protected override void InitWithNewParams(Parameters windowParams)
-		{
-			base.InitWithNewParams(windowParams);
+            this._WindowParams.ResetValues();
+        }
 
-			_WindowParams.ResetValues();
-		}
+        protected override void OnGUIImpl()
+        {
+            this.DrawSectionTitle("Create ScrollView");
 
-		protected override void OnGUIImpl()
-		{
-			DrawSectionTitle("Create ScrollView");
+            string             titleToSet;
+            UnityEngine.Object obj = null;
+            if (Selection.gameObjects.Length == 0)
+                titleToSet = "(Select a parent)";
+            else if (Selection.gameObjects.Length > 1)
+                titleToSet = "(Select only 1 parent)";
+            else
+            {
+                obj        = Selection.gameObjects[0];
+                titleToSet = "ScrollView's parent";
+            }
+            this.DrawObjectWithPath(this._BoxGUIStyle, titleToSet, obj);
 
-			string titleToSet;
-			UnityEngine.Object obj = null;
-			if (Selection.gameObjects.Length == 0)
-			{
-				titleToSet = "(Select a parent)";
-			}
-			else if (Selection.gameObjects.Length > 1)
-			{
-				titleToSet = "(Select only 1 parent)";
-			}
-			else
-			{
-				obj = Selection.gameObjects[0];
-				titleToSet = "ScrollView's parent";
-			}
-			DrawObjectWithPath(_BoxGUIStyle, titleToSet, obj);
+            EditorGUI.BeginDisabledGroup(!obj);
+            {
+                // Orientation
+                EditorGUILayout.BeginVertical(this._BoxGUIStyle);
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUILayout.LabelField("Orientation:", CWiz.LABEL_WIDTH);
+                        this._WindowParams.isHorizontal = GUILayout.SelectionGrid(this._WindowParams.Hor0_Vert1, new string[] { "Horizontal", "Vertical" }, 2, CWiz.VALUE_WIDTH) == 0 ? true : false;
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUI.EndDisabledGroup();
 
-			EditorGUI.BeginDisabledGroup(!obj);
-			{
-				// Orientation
-				EditorGUILayout.BeginVertical(_BoxGUIStyle);
-				{
-					EditorGUILayout.BeginHorizontal();
-					{
-						EditorGUILayout.LabelField("Orientation:", CWiz.LABEL_WIDTH);
-						_WindowParams.isHorizontal = GUILayout.SelectionGrid(_WindowParams.Hor0_Vert1, new string[] { "Horizontal", "Vertical" }, 2, CWiz.VALUE_WIDTH) == 0 ? true : false;
-					}
-					EditorGUILayout.EndHorizontal();
-				}
-				EditorGUILayout.EndVertical();
-			}
-			EditorGUI.EndDisabledGroup();
+            EditorGUILayout.Space();
 
-			EditorGUILayout.Space();
+            // Create button
+            this.DrawSubmitButon("Create");
+        }
 
-			// Create button
-			DrawSubmitButon("Create");
-		}
+        protected override void GetErrorAndWarning(out string error, out string warning)
+        {
+            warning = null;
+            Validate(false, out error);
+        }
 
-		protected override void GetErrorAndWarning(out string error, out string warning)
-		{
-			warning = null;
-			Validate(false, out error);
-		}
+        protected override void OnSubmitClicked()
+        {
+            // Commented: this is already checked and if there's and error, the submit button is disabled
+            //string reasonIfNotValid;
+            //// Validate again, to make sure the hierarchy wasn't modified
+            //if (!Validate(out reasonIfNotValid))
+            //{
+            //	DemosUtil.ShowCouldNotExecuteCommandNotification(this);
+            //	Debug.Log("OSA: Could not create ScrollView on the selected object: " + reasonIfNotValid);
+            //	return;
+            //}
+            var parentGO = Selection.gameObjects[0];
+            var go       = new GameObject("OSA", typeof(RectTransform));
+            var image    = go.AddComponent<Image>();
+            var c        = Color.white;
+            c.a         = .13f;
+            image.color = c;
+            var scrollRect   = go.AddComponent<ScrollRect>();
+            var scrollRectRT = scrollRect.transform as RectTransform;
+            var parentRT     = parentGO.transform as RectTransform;
+            scrollRectRT.anchorMin = new(Mathf.Clamp01(CWiz.SPACE_FOR_SCROLLBAR / parentRT.rect.width), Mathf.Clamp01(CWiz.SPACE_FOR_SCROLLBAR / parentRT.rect.height));
+            scrollRectRT.anchorMax = Vector2.one - scrollRectRT.anchorMin;
+            scrollRectRT.sizeDelta = Vector2.zero;
 
-		protected override void OnSubmitClicked()
-		{
-			// Commented: this is already checked and if there's and error, the submit button is disabled
-			//string reasonIfNotValid;
-			//// Validate again, to make sure the hierarchy wasn't modified
-			//if (!Validate(out reasonIfNotValid))
-			//{
-			//	DemosUtil.ShowCouldNotExecuteCommandNotification(this);
-			//	Debug.Log("OSA: Could not create ScrollView on the selected object: " + reasonIfNotValid);
-			//	return;
-			//}
-			var parentGO = Selection.gameObjects[0];
-			GameObject go = new GameObject("OSA", typeof(RectTransform));
-			var image = go.AddComponent<Image>();
-			var c = Color.white;
-			c.a = .13f;
-			image.color = c;
-			var scrollRect = go.AddComponent<ScrollRect>();
-			var scrollRectRT = scrollRect.transform as RectTransform;
-			var parentRT = parentGO.transform as RectTransform;
-			scrollRectRT.anchorMin = new Vector2(Mathf.Clamp01(CWiz.SPACE_FOR_SCROLLBAR / parentRT.rect.width), Mathf.Clamp01(CWiz.SPACE_FOR_SCROLLBAR / parentRT.rect.height));
-			scrollRectRT.anchorMax = Vector2.one - scrollRectRT.anchorMin;
-			scrollRectRT.sizeDelta = Vector2.zero;
+            GameObjectUtility.SetParentAndAlign(go, parentGO);
+            var viewportRT = this.CreateRTAndSetParent("Viewport", go.transform);
+            viewportRT.gameObject.AddComponent<Image>();
+            viewportRT.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+            var contentRT = this.CreateRTAndSetParent("Content", viewportRT);
 
-			GameObjectUtility.SetParentAndAlign(go, parentGO);
-			var viewportRT = CreateRTAndSetParent("Viewport", go.transform);
-			viewportRT.gameObject.AddComponent<Image>();
-			viewportRT.gameObject.AddComponent<Mask>().showMaskGraphic = false;
-			var contentRT = CreateRTAndSetParent("Content", viewportRT);
+            scrollRect.content = contentRT;
+            #if SCROLLRECT_HAS_VIEWPORT
+            scrollRect.viewport = viewportRT;
+            #endif
+            Canvas.ForceUpdateCanvases();
 
-			scrollRect.content = contentRT;
-#if SCROLLRECT_HAS_VIEWPORT
-			scrollRect.viewport = viewportRT;
-#endif
-			Canvas.ForceUpdateCanvases();
+            // Register the creation in the undo system
+            Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
+            Selection.activeObject = go;
 
-			// Register the creation in the undo system
-			Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
-			Selection.activeObject = go;
+            this.ConfigureScrollView(scrollRect, viewportRT);
+            this.Close();
 
-			ConfigureScrollView(scrollRect, viewportRT);
-			Close();
+            var validationResult = InitOSAWindow.Validate(false, scrollRect, false); // checkForWindows=false, becase this windows is already opened
+            if (!validationResult.isValid)
+            {
+                CWiz.ShowCouldNotExecuteCommandNotification(this);
+                Debug.LogError("OSA: Unexpected internal error while trying to initialize. Details(next line):\n" + validationResult.reasonIfNotValid + "\n" + validationResult.ToString());
+                return;
+            }
 
-			var validationResult = InitOSAWindow.Validate(false, scrollRect, false); // checkForWindows=false, becase this windows is already opened
-			if (!validationResult.isValid)
-			{
-				CWiz.ShowCouldNotExecuteCommandNotification(this);
-				Debug.LogError("OSA: Unexpected internal error while trying to initialize. Details(next line):\n" + validationResult.reasonIfNotValid + "\n" + validationResult.ToString());
-				return;
-			}
+            InitOSAWindow.Open(InitOSAWindow.Parameters.Create(validationResult, false, true, true, true));
+        }
 
-			InitOSAWindow.Open(InitOSAWindow.Parameters.Create(validationResult, false, true, true, true));
-		}
-
-
-		[Serializable]
-		public class Parameters : BaseWindowParams
-		{
-
-			public override void ResetValues()
-			{
-				base.ResetValues();
-
-			}
-		}
-	}
+        [Serializable]
+        public class Parameters : BaseWindowParams
+        {
+            public override void ResetValues()
+            {
+                base.ResetValues();
+            }
+        }
+    }
 }

@@ -8,9 +8,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
     public class BaseMechSFX : MonoBehaviour
     {
         [SerializeField] protected string sfxName;
-    
-        [Header("For Tool Set sfx")]
-        [SerializeField] private Object obj;
+
+        [Header("For Tool Set sfx")] [SerializeField] private Object obj;
 
         protected void OnPlaySfx()
         {

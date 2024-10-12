@@ -6,7 +6,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     {
         private PlayableDirector timeline;
 
-        public PlayTimelineQueueAction(PlayableDirector timeline, string actionId, string location) : base(actionId, location) { this.timeline = timeline; }
+        public PlayTimelineQueueAction(PlayableDirector timeline, string actionId, string location) : base(actionId, location)
+        {
+            this.timeline = timeline;
+        }
 
         public override void Execute()
         {
@@ -14,7 +17,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             base.Execute();
         }
 
-        private void OnTimelineStop(PlayableDirector obj) { this.Complete(); }
+        private void OnTimelineStop(PlayableDirector obj)
+        {
+            this.Complete();
+        }
 
         protected override void Action()
         {

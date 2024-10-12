@@ -15,31 +15,27 @@ namespace Sirenix.OdinInspector.Editor
     using UnityEditor;
     using UnityEditor.Build;
 
-#if UNITY_2018_1_OR_NEWER
+    #if UNITY_2018_1_OR_NEWER
     using UnityEditor.Build.Reporting;
-#endif
+    #endif
 
     public class AssemblyImportSettingsAutomation :
-#if UNITY_2018_1_OR_NEWER
+        #if UNITY_2018_1_OR_NEWER
         IPreprocessBuildWithReport
-#else
+    #else
         IPreprocessBuild
-#endif
+    #endif
     {
-
-        public int callbackOrder { get { return -1500; } }
+        public int callbackOrder => -1500;
 
         private static void ConfigureImportSettings()
         {
-            if (EditorOnlyModeConfig.Instance.IsEditorOnlyModeEnabled() || ImportSettingsConfig.Instance.AutomateBeforeBuild == false)
-            {
-                return;
-            }
+            if (EditorOnlyModeConfig.Instance.IsEditorOnlyModeEnabled() || ImportSettingsConfig.Instance.AutomateBeforeBuild == false) return;
 
-            var assemblyDir = new DirectoryInfo(SirenixAssetPaths.SirenixAssembliesPath).FullName;
+            var assemblyDir       = new DirectoryInfo(SirenixAssetPaths.SirenixAssembliesPath).FullName;
             var projectAssetsPath = Directory.GetCurrentDirectory().TrimEnd('\\', '/');
 
-            var isPackage = PathUtilities.HasSubDirectory(new DirectoryInfo(projectAssetsPath), new DirectoryInfo(assemblyDir)) == false;
+            var isPackage = PathUtilities.HasSubDirectory(new(projectAssetsPath), new(assemblyDir)) == false;
 
             var aotDirPath = assemblyDir + "NoEmitAndNoEditor/";
             var jitDirPath = assemblyDir + "NoEditor/";
@@ -52,30 +48,22 @@ namespace Sirenix.OdinInspector.Editor
 
             foreach (var file in aotDir.GetFiles("*.dll"))
             {
-                string path = file.FullName;
+                var path = file.FullName;
                 if (isPackage)
-                {
                     path = SirenixAssetPaths.SirenixAssembliesPath.TrimEnd('\\', '/') + "/" + path.Substring(assemblyDir.Length);
-                }
                 else
-                {
                     path = path.Substring(projectAssetsPath.Length + 1);
-                }
 
                 aotAssemblies.Add(path);
             }
 
             foreach (var file in jitDir.GetFiles("*.dll"))
             {
-                string path = file.FullName;
+                var path = file.FullName;
                 if (isPackage)
-                {
                     path = SirenixAssetPaths.SirenixAssembliesPath.TrimEnd('\\', '/') + "/" + path.Substring(assemblyDir.Length);
-                }
                 else
-                {
                     path = path.Substring(projectAssetsPath.Length + 1);
-                }
 
                 jitAssemblies.Add(path);
             }
@@ -107,27 +95,23 @@ namespace Sirenix.OdinInspector.Editor
 
         private static void ApplyImportSettings(BuildTarget platform, string[] assemblyPaths, OdinAssemblyImportSettings importSettings)
         {
-            for (int i = 0; i < assemblyPaths.Length; i++)
-            {
-                AssemblyImportSettingsUtilities.SetAssemblyImportSettings(platform, assemblyPaths[i], importSettings);
-            }
+            for (var i = 0; i < assemblyPaths.Length; i++) AssemblyImportSettingsUtilities.SetAssemblyImportSettings(platform, assemblyPaths[i], importSettings);
         }
 
-#if UNITY_2018_1_OR_NEWER
+        #if UNITY_2018_1_OR_NEWER
 
         void IPreprocessBuildWithReport.OnPreprocessBuild(BuildReport report)
         {
             ConfigureImportSettings();
         }
 
-#else
-
+        #else
         void IPreprocessBuild.OnPreprocessBuild(BuildTarget target, string path)
         {
             ConfigureImportSettings();
         }
 
-#endif
+        #endif
     }
 }
 

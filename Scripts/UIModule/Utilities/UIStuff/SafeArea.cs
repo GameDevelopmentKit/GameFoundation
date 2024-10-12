@@ -14,13 +14,11 @@ namespace UIModule.Utilities.UIStuff
     /// </summary>
     public class SafeArea : MonoBehaviour
     {
-        [SerializeField]
-        private bool conformX = true; // Conform to screen safe area on X-axis (default true, disable to ignore)
+        [SerializeField] private bool conformX = true; // Conform to screen safe area on X-axis (default true, disable to ignore)
 
-        [SerializeField]
-        private bool conformY = true; // Conform to screen safe area on Y-axis (default true, disable to ignore)
+        [SerializeField] private bool conformY = true; // Conform to screen safe area on Y-axis (default true, disable to ignore)
 
-        private Rect          lastSafeArea = new Rect(0, 0, 0, 0);
+        private Rect          lastSafeArea = new(0, 0, 0, 0);
         private RectTransform panel;
 
         private void Awake()
@@ -45,8 +43,7 @@ namespace UIModule.Utilities.UIStuff
         {
             var safeArea = this.GetSafeArea();
 
-            if (safeArea != this.lastSafeArea)
-                this.ApplySafeArea(safeArea);
+            if (safeArea != this.lastSafeArea) this.ApplySafeArea(safeArea);
         }
 
         private Rect GetSafeArea()

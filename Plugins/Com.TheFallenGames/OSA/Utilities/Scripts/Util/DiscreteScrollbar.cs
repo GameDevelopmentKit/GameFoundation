@@ -10,96 +10,98 @@ using Com.ForbiddenByte.OSA.Core;
 
 namespace Com.ForbiddenByte.OSA.Util
 {
-	/// <summary>
-	/// Important note: if used with ScrollbarFixer8 (which is true in the most cases, 
-	/// make sure <see cref="ScrollbarFixer8.minSize"/> is not too small
-	/// </summary>
-	public class DiscreteScrollbar : MonoBehaviour 
-	{
-		public RectTransform slotPrefab;
-		public RectTransform slotsParent;
-		public UnityIntEvent OnSlotSelected;
-		public Func<int> getItemsCountFunc;
+    /// <summary>
+    /// Important note: if used with ScrollbarFixer8 (which is true in the most cases, 
+    /// make sure <see cref="ScrollbarFixer8.minSize"/> is not too small
+    /// </summary>
+    public class DiscreteScrollbar : MonoBehaviour
+    {
+        public RectTransform slotPrefab;
+        public RectTransform slotsParent;
+        public UnityIntEvent OnSlotSelected;
+        public Func<int>     getItemsCountFunc;
 
-		Scrollbar _Scrollbar;
-		RectTransform[] slots = new RectTransform[0];
-		RectTransform _ScrollbarPanelRT;
-		IScrollRectProxy _ScrollRectProxy;
-		int _OneIfVert_ZeroIfHor;
+        private Scrollbar        _Scrollbar;
+        private RectTransform[]  slots = new RectTransform[0];
+        private RectTransform    _ScrollbarPanelRT;
+        private IScrollRectProxy _ScrollRectProxy;
+        private int              _OneIfVert_ZeroIfHor;
 
-		const int MAX_COUNT = 100;
-		bool _UpdatePending;
+        private const int  MAX_COUNT = 100;
+        private       bool _UpdatePending;
 
+        private void Awake()
+        {
+            // Get in parent, but ignore self
+            this._ScrollRectProxy = this.transform.parent.GetComponentInParent<IScrollRectProxy>();
+            if (this._ScrollRectProxy == null) throw new OSAException(this.GetType().Name + ": No IScrollRectProxy component found in parent");
 
-		void Awake()
-		{
-			// Get in parent, but ignore self
-			_ScrollRectProxy = transform.parent.GetComponentInParent<IScrollRectProxy>();
-			if (_ScrollRectProxy == null)
-				throw new OSAException(GetType().Name + ": No IScrollRectProxy component found in parent");
+            this._Scrollbar           = this.GetComponent<Scrollbar>();
+            this._ScrollbarPanelRT    = this._Scrollbar.transform as RectTransform;
+            this._OneIfVert_ZeroIfHor = this._ScrollRectProxy.IsHorizontal ? 0 : 1;
+        }
 
-			_Scrollbar = GetComponent<Scrollbar>();
-			_ScrollbarPanelRT = _Scrollbar.transform as RectTransform;
-			_OneIfVert_ZeroIfHor = _ScrollRectProxy.IsHorizontal ? 0 : 1;
+        private void OnEnable()
+        {
+            this._UpdatePending = false;
+        }
 
-		}
+        public void OnScrollbarSizeChanged()
+        {
+            this.StartCoroutine(this.UpdateSize());
+        }
 
-		void OnEnable() { _UpdatePending = false; }
+        private IEnumerator UpdateSize()
+        {
+            while (this._UpdatePending) // wait for prev request to complete
+                yield return null;
 
-		public void OnScrollbarSizeChanged()
-		{
-			StartCoroutine(UpdateSize());
-		}
+            this._UpdatePending = true;
+            yield return null;
 
-		IEnumerator UpdateSize()
-		{
-			while (_UpdatePending) // wait for prev request to complete
-				yield return null;
+            if (this.getItemsCountFunc == null) throw new OSAException(this.GetType().Name + "getItemsCountFunc==null. Please specify a count provider");
 
-			_UpdatePending = true;
-			yield return null;
+            this._UpdatePending = true;
+            var count = this.getItemsCountFunc();
+            if (count > MAX_COUNT) throw new OSAException(this.GetType().Name + ": count is " + count + ". Bigger than MAX_COUNT=" + MAX_COUNT + ". Are you sure you want to use a discrete scrollbar?");
 
-			if (getItemsCountFunc == null)
-				throw new OSAException(GetType().Name + "getItemsCountFunc==null. Please specify a count provider");
+            this.Rebuild(count);
+            this._UpdatePending = false;
+        }
 
-			_UpdatePending = true;
-			int count = getItemsCountFunc(); 
-			if (count > MAX_COUNT)
-				throw new OSAException(GetType().Name + ": count is " + count + ". Bigger than MAX_COUNT=" + MAX_COUNT + ". Are you sure you want to use a discrete scrollbar?");
+        public void Rebuild(int numSlots)
+        {
+            this.slotPrefab.gameObject.SetActive(true);
 
-			Rebuild(count);
-			_UpdatePending = false;
-		}
+            // Clear prev
+            if (this.slots != null)
+                foreach (var slot in this.slots)
+                    Destroy(slot.gameObject);
 
-		public void Rebuild(int numSlots)
-		{
-			slotPrefab.gameObject.SetActive(true);
+            // Add new
+            this.slots = new RectTransform[numSlots];
+            float sizesCumu       = 0;
+            var   slotSize        = this._ScrollbarPanelRT.rect.size[this._OneIfVert_ZeroIfHor] / numSlots; // not using the handle's size because of rounding errors with higher <numSlots>
+            var   edgeToInsetFrom = this._OneIfVert_ZeroIfHor == 1 ? RectTransform.Edge.Top : RectTransform.Edge.Left;
+            for (var i = 0; i < numSlots; i++)
+            {
+                var slot = (Instantiate(this.slotPrefab.gameObject) as GameObject).GetComponent<RectTransform>();
+                this.slots[i] = slot;
+                slot.SetParent(this.slotsParent, false);
+                slot.SetInsetAndSizeFromParentEdgeWithCurrentAnchors(edgeToInsetFrom, sizesCumu, slotSize);
+                sizesCumu += slotSize;
+                var copyOfI = i;
+                slot.GetComponentInChildren<Button>().onClick.AddListener(() =>
+                {
+                    if (this.OnSlotSelected != null) this.OnSlotSelected.Invoke(copyOfI);
+                });
+            }
+            this.slotPrefab.gameObject.SetActive(false);
+        }
 
-			// Clear prev
-			if (slots != null)
-				foreach (var slot in slots)
-					Destroy(slot.gameObject);
-
-			// Add new
-			slots = new RectTransform[numSlots];
-			float sizesCumu = 0;
-			float slotSize = _ScrollbarPanelRT.rect.size[_OneIfVert_ZeroIfHor] / numSlots; // not using the handle's size because of rounding errors with higher <numSlots>
-			RectTransform.Edge edgeToInsetFrom = _OneIfVert_ZeroIfHor == 1 ? RectTransform.Edge.Top : RectTransform.Edge.Left;
-			for (int i = 0; i < numSlots; i++)
-			{
-				var slot = (Instantiate(slotPrefab.gameObject) as GameObject).GetComponent<RectTransform>();
-				slots[i] = slot;
-				slot.SetParent(slotsParent, false);
-				slot.SetInsetAndSizeFromParentEdgeWithCurrentAnchors(edgeToInsetFrom, sizesCumu, slotSize);
-				sizesCumu += slotSize;
-				int copyOfI = i;
-				slot.GetComponentInChildren<Button>().onClick.AddListener(() => { if (OnSlotSelected != null) OnSlotSelected.Invoke(copyOfI); });
-			}
-			slotPrefab.gameObject.SetActive(false);
-		}
-
-
-		[Serializable]
-		public class UnityIntEvent : UnityEvent<int> { }
-	}
+        [Serializable]
+        public class UnityIntEvent : UnityEvent<int>
+        {
+        }
+    }
 }

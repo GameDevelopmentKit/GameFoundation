@@ -8,6 +8,7 @@
     {
         protected override string ConfigName { get; } = "BlueprintConfig";
         protected override string ConfigPath { get; } = "GameConfigs";
+
         public override VisualElement LoadView()
         {
             var blueprintConfigTemplate = EditorGUIUtility.Load("Packages/com.gdk.core/Scripts/BlueprintFlow/Editor/BlueprintConfigEditor.uxml") as VisualTreeAsset;

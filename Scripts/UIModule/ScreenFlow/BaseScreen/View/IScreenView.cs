@@ -21,7 +21,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
         public void          Hide();
         public void          Show();
 
-
         public void DestroySelf();
 
         public event Action ViewDidClose;

@@ -17,143 +17,123 @@ namespace Com.ForbiddenByte.OSA.Util.PullToRefresh
     public class PullToRefreshRotateGizmo : PullToRefreshGizmo
     {
 #pragma warning disable 0649
-		[SerializeField]
-		[FormerlySerializedAs("_StartingPoint")]
-		RectTransform _PullFromStartInitial = null;
-		[SerializeField]
-		[FormerlySerializedAs("_EndingPoint")]
-		RectTransform _PullFromStartTarget = null;
+        [SerializeField] [FormerlySerializedAs("_StartingPoint")] private RectTransform _PullFromStartInitial = null;
+        [SerializeField] [FormerlySerializedAs("_EndingPoint")]   private RectTransform _PullFromStartTarget  = null;
 
-		[SerializeField]
-		RectTransform _PullFromEndInitial = null;
-		[SerializeField]
-		RectTransform _PullFromEndTarget = null;
+        [SerializeField] private RectTransform _PullFromEndInitial = null;
+        [SerializeField] private RectTransform _PullFromEndTarget  = null;
 #pragma warning restore 0649
 
-		//[Tooltip("When pulling is done from the end, this gizmo will also appear at the end, not at the start. " +
-		//	"\nThe gizmo's position in this case is inferred using the parent's size and _StartingPoint & _EndingPoint ")]
-		//[SerializeField]
-		//bool _AllowAppearingFromEnd = true;
+        //[Tooltip("When pulling is done from the end, this gizmo will also appear at the end, not at the start. " +
+        //	"\nThe gizmo's position in this case is inferred using the parent's size and _StartingPoint & _EndingPoint ")]
+        //[SerializeField]
+        //bool _AllowAppearingFromEnd = true;
 
-        [SerializeField]
-        [Range(0f, 1f)]
-        float _ExcessPullRotationDamping = .95f;
+        [SerializeField] [Range(0f, 1f)] private float _ExcessPullRotationDamping = .95f;
 
-		[SerializeField]
-		float _AutoRotationDegreesPerSec = 200;
+        [SerializeField] private float _AutoRotationDegreesPerSec = 200;
 
-		[Tooltip("Will also interpolate its own scale between the Initial's and Target's scale")]
-		[SerializeField]
-		bool _ScaleWithTarget = true;
+        [Tooltip("Will also interpolate its own scale between the Initial's and Target's scale")] [SerializeField] private bool _ScaleWithTarget = true;
 
-		[Tooltip("If true, it won't be affected by Time.timeScale")]
-		[SerializeField]
-		bool _UseUnscaledTime = true;
+        [Tooltip("If true, it won't be affected by Time.timeScale")] [SerializeField] private bool _UseUnscaledTime = true;
 
-		bool _WaitingForManualHide;
-
+        private bool _WaitingForManualHide;
 
         /// <summary>Calls base implementation + resets the rotation to default each time is assigned, regardless if true or false</summary>
         public override bool IsShown
         {
-            get { return base.IsShown; }
-
+            get => base.IsShown;
             set
             {
                 base.IsShown = value;
 
                 // Reset to default rotation
-                transform.localRotation = Quaternion.Euler(_InitialLocalRotation);
+                this.transform.localRotation = Quaternion.Euler(this._InitialLocalRotation);
 
-                if (!value)
-                    _WaitingForManualHide = false;
+                if (!value) this._WaitingForManualHide = false;
             }
         }
 
+        private Vector3   _InitialLocalRotation, _InitialLocalScale;
+        private Transform _TR;
 
-
-        Vector3 _InitialLocalRotation, _InitialLocalScale;
-		Transform _TR;
-
-
-		public override void Awake()
+        public override void Awake()
         {
             base.Awake();
-			_TR = transform;
+            this._TR = this.transform;
 
-			_InitialLocalRotation = _TR.localRotation.eulerAngles;
-			_InitialLocalScale = _TR.localScale;
+            this._InitialLocalRotation = this._TR.localRotation.eulerAngles;
+            this._InitialLocalScale    = this._TR.localScale;
         }
 
-
-        void Update()
+        private void Update()
         {
-            if (_WaitingForManualHide)
-            {
-                SetLocalZRotation((_TR.localEulerAngles.z - (_UseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime) * _AutoRotationDegreesPerSec) % 360);
-            }
+            if (this._WaitingForManualHide) this.SetLocalZRotation((this._TR.localEulerAngles.z - (this._UseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime) * this._AutoRotationDegreesPerSec) % 360);
         }
 
-		public override void OnPull(double power)
+        public override void OnPull(double power)
         {
             base.OnPull(power);
 
-			double powerAbs = Math.Abs(power);
-			int powerSign = Math.Sign(power);
-			float powerAbsClamped01 = Mathf.Clamp01((float)powerAbs);
-            float excess = Mathf.Max(0f, (float)powerAbs - 1f);
+            var powerAbs          = Math.Abs(power);
+            var powerSign         = Math.Sign(power);
+            var powerAbsClamped01 = Mathf.Clamp01((float)powerAbs);
+            var excess            = Mathf.Max(0f, (float)powerAbs - 1f);
 
-            float dampedExcess = excess * (1f - _ExcessPullRotationDamping);
+            var dampedExcess = excess * (1f - this._ExcessPullRotationDamping);
 
-            SetLocalZRotation((_InitialLocalRotation.z - 360 * (powerAbsClamped01 + dampedExcess)) % 360);
+            this.SetLocalZRotation((this._InitialLocalRotation.z - 360 * (powerAbsClamped01 + dampedExcess)) % 360);
 
-			//_TR.position = LerpUnclamped(_StartingPoint.position, _EndingPoint.position, power <= 1f ? (power - (1f - power/2)*(1f-power/2)) : (1 - 1/(1 + excess) ));
-			Vector3 start, end;
-			Vector3 scaleStart, scaleEnd;
-			if (powerSign < 0 && _PullFromEndInitial && _PullFromEndTarget)
-			{
-				start = _PullFromEndInitial.position;
-				end = _PullFromEndTarget.position;
-				scaleStart = _PullFromEndInitial.localScale;
-				scaleEnd = _PullFromEndTarget.localScale;
-			}
-			else
-			{
-				start = _PullFromStartInitial.position;
-				end = _PullFromStartTarget.position;
-				scaleStart = _PullFromStartInitial.localScale;
-				scaleEnd = _PullFromStartTarget.localScale;
-			}
+            //_TR.position = LerpUnclamped(_StartingPoint.position, _EndingPoint.position, power <= 1f ? (power - (1f - power/2)*(1f-power/2)) : (1 - 1/(1 + excess) ));
+            Vector3 start,      end;
+            Vector3 scaleStart, scaleEnd;
+            if (powerSign < 0 && this._PullFromEndInitial && this._PullFromEndTarget)
+            {
+                start      = this._PullFromEndInitial.position;
+                end        = this._PullFromEndTarget.position;
+                scaleStart = this._PullFromEndInitial.localScale;
+                scaleEnd   = this._PullFromEndTarget.localScale;
+            }
+            else
+            {
+                start      = this._PullFromStartInitial.position;
+                end        = this._PullFromStartTarget.position;
+                scaleStart = this._PullFromStartInitial.localScale;
+                scaleEnd   = this._PullFromStartTarget.localScale;
+            }
 
-			var t01Unclamped = 2 - 2 / (1 + powerAbsClamped01);
-			_TR.position = LerpUnclamped(start, end, t01Unclamped);
-			if (_ScaleWithTarget)
-				_TR.localScale = LerpUnclamped(scaleStart, scaleEnd, t01Unclamped);
-			else
-				_TR.localScale = _InitialLocalScale;
+            var t01Unclamped = 2 - 2 / (1 + powerAbsClamped01);
+            this._TR.position = this.LerpUnclamped(start, end, t01Unclamped);
+            if (this._ScaleWithTarget)
+                this._TR.localScale = this.LerpUnclamped(scaleStart, scaleEnd, t01Unclamped);
+            else
+                this._TR.localScale = this._InitialLocalScale;
         }
 
-		public override void OnRefreshCancelled()
+        public override void OnRefreshCancelled()
         {
             base.OnRefreshCancelled();
 
-            _WaitingForManualHide = false;
+            this._WaitingForManualHide = false;
         }
 
-		public override void OnRefreshed(bool autoHide)
+        public override void OnRefreshed(bool autoHide)
         {
             base.OnRefreshed(autoHide);
 
-            _WaitingForManualHide = !autoHide;
+            this._WaitingForManualHide = !autoHide;
         }
 
-        Vector3 LerpUnclamped(Vector3 from, Vector3 to, float t) { return (1f - t) * from + t * to ; }
-
-        void SetLocalZRotation(float zRotation)
+        private Vector3 LerpUnclamped(Vector3 from, Vector3 to, float t)
         {
-            var rotE = _TR.localRotation.eulerAngles;
-            rotE.z = zRotation;
-			_TR.localRotation = Quaternion.Euler(rotE);
+            return (1f - t) * from + t * to;
+        }
+
+        private void SetLocalZRotation(float zRotation)
+        {
+            var rotE = this._TR.localRotation.eulerAngles;
+            rotE.z                 = zRotation;
+            this._TR.localRotation = Quaternion.Euler(rotE);
         }
     }
 }

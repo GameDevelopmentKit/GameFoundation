@@ -8,22 +8,35 @@ namespace GameFoundation.Scripts.Utilities.Extension
     //</summary>
     public static class ExtensionMethod
     {
-        public static string ToJson<T>(this T obj) { return JsonConvert.SerializeObject(obj); }
+        public static string ToJson<T>(this T obj)
+        {
+            return JsonConvert.SerializeObject(obj);
+        }
 
         public static string GetPath(this Transform current)
         {
-            if (current.parent == null)
-                return current.name;
+            if (current.parent == null) return current.name;
             return current.parent.GetPath() + "/" + current.name;
         }
 
-        public static string Path(this Component component) { return GetPath(component.transform); }
+        public static string Path(this Component component)
+        {
+            return GetPath(component.transform);
+        }
 
-        public static string Path(this GameObject gameObject) { return GetPath(gameObject.transform); }
+        public static string Path(this GameObject gameObject)
+        {
+            return GetPath(gameObject.transform);
+        }
 
-        public static Vector2 AsUnityVector2(this System.Numerics.Vector2 v) { return new Vector2(v.X, v.Y); }
+        public static Vector2 AsUnityVector2(this System.Numerics.Vector2 v)
+        {
+            return new(v.X, v.Y);
+        }
 
-        public static Vector3 AsUnityVector3(this System.Numerics.Vector3 v) { return new Vector3(v.X, v.Y, v.Z); }
-        
+        public static Vector3 AsUnityVector3(this System.Numerics.Vector3 v)
+        {
+            return new(v.X, v.Y, v.Z);
+        }
     }
 }

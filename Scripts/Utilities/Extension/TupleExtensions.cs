@@ -103,12 +103,13 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static (List<TFirst>, List<TSecond>) Unzip<TFirst, TSecond>(this IEnumerable<(TFirst, TSecond)> tuples)
         {
-            return tuples.Aggregate((new List<TFirst>(), new List<TSecond>()), (lists, tuple) =>
-            {
-                lists.Item1.Add(tuple.Item1);
-                lists.Item2.Add(tuple.Item2);
-                return lists;
-            });
+            return tuples.Aggregate((new List<TFirst>(), new List<TSecond>()),
+                (lists, tuple) =>
+                {
+                    lists.Item1.Add(tuple.Item1);
+                    lists.Item2.Add(tuple.Item2);
+                    return lists;
+                });
         }
 
         public static (List<(TFirst, TSecond)> Matches, List<(TFirst, TSecond)> Mismatches) Split<TFirst, TSecond>(this IEnumerable<(TFirst, TSecond)> tuples, Func<TFirst, TSecond, bool> predicate)

@@ -22,7 +22,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         #if UNITY_EDITOR
         private void OnValidate()
         {
-            var activeScene  = SceneManager.GetActiveScene();
+            var activeScene = SceneManager.GetActiveScene();
             var sceneContext = this.GetComponent<SceneContext>();
             if (!sceneContext.AutoInjectInHierarchy)
             {

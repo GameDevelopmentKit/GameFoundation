@@ -7,10 +7,10 @@ using UnityEngine.Timeline;
 public class NavMeshAgentControlBehaviour : PlayableBehaviour
 {
     public Transform destination;
-    public bool destinationSet;
+    public bool      destinationSet;
 
-    public override void OnPlayableCreate (Playable playable)
+    public override void OnPlayableCreate(Playable playable)
     {
-        destinationSet = false;
+        this.destinationSet = false;
     }
 }

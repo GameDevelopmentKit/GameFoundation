@@ -13,7 +13,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         {
             return source.Subscribe(text, (x, t) => t.text = x);
         }
-        
+
         public static IDisposable SubscribeToText<T>(this ReactiveProperty<T> source, TextMeshProUGUI text)
         {
             return source.Subscribe(text, (x, t) => t.text = x.ToString());

@@ -22,9 +22,9 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var baseType = typeof(T);
             var baseAsm  = Assembly.GetAssembly(baseType);
             return AppDomain.CurrentDomain.GetAssemblies()
-                            .Where(asm => !asm.IsDynamic && (!sameAssembly || asm == baseAsm))
-                            .SelectMany(GetTypesSafely)
-                            .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type));
+                .Where(asm => !asm.IsDynamic && (!sameAssembly || asm == baseAsm))
+                .SelectMany(GetTypesSafely)
+                .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type));
         }
 
         public static IEnumerable<FieldInfo> GetRecursiveFields(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
@@ -38,7 +38,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static IEnumerable<Type> GetTypesSafely(Assembly assembly)
         {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             IEnumerable<Type> types;
             try
             {
@@ -50,9 +50,9 @@ namespace GameFoundation.Scripts.Utilities.Extension
             }
 
             return types;
-#else
+            #else
                     return assembly.GetTypes();
-#endif
+            #endif
         }
     }
 }

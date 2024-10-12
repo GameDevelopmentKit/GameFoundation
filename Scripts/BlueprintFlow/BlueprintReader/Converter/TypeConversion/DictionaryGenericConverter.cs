@@ -8,6 +8,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     {
         private readonly char delimiterItem;
         private readonly char delimiterPair;
+
         public DictionaryGenericConverter(char delimiterItem = ',', char delimiterPair = ':')
         {
             this.delimiterItem = delimiterItem;
@@ -25,7 +26,8 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
                 var list = new List<string>();
                 foreach (DictionaryEntry itemData in (IDictionary)value)
-                    list.Add(string.Join(this.delimiterPair, keyConverter.ConvertToString(itemData.Key, keyType),
+                    list.Add(string.Join(this.delimiterPair,
+                        keyConverter.ConvertToString(itemData.Key, keyType),
                         valueConverter.ConvertToString(itemData.Value, valueType)));
 
                 return string.Join(this.delimiterItem, list);
@@ -33,7 +35,6 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
             return null;
         }
-
 
         public override object ConvertFromString(string text, Type typeInfo)
         {

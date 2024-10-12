@@ -9,15 +9,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
     {
         [SerializeField] private PlayableDirector introAnimation;
         [SerializeField] private PlayableDirector outroAnimation;
-        
-        [Tooltip("if lockInput = true, disable event system while anim is running and otherwise.")]
-        [SerializeField] private bool             lockInput = true;
+
+        [Tooltip("if lockInput = true, disable event system while anim is running and otherwise.")] [SerializeField] private bool lockInput = true;
 
         public DirectorUpdateMode DirectorUpdateMode = DirectorUpdateMode.UnscaledGameTime;
 
         private EventSystem             eventSystem;
         private UniTaskCompletionSource animationTask;
-        
+
         public PlayableDirector IntroAnimation => this.introAnimation;
         public PlayableDirector OutroAnimation => this.outroAnimation;
 
@@ -55,19 +54,15 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private UniTask PlayAnim(PlayableDirector anim)
         {
-            if (!anim.playableAsset || this.animationTask?.Task.Status == UniTaskStatus.Pending)
-            {
-                return UniTask.CompletedTask;
-            }
-            
-            this.animationTask = new UniTaskCompletionSource();
+            if (!anim.playableAsset || this.animationTask?.Task.Status == UniTaskStatus.Pending) return UniTask.CompletedTask;
+
+            this.animationTask = new();
             this.SetLookInput(false);
 
             anim.Play();
             return this.animationTask.Task;
-           
         }
-        
+
         private void OnAnimComplete(PlayableDirector obj)
         {
             this.animationTask.TrySetResult();
@@ -76,10 +71,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void SetLookInput(bool value)
         {
-            if (this.lockInput && this.eventSystem != null)
-            {
-                this.eventSystem.enabled = value;
-            }
+            if (this.lockInput && this.eventSystem != null) this.eventSystem.enabled = value;
         }
     }
 }

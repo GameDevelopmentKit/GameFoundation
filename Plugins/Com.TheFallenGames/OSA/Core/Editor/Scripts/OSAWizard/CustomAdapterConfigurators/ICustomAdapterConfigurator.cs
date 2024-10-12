@@ -7,8 +7,8 @@ using Com.ForbiddenByte.OSA.Core;
 
 namespace Com.ForbiddenByte.OSA.Editor.OSAWizard.CustomAdapterConfigurators
 {
-	public interface ICustomAdapterConfigurator
-	{
-		void ConfigureNewAdapter(IOSA newAdapter);
-	}
+    public interface ICustomAdapterConfigurator
+    {
+        void ConfigureNewAdapter(IOSA newAdapter);
+    }
 }

@@ -5,7 +5,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     public class ArrayGenericConverter : DefaultTypeConverter
     {
         private readonly char delimiter;
-        public ArrayGenericConverter(char delimiter = ',') { this.delimiter = delimiter; }
+
+        public ArrayGenericConverter(char delimiter = ',')
+        {
+            this.delimiter = delimiter;
+        }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
@@ -19,8 +23,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
                 var array     = Array.CreateInstance(elementType, arraySize);
                 var converter = CsvHelper.TypeConverterCache.GetConverter(elementType);
 
-                for (var i = 0; i < arraySize; i++)
-                    array.SetValue(converter.ConvertFromString(stringData[i], elementType), i);
+                for (var i = 0; i < arraySize; i++) array.SetValue(converter.ConvertFromString(stringData[i], elementType), i);
 
                 return array;
             }

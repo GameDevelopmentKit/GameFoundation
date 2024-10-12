@@ -15,39 +15,33 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
 
         public LayoutElement rootLayoutElement;
 
-
         /// <summary>Calls base's implementation, after which calls <see cref="GetViews"/> whose result is stored in <see cref="views"/></summary>
         public override void CollectViews()
         {
             base.CollectViews();
 
-            views = GetViews();
-            if (views == root)
-                throw new OSAException("CellViewsHolder: views == root not allowed: you should have a child of root that holds all the views, as the root should always be enabled for layouting purposes");
+            this.views = this.GetViews();
+            if (this.views == this.root) throw new OSAException("CellViewsHolder: views == root not allowed: you should have a child of root that holds all the views, as the root should always be enabled for layouting purposes");
 
-			rootLayoutElement = root.GetComponent<LayoutElement>();
-			if (!rootLayoutElement)
-				throw new OSAException("CellViewsHolder: no LayoutElement found on the root: you should add one to configure how the cell's parent LayoutGroup should position/size it");
-		}
+            this.rootLayoutElement = this.root.GetComponent<LayoutElement>();
+            if (!this.rootLayoutElement) throw new OSAException("CellViewsHolder: no LayoutElement found on the root: you should add one to configure how the cell's parent LayoutGroup should position/size it");
+        }
 
-		/// <inheritdoc/>
-		public override void MarkForRebuild()
-		{
-			base.MarkForRebuild();
+        /// <inheritdoc/>
+        public override void MarkForRebuild()
+        {
+            base.MarkForRebuild();
 
-			if (views)
-				LayoutRebuilder.MarkLayoutForRebuild(views);
-		}
+            if (this.views) LayoutRebuilder.MarkLayoutForRebuild(this.views);
+        }
 
-		/// <summary>Provide the cell's child GameObject that contains its views</summary>
-		protected virtual RectTransform GetViews()
-		{
-			var viewsTR = root.Find("Views") as RectTransform;
-			if (!viewsTR)
-				throw new OSAException("Override " + (typeof(CellViewsHolder).Name) + ".GetViews() " +
-					"and provide your own path to the child containing the views. For more info, check the Grid example scene");
+        /// <summary>Provide the cell's child GameObject that contains its views</summary>
+        protected virtual RectTransform GetViews()
+        {
+            var viewsTR = this.root.Find("Views") as RectTransform;
+            if (!viewsTR) throw new OSAException("Override " + typeof(CellViewsHolder).Name + ".GetViews() " + "and provide your own path to the child containing the views. For more info, check the Grid example scene");
 
-			return viewsTR;
-		}
+            return viewsTR;
+        }
     }
 }

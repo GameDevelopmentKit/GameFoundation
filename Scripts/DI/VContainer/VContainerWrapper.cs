@@ -20,29 +20,65 @@ namespace GameFoundation.DI
         private readonly IObjectResolver container;
 
         [Preserve]
-        public VContainerWrapper(IObjectResolver container) => this.container = container;
+        public VContainerWrapper(IObjectResolver container)
+        {
+            this.container = container;
+        }
 
-        bool IDependencyContainer.TryResolve(Type type, [MaybeNullWhen(false)] out object instance) => this.container.TryResolve(type, out instance);
+        bool IDependencyContainer.TryResolve(Type type, [MaybeNullWhen(false)] out object instance)
+        {
+            return this.container.TryResolve(type, out instance);
+        }
 
-        bool IDependencyContainer.TryResolve<T>([MaybeNullWhen(false)] out T instance) => this.container.TryResolve(out instance);
+        bool IDependencyContainer.TryResolve<T>([MaybeNullWhen(false)] out T instance)
+        {
+            return this.container.TryResolve(out instance);
+        }
 
-        object IDependencyContainer.Resolve(Type type) => this.container.Resolve(type);
+        object IDependencyContainer.Resolve(Type type)
+        {
+            return this.container.Resolve(type);
+        }
 
-        T IDependencyContainer.Resolve<T>() => this.container.Resolve<T>();
+        T IDependencyContainer.Resolve<T>()
+        {
+            return this.container.Resolve<T>();
+        }
 
-        object[] IDependencyContainer.ResolveAll(Type type) => ((IEnumerable)this.container.Resolve(typeof(IEnumerable<>).MakeGenericType(type))).Cast<object>().ToArray();
+        object[] IDependencyContainer.ResolveAll(Type type)
+        {
+            return ((IEnumerable)this.container.Resolve(typeof(IEnumerable<>).MakeGenericType(type))).Cast<object>().ToArray();
+        }
 
-        T[] IDependencyContainer.ResolveAll<T>() => this.container.Resolve<IEnumerable<T>>().ToArray();
+        T[] IDependencyContainer.ResolveAll<T>()
+        {
+            return this.container.Resolve<IEnumerable<T>>().ToArray();
+        }
 
-        object IDependencyContainer.Instantiate(Type type, params object[] @params) => this.container.Instantiate(type, @params.Select(param => new Parameter(param)).ToArray());
+        object IDependencyContainer.Instantiate(Type type, params object[] @params)
+        {
+            return this.container.Instantiate(type, @params.Select(param => new Parameter(param)).ToArray());
+        }
 
-        T IDependencyContainer.Instantiate<T>(params object[] @params) => this.container.Instantiate<T>(@params.Select(param => new Parameter(param)).ToArray());
+        T IDependencyContainer.Instantiate<T>(params object[] @params)
+        {
+            return this.container.Instantiate<T>(@params.Select(param => new Parameter(param)).ToArray());
+        }
 
-        void IDependencyContainer.Inject(object instance) => this.container.Inject(instance);
+        void IDependencyContainer.Inject(object instance)
+        {
+            this.container.Inject(instance);
+        }
 
-        void IDependencyContainer.InjectGameObject(GameObject instance) => this.container.InjectGameObject(instance);
+        void IDependencyContainer.InjectGameObject(GameObject instance)
+        {
+            this.container.InjectGameObject(instance);
+        }
 
-        GameObject IDependencyContainer.InstantiatePrefab(GameObject prefab) => this.container.Instantiate(prefab);
+        GameObject IDependencyContainer.InstantiatePrefab(GameObject prefab)
+        {
+            return this.container.Instantiate(prefab);
+        }
     }
 
     public sealed class InjectAttribute : VContainer.InjectAttribute
@@ -91,11 +127,20 @@ namespace GameFoundation.DI
     {
         private readonly object value;
 
-        public Parameter(object value) => this.value = value;
+        public Parameter(object value)
+        {
+            this.value = value;
+        }
 
-        bool IInjectParameter.Match(Type parameterType, string _) => parameterType.IsInstanceOfType(this.value);
+        bool IInjectParameter.Match(Type parameterType, string _)
+        {
+            return parameterType.IsInstanceOfType(this.value);
+        }
 
-        object IInjectParameter.GetValue(IObjectResolver _) => this.value;
+        object IInjectParameter.GetValue(IObjectResolver _)
+        {
+            return this.value;
+        }
     }
 }
 #endif

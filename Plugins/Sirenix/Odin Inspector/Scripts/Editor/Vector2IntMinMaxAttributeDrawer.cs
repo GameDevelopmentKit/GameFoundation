@@ -22,8 +22,8 @@ namespace Sirenix.OdinInspector.Editor.Drawers
     /// </summary>
     public class Vector2IntMinMaxAttributeDrawer : OdinAttributeDrawer<MinMaxSliderAttribute, Vector2Int>
     {
-        private ValueResolver<float> minGetter;
-        private ValueResolver<float> maxGetter;
+        private ValueResolver<float>      minGetter;
+        private ValueResolver<float>      maxGetter;
         private ValueResolver<Vector2Int> vector2IntMinMaxGetter;
 
         /// <summary>
@@ -36,10 +36,7 @@ namespace Sirenix.OdinInspector.Editor.Drawers
             this.maxGetter = ValueResolver.Get<float>(this.Property, this.Attribute.MaxValueGetter, this.Attribute.MaxValue);
 
             // Min max member reference.
-            if (this.Attribute.MinMaxValueGetter != null)
-            {
-                this.vector2IntMinMaxGetter = ValueResolver.Get<Vector2Int>(this.Property, this.Attribute.MinMaxValueGetter);
-            }
+            if (this.Attribute.MinMaxValueGetter != null) this.vector2IntMinMaxGetter = ValueResolver.Get<Vector2Int>(this.Property, this.Attribute.MinMaxValueGetter);
         }
 
         /// <summary>
@@ -52,9 +49,7 @@ namespace Sirenix.OdinInspector.Editor.Drawers
             // Get the range of the slider from the attribute or from member references.
             Vector2 range;
             if (this.vector2IntMinMaxGetter != null && !this.vector2IntMinMaxGetter.HasError)
-            {
                 range = (Vector2)this.vector2IntMinMaxGetter.GetValue();
-            }
             else
             {
                 range.x = this.minGetter.GetValue();
@@ -62,11 +57,8 @@ namespace Sirenix.OdinInspector.Editor.Drawers
             }
 
             EditorGUI.BeginChangeCheck();
-            Vector2 value = SirenixEditorFields.MinMaxSlider(label, (Vector2)this.ValueEntry.SmartValue, range, this.Attribute.ShowFields);
-            if (EditorGUI.EndChangeCheck())
-            {
-                this.ValueEntry.SmartValue = new Vector2Int((int)value.x, (int)value.y);
-            }
+            var value                                                  = SirenixEditorFields.MinMaxSlider(label, (Vector2)this.ValueEntry.SmartValue, range, this.Attribute.ShowFields);
+            if (EditorGUI.EndChangeCheck()) this.ValueEntry.SmartValue = new((int)value.x, (int)value.y);
         }
     }
 }

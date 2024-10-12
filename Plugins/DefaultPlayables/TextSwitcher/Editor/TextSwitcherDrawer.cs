@@ -7,19 +7,19 @@ using UnityEngine.UI;
 [CustomPropertyDrawer(typeof(TextSwitcherBehaviour))]
 public class TextSwitcherDrawer : PropertyDrawer
 {
-    public override float GetPropertyHeight (SerializedProperty property, GUIContent label)
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        int fieldCount = 3;
+        var fieldCount = 3;
         return fieldCount * EditorGUIUtility.singleLineHeight;
     }
 
-    public override void OnGUI (Rect position, SerializedProperty property, GUIContent label)
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        SerializedProperty colorProp = property.FindPropertyRelative("color");
-        SerializedProperty fontSizeProp = property.FindPropertyRelative("fontSize");
-        SerializedProperty textProp = property.FindPropertyRelative("text");
+        var colorProp    = property.FindPropertyRelative("color");
+        var fontSizeProp = property.FindPropertyRelative("fontSize");
+        var textProp     = property.FindPropertyRelative("text");
 
-        Rect singleFieldRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+        var singleFieldRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
         EditorGUI.PropertyField(singleFieldRect, colorProp);
 
         singleFieldRect.y += EditorGUIUtility.singleLineHeight;

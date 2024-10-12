@@ -11,8 +11,8 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 
         private void Awake()
         {
-            this.isAlive    = true;
-            this.state = new ReactiveProperty<DeviceOrientation>(Input.deviceOrientation);
+            this.isAlive = true;
+            this.state   = new(Input.deviceOrientation);
             this.StartCoroutine(this.CheckForChange());
         }
 
@@ -22,7 +22,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
             this.StopCoroutine(this.CheckForChange());
         }
 
-        IEnumerator CheckForChange()
+        private IEnumerator CheckForChange()
         {
             Debug.Log("Start Detect Orientation");
             while (this.isAlive)

@@ -1,5 +1,6 @@
 // Pre-2019.1 Unity versions have performance problems with the Shadow script,
 // while 2019.{1,2,3,4} sometimes have problems with displaying an Image+Shadow
+
 #if UNITY_2019_1_OR_NEWER && !(UNITY_2019_1_0 || UNITY_2019_1_1 || UNITY_2019_1_2 || UNITY_2019_1_3 || UNITY_2019_1_4)
 #define ALLOW_SHADOWS
 #endif
@@ -10,17 +11,17 @@ using UnityEngine.UI;
 
 namespace Com.ForbiddenByte.OSA.Util.Optimization
 {
-	/// <summary>
-	/// Simple: If no Unity 2019, no shadow (the shadow will be destroyed). 
-	/// Seems like a lot of Shadow components used cause significant FPS drops
-	/// </summary>
-	[ExecuteInEditMode]
-	public class ShadowRemover : MonoBehaviour
-	{
-		// If not on a compatible unity version, destroy the Shadow script and this script
-#if ALLOW_SHADOWS
+    /// <summary>
+    /// Simple: If no Unity 2019, no shadow (the shadow will be destroyed). 
+    /// Seems like a lot of Shadow components used cause significant FPS drops
+    /// </summary>
+    [ExecuteInEditMode]
+    public class ShadowRemover : MonoBehaviour
+    {
+        // If not on a compatible unity version, destroy the Shadow script and this script
+        #if ALLOW_SHADOWS
 
-#else
+        #else
 		[SerializeField]
 		[HideInInspector]
 		Shadow _Shadow;
@@ -55,6 +56,6 @@ namespace Com.ForbiddenByte.OSA.Util.Optimization
 		}
 #endif
 
-#endif
-	}
+        #endif
+    }
 }

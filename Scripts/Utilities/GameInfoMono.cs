@@ -13,9 +13,9 @@
         {
             this.gameInfoText      = this.GetComponent<TextMeshProUGUI>();
             this.gameInfoText.text = GameVersion.FullInfo;
-#if !DEVELOPMENT_BUILD && !UNITY_EDITOR
+            #if !DEVELOPMENT_BUILD && !UNITY_EDITOR
             this.gameObject.SetActive(false);
-#endif
+            #endif
         }
     }
 }

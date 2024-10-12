@@ -5,7 +5,7 @@ namespace BlueprintFlow.Signals
         public string Url;
         public string Hash;
     }
-    
+
     public interface IProgressPercent
     {
         public float Percent { get; }
@@ -19,7 +19,7 @@ namespace BlueprintFlow.Signals
     {
         public float Percent { get; set; }
     }
-    
+
     public class ReadBlueprintProgressSignal : IProgressPercent
     {
         public int MaxBlueprint;

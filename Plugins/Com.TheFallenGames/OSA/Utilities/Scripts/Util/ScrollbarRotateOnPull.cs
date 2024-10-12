@@ -5,79 +5,73 @@ using Com.ForbiddenByte.OSA.Core;
 
 namespace Com.ForbiddenByte.OSA.Util
 {
-	[RequireComponent(typeof(Scrollbar))]
-	public class ScrollbarRotateOnPull : MonoBehaviour
-	{
-		[SerializeField]
-		float _DegreesOfFreedom = 5f;
-		[SerializeField]
-		float _RotationSensivity = .5f;
+    [RequireComponent(typeof(Scrollbar))]
+    public class ScrollbarRotateOnPull : MonoBehaviour
+    {
+        [SerializeField] private float _DegreesOfFreedom  = 5f;
+        [SerializeField] private float _RotationSensivity = .5f;
 
-		IOSA _Adapter;
-		RectTransform _HandleRT;
-		Vector2 _SrollbarPivotOnInit;
+        private IOSA          _Adapter;
+        private RectTransform _HandleRT;
+        private Vector2       _SrollbarPivotOnInit;
 
-
-		void Start()
-		{
-			_Adapter = GetComponentInParent<IOSA>();
-			_HandleRT = transform as RectTransform;
-			//_HandleRT = _Scrollbar.handleRect;
-			_SrollbarPivotOnInit = _HandleRT.pivot;
-		}
-
-
-        void Update()
+        private void Start()
         {
-			if (_Adapter == null)
-				return;
+            this._Adapter  = this.GetComponentInParent<IOSA>();
+            this._HandleRT = this.transform as RectTransform;
+            //_HandleRT = _Scrollbar.handleRect;
+            this._SrollbarPivotOnInit = this._HandleRT.pivot;
+        }
 
-			float pullAmount01 = 0f;
-			var piv = _SrollbarPivotOnInit;
-			int sign = 1;
-			if (_Adapter.GetContentSizeToViewportRatio() > 1d)
-			{
-				var insetStart = _Adapter.ContentVirtualInsetFromViewportStart;
-				if (insetStart > 0d)
-				{
-					if (_Adapter.IsHorizontal)
-					{
-						pullAmount01 = (float)(insetStart / _Adapter.BaseParameters.Viewport.rect.width);
-						piv.x = 0f;
-					}
-					else
-					{
-						pullAmount01 = (float)(insetStart / _Adapter.BaseParameters.Viewport.rect.height);
-						piv.y = 1f;
-					}
-				}
-				else
-				{
-					var insetEnd = _Adapter.ContentVirtualInsetFromViewportEnd;
-					if (insetEnd > 0d)
-					{
-						sign = -1;
-						pullAmount01 = (float)(insetEnd / _Adapter.GetContentSize());
-						if (_Adapter.IsHorizontal)
-						{
-							pullAmount01 = (float)(insetEnd / _Adapter.BaseParameters.Viewport.rect.width);
-							piv.x = 1f;
-						}
-						else
-						{
-							pullAmount01 = (float)(insetEnd / _Adapter.BaseParameters.Viewport.rect.height);
-							piv.y = 0f;
-						}
-					}
-				}
-			}
-			if (_HandleRT.pivot != piv)
-				_HandleRT.pivot = piv;
+        private void Update()
+        {
+            if (this._Adapter == null) return;
 
-			var euler = _HandleRT.localEulerAngles;
-			// Multiplying argument by _Speed to speed up sine function growth
-			euler.z = Mathf.Sin(pullAmount01 * _RotationSensivity * Mathf.PI) * _DegreesOfFreedom * sign;
-			_HandleRT.localEulerAngles = euler;
+            var pullAmount01 = 0f;
+            var piv          = this._SrollbarPivotOnInit;
+            var sign         = 1;
+            if (this._Adapter.GetContentSizeToViewportRatio() > 1d)
+            {
+                var insetStart = this._Adapter.ContentVirtualInsetFromViewportStart;
+                if (insetStart > 0d)
+                {
+                    if (this._Adapter.IsHorizontal)
+                    {
+                        pullAmount01 = (float)(insetStart / this._Adapter.BaseParameters.Viewport.rect.width);
+                        piv.x        = 0f;
+                    }
+                    else
+                    {
+                        pullAmount01 = (float)(insetStart / this._Adapter.BaseParameters.Viewport.rect.height);
+                        piv.y        = 1f;
+                    }
+                }
+                else
+                {
+                    var insetEnd = this._Adapter.ContentVirtualInsetFromViewportEnd;
+                    if (insetEnd > 0d)
+                    {
+                        sign         = -1;
+                        pullAmount01 = (float)(insetEnd / this._Adapter.GetContentSize());
+                        if (this._Adapter.IsHorizontal)
+                        {
+                            pullAmount01 = (float)(insetEnd / this._Adapter.BaseParameters.Viewport.rect.width);
+                            piv.x        = 1f;
+                        }
+                        else
+                        {
+                            pullAmount01 = (float)(insetEnd / this._Adapter.BaseParameters.Viewport.rect.height);
+                            piv.y        = 0f;
+                        }
+                    }
+                }
+            }
+            if (this._HandleRT.pivot != piv) this._HandleRT.pivot = piv;
+
+            var euler = this._HandleRT.localEulerAngles;
+            // Multiplying argument by _Speed to speed up sine function growth
+            euler.z                         = Mathf.Sin(pullAmount01 * this._RotationSensivity * Mathf.PI) * this._DegreesOfFreedom * sign;
+            this._HandleRT.localEulerAngles = euler;
         }
     }
 }

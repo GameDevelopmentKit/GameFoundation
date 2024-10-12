@@ -6,8 +6,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     public class Tuple3GenericConverter : DefaultTypeConverter
     {
         private readonly char delimiterPair;
-        public Tuple3GenericConverter(char delimiterPair = ':') { this.delimiterPair = delimiterPair; }
 
+        public Tuple3GenericConverter(char delimiterPair = ':')
+        {
+            this.delimiterPair = delimiterPair;
+        }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {

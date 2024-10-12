@@ -4,87 +4,68 @@ using UnityEngine.UI;
 
 namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Basic
 {
-	public class BasicTableViewOptionsPanel : MonoBehaviour, ITableViewOptionsPanel
-	{
-		[SerializeField]
-		Button _EnterClearingStateButton = null;
+    public class BasicTableViewOptionsPanel : MonoBehaviour, ITableViewOptionsPanel
+    {
+        [SerializeField] private Button _EnterClearingStateButton = null;
 
-		[SerializeField]
-		Button _ExitClearingStateButton = null;
+        [SerializeField] private Button _ExitClearingStateButton = null;
 
-		[SerializeField]
-		GameObject _ClearingStateShownObject = null;
+        [SerializeField] private GameObject _ClearingStateShownObject = null;
 
-		[SerializeField]
-		GameObject _NoneStateShownObject = null;
+        [SerializeField] private GameObject _NoneStateShownObject = null;
 
-		[SerializeField]
-		GameObject _LoadingGameObject = null;
+        [SerializeField] private GameObject _LoadingGameObject = null;
 
-		[SerializeField]
-		CanvasGroup _CanvasGroupToDisableOnLoad = null;
+        [SerializeField] private CanvasGroup _CanvasGroupToDisableOnLoad = null;
 
-		public bool IsClearing { get { return _IsClearing; } set { SetIsClearing(value); } }
-		public bool IsLoading { get { return _IsLoading; } set { SetIsLoading(value); } }
+        public bool IsClearing { get => this._IsClearing; set => this.SetIsClearing(value); }
+        public bool IsLoading  { get => this._IsLoading;  set => this.SetIsLoading(value); }
 
-		bool _IsClearing;
-		bool _IsLoading;
+        private bool _IsClearing;
+        private bool _IsLoading;
 
+        private void Start()
+        {
+            if (this._EnterClearingStateButton) this._EnterClearingStateButton.onClick.AddListener(this.SetClearing);
+            if (this._ExitClearingStateButton) this._ExitClearingStateButton.onClick.AddListener(this.SetNoClearing);
 
-		void Start()
-		{
-			if (_EnterClearingStateButton)
-				_EnterClearingStateButton.onClick.AddListener(SetClearing);
-			if (_ExitClearingStateButton)
-				_ExitClearingStateButton.onClick.AddListener(SetNoClearing);
+            this.IsClearing = false;
+            this.IsLoading  = false;
+        }
 
-			IsClearing = false;
-			IsLoading = false;
-		}
+        private void Update()
+        {
+            if (this._IsLoading)
+                if (this._LoadingGameObject)
+                    this._LoadingGameObject.transform.Rotate(Vector3.forward, -270f * Time.deltaTime, Space.Self);
+        }
 
-		void Update()
-		{
-			if (_IsLoading)
-			{
-				if (_LoadingGameObject)
-				{
-					_LoadingGameObject.transform.Rotate(Vector3.forward, -270f * Time.deltaTime, Space.Self);
-				}
-			}
-		}
+        private void SetNoClearing()
+        {
+            this.IsClearing = false;
+        }
 
-		void SetNoClearing()
-		{
-			IsClearing = false;
-		}
+        private void SetClearing()
+        {
+            this.IsClearing = true;
+        }
 
-		void SetClearing()
-		{
-			IsClearing = true;
-		}
+        private void SetIsClearing(bool isClearing)
+        {
+            if (this._EnterClearingStateButton) this._EnterClearingStateButton.gameObject.SetActive(!isClearing);
+            if (this._ExitClearingStateButton) this._ExitClearingStateButton.gameObject.SetActive(isClearing);
+            if (this._ClearingStateShownObject) this._ClearingStateShownObject.gameObject.SetActive(isClearing);
+            if (this._NoneStateShownObject) this._NoneStateShownObject.gameObject.SetActive(!isClearing);
 
-		void SetIsClearing(bool isClearing)
-		{
-			if (_EnterClearingStateButton)
-				_EnterClearingStateButton.gameObject.SetActive(!isClearing);
-			if (_ExitClearingStateButton)
-				_ExitClearingStateButton.gameObject.SetActive(isClearing);
-			if (_ClearingStateShownObject)
-				_ClearingStateShownObject.gameObject.SetActive(isClearing);
-			if (_NoneStateShownObject)
-				_NoneStateShownObject.gameObject.SetActive(!isClearing);
+            this._IsClearing = isClearing;
+        }
 
-			_IsClearing = isClearing;
-		}
+        private void SetIsLoading(bool isLoading)
+        {
+            this._IsLoading = isLoading;
+            if (this._LoadingGameObject) this._LoadingGameObject.SetActive(this._IsLoading);
 
-		void SetIsLoading(bool isLoading)
-		{
-			_IsLoading = isLoading;
-			if (_LoadingGameObject)
-				_LoadingGameObject.SetActive(_IsLoading);
-
-			if (_CanvasGroupToDisableOnLoad)
-				_CanvasGroupToDisableOnLoad.blocksRaycasts = !_IsLoading;
-		}
-	}
+            if (this._CanvasGroupToDisableOnLoad) this._CanvasGroupToDisableOnLoad.blocksRaycasts = !this._IsLoading;
+        }
+    }
 }

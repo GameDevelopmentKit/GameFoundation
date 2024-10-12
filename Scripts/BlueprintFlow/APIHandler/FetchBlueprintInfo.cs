@@ -49,7 +49,10 @@ namespace BlueprintFlow.APIHandler
         public string Version;
         public string Hash;
         public string Url;
-        public void   Init() { }
+
+        public void Init()
+        {
+        }
     }
 
     public class FetchBlueprintInfo
@@ -67,7 +70,7 @@ namespace BlueprintFlow.APIHandler
             try
             {
                 var request      = (HttpWebRequest)WebRequest.Create(fetchUri);
-                var response     = (HttpWebResponse)(await request.GetResponseAsync());
+                var response     = (HttpWebResponse)await request.GetResponseAsync();
                 var reader       = new StreamReader(response.GetResponseStream());
                 var jsonResponse = await reader.ReadToEndAsync();
                 var definition   = new { data = new { blueprint = new BlueprintInfoData() } };

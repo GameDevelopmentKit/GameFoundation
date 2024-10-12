@@ -10,12 +10,26 @@ using UnityEngine.EventSystems;
 
 namespace Com.ForbiddenByte.OSA.Util.ScrollViews
 {
-	public class NonInteractableScrollRect : ScrollRect
-	{
-		public override void OnInitializePotentialDrag(PointerEventData eventData) { }
-		public override void OnBeginDrag(PointerEventData eventData) { }
-		public override void OnDrag(PointerEventData eventData) { }
-		public override void OnEndDrag(PointerEventData eventData) { }
-		public override void OnScroll(PointerEventData data) { }
-	}
+    public class NonInteractableScrollRect : ScrollRect
+    {
+        public override void OnInitializePotentialDrag(PointerEventData eventData)
+        {
+        }
+
+        public override void OnBeginDrag(PointerEventData eventData)
+        {
+        }
+
+        public override void OnDrag(PointerEventData eventData)
+        {
+        }
+
+        public override void OnEndDrag(PointerEventData eventData)
+        {
+        }
+
+        public override void OnScroll(PointerEventData data)
+        {
+        }
+    }
 }

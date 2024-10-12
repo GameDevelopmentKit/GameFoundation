@@ -37,15 +37,15 @@ namespace GameFoundation.DI
         /// </summary>
         public static IDependencyContainer GetCurrentContainer()
         {
-            if (CurrentSceneContext == null)
-            {
-                CurrentSceneContext = Object.FindObjectOfType<SceneScope>();
-            }
+            if (CurrentSceneContext == null) CurrentSceneContext = Object.FindObjectOfType<SceneScope>();
             return CurrentSceneContext.Container.Resolve<IDependencyContainer>();
         }
 
         /// <inheritdoc cref="GetCurrentContainer()"/>
-        public static IDependencyContainer GetCurrentContainer(this object _) => GetCurrentContainer();
+        public static IDependencyContainer GetCurrentContainer(this object _)
+        {
+            return GetCurrentContainer();
+        }
     }
     #else
     using System;

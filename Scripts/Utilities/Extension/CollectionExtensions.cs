@@ -28,7 +28,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static Stack<T> ToStack<T>(this IEnumerable<T> enumerable)
         {
-            return new Stack<T>(enumerable);
+            return new(enumerable);
         }
 
         public static T PeekOrDefault<T>(this Stack<T> stack)
@@ -53,7 +53,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static Queue<T> ToQueue<T>(this IEnumerable<T> enumerable)
         {
-            return new Queue<T>(enumerable);
+            return new(enumerable);
         }
 
         public static T PeekOrDefault<T>(this Queue<T> queue)
@@ -89,12 +89,8 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 var dimension2 = source.GroupBy(row => row.Length).Single().Key;
                 var result     = new T[dimension1, dimension2];
                 for (var i = 0; i < dimension1; ++i)
-                {
-                    for (var j = 0; j < dimension2; ++j)
-                    {
-                        result[i, j] = source[i][j];
-                    }
-                }
+                for (var j = 0; j < dimension2; ++j)
+                    result[i, j] = source[i][j];
                 return result;
             }
             catch (InvalidOperationException)
@@ -111,10 +107,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             for (var i = 0; i < dimension1; ++i)
             {
                 result[i] = new T[dimension2];
-                for (var j = 0; j < dimension2; ++j)
-                {
-                    result[i][j] = source[i, j];
-                }
+                for (var j = 0; j < dimension2; ++j) result[i][j] = source[i, j];
             }
             return result;
         }

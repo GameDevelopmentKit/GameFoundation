@@ -33,7 +33,10 @@
 
         protected readonly IGameAssets GameAssets;
 
-        protected BaseUIItemPresenter(IGameAssets gameAssets) { this.GameAssets = gameAssets; }
+        protected BaseUIItemPresenter(IGameAssets gameAssets)
+        {
+            this.GameAssets = gameAssets;
+        }
 
         /// <summary>
         /// Set view automatically
@@ -41,10 +44,7 @@
         /// <param name="parent"></param>
         public virtual async UniTask SetView(Transform parent)
         {
-            if (this.View == null)
-            {
-                this.SetView(Object.Instantiate(await this.GameAssets.LoadAssetAsync<GameObject>(this.PrefabPath), parent).GetComponent<TView>());
-            }
+            if (this.View == null) this.SetView(Object.Instantiate(await this.GameAssets.LoadAssetAsync<GameObject>(this.PrefabPath), parent).GetComponent<TView>());
         }
 
         /// <summary>
@@ -68,19 +68,22 @@
         /// <param name="parent"></param>
         public void SetView(GameObject prefabView, Transform parent)
         {
-            if (this.View == null)
-            {
-                this.SetView(Object.Instantiate(prefabView, parent).GetComponent<TView>());
-            }
+            if (this.View == null) this.SetView(Object.Instantiate(prefabView, parent).GetComponent<TView>());
         }
 
         /// <summary>
         /// Set view manually
         /// </summary>
         /// <param name="viewInstance"></param>
-        public virtual void SetView(TView viewInstance) { this.View = viewInstance; }
+        public virtual void SetView(TView viewInstance)
+        {
+            this.View = viewInstance;
+        }
 
-        public void SetView(IUIView viewInstance) { this.View = (TView)viewInstance; }
+        public void SetView(IUIView viewInstance)
+        {
+            this.View = (TView)viewInstance;
+        }
 
         public virtual void SetActiveView(bool value)
         {
@@ -90,18 +93,26 @@
 
     public abstract class BaseUIItemPresenter<TView, TModel> : BaseUIItemPresenter<TView>, IUIItemPresenter<TView, TModel>, IDisposable where TView : MonoBehaviour, IUIView
     {
-        protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets) { }
+        protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets)
+        {
+        }
 
-        public virtual void OnViewReady() { }
+        public virtual void OnViewReady()
+        {
+        }
 
         public abstract void BindData(TModel param);
 
-        public virtual void Dispose() { }
+        public virtual void Dispose()
+        {
+        }
     }
 
     public abstract class BaseUIItemPresenter<TView, TModel1, TModel2> : BaseUIItemPresenter<TView> where TView : MonoBehaviour, IUIView
     {
-        protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets) { }
+        protected BaseUIItemPresenter(IGameAssets gameAssets) : base(gameAssets)
+        {
+        }
 
         public abstract void BindData(TModel1 param1, TModel2 param2);
     }

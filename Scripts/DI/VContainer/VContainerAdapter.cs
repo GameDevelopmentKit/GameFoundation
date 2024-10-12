@@ -34,42 +34,27 @@ namespace GameFoundation.DI
 
         void VContainer.Unity.IStartable.Start()
         {
-            foreach (var initializable in this.initializables)
-            {
-                initializable.Initialize();
-            }
+            foreach (var initializable in this.initializables) initializable.Initialize();
         }
 
         void VContainer.Unity.ITickable.Tick()
         {
-            foreach (var tickable in this.tickables)
-            {
-                tickable.Tick();
-            }
+            foreach (var tickable in this.tickables) tickable.Tick();
         }
 
         void VContainer.Unity.ILateTickable.LateTick()
         {
-            foreach (var lateTickable in this.lateTickables)
-            {
-                lateTickable.LateTick();
-            }
+            foreach (var lateTickable in this.lateTickables) lateTickable.LateTick();
         }
 
         void VContainer.Unity.IFixedTickable.FixedTick()
         {
-            foreach (var fixedTickable in this.fixedTickables)
-            {
-                fixedTickable.FixedTick();
-            }
+            foreach (var fixedTickable in this.fixedTickables) fixedTickable.FixedTick();
         }
 
         void IDisposable.Dispose()
         {
-            foreach (var lateDisposable in this.lateDisposables)
-            {
-                lateDisposable.LateDispose();
-            }
+            foreach (var lateDisposable in this.lateDisposables) lateDisposable.LateDispose();
         }
     }
 }

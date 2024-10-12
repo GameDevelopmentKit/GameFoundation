@@ -6,6 +6,5 @@ namespace GameFoundation.Scripts.UIModule.MVP
     /// </summary>
     public interface IUIModel
     {
-        
     }
 }

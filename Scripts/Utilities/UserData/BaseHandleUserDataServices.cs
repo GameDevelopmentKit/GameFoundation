@@ -14,11 +14,14 @@ namespace GameFoundation.Scripts.Utilities.UserData
     {
         public const string UserDataPrefix = "LD-";
 
-        public static string KeyOf(Type type) => UserDataPrefix + type.Name;
+        public static string KeyOf(Type type)
+        {
+            return UserDataPrefix + type.Name;
+        }
 
         public static readonly JsonSerializerSettings JsonSetting = new()
         {
-            TypeNameHandling = TypeNameHandling.Auto,
+            TypeNameHandling      = TypeNameHandling.Auto,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         };
 
@@ -34,10 +37,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
             var key = KeyOf(typeof(T));
 
-            if (!this.userDataCache.ContainsKey(key))
-            {
-                this.userDataCache.Add(key, data);
-            }
+            if (!this.userDataCache.ContainsKey(key)) this.userDataCache.Add(key, data);
 
             if (!force) return;
 
@@ -54,27 +54,28 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
             var keys = types.Select(KeyOf).ToArray();
 
-            return IterTools.Zip(types, keys, await this.LoadJsons(keys), (type, key, json) =>
-            {
-                return this.userDataCache.GetOrAdd(key, () =>
+            return IterTools.Zip(types,
+                keys,
+                await this.LoadJsons(keys),
+                (type, key, json) =>
                 {
-                    var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type, JsonSetting);
+                    return this.userDataCache.GetOrAdd(key,
+                        () =>
+                        {
+                            var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type, JsonSetting);
 
-                    if (result is not ILocalData data)
-                    {
-                        this.logService.Error($"Failed to load data {key}");
-                        return null;
-                    }
+                            if (result is not ILocalData data)
+                            {
+                                this.logService.Error($"Failed to load data {key}");
+                                return null;
+                            }
 
-                    if (string.IsNullOrEmpty(json))
-                    {
-                        data.Init();
-                    }
+                            if (string.IsNullOrEmpty(json)) data.Init();
 
-                    this.logService.LogWithColor($"Loaded {key}", Color.green);
-                    return data;
-                });
-            }).ToArray();
+                            this.logService.LogWithColor($"Loaded {key}", Color.green);
+                            return data;
+                        });
+                }).ToArray();
         }
 
         public async UniTask SaveAll()

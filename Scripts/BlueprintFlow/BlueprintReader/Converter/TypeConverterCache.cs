@@ -73,7 +73,10 @@ namespace BlueprintFlow.BlueprintReader.Converter
         ///     Removes the <see cref="ITypeConverter" /> for the given <see cref="System.Type" />.
         /// </summary>
         /// <typeparam name="T">The type to remove the converter for.</typeparam>
-        public void RemoveConverter<T>() { this.RemoveConverter(typeof(T)); }
+        public void RemoveConverter<T>()
+        {
+            this.RemoveConverter(typeof(T));
+        }
 
         /// <summary>
         ///     Gets the converter for the given <see cref="System.Type" />.
@@ -177,10 +180,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
                 return this.GetConverter(type);
             }
 
-            if (type.IsGenericType && this.typeConverters.TryGetValue(type.GetGenericTypeDefinition(), out var converter))
-            {
-                return converter;
-            }
+            if (type.IsGenericType && this.typeConverters.TryGetValue(type.GetGenericTypeDefinition(), out var converter)) return converter;
 
             // A specific IEnumerable converter doesn't exist.
             if (typeof(IEnumerable).IsAssignableFrom(type)) return new EnumerableConverter();
@@ -193,7 +193,10 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// </summary>
         /// <typeparam name="T">The type to get the converter for.</typeparam>
         /// <returns>The <see cref="ITypeConverter" /> for the given <see cref="System.Type" />.</returns>
-        public ITypeConverter GetConverter<T>() { return this.GetConverter(typeof(T)); }
+        public ITypeConverter GetConverter<T>()
+        {
+            return this.GetConverter(typeof(T));
+        }
 
         private void CreateDefaultConverters()
         {

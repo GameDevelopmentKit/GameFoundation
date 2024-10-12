@@ -18,59 +18,57 @@ namespace Com.ForbiddenByte.OSA.Util
         public float longClickTime = .7f;
 
         public IItemLongClickListener longClickListener;
-		public StateEnum State { get { return _State; } }
+        public StateEnum              State => this._State;
 
-		float _PressedTime;
-		StateEnum _State;
-		//int _PointerID;
+        private float _PressedTime;
 
+        private StateEnum _State;
+        //int _PointerID;
 
-		public enum StateEnum
-		{
-			NOT_PRESSING,
-			PRESSING_WAITING_FOR_LONG_CLICK,
-			PRESSING_AFTER_LONG_CLICK
-		}
-
-
-        void Update()
+        public enum StateEnum
         {
-            if (_State == StateEnum.PRESSING_WAITING_FOR_LONG_CLICK)
-            {
-                if (Time.unscaledTime - _PressedTime >= longClickTime)
+            NOT_PRESSING,
+            PRESSING_WAITING_FOR_LONG_CLICK,
+            PRESSING_AFTER_LONG_CLICK,
+        }
+
+        private void Update()
+        {
+            if (this._State == StateEnum.PRESSING_WAITING_FOR_LONG_CLICK)
+                if (Time.unscaledTime - this._PressedTime >= this.longClickTime)
                 {
-					_State = StateEnum.PRESSING_AFTER_LONG_CLICK;
-                    if (longClickListener != null)
-                        longClickListener.OnItemLongClicked(this);
+                    this._State = StateEnum.PRESSING_AFTER_LONG_CLICK;
+                    if (this.longClickListener != null) this.longClickListener.OnItemLongClicked(this);
                 }
-            }
         }
 
         #region Callbacks from Unity UI event handlers
+
         public void OnPointerDown(PointerEventData eventData)
-		{
-			//Debug.Log("OnPointerDown" + eventData.button);
-			if (eventData.button != PointerEventData.InputButton.Left)
-				return;
+        {
+            //Debug.Log("OnPointerDown" + eventData.button);
+            if (eventData.button != PointerEventData.InputButton.Left) return;
 
-			//_PointerID = eventData.pointerId;
+            //_PointerID = eventData.pointerId;
 
-			_State = StateEnum.PRESSING_WAITING_FOR_LONG_CLICK;
-            _PressedTime = Time.unscaledTime;
+            this._State       = StateEnum.PRESSING_WAITING_FOR_LONG_CLICK;
+            this._PressedTime = Time.unscaledTime;
         }
-        public void OnPointerUp(PointerEventData eventData)
-		{
-			//Debug.Log("OnPointerUp" + eventData.button);
-			if (eventData.button != PointerEventData.InputButton.Left)
-				return;
 
-			_State = StateEnum.NOT_PRESSING;
-		}
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            //Debug.Log("OnPointerUp" + eventData.button);
+            if (eventData.button != PointerEventData.InputButton.Left) return;
+
+            this._State = StateEnum.NOT_PRESSING;
+        }
+
         public void OnCancel(BaseEventData eventData)
-		{
-			//Debug.Log("OnCancel");
-			_State = StateEnum.NOT_PRESSING;
-		}
+        {
+            //Debug.Log("OnCancel");
+            this._State = StateEnum.NOT_PRESSING;
+        }
+
         #endregion
 
         /// <summary>Interface to implement by the class that'll handle the long click events</summary>

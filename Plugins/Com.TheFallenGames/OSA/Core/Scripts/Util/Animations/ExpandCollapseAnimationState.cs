@@ -7,83 +7,77 @@ using Com.ForbiddenByte.OSA.Core;
 
 namespace Com.ForbiddenByte.OSA.Util.Animations
 {
-	/// <summary>
-	/// Used for more control than what <see cref="Com.ForbiddenByte.OSA.Util.ExpandCollapseOnClick"/> offers.
-	/// Holds all the required data for animating an item's size. The animation is done manually, using a MonoBehaviour's Update
-	/// </summary>
-	public class ExpandCollapseAnimationState
-	{
-		public readonly float expandingStartTime;
-		public float initialExpandedAmount;
-		public float targetExpandedAmount;
-		public float duration;
-		public int itemIndex;
-		bool _ForcefullyFinished;
-		readonly bool _UseUnscaledTime;
-		readonly Func<double, double> _Fn;
+    /// <summary>
+    /// Used for more control than what <see cref="Com.ForbiddenByte.OSA.Util.ExpandCollapseOnClick"/> offers.
+    /// Holds all the required data for animating an item's size. The animation is done manually, using a MonoBehaviour's Update
+    /// </summary>
+    public class ExpandCollapseAnimationState
+    {
+        public readonly  float                expandingStartTime;
+        public           float                initialExpandedAmount;
+        public           float                targetExpandedAmount;
+        public           float                duration;
+        public           int                  itemIndex;
+        private          bool                 _ForcefullyFinished;
+        private readonly bool                 _UseUnscaledTime;
+        private readonly Func<double, double> _Fn;
 
-		/// <summary>
-		/// Returns a value between <see cref="initialExpandedAmount"/> and <see cref="targetExpandedAmount"/> lerped by <see cref="Progress01"/>
-		/// </summary>
-		public float CurrentExpandedAmount { get { return Mathf.Lerp(initialExpandedAmount, targetExpandedAmount, Progress01); } }
+        /// <summary>
+        /// Returns a value between <see cref="initialExpandedAmount"/> and <see cref="targetExpandedAmount"/> lerped by <see cref="Progress01"/>
+        /// </summary>
+        public float CurrentExpandedAmount => Mathf.Lerp(this.initialExpandedAmount, this.targetExpandedAmount, this.Progress01);
 
-		/// <summary>
-		/// Returns a value between <see cref="targetExpandedAmount"/> and <see cref="initialExpandedAmount"/> lerped by <see cref="Progress01"/>
-		/// </summary>
-		public float CurrentExpandedAmountInverse { get { return Mathf.Lerp(targetExpandedAmount, initialExpandedAmount, Progress01); } }
+        /// <summary>
+        /// Returns a value between <see cref="targetExpandedAmount"/> and <see cref="initialExpandedAmount"/> lerped by <see cref="Progress01"/>
+        /// </summary>
+        public float CurrentExpandedAmountInverse => Mathf.Lerp(this.targetExpandedAmount, this.initialExpandedAmount, this.Progress01);
 
-		public float Progress01 { get { return CurrentAnimationElapsedTimeSmooth01; } }
+        public float Progress01 => this.CurrentAnimationElapsedTimeSmooth01;
 
-		public bool IsDone { get { return CurrentAnimationElapsedTime01 == 1f; } }
+        public bool IsDone => this.CurrentAnimationElapsedTime01 == 1f;
 
-		public bool IsExpanding { get { return targetExpandedAmount > initialExpandedAmount; } }
+        public bool IsExpanding => this.targetExpandedAmount > this.initialExpandedAmount;
 
-		float CurrentAnimationElapsedTime01
-		{
-			get
-			{
-				if (_ForcefullyFinished)
-					return 1f;
+        private float CurrentAnimationElapsedTime01
+        {
+            get
+            {
+                if (this._ForcefullyFinished) return 1f;
 
-				// Prevent div by zero. Also, no duration means there's no animation over time
-				if (duration == 0f)
-					return 1f;
+                // Prevent div by zero. Also, no duration means there's no animation over time
+                if (this.duration == 0f) return 1f;
 
-				var elapsed01 = (Time - expandingStartTime) / duration;
+                var elapsed01 = (this.Time - this.expandingStartTime) / this.duration;
 
-				if (elapsed01 >= 1f)
-					elapsed01 = 1f;
+                if (elapsed01 >= 1f) elapsed01 = 1f;
 
-				return elapsed01;
-			}
-		}
+                return elapsed01;
+            }
+        }
 
-		float CurrentAnimationElapsedTimeSmooth01
-		{
-			get
-			{
-				var t = CurrentAnimationElapsedTime01;
-				if (t == 1f)
-					return t;
+        private float CurrentAnimationElapsedTimeSmooth01
+        {
+            get
+            {
+                var t = this.CurrentAnimationElapsedTime01;
+                if (t == 1f) return t;
 
-				return (float)_Fn(t);
-			}
-		}
+                return (float)this._Fn(t);
+            }
+        }
 
-		float Time { get { return _UseUnscaledTime ? UnityEngine.Time.unscaledTime : UnityEngine.Time.time; } }
+        private float Time => this._UseUnscaledTime ? UnityEngine.Time.unscaledTime : UnityEngine.Time.time;
 
+        public ExpandCollapseAnimationState(bool useUnscaledTime, AnimationFunctionType animationFunctionType = AnimationFunctionType.SLOW_OUT)
+        {
+            this._UseUnscaledTime   = useUnscaledTime;
+            this._Fn                = OSAMath.GetLerpFunction(animationFunctionType);
+            this.expandingStartTime = this.Time;
+        }
 
-		public ExpandCollapseAnimationState(bool useUnscaledTime, AnimationFunctionType animationFunctionType = AnimationFunctionType.SLOW_OUT)
-		{
-			_UseUnscaledTime = useUnscaledTime;
-			_Fn = OSAMath.GetLerpFunction(animationFunctionType);
-			expandingStartTime = Time;
-		}
-
-
-		public void ForceFinish()
-		{
-			_ForcefullyFinished = true;
-		}
-	}
+        public void ForceFinish()
+        {
+            this._ForcefullyFinished = true;
+        }
+    }
 }

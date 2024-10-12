@@ -77,10 +77,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             void CallOnViewReady(TView view, TPresenter presenter)
             {
-                if (this.readiedViewSet.Add(view))
-                {
-                    presenter.OnViewReady();
-                }
+                if (this.readiedViewSet.Add(view)) presenter.OnViewReady();
             }
         }
 
@@ -98,17 +95,11 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> models)
         {
-            foreach (var baseUIItemPresenter in this.presenters)
-            {
-                baseUIItemPresenter.Dispose();
-            }
+            foreach (var baseUIItemPresenter in this.presenters) baseUIItemPresenter.Dispose();
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(models);
-            for (var i = 0; i < models.Count; ++i)
-            {
-                this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
-            }
+            for (var i = 0; i < models.Count; ++i) this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
         }
     }
 

@@ -24,14 +24,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         {
             var buttons = view.GetComponentsInChildren<Button>();
 
-            foreach (var b in buttons)
-            {
-                b.onClick.RemoveAllListeners();
-            }
+            foreach (var b in buttons) b.onClick.RemoveAllListeners();
         }
 
         //check Object trigger With other object
-        public static bool CheckObjectOnBound(this BaseView view, Bounds bounds, Bounds g) { return bounds.Intersects(g); }
+        public static bool CheckObjectOnBound(this BaseView view, Bounds bounds, Bounds g)
+        {
+            return bounds.Intersects(g);
+        }
 
         public static void InstantiateUIPresenter<TPresenter, TView, TModel>(this IDependencyContainer container, ref TPresenter presenter, TView view, TModel model)
             where TPresenter : IUIItemPresenter<TView, TModel> where TView : IUIView
@@ -83,7 +83,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
             {
                 context.Container.Resolve<SignalBus>().Fire(new ManualInitScreenSignal()
                 {
-                    ScreenPresenter   = presenter,
+                    ScreenPresenter = presenter,
                     IncludingBindData = autoBindData,
                 });
             }).NonLazy();

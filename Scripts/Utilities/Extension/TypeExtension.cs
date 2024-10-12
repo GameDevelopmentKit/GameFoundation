@@ -6,9 +6,10 @@ namespace GameFoundation.Scripts.Utilities.Extension
     {
         public static T GetCustomAttribute<T>(this object instance) where T : Attribute
         {
-            return (T)Attribute.GetCustomAttribute(instance.GetType(), typeof(T));;
+            return (T)Attribute.GetCustomAttribute(instance.GetType(), typeof(T));
+            ;
         }
-        
+
         /// <summary>
         /// Alternative version of <see cref="Type.IsSubclassOf"/> that supports raw generic types (generic types without
         /// any type parameters).
@@ -20,10 +21,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
             while (toCheck != null && toCheck != typeof(object))
             {
                 var cur = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
-                if (baseType == cur)
-                {
-                    return true;
-                }
+                if (baseType == cur) return true;
 
                 toCheck = toCheck.BaseType;
             }

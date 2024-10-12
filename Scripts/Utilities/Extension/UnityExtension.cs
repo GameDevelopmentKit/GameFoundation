@@ -15,7 +15,7 @@
             var result = gameObject.GetComponent<T>();
             return result != null ? result : gameObject.AddComponent<T>();
         }
-        
+
         public static T GetOrAddComponent<T>(this Transform transform) where T : Component
         {
             return GetOrAddComponent<T>(transform.gameObject);

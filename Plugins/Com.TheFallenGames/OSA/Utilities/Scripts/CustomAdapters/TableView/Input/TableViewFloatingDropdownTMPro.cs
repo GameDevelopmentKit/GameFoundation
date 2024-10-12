@@ -2,10 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-
 namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Input
 {
-#if OSA_TV_TMPRO
+    #if OSA_TV_TMPRO
 	public class TableViewFloatingDropdownTMPro : TMPro.TMP_Dropdown, ITableViewFloatingDropdown
 	{
 		public event Action Closed;
@@ -29,5 +28,5 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Input
 				Closed();
 		}
 	}
-#endif
+    #endif
 }

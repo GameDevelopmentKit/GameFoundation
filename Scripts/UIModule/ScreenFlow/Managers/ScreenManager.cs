@@ -123,10 +123,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         {
             get
             {
-                if (!this.rootUICanvas)
-                {
-                    this.rootUICanvas = Object.FindObjectOfType<RootUICanvas>();
-                }
+                if (!this.rootUICanvas) this.rootUICanvas = Object.FindObjectOfType<RootUICanvas>();
                 return this.rootUICanvas;
             }
         }
@@ -158,7 +155,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         public async UniTask<TPresenter> OpenScreen<TPresenter, TModel>(TModel model) where TPresenter : IScreenPresenter<TModel>
         {
-            var nextScreen = (await this.GetScreen<TPresenter>());
+            var nextScreen = await this.GetScreen<TPresenter>();
 
             if (nextScreen != null)
             {
@@ -210,8 +207,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         public async UniTask CloseCurrentScreen()
         {
-            if (this.activeScreens.Count > 0)
-                await this.activeScreens.Last().CloseViewAsync();
+            if (this.activeScreens.Count > 0) await this.activeScreens.Last().CloseViewAsync();
         }
 
         public void CloseAllScreen()
@@ -219,10 +215,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var cacheActiveScreens = this.activeScreens.ToList();
             this.activeScreens.Clear();
 
-            foreach (var screen in cacheActiveScreens)
-            {
-                screen.CloseViewAsync().Forget();
-            }
+            foreach (var screen in cacheActiveScreens) screen.CloseViewAsync().Forget();
 
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
@@ -234,10 +227,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var cacheActiveScreens = this.activeScreens.ToList();
             this.activeScreens.Clear();
 
-            foreach (var screen in cacheActiveScreens)
-            {
-                tasks.Add(screen.CloseViewAsync());
-            }
+            foreach (var screen in cacheActiveScreens) tasks.Add(screen.CloseViewAsync());
 
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
@@ -264,9 +254,15 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #region Check Overlay Popup
 
-        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter) { return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>)); }
+        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter)
+        {
+            return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>));
+        }
 
-        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter) { return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay; }
+        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter)
+        {
+            return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay;
+        }
 
         #endregion
 
@@ -294,8 +290,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.CurrentActiveScreen.Value.SetViewParent(this.CheckPopupIsOverlay(this.CurrentActiveScreen.Value) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
 
             // if show the screen that already in the active screens list, remove current one in list and add it to the last of list
-            if (this.activeScreens.Contains(signal.ScreenPresenter))
-                this.activeScreens.Remove(signal.ScreenPresenter);
+            if (this.activeScreens.Contains(signal.ScreenPresenter)) this.activeScreens.Remove(signal.ScreenPresenter);
 
             this.activeScreens.Add(signal.ScreenPresenter);
 
@@ -311,8 +306,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     this.previousActiveScreen.OnOverlap();
 
                     //With the current screen is popup, the previous screen will be hide after the blur background is shown
-                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen.Value))
-                        this.previousActiveScreen.HideView();
+                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen.Value)) this.previousActiveScreen.HideView();
                 }
             }
         }
@@ -338,9 +332,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 }
             }
             else
-            {
                 this.activeScreens.Remove(closeScreenPresenter);
-            }
 
             closeScreenPresenter?.SetViewParent(this.CurrentHiddenRoot);
         }
@@ -359,10 +351,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             {
                 screenPresenter.SetView(viewObj.GetComponent<IScreenView>());
 
-                if (signal.IncludingBindData)
-                {
-                    screenPresenter.BindData();
-                }
+                if (signal.IncludingBindData) screenPresenter.BindData();
             }
             else
                 this.logger.Error($"The {screenInfo.AddressableScreenPath} object may be not instantiated in the RootUICanvas!!!");
@@ -380,10 +369,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private void OnPopupBlurBgShowed()
         {
-            if (this.previousActiveScreen != null && this.previousActiveScreen.ScreenStatus != ScreenStatus.Hide)
-            {
-                this.previousActiveScreen.HideView();
-            }
+            if (this.previousActiveScreen != null && this.previousActiveScreen.ScreenStatus != ScreenStatus.Hide) this.previousActiveScreen.HideView();
         }
 
         #endregion

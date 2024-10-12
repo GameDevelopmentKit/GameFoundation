@@ -6,22 +6,32 @@ namespace GameFoundation.Scripts.AssetLibrary
 
     public class ComponentReference<TComponent> : AssetReference where TComponent : Object
     {
-        public ComponentReference(string guid) : base(guid) { }
-
-        public new AsyncOperationHandle<TComponent> InstantiateAsync(Vector3 position, Quaternion rotation,
-            Transform parent = null)
+        public ComponentReference(string guid) : base(guid)
         {
-            return Addressables.ResourceManager.CreateChainOperation(
-                base.InstantiateAsync(position, Quaternion.identity, parent), this.GameObjectReady);
         }
 
-        public new AsyncOperationHandle<TComponent> InstantiateAsync(Transform parent = null,
-            bool instantiateInWorldSpace = false)
+        public new AsyncOperationHandle<TComponent> InstantiateAsync(
+            Vector3    position,
+            Quaternion rotation,
+            Transform  parent = null
+        )
         {
             return Addressables.ResourceManager.CreateChainOperation(
-                base.InstantiateAsync(parent, instantiateInWorldSpace), this.GameObjectReady);
+                base.InstantiateAsync(position, Quaternion.identity, parent),
+                this.GameObjectReady);
         }
-        AsyncOperationHandle<TComponent> GameObjectReady(AsyncOperationHandle<GameObject> arg)
+
+        public new AsyncOperationHandle<TComponent> InstantiateAsync(
+            Transform parent                  = null,
+            bool      instantiateInWorldSpace = false
+        )
+        {
+            return Addressables.ResourceManager.CreateChainOperation(
+                base.InstantiateAsync(parent, instantiateInWorldSpace),
+                this.GameObjectReady);
+        }
+
+        private AsyncOperationHandle<TComponent> GameObjectReady(AsyncOperationHandle<GameObject> arg)
         {
             var comp = arg.Result.GetComponent<TComponent>();
             return Addressables.ResourceManager.CreateCompletedOperation(comp, string.Empty);
@@ -31,10 +41,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         {
             // Release the instance
             var component = op.Result as Component;
-            if (component != null)
-            {
-                Addressables.ReleaseInstance(component.gameObject);
-            }
+            if (component != null) Addressables.ReleaseInstance(component.gameObject);
 
             // Release the handle
             Addressables.Release(op);

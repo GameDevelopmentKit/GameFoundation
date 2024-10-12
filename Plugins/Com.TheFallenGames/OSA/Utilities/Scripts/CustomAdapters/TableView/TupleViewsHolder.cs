@@ -12,27 +12,25 @@ using TText = UnityEngine.UI.Text;
 
 namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView
 {
-	public class TupleViewsHolder : BaseItemViewsHolder
-	{
-		public ITupleAdapter Adapter { get; private set; }
+    public class TupleViewsHolder : BaseItemViewsHolder
+    {
+        public ITupleAdapter Adapter { get; private set; }
 
-		protected TText _IndexText;
+        protected TText _IndexText;
 
+        public override void CollectViews()
+        {
+            base.CollectViews();
 
-		public override void CollectViews()
-		{
-			base.CollectViews();
+            this.Adapter = this.root.GetComponent(typeof(ITupleAdapter)) as ITupleAdapter;
+            this.root.GetComponentAtPath("IndexText", out this._IndexText);
+        }
 
-			Adapter = root.GetComponent(typeof(ITupleAdapter)) as ITupleAdapter;
-			root.GetComponentAtPath("IndexText", out _IndexText);
-		}
+        public virtual void UpdateViews(ITuple tuple, ITableColumns columns)
+        {
+            if (this._IndexText) this._IndexText.text = this.ItemIndex.ToString();
 
-		public virtual void UpdateViews(ITuple tuple, ITableColumns columns)
-		{
-			if (_IndexText)
-				_IndexText.text = ItemIndex.ToString();
-
-			Adapter.ResetWithTuple(tuple, columns);
-		}
-	}
+            this.Adapter.ResetWithTuple(tuple, columns);
+        }
+    }
 }

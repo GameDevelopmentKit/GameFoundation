@@ -15,7 +15,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
         public static readonly CsvDataReaderOptions CsvDataReaderOptions = new()
         {
             HasHeaders = true,
-            Delimiter  = ','
+            Delimiter  = ',',
         };
 
         public static void RegisterTypeConverter(Type type, ITypeConverter typeConverter)
@@ -36,7 +36,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
             }
             catch (Exception e)
             {
-                Debug.LogError($"GetField - {name}:"+ e);
+                Debug.LogError($"GetField - {name}:" + e);
                 return string.Empty;
             }
         }
@@ -68,22 +68,22 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
             results = typeInfo.GetFields().Select(fieldInfo => new MemberInfo
             {
-                MemberName = fieldInfo.Name, MemberType = fieldInfo.FieldType,
-                SetValue = fieldInfo.SetValue, GetValue   = fieldInfo.GetValue,
-                IsDefined = type => fieldInfo.IsDefined(type,false)
+                MemberName = fieldInfo.Name, MemberType   = fieldInfo.FieldType,
+                SetValue   = fieldInfo.SetValue, GetValue = fieldInfo.GetValue,
+                IsDefined  = type => fieldInfo.IsDefined(type, false),
             }).ToList();
-            
+
             results.AddRange(typeInfo.GetProperties().Select(propertyInfo => new MemberInfo
             {
                 MemberName = propertyInfo.Name, MemberType   = propertyInfo.PropertyType,
                 SetValue   = propertyInfo.SetValue, GetValue = propertyInfo.GetValue,
-                IsDefined = type => propertyInfo.IsDefined(type,false)
+                IsDefined  = type => propertyInfo.IsDefined(type, false),
             }));
 
             return results;
         }
     }
-    
+
     public class MemberInfo
     {
         public Func<object, object>   GetValue;

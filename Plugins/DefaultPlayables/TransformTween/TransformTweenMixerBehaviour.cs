@@ -4,44 +4,42 @@ using UnityEngine.Playables;
 
 public class TransformTweenMixerBehaviour : PlayableBehaviour
 {
-    bool m_FirstFrameHappened;
+    private bool m_FirstFrameHappened;
 
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
     {
-        Transform trackBinding = playerData as Transform;
+        var trackBinding = playerData as Transform;
 
-        if(trackBinding == null)
-            return;
+        if (trackBinding == null) return;
 
-        Vector3 defaultPosition = trackBinding.position;
-        Quaternion defaultRotation = trackBinding.rotation;
+        var defaultPosition = trackBinding.position;
+        var defaultRotation = trackBinding.rotation;
 
-        int inputCount = playable.GetInputCount ();
+        var inputCount = playable.GetInputCount();
 
-        float positionTotalWeight = 0f;
-        float rotationTotalWeight = 0f;
+        var positionTotalWeight = 0f;
+        var rotationTotalWeight = 0f;
 
-        Vector3 blendedPosition = Vector3.zero;
-        Quaternion blendedRotation = new Quaternion(0f, 0f, 0f, 0f);
+        var blendedPosition = Vector3.zero;
+        var blendedRotation = new Quaternion(0f, 0f, 0f, 0f);
 
-        for (int i = 0; i < inputCount; i++)
+        for (var i = 0; i < inputCount; i++)
         {
-            ScriptPlayable<TransformTweenBehaviour> playableInput = (ScriptPlayable<TransformTweenBehaviour>)playable.GetInput (i);
-            TransformTweenBehaviour input = playableInput.GetBehaviour ();
+            var playableInput = (ScriptPlayable<TransformTweenBehaviour>)playable.GetInput(i);
+            var input         = playableInput.GetBehaviour();
 
-            if(input.endLocation == null)
-                continue;
+            if (input.endLocation == null) continue;
 
-            float inputWeight = playable.GetInputWeight(i);
+            var inputWeight = playable.GetInputWeight(i);
 
-            if (!m_FirstFrameHappened && !input.startLocation)
+            if (!this.m_FirstFrameHappened && !input.startLocation)
             {
                 input.startingPosition = defaultPosition;
                 input.startingRotation = defaultRotation;
             }
 
-            float normalisedTime = (float)(playableInput.GetTime() / playableInput.GetDuration ());
-            float tweenProgress = input.EvaluateCurrentCurve(normalisedTime);
+            var normalisedTime = (float)(playableInput.GetTime() / playableInput.GetDuration());
+            var tweenProgress  = input.EvaluateCurrentCurve(normalisedTime);
 
             if (input.tweenPosition)
             {
@@ -54,36 +52,33 @@ public class TransformTweenMixerBehaviour : PlayableBehaviour
             {
                 rotationTotalWeight += inputWeight;
 
-                Quaternion desiredRotation = Quaternion.Lerp(input.startingRotation, input.endLocation.rotation, tweenProgress);
+                var desiredRotation = Quaternion.Lerp(input.startingRotation, input.endLocation.rotation, tweenProgress);
                 desiredRotation = NormalizeQuaternion(desiredRotation);
 
-                if (Quaternion.Dot (blendedRotation, desiredRotation) < 0f)
-                {
-                    desiredRotation = ScaleQuaternion (desiredRotation, -1f);
-                }
+                if (Quaternion.Dot(blendedRotation, desiredRotation) < 0f) desiredRotation = ScaleQuaternion(desiredRotation, -1f);
 
                 desiredRotation = ScaleQuaternion(desiredRotation, inputWeight);
 
-                blendedRotation = AddQuaternions (blendedRotation, desiredRotation);
+                blendedRotation = AddQuaternions(blendedRotation, desiredRotation);
             }
         }
 
         blendedPosition += defaultPosition * (1f - positionTotalWeight);
-        Quaternion weightedDefaultRotation = ScaleQuaternion (defaultRotation, 1f - rotationTotalWeight);
-        blendedRotation = AddQuaternions (blendedRotation, weightedDefaultRotation);
+        var weightedDefaultRotation = ScaleQuaternion(defaultRotation, 1f - rotationTotalWeight);
+        blendedRotation = AddQuaternions(blendedRotation, weightedDefaultRotation);
 
         trackBinding.position = blendedPosition;
         trackBinding.rotation = blendedRotation;
-        
-        m_FirstFrameHappened = true;
+
+        this.m_FirstFrameHappened = true;
     }
 
-    public override void OnPlayableDestroy (Playable playable)
+    public override void OnPlayableDestroy(Playable playable)
     {
-        m_FirstFrameHappened = false;
+        this.m_FirstFrameHappened = false;
     }
 
-    static Quaternion AddQuaternions (Quaternion first, Quaternion second)
+    private static Quaternion AddQuaternions(Quaternion first, Quaternion second)
     {
         first.w += second.w;
         first.x += second.x;
@@ -92,7 +87,7 @@ public class TransformTweenMixerBehaviour : PlayableBehaviour
         return first;
     }
 
-    static Quaternion ScaleQuaternion (Quaternion rotation, float multiplier)
+    private static Quaternion ScaleQuaternion(Quaternion rotation, float multiplier)
     {
         rotation.w *= multiplier;
         rotation.x *= multiplier;
@@ -101,19 +96,18 @@ public class TransformTweenMixerBehaviour : PlayableBehaviour
         return rotation;
     }
 
-    static float QuaternionMagnitude (Quaternion rotation)
+    private static float QuaternionMagnitude(Quaternion rotation)
     {
-        return Mathf.Sqrt ((Quaternion.Dot (rotation, rotation)));
+        return Mathf.Sqrt(Quaternion.Dot(rotation, rotation));
     }
 
-    static Quaternion NormalizeQuaternion (Quaternion rotation)
+    private static Quaternion NormalizeQuaternion(Quaternion rotation)
     {
-        float magnitude = QuaternionMagnitude (rotation);
+        var magnitude = QuaternionMagnitude(rotation);
 
-        if (magnitude > 0f)
-            return ScaleQuaternion (rotation, 1f / magnitude);
+        if (magnitude > 0f) return ScaleQuaternion(rotation, 1f / magnitude);
 
-        Debug.LogWarning ("Cannot normalize a quaternion with zero magnitude.");
+        Debug.LogWarning("Cannot normalize a quaternion with zero magnitude.");
         return Quaternion.identity;
     }
 }

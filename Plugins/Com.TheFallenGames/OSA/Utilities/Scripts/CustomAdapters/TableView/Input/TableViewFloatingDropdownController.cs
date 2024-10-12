@@ -5,133 +5,132 @@ using UnityEngine;
 
 namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Input
 {
-	public class TableViewFloatingDropdownController : MonoBehaviour
-	{
-		ITableViewFloatingDropdown _Dropdown;
-		Action<int> _CurrentCallback;
-		int _ValueToReturn = -1;
-		//Vector3 _PosToReset;
-		List<object> _Values = new List<object>();
-		// Excluding the Close option
-		List<string> _ValueNames = new List<string>();
+    public class TableViewFloatingDropdownController : MonoBehaviour
+    {
+        private ITableViewFloatingDropdown _Dropdown;
+        private Action<int>                _CurrentCallback;
 
+        private int _ValueToReturn = -1;
 
-		protected void Awake()
-		{
-			(transform as RectTransform).pivot = new Vector2(0f, 1f);
-			_Dropdown = GetComponent(typeof(ITableViewFloatingDropdown)) as ITableViewFloatingDropdown;
-			_Dropdown.Closed += OnDropdownClosed;
-		}
+        //Vector3 _PosToReset;
+        private List<object> _Values = new();
 
+        // Excluding the Close option
+        private List<string> _ValueNames = new();
 
-		public void InitWithEnum(Type enumType, bool sortByEnumNameInsteadOfValue = false, Action<List<object>> valuesFilter = null)
-		{
-			if (enumType == null || !enumType.IsEnum)
-			{
-				enumType = null;
-				ClearOptionsAndTypes();
-				return;
-			}
+        protected void Awake()
+        {
+            (this.transform as RectTransform).pivot =  new(0f, 1f);
+            this._Dropdown                          =  this.GetComponent(typeof(ITableViewFloatingDropdown)) as ITableViewFloatingDropdown;
+            this._Dropdown.Closed                   += this.OnDropdownClosed;
+        }
 
-			var values = Enum.GetValues(enumType);
-			var list = new List<object>();
-			var names = new List<string>();
-			for (int i = 0; i < values.Length; i++)
-			{
-				var value = (int)values.GetValue(i);
-				list.Add(value);
-				names.Add(Enum.GetName(enumType, value));
-			}
+        public void InitWithEnum(Type enumType, bool sortByEnumNameInsteadOfValue = false, Action<List<object>> valuesFilter = null)
+        {
+            if (enumType == null || !enumType.IsEnum)
+            {
+                enumType = null;
+                this.ClearOptionsAndTypes();
+                return;
+            }
 
-			if (valuesFilter != null)
-				valuesFilter(list);
+            var values = Enum.GetValues(enumType);
+            var list   = new List<object>();
+            var names  = new List<string>();
+            for (var i = 0; i < values.Length; i++)
+            {
+                var value = (int)values.GetValue(i);
+                list.Add(value);
+                names.Add(Enum.GetName(enumType, value));
+            }
 
-			if (sortByEnumNameInsteadOfValue)
-				list.Sort((a, b) => Enum.GetName(enumType, a).CompareTo(Enum.GetName(enumType, b)));
-			else
-				list.Sort();
+            if (valuesFilter != null) valuesFilter(list);
 
-			InitWithValues(list, names);
-		}
+            if (sortByEnumNameInsteadOfValue)
+                list.Sort((a, b) => Enum.GetName(enumType, a).CompareTo(Enum.GetName(enumType, b)));
+            else
+                list.Sort();
 
-		public void ShowFloating(RectTransform atParent, Action<object> onValueSelected, object invalidValue)
-		{
-			Action<int> onSelected = i =>
-			{
-				if (onValueSelected == null || _Values == null || _Values.Count <= i)
-					return;
+            this.InitWithValues(list, names);
+        }
 
-				var val = i == -1 ? invalidValue : _Values[i];
-				onValueSelected(val);
-			};
+        public void ShowFloating(RectTransform atParent, Action<object> onValueSelected, object invalidValue)
+        {
+            Action<int> onSelected = i =>
+            {
+                if (onValueSelected == null || this._Values == null || this._Values.Count <= i) return;
 
-			ShowFloating(atParent, onSelected);
-		}
+                var val = i == -1 ? invalidValue : this._Values[i];
+                onValueSelected(val);
+            };
 
-		public void ClearOptionsAndTypes()
-		{
-			_Values.Clear();
-			_ValueNames.Clear();
-			_Dropdown.ClearOptions();
-		}
+            this.ShowFloating(atParent, onSelected);
+        }
 
-		public void Hide()
-		{
-			_Dropdown.Hide();
-		}
+        public void ClearOptionsAndTypes()
+        {
+            this._Values.Clear();
+            this._ValueNames.Clear();
+            this._Dropdown.ClearOptions();
+        }
 
-		void InitWithValues(IList<object> values, IList<string> names)
-		{
-			ClearOptionsAndTypes();
-			_Values.AddRange(values);
-			_ValueNames.AddRange(names);
-		}
+        public void Hide()
+        {
+            this._Dropdown.Hide();
+        }
 
-		void ShowFloating(RectTransform atParent, Action<int> onSelected)
-		{
-			_CurrentCallback = onSelected;
-			_ValueToReturn = -1;
+        private void InitWithValues(IList<object> values, IList<string> names)
+        {
+            this.ClearOptionsAndTypes();
+            this._Values.AddRange(values);
+            this._ValueNames.AddRange(names);
+        }
 
-			_Dropdown.onValueChanged.RemoveListener(OnValueChanged);
+        private void ShowFloating(RectTransform atParent, Action<int> onSelected)
+        {
+            this._CurrentCallback = onSelected;
+            this._ValueToReturn   = -1;
 
-			gameObject.SetActive(true);
-			transform.position = atParent.position;
+            this._Dropdown.onValueChanged.RemoveListener(this.OnValueChanged);
 
-			_Dropdown.ClearOptions();
-			var options = new List<string>(_ValueNames); // modifying a copy
+            this.gameObject.SetActive(true);
+            this.transform.position = atParent.position;
 
-			options.Add("<Close>");
-			_Dropdown.AddOptions(options);
-			_Dropdown.value = options.Count - 1; // selecting an invalid value by default
-			//RefreshShownValue();
-			_Dropdown.Show();
+            this._Dropdown.ClearOptions();
+            var options = new List<string>(this._ValueNames); // modifying a copy
 
-			_Dropdown.onValueChanged.AddListener(OnValueChanged);
+            options.Add("<Close>");
+            this._Dropdown.AddOptions(options);
+            this._Dropdown.value = options.Count - 1; // selecting an invalid value by default
+            //RefreshShownValue();
+            this._Dropdown.Show();
 
-			//_PosToReset = transform.localPosition;
-			var asRT = (transform as RectTransform);
-			asRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, atParent.rect.width);
-			asRT.TryClampPositionToParentBoundary();
-		}
+            this._Dropdown.onValueChanged.AddListener(this.OnValueChanged);
 
-		void OnValueChanged(int value)
-		{
-			// The invalid value is returned as -1
-			_ValueToReturn = value == _Dropdown.OptionsCount - 1 ? -1 : value;
+            //_PosToReset = transform.localPosition;
+            var asRT = this.transform as RectTransform;
+            asRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, atParent.rect.width);
+            asRT.TryClampPositionToParentBoundary();
+        }
 
-			_Dropdown.onValueChanged.RemoveListener(OnValueChanged);
-			_Dropdown.Hide();
-		}
+        private void OnValueChanged(int value)
+        {
+            // The invalid value is returned as -1
+            this._ValueToReturn = value == this._Dropdown.OptionsCount - 1 ? -1 : value;
 
-		void OnDropdownClosed()
-		{
-			gameObject.SetActive(false);
-			if (_CurrentCallback != null)
-			{
-				var callback = _CurrentCallback;
-				_CurrentCallback = null;
-				callback(_ValueToReturn);
-			}
-		}
-	}
+            this._Dropdown.onValueChanged.RemoveListener(this.OnValueChanged);
+            this._Dropdown.Hide();
+        }
+
+        private void OnDropdownClosed()
+        {
+            this.gameObject.SetActive(false);
+            if (this._CurrentCallback != null)
+            {
+                var callback = this._CurrentCallback;
+                this._CurrentCallback = null;
+                callback(this._ValueToReturn);
+            }
+        }
+    }
 }

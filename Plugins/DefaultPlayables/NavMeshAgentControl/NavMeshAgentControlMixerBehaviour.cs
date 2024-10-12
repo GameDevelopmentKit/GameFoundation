@@ -8,25 +8,23 @@ public class NavMeshAgentControlMixerBehaviour : PlayableBehaviour
 {
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
     {
-        NavMeshAgent trackBinding = playerData as NavMeshAgent;
+        var trackBinding = playerData as NavMeshAgent;
 
-        if (!trackBinding)
-            return;
+        if (!trackBinding) return;
 
-        int inputCount = playable.GetInputCount();
+        var inputCount = playable.GetInputCount();
 
-        for (int i = 0; i < inputCount; i++)
+        for (var i = 0; i < inputCount; i++)
         {
-            float inputWeight = playable.GetInputWeight(i);
-            ScriptPlayable<NavMeshAgentControlBehaviour> inputPlayable = (ScriptPlayable<NavMeshAgentControlBehaviour>)playable.GetInput(i);
-            NavMeshAgentControlBehaviour input = inputPlayable.GetBehaviour();
+            var inputWeight   = playable.GetInputWeight(i);
+            var inputPlayable = (ScriptPlayable<NavMeshAgentControlBehaviour>)playable.GetInput(i);
+            var input         = inputPlayable.GetBehaviour();
 
             if (inputWeight > 0.5f && !input.destinationSet && input.destination)
             {
-                if (!trackBinding.isOnNavMesh)
-                    continue;
+                if (!trackBinding.isOnNavMesh) continue;
 
-                trackBinding.SetDestination (input.destination.position);
+                trackBinding.SetDestination(input.destination.position);
                 input.destinationSet = true;
             }
         }

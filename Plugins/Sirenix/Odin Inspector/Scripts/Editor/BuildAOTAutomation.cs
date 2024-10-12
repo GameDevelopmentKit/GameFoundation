@@ -14,19 +14,18 @@ namespace Sirenix.Serialization.Internal
     using System.IO;
     using System;
 
-#if UNITY_2018_1_OR_NEWER
-
+    #if UNITY_2018_1_OR_NEWER
     using UnityEditor.Build.Reporting;
 
-#endif
+    #endif
 
-#if UNITY_2018_1_OR_NEWER
+    #if UNITY_2018_1_OR_NEWER
     public class PreBuildAOTAutomation : IPreprocessBuildWithReport
-#else
+    #else
     public class PreBuildAOTAutomation : IPreprocessBuild
-#endif
+    #endif
     {
-        public int callbackOrder { get { return -1000; } }
+        public int callbackOrder => -1000;
 
         public void OnPreprocessBuild(BuildTarget target, string path)
         {
@@ -37,23 +36,23 @@ namespace Sirenix.Serialization.Internal
             }
         }
 
-#if UNITY_2018_1_OR_NEWER
+        #if UNITY_2018_1_OR_NEWER
 
         public void OnPreprocessBuild(BuildReport report)
         {
             this.OnPreprocessBuild(report.summary.platform, report.summary.outputPath);
         }
 
-#endif
+        #endif
     }
 
-#if UNITY_2018_1_OR_NEWER
+    #if UNITY_2018_1_OR_NEWER
     public class PostBuildAOTAutomation : IPostprocessBuildWithReport
-#else
+    #else
     public class PostBuildAOTAutomation : IPostprocessBuild
-#endif
+    #endif
     {
-        public int callbackOrder { get { return -1000; } }
+        public int callbackOrder => -1000;
 
         public void OnPostprocessBuild(BuildTarget target, string path)
         {
@@ -65,14 +64,14 @@ namespace Sirenix.Serialization.Internal
             }
         }
 
-#if UNITY_2018_1_OR_NEWER
+        #if UNITY_2018_1_OR_NEWER
 
         public void OnPostprocessBuild(BuildReport report)
         {
             this.OnPostprocessBuild(report.summary.platform, report.summary.outputPath);
         }
 
-#endif
+        #endif
     }
 }
 

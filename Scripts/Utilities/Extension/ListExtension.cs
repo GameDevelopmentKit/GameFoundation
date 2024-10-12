@@ -15,9 +15,8 @@
             {
                 int randomIndex;
                 do
-                {
                     randomIndex = Random.Range(0, seedData.Count);
-                } while (marked.Contains(randomIndex));
+                while (marked.Contains(randomIndex));
 
                 marked.Add(randomIndex);
                 result.Add(seedData[randomIndex]);
@@ -29,10 +28,7 @@
         public static List<int> GetRandomListInt(this object obj, int amount, int rangeMin = 0, int rangeMax = 100)
         {
             var result = new List<int>();
-            for (var i = 0; i < amount; i++)
-            {
-                result.Add(Random.Range(rangeMin, rangeMax));
-            }
+            for (var i = 0; i < amount; i++) result.Add(Random.Range(rangeMin, rangeMax));
 
             return result;
         }
@@ -52,9 +48,9 @@
             var src = source.ToArray();
 
             return src
-                   .Union(count > src.Length ? Enumerable.Repeat(defaultValue, count - src.Length) : Enumerable.Empty<T>())
-                   .ShuffleSource()
-                   .Take(count);
+                .Union(count > src.Length ? Enumerable.Repeat(defaultValue, count - src.Length) : Enumerable.Empty<T>())
+                .ShuffleSource()
+                .Take(count);
         }
 
         public static T PickRandom<T>(this IEnumerable<T> source)
@@ -75,23 +71,17 @@
         public static void TryInsert<T>(this List<T> list, T item, int index)
         {
             if (index >= 0 && index < list.Count)
-            {
                 list.Insert(index, item);
-            }
             else
-            {
                 list.Add(item);
-            }
         }
 
         public static bool TryGetItem<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource item, out int index)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
             index = 0;
-            foreach (TSource source1 in source)
+            foreach (var source1 in source)
             {
                 if (predicate(source1))
                 {

@@ -11,9 +11,15 @@ namespace GameFoundation.Scripts.Utilities.Utils
     {
         private readonly HashSet<string> exclusions;
 
-        public EnumEnumerableExcludeAttribute() { this.exclusions = new HashSet<string>(); }
+        public EnumEnumerableExcludeAttribute()
+        {
+            this.exclusions = new();
+        }
 
-        public EnumEnumerableExcludeAttribute(params string[] exclusions) { this.exclusions = exclusions.ToHashSet(); }
+        public EnumEnumerableExcludeAttribute(params string[] exclusions)
+        {
+            this.exclusions = exclusions.ToHashSet();
+        }
 
         public bool IsExcluded<TEnum>(TEnum enumValue) where TEnum : Enum
         {

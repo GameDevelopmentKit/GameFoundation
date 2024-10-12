@@ -32,9 +32,7 @@
         {
             this.currentCooldownTime -= (long)signal.MinimizeTime;
             if (this.currentCooldownTime <= 0)
-            {
                 this.onComplete?.Invoke();
-            }
             else
             {
                 this.observableTimer?.Dispose();
@@ -85,21 +83,12 @@
             var  timeSpan = TimeSpan.FromSeconds(time);
             long cycle    = 0;
             if (timeSpan.TotalDays > MIN_DAYS)
-            {
                 cycle = 86400;
-            }
             else if (timeSpan.TotalHours > MIN_HOURS)
-            {
                 cycle = 3600;
-            }
             else if (timeSpan.TotalMinutes > MIN_MINUTES)
-            {
-                cycle = 60;
-            }
-            else if (timeSpan.Minutes <= MIN_MINUTES)
-            {
-                cycle = 1;
-            }
+                cycle                                       = 60;
+            else if (timeSpan.Minutes <= MIN_MINUTES) cycle = 1;
 
             return cycle;
         }

@@ -6,12 +6,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Signals
     {
         public IScreenPresenter ScreenPresenter;
     }
-    
+
     public class PopupHiddenSignal
     {
         public IScreenPresenter ScreenPresenter;
     }
-    
+
     public class PopupBlurBgShowedSignal
     {
     }

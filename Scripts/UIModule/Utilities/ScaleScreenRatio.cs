@@ -12,18 +12,22 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         private const float LandscapeStandardScreenRatio = 1.8f;
 
         private const float PortraitStandardScreenRatio = 0.56f;
-        private       void  Awake() { this.SetCanvasScaler(); }
+
+        private void Awake()
+        {
+            this.SetCanvasScaler();
+        }
 
         private void SetCanvasScaler()
         {
             // if current screen ratio > WideScreenRatio, it will be the long screen the need keep height and scale width, and vice versa 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             var standardScreenRatio = Screen.width > Screen.height ? LandscapeStandardScreenRatio : PortraitStandardScreenRatio;
             this.GetComponent<CanvasScaler>().matchWidthOrHeight = Screen.width * 1.0f / Screen.height >= standardScreenRatio ? 1 : 0;
-#else
+            #else
             var standardScreenRatio = Screen.width > Screen.height ? LandscapeStandardScreenRatio : PortraitStandardScreenRatio;
             this.GetComponent<CanvasScaler>().matchWidthOrHeight = Screen.currentResolution.width * 1.0f / Screen.currentResolution.height >= standardScreenRatio ? 1 : 0;
-#endif
+            #endif
         }
     }
 }

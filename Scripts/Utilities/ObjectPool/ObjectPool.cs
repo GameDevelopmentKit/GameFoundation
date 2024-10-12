@@ -6,15 +6,16 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     public class ObjectPool : MonoBehaviour
     {
         public GameObject       prefab;
-        public List<GameObject> pooledObjects  = new List<GameObject>();
-        public List<GameObject> spawnedObjects = new List<GameObject>();
+        public List<GameObject> pooledObjects  = new();
+        public List<GameObject> spawnedObjects = new();
 
         private bool isDestroying;
+
         public GameObject Spawn(Transform parent, Vector3 position, Quaternion rotation)
         {
             GameObject obj                = null;
             var        pooledObjectsCount = this.pooledObjects.Count;
-            
+
             while (obj == null && pooledObjectsCount > 0)
             {
                 obj = this.pooledObjects[pooledObjectsCount - 1];
@@ -30,9 +31,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 obj.SetActive(true);
             }
             else
-            {
                 obj = Instantiate(this.prefab, position, rotation);
-            }
 
             obj.transform.SetParent(parent ? parent : this.transform);
             this.spawnedObjects.Add(obj);
@@ -45,16 +44,12 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             this.pooledObjects.Add(obj);
             this.spawnedObjects.Remove(obj);
             obj.SetActive(false);
-            if (!this.isDestroying)
-                obj.transform.SetParent(this.transform);
+            if (!this.isDestroying) obj.transform.SetParent(this.transform);
         }
 
         public void CleanUpPooled()
         {
-            foreach (var t in this.pooledObjects)
-            {
-                Destroy(t);
-            }
+            foreach (var t in this.pooledObjects) Destroy(t);
 
             this.pooledObjects.Clear();
         }

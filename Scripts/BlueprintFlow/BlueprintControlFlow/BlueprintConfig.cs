@@ -20,10 +20,13 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         public         string FetchBlueprintUri     => string.Format(this.fetchBlueprintUri, this.currentBlueprintVersion);
         public         bool   IsResourceMode        => this.isResourceMode;
-        public virtual string BlueprintZipFilepath  => $"{persistentDataPath}/Blueprints_v{this.currentBlueprintVersion}.zip";
+        public virtual string BlueprintZipFilepath  => $"{this.persistentDataPath}/Blueprints_v{this.currentBlueprintVersion}.zip";
         public         string ResourceBlueprintPath => this.resourceBlueprintPath;
         public         string BlueprintFileType     => this.blueprintFileType;
 
-        private void OnEnable() { this.persistentDataPath = Application.persistentDataPath; }
+        private void OnEnable()
+        {
+            this.persistentDataPath = Application.persistentDataPath;
+        }
     }
 }
