@@ -26,7 +26,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             this.introAnimation.timeUpdateMode = this.DirectorUpdateMode;
             this.outroAnimation.timeUpdateMode = this.DirectorUpdateMode;
             if (!this.introAnimation.playableAsset)
+            {
                 Debug.LogWarning($"Intro Animation for {this.gameObject.name} is not available", this);
+            }
             else
             {
                 this.introAnimation.playOnAwake =  false;
@@ -34,7 +36,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             }
 
             if (!this.outroAnimation.playableAsset)
+            {
                 Debug.LogWarning($"Outro animation for {this.gameObject.name} is not available", this);
+            }
             else
             {
                 this.outroAnimation.playOnAwake =  false;

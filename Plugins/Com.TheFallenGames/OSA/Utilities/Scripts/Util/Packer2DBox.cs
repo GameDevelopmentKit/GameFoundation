@@ -114,8 +114,9 @@ namespace Com.ForbiddenByte.OSA.Util
                 this.FindNode(rootNode.bottomNode, boxWidth, boxHeight, ref node);
             }
             else if (boxWidth <= rootNode.width && boxHeight <= rootNode.height)
-                if (node == null || rootNode.distFromOrigin < node.distFromOrigin)
-                    node = rootNode;
+            {
+                if (node == null || rootNode.distFromOrigin < node.distFromOrigin) node = rootNode;
+            }
         }
 
         private Node SplitNode(Node node, double boxWidth, double boxHeight)
@@ -143,7 +144,9 @@ namespace Com.ForbiddenByte.OSA.Util
                     this._AlternatingOtherStrategyBiggerRightNode = !this._AlternatingOtherStrategyBiggerRightNode;
                 }
                 else
+                {
                     biggerRightNode = rightVolume > bottomVolume;
+                }
             }
             else if (localStrategy == NodeChoosingStrategy.MAX_SIDE)
             {
@@ -157,7 +160,9 @@ namespace Com.ForbiddenByte.OSA.Util
                     this._AlternatingOtherStrategyBiggerRightNode = !this._AlternatingOtherStrategyBiggerRightNode;
                 }
                 else
+                {
                     biggerRightNode = rightMaxSide > bottomMaxSide;
+                }
             }
             else if (localStrategy == NodeChoosingStrategy.MAX_SIDE)
             {
@@ -171,7 +176,9 @@ namespace Com.ForbiddenByte.OSA.Util
                     this._AlternatingOtherStrategyBiggerRightNode = !this._AlternatingOtherStrategyBiggerRightNode;
                 }
                 else
+                {
                     biggerRightNode = rightMaxSide > bottomMaxSide;
+                }
             }
             else if (localStrategy == NodeChoosingStrategy.MAX_SUM)
             {
@@ -185,14 +192,20 @@ namespace Com.ForbiddenByte.OSA.Util
                     this._AlternatingOtherStrategyBiggerRightNode = !this._AlternatingOtherStrategyBiggerRightNode;
                 }
                 else
+                {
                     biggerRightNode = rightSum > bottomSum;
+                }
             }
             else
             {
                 if (this._ChoosingStrategy == NodeChoosingStrategy.RIGHT)
+                {
                     biggerRightNode = true;
+                }
                 else if (this._ChoosingStrategy == NodeChoosingStrategy.BOTTOM)
+                {
                     biggerRightNode = false;
+                }
                 else
                 {
                     // Alternating

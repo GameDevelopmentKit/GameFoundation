@@ -305,10 +305,14 @@ namespace frame8.Logic.Misc.Other.Extensions
 
             if (myCorners[0].y <= canvasCorners[0].y)
                 // overlapping with bottom
+            {
                 rt.SetInsetAndSizeFromParentEdgeWithCurrentAnchors(RectTransform.Edge.Bottom, 20f, rt.rect.size.y);
+            }
             else if (myCorners[1].y >= canvasCorners[1].y)
                 // overlapping with top
+            {
                 rt.SetInsetAndSizeFromParentEdgeWithCurrentAnchors(RectTransform.Edge.Top, 20f, rt.rect.size.y);
+            }
             else
             {
             }

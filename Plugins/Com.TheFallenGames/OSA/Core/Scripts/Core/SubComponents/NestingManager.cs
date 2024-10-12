@@ -78,7 +78,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
             }
             else
                 // Only allow the scroll handler to be taken from the drag handler, if any, so all handlers will come from the same object
+            {
                 this.parentScrollHandler = this.parentInitializePotentialDragHandler as IScrollHandler;
+            }
 
             this._SearchedAtLeastOnce = true;
         }
@@ -113,7 +115,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
             }
             else
                 // When the child ScrollView has its drag disabled, forward the event to the parent without further checks
+            {
                 this._CurrentDragCapturedByParent = true;
+            }
 
             if (!this._CurrentDragCapturedByParent) return;
 

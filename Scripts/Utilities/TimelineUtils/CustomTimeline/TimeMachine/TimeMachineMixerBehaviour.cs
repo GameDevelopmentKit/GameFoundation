@@ -45,7 +45,9 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeMach
                                     //Rewind
                                     if (input.action == TimeMachineBehaviour.TimeMachineAction.JumpToTime)
                                         //Jump to time
+                                    {
                                         (playable.GetGraph().GetResolver() as PlayableDirector).time = (double)input.timeToJumpTo;
+                                    }
                                     else
                                     {
                                         //Jump to marker

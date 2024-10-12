@@ -261,7 +261,9 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
             } while (!found && ++ii < 5 /*avoid potential infinite loop*/ && buttonPtr != IntPtr.Zero);
 
             if (found)
+            {
                 NativeMethods.SendMessage(buttonPtr, 0x00F5 /*BM_CLICK*/, IntPtr.Zero, IntPtr.Zero);
+            }
             else
             {
                 // shouldn't happen...
@@ -608,9 +610,13 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
                 implementationsString = implementationsString.Substring(0, implementationsString.Length - 2);
 
                 if (string.IsNullOrEmpty(scriptName))
+                {
                     throw new OSAException("Internal error: _WindowParams.generatedScriptNameToUse is null after recompilation; " + "availableImplementations=" + implementationsString);
+                }
                 else if ((fullName = this.GetFullNameIfScriptExists(scriptName)) == null)
+                {
                     throw new OSAException("Internal error: Couldn't find the type's fullName for script '" + scriptName + "'. Did you delete the newly created script?\n " + "availableImplementations=" + implementationsString);
+                }
                 else
                 {
                     // Commented this is done in initInFirstOnGUI
@@ -752,7 +758,9 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
                             //	ReloadVisualStudioSolutionIfOpenedAndIfPossible();
                         }
                         else
+                        {
                             Debug.Log("OSA: Could not open '" + iAdapter.GetType().Name + "' in external code editor");
+                        }
                     }
 
                     this._State = State.PING_SCROLL_RECT_PENDING;
@@ -798,7 +806,9 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
                         if (this._WindowParams.destroyScrollRectAfter) DestroyImmediate(this._WindowParams.scrollRect);
                     }
                     else
+                    {
                         Debug.Log("OSA: Unexpected state: the scrollrect was destroyed meanwhile. Did you delete it from the scene?");
+                    }
 
                     this._State = State.CLOSE_PENDING;
 
@@ -946,7 +956,9 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
             }
             else
                 // Will be executed in the next Update
+            {
                 this._State = State.ATTACH_EXISTING_OSA_PENDING;
+            }
         }
 
         private bool ScheduleCloseIfUndefinedState()
@@ -1128,7 +1140,9 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
                 if (this._WindowParams.indexOfExistingImplementationToUse == 0)
                 {
                     if (this._WindowParams.availableTemplates.Length == 0)
+                    {
                         EditorGUILayout.HelpBox("There are no templates in */Resources/" + CWiz.TEMPLATE_SCRIPTS_RESPATH + ". Did you manually delete them? If not, this is a Unity bug and you can solve it by re-opening Unity", MessageType.Error);
+                    }
                     else
                     {
                         this._WindowParams.IndexOfTemplateToUseForNewScript =

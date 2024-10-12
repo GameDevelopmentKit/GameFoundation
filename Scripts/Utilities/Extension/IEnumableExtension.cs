@@ -36,10 +36,12 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var passes = new List<T>();
             var fails  = new List<T>();
             foreach (var entry in list)
+            {
                 if (predicate(entry))
                     passes.Add(entry);
                 else
                     fails.Add(entry);
+            }
             return (passes, fails);
         }
 
@@ -325,7 +327,9 @@ namespace GameFoundation.Scripts.Utilities.Extension
                 pool.Return(tmp);
             }
             else
+            {
                 result = list[mid];
+            }
 
             return result;
         }

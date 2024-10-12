@@ -79,11 +79,13 @@ namespace Com.ForbiddenByte.OSA.Util.ItemDragging
             raycaster.Raycast(pev, raycastResults);
             var foundThis = false;
             foreach (var res in raycastResults)
+            {
                 if (res.gameObject == this.gameObject)
                 {
                     foundThis = true;
                     break;
                 }
+            }
 
             // Happens if the object is moved externally while the pointer remains still
             if (!foundThis)
@@ -170,7 +172,9 @@ namespace Com.ForbiddenByte.OSA.Util.ItemDragging
             if (eventData.button != PointerEventData.InputButton.Left) return;
 
             if (this._State == StateEnum.PRESSING__WAITING_FOR_LONG_CLICK)
+            {
                 this.EnterState_WaitingForPress();
+            }
             else if (this._State == StateEnum.DRAGGING || this._State == StateEnum.AFTER_LONG_CLICK_DRAG_ACCEPTED__WAITING_TO_BEGIN_DRAG)
             {
                 var raycaster = this._GraphicRaycaster;
@@ -214,7 +218,9 @@ namespace Com.ForbiddenByte.OSA.Util.ItemDragging
                         casted.OnBeginDrag(eventData);
                     }
                     else
+                    {
                         this.EnterState_WaitingForPress();
+                    }
                 }
 
                 return;
@@ -275,7 +281,9 @@ namespace Com.ForbiddenByte.OSA.Util.ItemDragging
                     this.SetVisualMode(VisualMode.OVER_OWNER_OR_OUTSIDE);
             }
             else
+            {
                 this.SetVisualMode(VisualMode.OVER_OWNER_OR_OUTSIDE);
+            }
 
             if (this.dragDropListener != null) this.dragDropListener.OnDraggedItem(eventData);
         }

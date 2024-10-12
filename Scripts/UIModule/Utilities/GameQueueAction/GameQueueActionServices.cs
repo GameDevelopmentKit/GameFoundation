@@ -58,7 +58,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                         listAction.TryInsert(action, index);
                     }
                     else
+                    {
                         listAction[curIndex] = action;
+                    }
                 }
                 else
                 {

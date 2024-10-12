@@ -73,7 +73,9 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
                 this.SlowUpdate();
             }
             else
+            {
                 ++this._CurrentFrameInSlowUpdateCycle;
+            }
         }
 
         protected void OnGUI()
@@ -217,6 +219,7 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
 
             this.DisableOrNotifyAboutMiscComponents(scrollRect.content.gameObject, "Content");
             foreach (Transform child in scrollRect.content)
+            {
                 if (child.gameObject.activeSelf)
                 {
                     if (Array.IndexOf(objectsToSkipDisabling, child) != -1) continue;
@@ -224,6 +227,7 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
                     Debug.Log("OSA: De-activating Content's unknown child '" + child.name + "'. You can activate it back if it doesn't interfere with OSA");
                     child.gameObject.SetActive(false);
                 }
+            }
         }
 
         protected abstract void GetErrorAndWarning(out string error, out string warning);

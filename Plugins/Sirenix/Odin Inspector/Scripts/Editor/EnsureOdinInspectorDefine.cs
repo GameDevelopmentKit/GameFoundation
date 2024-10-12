@@ -32,6 +32,7 @@ namespace Sirenix.Utilities
             var changed = false;
 
             foreach (var define in DEFINES)
+            {
                 if (defines.Contains(define) == false)
                 {
                     if (definesString.EndsWith(";", StringComparison.InvariantCulture) == false) definesString += ";";
@@ -39,6 +40,7 @@ namespace Sirenix.Utilities
                     definesString += define;
                     changed       =  true;
                 }
+            }
 
             if (changed) PlayerSettings.SetScriptingDefineSymbolsForGroup(currentTarget, definesString);
         }

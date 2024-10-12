@@ -115,7 +115,9 @@ namespace Com.ForbiddenByte.OSA.CustomParams
                     LayoutRebuilder.ForceRebuildLayoutImmediate(asRT);
                 }
                 else
+                {
                     LayoutRebuilder.ForceRebuildLayoutImmediate(this.ItemPrefab);
+                }
             }
 
             if (this.PrefabControlsDefaultItemSize)

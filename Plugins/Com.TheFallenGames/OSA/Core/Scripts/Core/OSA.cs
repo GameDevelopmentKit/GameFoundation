@@ -293,7 +293,9 @@ namespace Com.ForbiddenByte.OSA.Core
                     allowTransientSpeed = true;
             }
             else
+            {
                 stopMovement = true;
+            }
 
             var cancelAnimations = false;
             if (!stopMovement)
@@ -527,7 +529,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 var inertiaWaitTimeWindow             = Mathf.Max(this.DeltaTime, .1f); // max time to wait for the inertia to still be applied
 
                 if (dtSinceLastOnDragStrictlyPositive > inertiaWaitTimeWindow)
+                {
                     zeroVelocity = true;
+                }
                 else
                 {
                     var ctSpaceDeltaFromPressPosition        = this._InternalState.GetPointerPositionInCTSpace(eventData) - this._OnInitializePotentialDragPointerPosInCTSpace;
@@ -541,7 +545,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 }
 
                 if (zeroVelocity)
+                {
                     this._Velocity[this._InternalState.hor0_vert1] = 0f;
+                }
                 else
                 {
                     var velocityToAdd = this._VelocityToAddOnDragEnd[this._InternalState.hor0_vert1];
@@ -992,7 +998,9 @@ namespace Com.ForbiddenByte.OSA.Core
                     //Debug.Log("cancel - other started");
                 }
                 else
+                {
                     return false;
+                }
             }
 
             this._SmoothScrollCoroutine = this.StartCoroutine(this.SmoothScrollProgressCoroutine(itemIndex, duration, normalizedOffsetFromViewportStart, normalizedPositionOfItemPivotToUse, onProgress, onDone));
@@ -1235,7 +1243,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 }
                 else
                     // Simulate scroll towards end to remove any items that went outside viewport
+                {
                     reportedScrollDelta = -.1d;
+                }
             }
             else
             {
@@ -1251,7 +1261,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 }
                 else
                     // .. analogue
+                {
                     reportedScrollDelta = .1d;
+                }
             }
 
             //CorrectPositionsOfVisibleItemsBasedOnCachedCTInsetFromVPS(true);
@@ -1467,7 +1479,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 {
                     var indexInView = oldIndicesInViewOfNonDefaultSizedItems[i];
                     if (i == 0)
+                    {
                         itemsDesc.BeginChangingItemsSizes(indexInView);
+                    }
                     else
                     {
                         var consecutiveWithPrevious = prevIndexInView + 1 == indexInView;
@@ -1621,11 +1635,13 @@ namespace Com.ForbiddenByte.OSA.Core
             if (this._VisibleItems != null)
             {
                 foreach (var item in this._VisibleItems)
+                {
                     if (item != null)
                     {
                         this.OnBeforeRecycleOrDisableViewsHolder(item, -1);
                         if (item.root != null) this.InternalDestroyRecyclableItem(item, true);
                     }
+                }
                 this._VisibleItems.Clear();
                 this.VisibleItemsCount = 0;
             }
@@ -1909,10 +1925,15 @@ namespace Com.ForbiddenByte.OSA.Core
                         vh.root.gameObject.SetActive(true);
                 }
                 else
+                {
                     scale = Vector3.zero;
+                }
                 vh.root.localScale = scale;
             }
-            else if (vh.root.gameObject.activeSelf != vhEnabled) vh.root.gameObject.SetActive(vhEnabled);
+            else if (vh.root.gameObject.activeSelf != vhEnabled)
+            {
+                vh.root.gameObject.SetActive(vhEnabled);
+            }
         }
 
         public void SetViewsHolderEnabled(TItemViewsHolder vh)
@@ -1924,7 +1945,10 @@ namespace Com.ForbiddenByte.OSA.Core
                     vh.root.gameObject.SetActive(true);
                 vh.root.localScale = Vector3.one;
             }
-            else if (!vh.root.gameObject.activeSelf) vh.root.gameObject.SetActive(true);
+            else if (!vh.root.gameObject.activeSelf)
+            {
+                vh.root.gameObject.SetActive(true);
+            }
         }
 
         public bool IsViewsHolderEnabled(TItemViewsHolder vh)

@@ -136,7 +136,9 @@
                 if (_OnSwipeDetected != null) _OnSwipeDetected(swipeDirection, swipeVelocity);
             }
             else
+            {
                 swipeDirection = Swipe.None;
+            }
         }
 
         public static bool IsSwiping()

@@ -95,8 +95,10 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             var has0xOffset = has0x ? 1 : 0;
 
             for (var stringIndex = has0xOffset * 2; stringIndex < hex.Length; stringIndex += this.ByteLength)
+            {
                 byteArray[(stringIndex - has0xOffset) / this.ByteLength] =
                     Convert.ToByte(hex.Substring(stringIndex, 2), 16);
+            }
 
             return byteArray;
         }

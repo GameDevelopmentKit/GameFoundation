@@ -45,7 +45,9 @@ namespace Com.ForbiddenByte.OSA.Util.IO
                 var foundCached = false;
                 // Don't re-request if the url is the same. This is useful if there's no pool provided
                 if (currentRequestedURLAlreadyLoaded)
+                {
                     foundCached = this._Texture != null;
+                }
                 else if (this._Pool != null)
                 {
                     var cachedInPool = this._Pool.Get(imageURL) as Texture2D;
@@ -91,7 +93,9 @@ namespace Com.ForbiddenByte.OSA.Util.IO
                             if (someoneStoredTheImageSooner)
                                 // Happens when the same URL is requested multiple times for the first time, and of course only the first 
                                 // downloaded image should be kept. In this case, someone else already have downloaded and cached the image, so we just discard the one we downloaded
+                            {
                                 this._Texture = textureAlreadyStoredMeanwhile as Texture2D;
+                            }
                             else
                             {
                                 // First time downloaded => cache
@@ -104,7 +108,10 @@ namespace Com.ForbiddenByte.OSA.Util.IO
 
                         if (onCompleted != null) onCompleted(false, true);
                     }
-                    else if (onCanceled != null) onCanceled();
+                    else if (onCanceled != null)
+                    {
+                        onCanceled();
+                    }
                 },
                 onError = () =>
                 {
@@ -114,7 +121,10 @@ namespace Com.ForbiddenByte.OSA.Util.IO
 
                         if (onCompleted != null) onCompleted(false, false);
                     }
-                    else if (onCanceled != null) onCanceled();
+                    else if (onCanceled != null)
+                    {
+                        onCanceled();
+                    }
                 },
             };
             SimpleImageDownloader.Instance.Enqueue(request);

@@ -129,7 +129,9 @@ namespace Com.ForbiddenByte.OSA.Util
             }
             var normPos = this.GetNormPosOnDraggingSegment(this.GetVEndPointStartTo(rtNewPosUnclamped));
             if (this._DragSelf)
+            {
                 this.SetNormalizedPosition(normPos, true);
+            }
             else
             {
                 //Debug.Log(normPos);

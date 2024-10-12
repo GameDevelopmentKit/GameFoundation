@@ -378,7 +378,9 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
                 activeCellsForThisGroup = this._CellsCount - totalCellsBeforeThisGroup;
             }
             else
+            {
                 activeCellsForThisGroup = this._Params.CurrentUsedNumCellsPerGroup;
+            }
             newOrRecycled.NumActiveCells = activeCellsForThisGroup;
 
             for (var i = 0; i < activeCellsForThisGroup; ++i) this.UpdateCellViewsHolder(newOrRecycled.ContainingCellViewsHolders[i]);

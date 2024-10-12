@@ -154,7 +154,9 @@ namespace Com.ForbiddenByte.OSA.DataHelpers
                 this._Adapter.InsertItems(this._UseFilteredData ? filteredIndex : unfilteredIndex, wetherToInsert, freezeEndEdge, this._KeepVelocityOnCountChange);
             }
             else
+            {
                 this._Adapter.ResetItems(this.CurrentList.Count, freezeEndEdge, this._KeepVelocityOnCountChange);
+            }
         }
 
         public void InsertOneAtStart(T model, bool freezeEndEdge = false)
@@ -193,10 +195,14 @@ namespace Com.ForbiddenByte.OSA.DataHelpers
                     if (filteredItemsToRemove > 0) this._Adapter.RemoveItems(filteredMinIndex, filteredItemsToRemove, freezeEndEdge, this._KeepVelocityOnCountChange);
                 }
                 else
+                {
                     this._Adapter.RemoveItems(index, count, this._KeepVelocityOnCountChange);
+                }
             }
             else
+            {
                 this._Adapter.ResetItems(this.CurrentList.Count, freezeEndEdge, this._KeepVelocityOnCountChange);
+            }
         }
 
         public void RemoveItemsFromStart(int count, bool freezeEndEdge = false)

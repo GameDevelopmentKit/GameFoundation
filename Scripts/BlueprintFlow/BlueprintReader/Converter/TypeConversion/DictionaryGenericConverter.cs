@@ -26,9 +26,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
                 var list = new List<string>();
                 foreach (DictionaryEntry itemData in (IDictionary)value)
+                {
                     list.Add(string.Join(this.delimiterPair,
                         keyConverter.ConvertToString(itemData.Key, keyType),
                         valueConverter.ConvertToString(itemData.Value, valueType)));
+                }
 
                 return string.Join(this.delimiterItem, list);
             }

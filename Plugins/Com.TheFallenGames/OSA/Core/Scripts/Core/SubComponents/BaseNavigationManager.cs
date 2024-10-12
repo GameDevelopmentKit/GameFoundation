@@ -93,7 +93,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
 
             float durationToUse;
             if (duration == 0f || this.Adapter.DeltaTime > duration / 2f)
+            {
                 durationToUse = 0f;
+            }
             else
             {
                 var timeSinceLastBringToView                                = this.Adapter.Time - this._OSATimeOnLastAnimatedBringToView;

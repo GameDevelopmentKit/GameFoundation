@@ -42,7 +42,9 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Basic
                 for (var i = 0; i < newValues.Count; i++) this._Values[i] = newValues[i];
             }
             else
+            {
                 this._Values = newValues;
+            }
         }
     }
 }

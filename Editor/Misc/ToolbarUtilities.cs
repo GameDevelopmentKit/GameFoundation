@@ -111,12 +111,14 @@
                 var sceneIndex = -1;
 
                 for (var i = 0; i < _sceneNames.Length; ++i)
+                {
                     if (sceneName == _sceneNames[i])
                     {
                         sceneIndex = i;
 
                         break;
                     }
+                }
 
                 var newSceneIndex = EditorGUILayout.Popup(sceneIndex, _sceneNames, GUILayout.Width(200.0f));
 

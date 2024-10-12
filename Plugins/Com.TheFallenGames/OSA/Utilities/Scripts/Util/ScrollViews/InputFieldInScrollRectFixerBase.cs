@@ -22,7 +22,9 @@ namespace Com.ForbiddenByte.OSA.AdditionalComponents
             this._InputField = this.GetComponent<Selectable>();
             this._IAmChild   = this._InputField == null;
             if (this._IAmChild)
+            {
                 this.InitAsChild();
+            }
             else
             {
                 this.CacheMethods();

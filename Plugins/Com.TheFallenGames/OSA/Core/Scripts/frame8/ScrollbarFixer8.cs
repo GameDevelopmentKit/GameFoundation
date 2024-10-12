@@ -317,8 +317,9 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
             // Handling the case when the scrollbar was hidden but its autoHide property was set to false afterwards 
             // and hideWhenNotNeeded is also false, meaning the scrollbar won't ever be shown
             else if (!this.hideWhenNotNeeded)
-                if (this._Hidden)
-                    this.Show();
+            {
+                if (this._Hidden) this.Show();
+            }
         }
 
         private void UpdateOnPreDragging()
@@ -559,7 +560,9 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 
                     double sizeUnclamped;
                     if (contentSize <= 0d || contentSize == double.NaN || contentSize == double.Epsilon || contentSize == double.NegativeInfinity || contentSize == double.PositiveInfinity)
+                    {
                         sizeUnclamped = size = 1d;
+                    }
                     else
                     {
                         sizeUnclamped = viewportSize / contentSize;
@@ -600,8 +603,9 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
                     // Handling the case when the scrollbar was hidden but its hideWhenNotNeeded property was set to false afterwards
                     // and autoHide is also false, meaning the scrollbar won't ever be shown
                     else if (!this.autoHide)
-                        if (this._Hidden)
-                            this.Show();
+                    {
+                        if (this._Hidden) this.Show();
+                    }
 
                     if (!this._TriedToCallOnScrollbarSizeChangedAtLeastOnce || oldSizeFloat != currentSizeFloat)
                     {

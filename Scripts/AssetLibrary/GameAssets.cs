@@ -306,10 +306,12 @@ namespace GameFoundation.Scripts.AssetLibrary
 
             if (!this.assetsAutoUnloadByScene.TryGetValue(sceneName, out var listAsset)) return;
             foreach (var asset in listAsset)
+            {
                 if (this.loadedScenes.ContainsKey(asset))
                     this.UnloadSceneAsync(asset);
                 else
                     this.ReleaseAsset(asset);
+            }
 
             this.assetsAutoUnloadByScene.Remove(sceneName);
         }

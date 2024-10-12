@@ -259,12 +259,16 @@ namespace Com.ForbiddenByte.OSA.AdditionalComponents
                                 nextSelectable = this.FindVHSelectableInDirectionOrDefault(otherExtremityItemIndex - nextOSAItemDirSign, nextOSAItemDirSign, extremityItemIndex, this, nextOuterSelectableFromParams);
                             }
                             else
+                            {
                                 nextSelectable = nextOuterSelectableFromParams;
+                            }
 
                             //SetOrFindNextSelectable(evSystem, nextSelectable, findNextSelectableAuto_Vector);
                         }
                         else
+                        {
                             nextSelectable = this.FindVHSelectableInDirectionOrDefault(itemIndex, nextOSAItemDirSign, extremityItemIndex, this, nextOuterSelectableFromParams);
+                        }
                     }
                     else
                     {
@@ -283,7 +287,9 @@ namespace Com.ForbiddenByte.OSA.AdditionalComponents
                         else
                             // Either nav mode is None, or Explicit and no Selectable assigned in that direction.
                             // In this case, we don't do anything, as it's required to have <this> selected as the next selectable in order to 'enter' OSA
+                        {
                             return;
+                        }
 
                         //// Commented: setting to null, and SetOrFindNextSelectable() will decide what to do next, based on params
                         ////nextSelectable = curSelectable.FindSelectable(findNextSelectableAuto_Vector);
@@ -334,7 +340,9 @@ namespace Com.ForbiddenByte.OSA.AdditionalComponents
                         else
                             // Either nav mode is None, or Explicit and no Selectable assigned in that direction.
                             // In this case, we don't do anything, as it's required to have <this> selected as the next selectable in order to 'enter' OSA
+                        {
                             return;
+                        }
                     }
                     //SetOrFindNextSelectable(evSystem, nextSelectableFromParams, findNextSelectableAuto_Vector);
                 }
@@ -544,7 +552,9 @@ namespace Com.ForbiddenByte.OSA.AdditionalComponents
                                 nextSelectableVH = null;
                         }
                         else
+                        {
                             this.GetClosestSelectableFromOSAsVHs(curSelectable.gameObject, out nextSelectable, out nextSelectableVH);
+                        }
 
                         if (!nextSelectable) break;
 

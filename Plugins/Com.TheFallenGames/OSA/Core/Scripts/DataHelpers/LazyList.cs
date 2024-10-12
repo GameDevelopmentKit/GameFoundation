@@ -158,11 +158,13 @@ namespace Com.ForbiddenByte.OSA.DataHelpers
         public int Remove(T value)
         {
             foreach (var kv in this._BackingMap)
+            {
                 if (kv.Value.Equals(value))
                 {
                     this.Remove(kv.Key, 1);
                     return kv.Key;
                 }
+            }
 
             return -1;
         }
@@ -186,7 +188,9 @@ namespace Com.ForbiddenByte.OSA.DataHelpers
                     this._BackingMap.Remove(key);
                 }
                 else
+                {
                     break;
+                }
             }
 
             // Decrement the following keys, if existing
@@ -245,7 +249,9 @@ namespace Com.ForbiddenByte.OSA.DataHelpers
             var prevKeyIndex = existingKeyIndexOrPotentialIndex - 1;
             int nextKeyIndex;
             if (existingKeyIndexOrPotentialIndex == 0) // no prev key exists
+            {
                 nextKeyIndex = existingKeyIndexOrPotentialIndex + 1;
+            }
             else
             {
                 // Next index, if exists, is after the current one

@@ -107,9 +107,13 @@ namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
             string             titleToSet;
             UnityEngine.Object obj = null;
             if (Selection.gameObjects.Length == 0)
+            {
                 titleToSet = "(Select a parent)";
+            }
             else if (Selection.gameObjects.Length > 1)
+            {
                 titleToSet = "(Select only 1 parent)";
+            }
             else
             {
                 obj        = Selection.gameObjects[0];

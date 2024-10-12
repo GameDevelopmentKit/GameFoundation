@@ -250,7 +250,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
             var    vsa = this.VirtualScrollableArea;
             double val;
             if (vsa <= 0) // vp bigger than- or equal (avoiding div by zero below) to ct
+            {
                 val = 1d;
+            }
             else
             {
                 var insetClamped = Math.Min(0d, this.ctVirtualInsetFromVPS_Cached);
@@ -270,7 +272,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
                     //maxInsetStart = GetTargetCTVirtualInsetFromVPSWhenCTSmallerThanVP(emptyArea);
                     //double maxInsetEnd = vpSize - (ctVirtualSize + maxInsetStart);
                     //minInsetStart = vpSize - (ctVirtualSize + maxInsetEnd);
+                {
                     minInsetStart = maxInsetStart = this.GetTargetCTVirtualInsetFromVPSWhenCTSmallerThanVP(emptyArea);
+                }
                 else
                 {
                     var vsa = this.VirtualScrollableArea;
@@ -359,7 +363,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
             var transvSizeInParams = this._SourceParams.ItemTransversalSize;
             if (transvSizeInParams == 0f)
                 // Default behavior: expand item to fill available space
+            {
                 size = (float)this.layoutInfo.itemsConstantTransversalSize;
+            }
             else
             {
                 if (transvSizeInParams == -1f)
@@ -424,7 +430,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
                             additionalCTDragAbstrDelta = -cutAmountInsideVP;
                         }
                         else
+                        {
                             ctInsetFromVPSOverride = null;
+                        }
                     }
                     //Debug.Log("contentAmountBeforeVP:" + contentAmountBeforeVP + ", additionalCTDragAbstrDelta=" + additionalCTDragAbstrDelta);
                 }
@@ -457,13 +465,17 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
                             additionalCTDragAbstrDelta = cutAmountInsideVP;
                         }
                         else
+                        {
                             ctInsetFromVPSOverride = null;
+                        }
                     }
                     //Debug.Log("contentAmountAfterVP:" + contentAmountAfterVP + ", additionalCTDragAbstrDelta=" + additionalCTDragAbstrDelta);
                 }
             }
             else
+            {
                 ctInsetFromVPSOverride = null;
+            }
         }
 
         public void RebuildLayoutImmediateCompat(RectTransform rectTransform)

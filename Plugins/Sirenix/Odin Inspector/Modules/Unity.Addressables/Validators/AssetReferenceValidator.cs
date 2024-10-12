@@ -108,8 +108,10 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             // Somehow an item sneaked through all of unity's validation measures and ended up not being addressable
             // while still ending up in the asset reference object field.
             if (!isAddressable)
+            {
                 result.AddError("Assigned item is not addressable.")
                     .WithFix<MakeAddressableFixArgs>("Make Addressable", args => OdinAddressableUtility.MakeAddressable(mainAsset, args.Group));
+            }
             // Check the assigned item against any and all label restrictions.
             else
             {
@@ -131,11 +133,13 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 var hasMissingSubObject = true;
 
                 foreach (var subObject in subObjects)
+                {
                     if (subObject.name == assetReference.SubObjectName)
                     {
                         hasMissingSubObject = false;
                         break;
                     }
+                }
 
                 if (hasMissingSubObject) result.AddError($"The previously assigned sub asset with name <b>'{assetReference.SubObjectName}'</b> is missing.").EnableRichText();
             }

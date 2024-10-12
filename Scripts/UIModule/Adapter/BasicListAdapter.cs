@@ -95,18 +95,20 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public void ForceUpdateFullVisibleItems()
         {
             var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
-            if (twinPassScheduledBefore)
-                throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
+            if (twinPassScheduledBefore) throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 
-            for (var i = 0; i < this.viewToPresenter.Count; i++)
-            {
-                this.ForceUpdateViewsHolderIfVisible(i);
-            }
+            for (var i = 0; i < this.viewToPresenter.Count; i++) this.ForceUpdateViewsHolderIfVisible(i);
         }
 
-        public TPresenter GetPresenterAtIndex(int index) => this.indexToPresenter[index];
+        public TPresenter GetPresenterAtIndex(int index)
+        {
+            return this.indexToPresenter[index];
+        }
 
-        public List<TPresenter> GetPresenters() => this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        public List<TPresenter> GetPresenters()
+        {
+            return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        }
     }
 
     // This class keeps references to an item's views.

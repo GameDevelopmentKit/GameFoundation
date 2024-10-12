@@ -49,7 +49,9 @@ namespace Sirenix.OdinInspector.Editor.Drawers
             // Get the range of the slider from the attribute or from member references.
             Vector2 range;
             if (this.vector2IntMinMaxGetter != null && !this.vector2IntMinMaxGetter.HasError)
+            {
                 range = (Vector2)this.vector2IntMinMaxGetter.GetValue();
+            }
             else
             {
                 range.x = this.minGetter.GetValue();

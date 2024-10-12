@@ -340,7 +340,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
                         break;
                 }
                 else
+                {
                     break; // the current item is INside(not necessarily completely) the viewport
+                }
 
                 // if negative, VIs will be removed from start, so the index of the "next" stays constantly at 0; 
                 // if positive, the index of the "next" is decremented by one, because it starts at end and the list is always shortened by 1
@@ -455,7 +457,9 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
                 }
                 else
                     //++i;
+                {
                     this._Adapter.AddBufferredRecycleableItem(vh);
+                }
             }
         }
     }

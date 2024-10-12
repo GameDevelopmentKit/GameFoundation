@@ -164,17 +164,25 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 if (this.updateShowSubAssetField && Event.current.type == EventType.Layout)
                 {
                     if (value == null || value.AssetGUID == null || value.editorAsset == null)
+                    {
                         this.showSubAssetField = false;
+                    }
                     else if (string.IsNullOrEmpty(value.SubObjectName) == false)
+                    {
                         this.showSubAssetField = true;
+                    }
                     else if (this.ActuallyDisallowSubAssets)
+                    {
                         this.showSubAssetField = false;
+                    }
                     else
                     {
                         var path = AssetDatabase.GUIDToAssetPath(value.AssetGUID);
 
                         if (path == null)
+                        {
                             this.showSubAssetField = false;
+                        }
                         else
                         {
                             var mainAsset = AssetDatabase.LoadMainAssetAtPath(path);
@@ -218,6 +226,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                     if (this.ConvertToValidAssignment(drop, out var obj, out var isSubAssetAssignment))
                     {
                         if (this.isSpriteAtlas && obj is Sprite sprite)
+                        {
                             foreach (var spriteAtlas in AssetDatabase_Internals.FindAssets<SpriteAtlas>(string.Empty, false, AssetDatabaseSearchArea.AllAssets))
                             {
                                 if (!spriteAtlas.CanBindTo(sprite)) continue;
@@ -229,6 +238,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 
                                 break;
                             }
+                        }
                         else
                         {
                             if (isSubAssetAssignment)
@@ -287,7 +297,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 {
                     GUIContent valueLabel;
                     if (value == null || string.IsNullOrEmpty(value.AssetGUID) || value.editorAsset == null)
+                    {
                         valueLabel = GUIHelper.TempContent(this.NoneSelectedLabel);
+                    }
                     else if (this.showSubAssetField)
                     {
                         var path      = AssetDatabase.GUIDToAssetPath(value.AssetGUID);
@@ -296,7 +308,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                         valueLabel = GUIHelper.TempContent(assetName, GetTheDamnPreview(value.editorAsset));
                     }
                     else
+                    {
                         valueLabel = GUIHelper.TempContent(value.editorAsset.name, GetTheDamnPreview(value.editorAsset));
+                    }
 
                     GUI.Label(mainRect, valueLabel, EditorStyles.objectField);
                     SdfIcons.DrawIcon(mainPickerRect.SetWidth(12), SdfIconType.Record2);
@@ -314,7 +328,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 }
             }
             else
+            {
                 this.Property.Children[0].Draw(label);
+            }
         }
 
         private static Texture2D GetTheDamnPreview(Object obj)
@@ -339,11 +355,13 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 
             if (!ConvertUtility.TryWeakConvert(drop, this.targetType, out var convertedObj))
                 for (var i = 0; i < this.validMainAssetTypes.Length; i++)
+                {
                     if (ConvertUtility.TryWeakConvert(drop, this.validMainAssetTypes[i], out convertedObj))
                     {
                         isDefinitelyMainAssetAssignment = true;
                         break;
                     }
+                }
 
             if (convertedObj == null || !(convertedObj is Object unityObj) || unityObj == null) return false;
 
@@ -470,7 +488,10 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 // The user will need to choose a sprite
                 // "sub asset" from the atlas.
             }
-            else if (this.ActuallyDisallowSubAssets == false && AssetDatabase.IsSubAsset(obj)) instance.SetEditorSubObject(obj);
+            else if (this.ActuallyDisallowSubAssets == false && AssetDatabase.IsSubAsset(obj))
+            {
+                instance.SetEditorSubObject(obj);
+            }
 
             return instance;
         }
@@ -730,7 +751,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             OdinMenuItem noneItem;
 
             if (this.filterTypes.Contains(typeof(Object)))
+            {
                 noneItem = new(tree, "<none> (Addressable Asset)", null);
+            }
             else
             {
                 string filterTypesJoined;
@@ -788,11 +811,13 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 var inheritsFromFilterType = false;
 
                 for (var i = 0; i < this.filterTypes.Length; i++)
+                {
                     if (this.filterTypes[i].IsAssignableFrom(assetType))
                     {
                         inheritsFromFilterType = true;
                         break;
                     }
+                }
 
                 if (inheritsFromFilterType && this.PassesRestrictions(entry))
                 {
@@ -826,11 +851,13 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                             OdinMenuItem folderItem = null;
 
                             for (var i = 0; i < groupItem.ChildMenuItems.Count; i++)
+                            {
                                 if (groupItem.ChildMenuItems[i].Name == entry.ParentEntry.address)
                                 {
                                     folderItem = groupItem.ChildMenuItems[i];
                                     break;
                                 }
+                            }
 
                             if (folderItem == null)
                             {
@@ -841,11 +868,18 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                             folderItem.ChildMenuItems.Add(item);
                         }
                         else
+                        {
                             groupItem.ChildMenuItems.Add(item);
+                        }
                     }
                     else if (listMode.Value == SelectorListMode.Path)
+                    {
                         tree.AddMenuItemAtPath(Path.GetDirectoryName(entry.AssetPath), item);
-                    else if (listMode.Value == SelectorListMode.Flat) tree.MenuItems.Add(item);
+                    }
+                    else if (listMode.Value == SelectorListMode.Flat)
+                    {
+                        tree.MenuItems.Add(item);
+                    }
                 }
             }
         }
@@ -1083,7 +1117,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             if (to.InheritsFrom(typeof(AssetReference)))
             {
                 if (comparer.Equals(from, typeof(AddressableAssetEntry)) || comparer.Equals(from, this.type_AssetEntryTreeViewItem))
+                {
                     return true;
+                }
                 else if (from.InheritsFrom<Object>())
                 {
                     if (to.InheritsFrom(typeof(AssetReferenceT<>)))
@@ -1095,17 +1131,27 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                         return from.InheritsFrom(targetType);
                     }
                     else
+                    {
                         return true;
+                    }
                 }
                 else if (from.InheritsFrom(typeof(AssetReference)))
+                {
                     return to.InheritsFrom(from);
+                }
                 else
+                {
                     return false;
+                }
             }
             else if (from.InheritsFrom(typeof(AssetReference)) && to.InheritsFrom<Object>())
+            {
                 return false;
+            }
             else
+            {
                 return false;
+            }
         }
 
         public bool TryConvert(object obj, Type to, out object result)
@@ -1131,7 +1177,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                     assetType = baseType.GetGenericArguments()[0];
                 }
                 else
+                {
                     assetType = typeof(Object);
+                }
 
                 if (obj is Object uObj)
                 {
@@ -1247,19 +1295,25 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 asset = null;
 
                 foreach (var subAsset in OdinAddressableUtility.EnumerateAllActualAndVirtualSubAssets(reference.editorAsset, path))
+                {
                     if (subAsset.name == reference.SubObjectName)
                     {
                         asset = subAsset;
                         break;
                     }
+                }
             }
             else
+            {
                 asset = AssetDatabase.LoadAssetAtPath<Object>(path);
+            }
 
             if (asset != null)
             {
                 if (asset.GetType().InheritsFrom(to))
+                {
                     return true;
+                }
                 else if (ConvertUtility.TryWeakConvert(asset, to, out var converted))
                 {
                     asset = (Object)converted;
@@ -1272,7 +1326,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 }
             }
             else
+            {
                 return false;
+            }
         }
 
         private AssetReference CreateReference(Type type, Object obj)
@@ -1397,7 +1453,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                 return genericBase.GetGenericArguments()[0];
             }
             else
+            {
                 return typeof(Object);
+            }
         }
 
         public static Type[] GetAssetReferenceValidMainAssetTypes(Type assetReferenceType)
@@ -1446,6 +1504,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
             _ = asset ?? throw new ArgumentNullException(nameof(asset));
 
             for (var i = 0; i < restrictions.Count; i++)
+            {
                 if (restrictions[i] is AssetReferenceUILabelRestriction labels)
                 {
  /* Unity, in all its wisdom, have apparently decided not to implement their AssetReferenceRestriction attributes in some versions(?)
@@ -1465,6 +1524,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                     failedRestriction = restrictions[i];
                     return false;
                 }
+            }
 
             failedRestriction = null;
             return true;

@@ -776,7 +776,9 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView
             }
             else
                 // Header dragged as a result of a value tuple being dragged in OnTupleAdapterScrollPositionChanged
+            {
                 this.AssureActivelyMovingVHIsStillActive();
+            }
 
             this.SetScrollPositionForAllChildrenExceptDraggedAndHeader(scrollPosition);
         }
@@ -894,7 +896,9 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView
                         edgeDragger.localScale = scal;
                     }
                     else
+                    {
                         edgeDragger.gameObject.SetActive(resizingByDraggerAvailableForThisVH);
+                    }
                 }
             }
 

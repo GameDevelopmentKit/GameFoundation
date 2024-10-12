@@ -18,10 +18,12 @@ namespace BlueprintFlow.BlueprintReader
                 .ToDictionary(info => info.MemberName, info => info);
 
             while (await csv.ReadAsync())
+            {
                 if (allMembers.TryGetValue(csv.GetString(0), out var memberInfo))
                     memberInfo.SetValue(this,
                         CsvHelper.TypeConverterCache.GetConverter(memberInfo.MemberType)
                             .ConvertFromString(csv.GetString(1), memberInfo.MemberType));
+            }
         }
     }
 }

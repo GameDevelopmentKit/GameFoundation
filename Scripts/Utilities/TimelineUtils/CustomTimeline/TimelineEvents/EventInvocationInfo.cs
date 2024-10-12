@@ -46,7 +46,9 @@
                 {
                     var paramType = this.MethodInfo.GetParameters()[0].ParameterType;
                     if (paramType.IsEnum)
+                    {
                         this.Invoke(ConvertToType<int>(value));
+                    }
                     else if (SupportedTypes.Contains(paramType))
                     {
                         if (paramType == typeof(string))
@@ -62,10 +64,14 @@
                                 "Could not parse argument value " + value + " for method " + this.MethodInfo.Name + ". Ignoring");
                     }
                     else
+                    {
                         Debug.Log("Could not parse argument value " + value + " for method " + this.MethodInfo.Name + ". Ignoring");
+                    }
                 }
                 else
+                {
                     this.InvokeNoArgs();
+                }
             }
             catch (Exception e)
             {
@@ -78,7 +84,9 @@
             var isConverted = false;
             var type        = typeof(T);
             if (type == typeof(string))
+            {
                 return (T)(object)input;
+            }
             else if (type == typeof(float))
             {
                 isConverted = float.TryParse(input, out var f);

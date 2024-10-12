@@ -56,7 +56,9 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Tuple
                 //SetNormalizedPosition(GetNormalizedPosition());
             }
             else
+            {
                 this.ResetItems(columnsCount);
+            }
         }
 
         /// <summary>

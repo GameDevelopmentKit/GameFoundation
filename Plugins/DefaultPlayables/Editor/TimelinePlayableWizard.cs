@@ -257,7 +257,9 @@ public class TimelinePlayableWizard : EditorWindow
         EditorGUILayout.Space();
 
         if (this.isStandardBlendPlayable)
+        {
             this.StandardBlendPlayablePropertyGUI(oldIndex != this.m_ComponentBindingTypeIndex || oldStandardBlendPlayable != this.isStandardBlendPlayable);
+        }
         else
         {
             exposedVariablesNamesValid = this.VariableListGUI(this.exposedReferences,

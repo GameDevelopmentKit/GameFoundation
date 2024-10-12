@@ -32,7 +32,9 @@
         {
             this.currentCooldownTime -= (long)signal.MinimizeTime;
             if (this.currentCooldownTime <= 0)
+            {
                 this.onComplete?.Invoke();
+            }
             else
             {
                 this.observableTimer?.Dispose();

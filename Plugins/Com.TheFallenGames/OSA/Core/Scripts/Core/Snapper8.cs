@@ -209,7 +209,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 }
             }
             else
+            {
                 indexToSnapTo = middle.ItemIndex;
+            }
 
             //Debug.Log(
             //	"StartSnappingIfNeeded:\n" +

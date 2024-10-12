@@ -135,7 +135,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 }
             }
             else
+            {
                 allowOutsideBounds = allowOutsideBoundsMode != AllowContentOutsideBoundsMode.DO_NOT_ALLOW;
+            }
 
             var finalAbstractDelta = abstrDeltaInCTSpace * dragCoefficient;
             //DragVisibleItemsRangeUnchecked(0, _VisibleItemsCount, finalAbstractDelta, false);
@@ -326,7 +328,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 elapsedTime = time - startTime;
 
                 if (elapsedTime >= duration)
+                {
                     reportedProgress = localProgress = 1d;
+                }
                 else
                 {
                     //progress = (elapsedTime / duration);
@@ -597,7 +601,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 //_StolenItems.Add(vh);
             }
             else
+            {
                 this._RecyclableItems.Add(vh);
+            }
         }
 
         // Returns whether the scrollview looped or not
@@ -608,7 +614,9 @@ namespace Com.ForbiddenByte.OSA.Core
             var itemVirtualInset    = this._InternalState.paddingContentStart;
             var contentVirtualInset = 0d;
             if (p.contentInsetOverride != null)
+            {
                 contentVirtualInset = p.contentInsetOverride.Value;
+            }
             else if (this.VisibleItemsCount > 0)
             {
                 var vh                        = this._VisibleItems[0];
@@ -878,7 +886,9 @@ namespace Com.ForbiddenByte.OSA.Core
 
                             if (vhEndIndexMinus1 < 0)
                                 // The views holders to be shifted are all before vp => only shift the indices of all visible items
+                            {
                                 reportedScrollDeltaOverride = .1d;
+                            }
                             //for (vhIndex = 0; vhIndex < _VisibleItemsCount; ++vhIndex)
                             //{
                             //	vh = _VisibleItems[vhIndex];
@@ -898,7 +908,9 @@ namespace Com.ForbiddenByte.OSA.Core
 
                                 if (vhEndIndex >= this.VisibleItemsCount)
                                     // The new items will be added after LV, so all the currently visible ones will be shifted towards start
+                                {
                                     this.DragVisibleItemsRangeUnchecked(0, this.VisibleItemsCount, -deltaSize, false, false);
+                                }
                                 //// If looping, only shifting items with bigger ItemIndex, which can be before insertIndex, i.e. shifting indices of the TAIL and everything before it
                                 //if (loopItems)
                                 //{
@@ -1069,7 +1081,9 @@ namespace Com.ForbiddenByte.OSA.Core
                                 //		ShiftViewsHolderIndex(vh, count, true, indexIfInsertingOrRemoving);
                                 //	}
                                 //}
+                            {
                                 reportedScrollDeltaOverride = -.1d;
+                            }
                         }
                     }
 
@@ -1140,7 +1154,9 @@ namespace Com.ForbiddenByte.OSA.Core
                                 {
                                     startVHIndexClamped = 0;
                                     if (endVHIndex < 0) // all are before vp
+                                    {
                                         vhsToRemove = 0;
+                                    }
                                     else // .. and some are inside vp
                                     {
                                         vhsToRemove = endVHIndexExcl;
@@ -1201,7 +1217,9 @@ namespace Com.ForbiddenByte.OSA.Core
                             {
                                 startVHIndexClamped = 0;
                                 if (endVHIndex < 0) // all are before vp
+                                {
                                     itemsOutsideVPToBeRemoved = count;
+                                }
                                 else
                                 {
                                     if (endVHIndex < this.VisibleItemsCount) // the rest are inside vp
@@ -1210,7 +1228,9 @@ namespace Com.ForbiddenByte.OSA.Core
                                         correctionMayBeNeeded     = true;
                                     }
                                     else // the rest are some inside + some after vp => all vhs will be recycled =>  treat is as the RESET case
+                                    {
                                         goto case ItemCountChangeMode.RESET;
+                                    }
                                 }
 
                                 reportedScrollDeltaOverride = -.1d;
@@ -1221,7 +1241,9 @@ namespace Com.ForbiddenByte.OSA.Core
                                 {
                                     startVHIndexClamped = startVHIndex;
                                     if (endVHIndexExcl > this.VisibleItemsCount) // .. and some are after vp
+                                    {
                                         itemsOutsideVPToBeRemoved = endVHIndexExcl - this.VisibleItemsCount;
+                                    }
                                     else // are all inside
                                     {
                                     }
@@ -1330,13 +1352,19 @@ namespace Com.ForbiddenByte.OSA.Core
             // TODO check this, the same way as for when changing item's size
             double reportedScrollDelta;
             if (reportedScrollDeltaOverride != null)
+            {
                 reportedScrollDelta = reportedScrollDeltaOverride.Value;
+            }
             else
             {
                 if (prevCount == 0)
+                {
                     reportedScrollDelta = 0d; // helps with the initial displacement of the content when using CSF and preferEndEdge=false
+                }
                 else if (contentPanelEndEdgeStationary)
+                {
                     reportedScrollDelta = .1d;
+                }
                 else
                 {
                     // If start edge is stationary, either if the content shrinks or expands the reportedDelta should be negative, 
@@ -1671,7 +1699,9 @@ namespace Com.ForbiddenByte.OSA.Core
             else
             {
                 if (this._IsDragging || isSnapping)
+                {
                     this._ReleaseFromPull.inProgress = false;
+                }
                 else
                 {
                     var    currentInset = this._InternalState.ctVirtualInsetFromVPS_Cached;
@@ -1692,7 +1722,9 @@ namespace Com.ForbiddenByte.OSA.Core
                             this._ReleaseFromPull.targetCTInsetFromVPS = -vsa;
                         }
                         else
+                        {
                             absDisplacement = 0d;
+                        }
                     }
                     var displacementExists = absDisplacement > 0d;
 
@@ -1757,7 +1789,9 @@ namespace Com.ForbiddenByte.OSA.Core
                                 //// Bugfix: on fast scrolling and/or on low-framerate, sometimes all vhs go outside the vp, 
                                 //// so even if looping, the content needs to be clamped & computevisibility needs to correct the positions
                                 //if (_VisibleItemsCount == 0 && _ItemsDesc.itemsCount > 0)
+                            {
                                 clampManually = true;
+                            }
                         }
                     }
                     else
@@ -1781,7 +1815,9 @@ namespace Com.ForbiddenByte.OSA.Core
 
                     var magVelocityToAdd = this._VelocityToAddOnDragEnd.magnitude;
                     if (magVelocityToAdd < 1f)
+                    {
                         this._VelocityToAddOnDragEnd = Vector2.zero;
+                    }
                     else
                     {
                         var magVelocityToAddToMaxVelocity                                    = magVelocityToAdd / this._Params.effects.MaxSpeed;
@@ -1800,7 +1836,9 @@ namespace Com.ForbiddenByte.OSA.Core
                     }
                     else
                         // The content's speed decreases with each second, according to inertiaDecelerationRate
+                    {
                         this._Velocity *= velocityFactor;
+                    }
                 }
             }
             #if DEBUG_UPDATE
@@ -1836,11 +1874,13 @@ namespace Com.ForbiddenByte.OSA.Core
                     #endif
 
                     if (dragUnchecked)
+                    {
                         this.DragVisibleItemsRangeUnchecked(0,
                             this.VisibleItemsCount,
                             dragPerFrame,
                             true,
                             true); // bugfix for disappearing items that are outside vp on pointer up
+                    }
                     else
                     {
                         bool _, __;
@@ -2535,6 +2575,7 @@ namespace Com.ForbiddenByte.OSA.Core
             var scaleToZeroInsteadOfDisable                   = this._Params.optimization.ScaleToZeroInsteadOfDisable;
             var targetLocalScaleIfScaleToZeroInsteadOfDisable = areEnabled ? Vector3.one : Vector3.zero;
             foreach (var vh in vhs)
+            {
                 if (vh != null && vh.root)
                 {
                     if (scaleToZeroInsteadOfDisable)
@@ -2542,11 +2583,14 @@ namespace Com.ForbiddenByte.OSA.Core
                         if (vh.root.localScale != targetLocalScaleIfScaleToZeroInsteadOfDisable) vh.root.localScale = targetLocalScaleIfScaleToZeroInsteadOfDisable;
                     }
                     else
+                    {
                         vh.root.localScale = Vector3.one;
+                    }
                     vh.root.localEulerAngles = Vector3.zero;
 
                     this.OnRemoveCustomGalleryEffects(vh);
                 }
+            }
         }
 
         // TODO merge this with UpdateCTInset...
@@ -2584,7 +2628,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 // Bugfix 27.08.2019 (thanks Gladyon (Unity forum)): resizing items outside viewport didn't work properly sometimes
                 var firstVisibleItemIndexInView = this._VisibleItems[0].itemIndexInView;
                 if (itemIndexInView < firstVisibleItemIndexInView)
+                {
                     indexOfVHIfVisible_ElseExtremityExcl = -1;
+                }
                 else
                 {
                     var lastVisibleItemIndexInView = this._VisibleItems[this.VisibleItemsCount - 1].itemIndexInView;
@@ -2823,7 +2869,9 @@ namespace Com.ForbiddenByte.OSA.Core
 
             bool computeNegative = false, computePositive = false;
             if (this.VisibleItemsCount == 0)
+            {
                 computeNegative = computePositive = true;
+            }
             else
             {
                 var firstVH                                                                               = this._VisibleItems[0];

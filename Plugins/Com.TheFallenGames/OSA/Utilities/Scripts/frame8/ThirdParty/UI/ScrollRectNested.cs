@@ -47,7 +47,9 @@ namespace frame8.ThirdParty.UI
                 if (this._ParentScrollRect) ((IBeginDragHandler)this._ParentScrollRect).OnBeginDrag(eventData);
             }
             else
+            {
                 base.OnBeginDrag(eventData);
+            }
         }
 
         public override void OnDrag(PointerEventData eventData)
@@ -57,7 +59,9 @@ namespace frame8.ThirdParty.UI
                 if (this._ParentScrollRect) ((IDragHandler)this._ParentScrollRect).OnDrag(eventData);
             }
             else
+            {
                 base.OnDrag(eventData);
+            }
         }
 
         public override void OnEndDrag(PointerEventData eventData)
@@ -67,7 +71,9 @@ namespace frame8.ThirdParty.UI
                 if (this._ParentScrollRect) ((IEndDragHandler)this._ParentScrollRect).OnEndDrag(eventData);
             }
             else
+            {
                 base.OnEndDrag(eventData);
+            }
             this._RouteToParent = false;
         }
     }

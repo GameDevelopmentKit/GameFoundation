@@ -31,7 +31,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.View     = (TView)viewInstance;
             this.ScreenId = ScreenHelper.GetScreenId<TView>();
             if (this.View.IsReadyToUse)
+            {
                 this.OnViewReady();
+            }
             else
             {
                 await UniTask.WaitUntil(() => this.View.IsReadyToUse);

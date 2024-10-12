@@ -332,7 +332,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 }
             }
             else
+            {
                 this.activeScreens.Remove(closeScreenPresenter);
+            }
 
             closeScreenPresenter?.SetViewParent(this.CurrentHiddenRoot);
         }
@@ -354,7 +356,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 if (signal.IncludingBindData) screenPresenter.BindData();
             }
             else
+            {
                 this.logger.Error($"The {screenInfo.AddressableScreenPath} object may be not instantiated in the RootUICanvas!!!");
+            }
         }
 
         private void OnDestroyScreen(ScreenSelfDestroyedSignal signal)

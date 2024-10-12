@@ -295,7 +295,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 this.spawnedObjToObjectPool.Remove(obj);
             }
             else
+            {
                 throw new($"Can't recycle object {obj.Path()}, maybe you already recycled it!");
+            }
         }
 
         public IEnumerator Recycle(GameObject obj, float delay)

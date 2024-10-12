@@ -33,13 +33,17 @@ namespace UnityEngine.Timeline
             this.videoPlayer.isLooping         = this.loop;
 
             for (ushort i = 0; i < this.videoClip.audioTrackCount; ++i)
+            {
                 if (this.videoPlayer.audioOutputMode == VideoAudioOutputMode.Direct)
+                {
                     this.videoPlayer.SetDirectAudioMute(i, this.mute || !Application.isPlaying);
+                }
                 else if (this.videoPlayer.audioOutputMode == VideoAudioOutputMode.AudioSource)
                 {
                     var audioSource                           = this.videoPlayer.GetTargetAudioSource(i);
                     if (audioSource != null) audioSource.mute = this.mute || !Application.isPlaying;
                 }
+            }
 
             this.videoPlayer.loopPointReached += this.LoopPointReached;
             this.videoPlayer.time             =  this.clipInTime;
@@ -92,13 +96,17 @@ namespace UnityEngine.Timeline
 
             if (Application.isPlaying)
                 for (ushort i = 0; i < this.videoPlayer.clip.audioTrackCount; ++i)
+                {
                     if (this.videoPlayer.audioOutputMode == VideoAudioOutputMode.Direct)
+                    {
                         this.videoPlayer.SetDirectAudioVolume(i, info.weight);
+                    }
                     else if (this.videoPlayer.audioOutputMode == VideoAudioOutputMode.AudioSource)
                     {
                         var audioSource                             = this.videoPlayer.GetTargetAudioSource(i);
                         if (audioSource != null) audioSource.volume = info.weight;
                     }
+                }
         }
 
         public override void OnGraphStart(Playable playable)

@@ -22,7 +22,9 @@ public abstract class BaseGameConfigEditor<T> : VisualElement, IGameConfigEditor
             gdkConfig.AddGameConfig(this.Config);
         }
         else
+        {
             this.Config = gdkConfig.GetGameConfig<T>();
+        }
     }
 
     public abstract VisualElement LoadView();

@@ -31,7 +31,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 obj.SetActive(true);
             }
             else
+            {
                 obj = Instantiate(this.prefab, position, rotation);
+            }
 
             obj.transform.SetParent(parent ? parent : this.transform);
             this.spawnedObjects.Add(obj);

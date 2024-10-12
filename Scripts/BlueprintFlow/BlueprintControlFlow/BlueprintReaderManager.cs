@@ -170,7 +170,9 @@ namespace BlueprintFlow.BlueprintControlFlow
                 // Try to load a raw blueprint file from local or resource folder
                 string rawCsv;
                 if (this.blueprintConfig.IsResourceMode || bpAttribute.IsLoadFromResource)
+                {
                     rawCsv = await LoadRawCsvFromResourceFolder();
+                }
                 else
                 {
                     if (!listRawBlueprints.TryGetValue(bpAttribute.DataPath + this.blueprintConfig.BlueprintFileType, out rawCsv))
@@ -212,10 +214,14 @@ namespace BlueprintFlow.BlueprintControlFlow
                     }
                 }
                 else
+                {
                     this.logService.Warning($"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");
+                }
             }
             else
+            {
                 this.logService.Warning($"[BlueprintReader] Class {blueprintReader} does not have BlueprintReaderAttribute yet");
+            }
         }
     }
 }

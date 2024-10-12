@@ -304,11 +304,13 @@
             foreach (var track in tracks)
             foreach (var clip in track.GetClips())
                 //Debug.Log($"Check clip {clip.displayName} vs {markerClipName} of track {track.name}");
+            {
                 if (clip.displayName == markerClipName)
                 {
                     time = clip.start;
                     tmp++;
                 }
+            }
 
             if (tmp > 1)
                 Debug.LogWarning($"There are multiple {tmp} tracks & clips to jump to ??");
@@ -337,11 +339,13 @@
 
                 foreach (var clip in track.GetClips())
                     //Debug.Log($"Check clip {clip.displayName} vs {markerClipName} of track {track.name}");
+                {
                     if (clip.displayName == markerClipName)
                     {
                         time = clip.start;
                         tmp++;
                     }
+                }
             }
 
             if (tmp > 1)
@@ -374,7 +378,9 @@
                 track.muted = muteOrUnmute;
             }
             else
+            {
                 Debug.LogError($"Can't find group track {groupName}");
+            }
         }
 
         public static void SetTMPUICounter(this PlayableDirector playableDirector, string trackName, int start, int end, string format = SELF_VALUE)
@@ -388,7 +394,9 @@
                 clip.template.format     = format;
             }
             else
+            {
                 Debug.LogError($"Can not get output track {trackName}");
+            }
         }
 
         public const string SELF_VALUE = "{0}";
@@ -403,7 +411,9 @@
                 clip.template.SetEndValue(end);
             }
             else
+            {
                 Debug.LogError($"Can not get output track {trackName}");
+            }
         }
 
         public static void MuteTrack(this PlayableDirector playableDirector, int trackIndex, bool muteOrUnmute)
@@ -432,7 +442,9 @@
         public static void AddOnceCompleteListener(this PlayableDirector playableDirector, Action callback)
         {
             if (onCompleteCallback.TryGetValue(playableDirector.GetHashCode(), out var listCallback))
+            {
                 listCallback.Add(callback);
+            }
             else
             {
                 onCompleteCallback.Add(playableDirector.GetHashCode(), new() { callback });

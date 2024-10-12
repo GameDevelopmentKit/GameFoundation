@@ -156,7 +156,9 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Input
                 this._Text.color = c;
             }
             else
+            {
                 prevAlpha = 0f;
+            }
 
             return prevAlpha;
         }

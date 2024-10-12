@@ -116,7 +116,9 @@ namespace Com.ForbiddenByte.OSA.Util.PullToRefresh
             this._RefreshGizmo          = this.GetComponentInChildren<PullToRefreshGizmo>(); // self or children
             if (this._ScrollRect)
                 // May be null
+            {
                 this.externalScrollRectProxy = this._ScrollRect.GetComponent(typeof(IScrollRectProxy)) as IScrollRectProxy;
+            }
             else
             {
                 this.externalScrollRectProxy = this.GetComponentInParent(typeof(IScrollRectProxy)) as IScrollRectProxy;
@@ -300,7 +302,9 @@ namespace Com.ForbiddenByte.OSA.Util.PullToRefresh
                     this._State = StateEnum.NONE;
                 }
                 else
+                {
                     this._State = StateEnum.AFTER_RELEASE_WAITING_FOR_GIZMO_TO_HIDE;
+                }
             }
         }
 

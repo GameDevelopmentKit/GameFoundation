@@ -27,6 +27,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAn
                 trackBinding.enabled = true;
 
                 foreach (AnimationState a in trackBinding)
+                {
                     if (a.name == input.animationName && !trackBinding.IsPlaying(a.name))
                     {
                         trackBinding[a.name].time     = input.startTime;
@@ -43,6 +44,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAn
                             trackBinding[input.animationName].speed = input.speed;
                         }
                     }
+                }
             }
         }
     }

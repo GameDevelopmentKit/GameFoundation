@@ -261,9 +261,13 @@ public static class EditorUtilities
         public static void Open(string path)
         {
             if (IsInWinOS)
+            {
                 OpenInWin(path);
+            }
             else if (IsInMacOS)
+            {
                 OpenInMac(path);
+            }
             else // couldn't determine OS
             {
                 OpenInWin(path);

@@ -174,6 +174,7 @@ namespace BlueprintFlow.BlueprintReader
 
             var memberInfos = this.recordType.GetAllFieldAndProperties();
             foreach (var memberInfo in memberInfos)
+            {
                 if (this.IsBlueprintCollection(memberInfo.MemberType))
                 {
                     this.blueprintCollectionMemberInfos ??= new();
@@ -191,6 +192,7 @@ namespace BlueprintFlow.BlueprintReader
 
                     this.fieldAndProperties.Add(memberInfo);
                 }
+            }
 
             this.customTypeConverter = this.recordType.GetCustomAttribute<CustomTypeConverterAttribute>();
         }
@@ -206,6 +208,7 @@ namespace BlueprintFlow.BlueprintReader
                 record = Activator.CreateInstance(this.recordType);
 
                 foreach (var memberInfo in this.fieldAndProperties)
+                {
                     try
                     {
                         var ordinal = inputCsv.GetOrdinal(memberInfo.MemberName);
@@ -220,6 +223,7 @@ namespace BlueprintFlow.BlueprintReader
                     {
                         throw new($"{this.blueprintType.FullName} - {memberInfo.MemberName}- {e}");
                     }
+                }
 
                 if (this.blueprintCollectionMemberInfos != null)
                 {

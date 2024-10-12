@@ -69,7 +69,9 @@ namespace Com.ForbiddenByte.OSA.Core
                     this._IndexInViewOfLastItemThatChangedSizeDuringSizesChange = itemIndexInView;
                 }
                 else
+                {
                     throw new OSAException("Call BeginChangingItemsSizes() before");
+                }
             }
         }
 
@@ -221,7 +223,9 @@ namespace Com.ForbiddenByte.OSA.Core
                 if (newCount < 0) throw new ArgumentOutOfRangeException("newCount", "OSA.ItemsDescriptor.ReinitializeSizes: Can't have negative count " + newCount);
 
                 if (newCount == 0)
+                {
                     this.ClearAllKeysAndSizes();
+                }
                 else
                 {
                     if (this.itemsCount > 0)

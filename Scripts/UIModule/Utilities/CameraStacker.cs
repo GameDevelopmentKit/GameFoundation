@@ -67,11 +67,13 @@ namespace GameFoundation.Scripts.UIModule.Utilities
                 cameraStackChanged = true;
             else
                 for (var i = 0; i < CameraStackers.Count; i++)
+                {
                     if (CameraStackers[i] != currentCameraStackers[i])
                     {
                         cameraStackChanged = true;
                         break;
                     }
+                }
 
             // If there are changes, update the camera stack
             if (cameraStackChanged)

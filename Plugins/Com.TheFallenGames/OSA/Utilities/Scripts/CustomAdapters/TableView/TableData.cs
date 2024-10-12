@@ -83,7 +83,9 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView
             }
             else
                 // No sorting needed, just reversing the list, which is faster
+            {
                 this.ReverseTuplesListIfSupported();
+            }
 
             return true;
         }
@@ -107,7 +109,10 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView
                 {
                     if (y != null) return -1;
                 }
-                else if (y == null) return 1;
+                else if (y == null)
+                {
+                    return 1;
+                }
 
                 return 0;
             }

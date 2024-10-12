@@ -61,7 +61,9 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
                 if (!isSpecialType) this.AddGeneralValueInput(selectedMethod, argValueProperty);
             }
             else
+            {
                 argValueProperty.stringValue = "";
+            }
 
             if (selectedMethod == null) EditorGUILayout.HelpBox("Unable to find event handlers. ", MessageType.Warning);
 
@@ -138,7 +140,9 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
                     property.stringValue = "-1";
             }
             else
+            {
                 return false;
+            }
 
             return true;
         }

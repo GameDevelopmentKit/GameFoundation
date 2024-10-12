@@ -126,7 +126,9 @@ namespace Com.ForbiddenByte.OSA.Util
                     this.animating = false;
                 }
                 else
+                {
                     t01 = Mathf.Sqrt(t01); // fast-in, slow-out effect
+                }
 
                 var size = Mathf.Lerp(this.startSize, this.endSize, t01);
                 if (this.sizeChangesHandler == null)

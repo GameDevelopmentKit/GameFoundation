@@ -326,7 +326,9 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
                     this.toggleSettingHasModel.SetEnabled(false);
                 }
                 else
+                {
                     this.toggleSettingHasModel.SetEnabled(true);
+                }
 
                 this.UpdateAllName();
             });

@@ -121,11 +121,13 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
                 if (this.TargetObject == null) throw new("No target set for key " + key);
 
                 foreach (var behaviour in this.TargetObject.GetComponents<Behaviour>())
+                {
                     if (typeName == behaviour.GetType().ToString() || typeName == behaviour.GetType().BaseType.ToString())
                     {
                         targetBehaviour = behaviour;
                         break;
                     }
+                }
 
                 if (targetBehaviour == null) throw new("Unable to find target behaviour: key " + key + " typename " + typeName);
             }
