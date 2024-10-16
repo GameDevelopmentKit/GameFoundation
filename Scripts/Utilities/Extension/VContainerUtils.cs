@@ -9,7 +9,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// <summary>
         /// This method registers the type with its derived types.
         /// </summary>
-        public static void RegisterWithDerivedTypes<T>(this IContainerBuilder builder, Lifetime lifetime = Lifetime.Singleton)
+        public static void RegisterFromDerivedType<T>(this IContainerBuilder builder, Lifetime lifetime = Lifetime.Singleton)
         {
             var registerType = typeof(T)
                                .GetDerivedTypes()
