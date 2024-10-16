@@ -7,7 +7,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
     public static class VContainerUtils
     {
         /// <summary>
-        /// Same as Zenject's ReBind method.
+        /// This method registers the type with its derived types.
         /// </summary>
         public static void RegisterWithDerivedTypes<T>(this IContainerBuilder builder, Lifetime lifetime = Lifetime.Singleton)
         {
