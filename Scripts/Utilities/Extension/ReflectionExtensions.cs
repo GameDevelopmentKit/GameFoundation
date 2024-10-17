@@ -18,9 +18,19 @@ namespace GameFoundation.Scripts.Utilities.Extension
             };
         }
 
+        public static Type GetSingleDerivedType(this Type type)
+        {
+            return type.GetDerivedTypes().ToArray() switch
+            {
+                { Length: 0 }   => throw new InvalidOperationException($"No derived type found for {type.Name}"),
+                { Length: > 1 } => throw new InvalidOperationException($"Multiple derived types found for {type.Name}"),
+                { } types       => types[0],
+            };
+        }
+
         public static Func<object> GetEmptyConstructor(this Type type)
         {
-            var constructor = type.GetConstructors().FirstOrDefault(constructor => constructor.GetParameters().All(parameter => parameter.HasDefaultValue))
+            var constructor = type.GetConstructors().SingleOrDefault(constructor => constructor.GetParameters().All(parameter => parameter.HasDefaultValue))
                 ?? type.GetSingleConstructor();
             var parameters = constructor.GetParameters().Select(parameter => parameter.HasDefaultValue ? parameter.DefaultValue : null).ToArray();
             return () => constructor.Invoke(parameters);
