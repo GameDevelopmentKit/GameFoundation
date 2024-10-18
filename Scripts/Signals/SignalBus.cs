@@ -30,12 +30,12 @@ namespace GameFoundation.Signals
 
         public void Subscribe<TSignal>(Action callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback already subscribed");
         }
 
         public void Subscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback already subscribed");
         }
 
         public bool TrySubscribe<TSignal>(Action callback)
@@ -50,12 +50,12 @@ namespace GameFoundation.Signals
 
         public void Unsubscribe<TSignal>(Action callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback not subscribed");
         }
 
         public void Unsubscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback not subscribed");
         }
 
         public bool TryUnsubscribe<TSignal>(Action callback)
@@ -70,13 +70,13 @@ namespace GameFoundation.Signals
 
         private IPublisher<TSignal> GetPublisher<TSignal>()
         {
-            if (!this.container.TryResolve<IPublisher<TSignal>>(out var publisher)) throw new("Signal not declared");
+            if (!this.container.TryResolve<IPublisher<TSignal>>(out var publisher)) throw new InvalidOperationException($"{typeof(TSignal).Name} - Signal not declared");
             return publisher;
         }
 
         private ISubscriber<TSignal> GetSubscriber<TSignal>()
         {
-            if (!this.container.TryResolve<ISubscriber<TSignal>>(out var subscriber)) throw new("Signal not declared");
+            if (!this.container.TryResolve<ISubscriber<TSignal>>(out var subscriber)) throw new InvalidOperationException($"{typeof(TSignal).Name} - Signal not declared");
             return subscriber;
         }
 
