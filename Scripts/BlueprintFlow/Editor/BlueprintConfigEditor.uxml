@@ -1,5 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="BlueprintConfigPanel">
-        <ui:Label text="Blueprint Config" display-tooltip-when-elided="true" style="-unity-font-style: bold;"/>
-    </ui:VisualElement>
-</ui:UXML>

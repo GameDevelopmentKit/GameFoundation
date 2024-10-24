@@ -3,6 +3,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.DI;
@@ -11,7 +12,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Signals;
     using R3;
@@ -193,7 +193,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             async Task<IScreenPresenter> InstantiateScreen()
             {
                 screenPresenter = this.GetCurrentContainer().Instantiate<T>();
-                var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
+                var screenInfo = screenPresenter.GetType().GetCustomAttribute<ScreenInfoAttribute>();
 
                 var viewObject = Object.Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
                     this.CheckPopupIsOverlay(screenPresenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
@@ -256,12 +256,21 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private bool CheckScreenIsPopup(IScreenPresenter screenPresenter)
         {
-            return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>));
+            var screenType = screenPresenter.GetType();
+            var baseType   = typeof(BasePopupPresenter<>);
+            while (screenType != null && screenType != typeof(object))
+            {
+                var cur = screenType.IsGenericType ? screenType.GetGenericTypeDefinition() : screenType;
+                if (baseType == cur) return true;
+
+                screenType = screenType.BaseType;
+            }
+            return false;
         }
 
         private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter)
         {
-            return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay;
+            return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetType().GetCustomAttribute<PopupInfoAttribute>().IsOverlay;
         }
 
         #endregion
@@ -345,7 +354,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var screenType      = screenPresenter.GetType();
 
             if (!this.typeToLoadedScreenPresenter.TryAdd(screenType, screenPresenter)) return;
-            var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
+            var screenInfo = screenPresenter.GetType().GetCustomAttribute<ScreenInfoAttribute>();
 
             var viewObj = this.CurrentRootScreen.Find(screenInfo.AddressableScreenPath);
 

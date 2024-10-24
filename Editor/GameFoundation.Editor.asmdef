@@ -6,6 +6,7 @@
     "GameFoundation.Models",
     "GameFoundation.Network.Config",
     "GameFoundation.Utilities",
+    "TheOne.Extensions",
     "Unity.Addressables",
     "Unity.ResourceManager",
     "UniTask.Addressables",

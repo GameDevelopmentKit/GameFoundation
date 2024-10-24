@@ -2,7 +2,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 {
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.Utilities.Extension;
+    using TheOne.Extensions;
     using GameFoundation.Scripts.Utilities.LogService;
     using UnityEngine;
     using UnityEngine.Scripting;

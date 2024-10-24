@@ -2,6 +2,7 @@
   "name": "GameFoundation.DI",
   "rootNamespace": "GameFoundation.DI",
   "references": [
+    "TheOne.Extensions",
     "Zenject",
     "VContainer"
   ],

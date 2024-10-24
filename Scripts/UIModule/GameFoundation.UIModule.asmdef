@@ -6,6 +6,7 @@
     "GameFoundation.Signals",
     "GameFoundation.Utilities",
     "GameFoundation.DI",
+    "TheOne.Extensions",
     "Unity.TextMeshPro",
     "Unity.Addressables",
     "Unity.ResourceManager",

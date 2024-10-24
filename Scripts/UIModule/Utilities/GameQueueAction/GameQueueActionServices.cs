@@ -4,7 +4,6 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
-    using GameFoundation.Scripts.Utilities.Extension;
     using R3;
     using UnityEngine.Scripting;
 
@@ -55,7 +54,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                     if (index >= 0 && index != curIndex)
                     {
                         listAction.RemoveAt(curIndex);
-                        listAction.TryInsert(action, index);
+                        if (index < listAction.Count)
+                            listAction.Insert(index, action);
+                        else
+                            listAction.Add(action);
                     }
                     else
                     {
@@ -65,7 +67,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                 else
                 {
                     // add new
-                    listAction.TryInsert(action, index);
+                    if (index >= 0 && index < listAction.Count)
+                        listAction.Insert(index, action);
+                    else
+                        listAction.Add(action);
                     isAdded = true;
                 }
             }

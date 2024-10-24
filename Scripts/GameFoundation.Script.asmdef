@@ -9,6 +9,7 @@
     "GameFoundation.UIModule",
     "GameFoundation.Signals",
     "GameFoundation.DI",
+    "TheOne.Extensions",
     "MasterAAASound.Scripts",
     "I2Localization.Scripts",
     "Zenject",

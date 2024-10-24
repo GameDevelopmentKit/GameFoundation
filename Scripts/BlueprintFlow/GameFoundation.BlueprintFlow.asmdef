@@ -2,20 +2,16 @@
   "name": "GameFoundation.BlueprintFlow",
   "rootNamespace": "GameFoundation.BlueprintFlow",
   "references": [
-    "GameFoundation.DI",
-    "GameFoundation.Signals",
-    "GameFoundation.Models",
-    "GameFoundation.Utilities",
+    "TheOne.Data.DI",
+    "TheOne.Extensions",
+    "TheOne.Logging",
+    "TheOne.ResourceManagement",
+    "TheOne.Data",
     "UniTask",
-    "Zenject",
+    "GameFoundation.Signals",
     "VContainer"
   ],
   "versionDefines": [
-    {
-      "name": "com.gdk.network",
-      "expression": "",
-      "define": "GDK_NETWORK_ENABLE"
-    },
     {
       "name": "com.svermeulen.extenject",
       "expression": "",

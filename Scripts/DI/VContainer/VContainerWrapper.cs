@@ -10,9 +10,7 @@ namespace GameFoundation.DI
     using System.Linq;
     using UnityEngine;
     using VContainer;
-    using VContainer.Internal;
     using VContainer.Unity;
-    using Object = UnityEngine.Object;
     using PreserveAttribute = UnityEngine.Scripting.PreserveAttribute;
 
     public sealed class VContainerWrapper : IDependencyContainer
@@ -57,12 +55,12 @@ namespace GameFoundation.DI
 
         object IDependencyContainer.Instantiate(Type type, params object[] @params)
         {
-            return this.container.Instantiate(type, @params.Select(param => new Parameter(param)).ToArray());
+            return this.container.Instantiate(type, @params);
         }
 
         T IDependencyContainer.Instantiate<T>(params object[] @params)
         {
-            return this.container.Instantiate<T>(@params.Select(param => new Parameter(param)).ToArray());
+            return this.container.Instantiate<T>(@params);
         }
 
         void IDependencyContainer.Inject(object instance)
@@ -85,62 +83,5 @@ namespace GameFoundation.DI
     {
     }
 
-    public static class VContainerExtensions
-    {
-        public static RegistrationBuilder RegisterResource<T>(this IContainerBuilder builder, string path, Lifetime lifetime) where T : Object
-        {
-            return builder.Register(_ => Object.Instantiate(Resources.Load<T>(path) ?? throw new($"{path} not found")), lifetime);
-        }
-
-        public static ComponentRegistrationBuilder RegisterComponentInNewPrefabResource<T>(this IContainerBuilder builder, string path, Lifetime lifetime) where T : Component
-        {
-            return builder.RegisterComponentInNewPrefab(_ => Resources.Load<T>(path) ?? throw new($"{path} not found"), lifetime);
-        }
-
-        public static RegistrationBuilder AsInterfacesAndSelf(this RegistrationBuilder registrationBuilder)
-        {
-            return registrationBuilder.AsImplementedInterfaces().AsSelf();
-        }
-
-        public static void AutoResolve(this IContainerBuilder builder, Type type)
-        {
-            builder.RegisterBuildCallback(container => container.Resolve(type));
-        }
-
-        public static void AutoResolve<T>(this IContainerBuilder builder)
-        {
-            builder.AutoResolve(typeof(T));
-        }
-
-        public static object Instantiate(this IObjectResolver container, Type type, IReadOnlyList<IInjectParameter>? parameters = null)
-        {
-            return InjectorCache.GetOrBuild(type).CreateInstance(container, parameters);
-        }
-
-        public static T Instantiate<T>(this IObjectResolver container, IReadOnlyList<IInjectParameter>? parameters = null)
-        {
-            return (T)container.Instantiate(typeof(T), parameters);
-        }
-    }
-
-    public sealed class Parameter : IInjectParameter
-    {
-        private readonly object value;
-
-        public Parameter(object value)
-        {
-            this.value = value;
-        }
-
-        bool IInjectParameter.Match(Type parameterType, string _)
-        {
-            return parameterType.IsInstanceOfType(this.value);
-        }
-
-        object IInjectParameter.GetValue(IObjectResolver _)
-        {
-            return this.value;
-        }
-    }
 }
 #endif

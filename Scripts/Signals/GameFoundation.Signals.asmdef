@@ -3,6 +3,7 @@
   "rootNamespace": "GameFoundation.Signals",
   "references": [
     "GameFoundation.DI",
+    "TheOne.Extensions",
     "MessagePipe",
     "UniTask",
     "Zenject",
