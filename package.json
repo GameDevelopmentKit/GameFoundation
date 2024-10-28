@@ -24,7 +24,8 @@
     "com.theone.extensions": "1.0.0",
     "com.theone.logging": "1.0.0",
     "com.theone.resourcemanagement": "1.0.0",
-    "com.theone.data": "1.0.0"
+    "com.theone.data": "1.0.0",
+    "com.theone.di": "1.0.0"
   },
   "keywords": [
     "SDK",

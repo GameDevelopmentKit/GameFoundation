@@ -27,7 +27,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         public async UniTask LoadBlueprint()
         {
-            await this.blueprints.ForEachAsync(blueprint => this.dataManager.LoadAsync($"BlueprintData/{blueprint.GetType().GetCustomAttribute<BlueprintReaderAttribute>().Key}", blueprint.GetType()).ContinueWith(data => data.CopyTo(blueprint)));
+            await this.blueprints.ForEachAsync(blueprint => this.dataManager.LoadAsync($"BlueprintData/{blueprint.GetType().GetCustomAttribute<BlueprintReaderAttribute>().Key}.csv", blueprint.GetType()).ContinueWith(data => data.CopyTo(blueprint)));
             this.signalBus.Fire(new LoadBlueprintDataProgressSignal(1f));
             this.signalBus.Fire(new ReadBlueprintProgressSignal(this.blueprints.Count, this.blueprints.Count));
             this.signalBus.Fire(new LoadBlueprintDataSucceedSignal());

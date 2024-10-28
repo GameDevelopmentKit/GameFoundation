@@ -2,7 +2,6 @@
 #nullable enable
 namespace GameFoundation.Signals
 {
-    using GameFoundation.DI;
     using MessagePipe;
     using VContainer;
 
