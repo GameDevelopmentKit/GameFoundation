@@ -30,12 +30,12 @@ namespace GameFoundation.Signals
 
         public void Subscribe<TSignal>(Action callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
+            this.SubscribeInternal<TSignal>(callback);
         }
 
         public void Subscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback already subscribed");
+            this.SubscribeInternal<TSignal>(callback);
         }
 
         public bool TrySubscribe<TSignal>(Action callback)
@@ -50,12 +50,12 @@ namespace GameFoundation.Signals
 
         public void Unsubscribe<TSignal>(Action callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
+            this.UnsubscribeInternal<TSignal>(callback);
         }
 
         public void Unsubscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException("Callback not subscribed");
+            this.UnsubscribeInternal<TSignal>(callback);
         }
 
         public bool TryUnsubscribe<TSignal>(Action callback)
@@ -70,14 +70,19 @@ namespace GameFoundation.Signals
 
         private IPublisher<TSignal> GetPublisher<TSignal>()
         {
-            if (!this.container.TryResolve<IPublisher<TSignal>>(out var publisher)) throw new("Signal not declared");
+            if (!this.container.TryResolve<IPublisher<TSignal>>(out var publisher)) throw new InvalidOperationException($"{typeof(TSignal).Name} - Signal not declared");
             return publisher;
         }
 
         private ISubscriber<TSignal> GetSubscriber<TSignal>()
         {
-            if (!this.container.TryResolve<ISubscriber<TSignal>>(out var subscriber)) throw new("Signal not declared");
+            if (!this.container.TryResolve<ISubscriber<TSignal>>(out var subscriber)) throw new InvalidOperationException($"{typeof(TSignal).Name} - Signal not declared");
             return subscriber;
+        }
+
+        private void SubscribeInternal<TSignal>(Delegate callback)
+        {
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback.Method} - Already subscribed");
         }
 
         private bool TrySubscribeInternal<TSignal>(Delegate callback)
@@ -95,6 +100,11 @@ namespace GameFoundation.Signals
             var subscription = this.GetSubscriber<TSignal>().Subscribe(wrapper);
             this.subscriptions.Add(key, subscription);
             return true;
+        }
+
+        private void UnsubscribeInternal<TSignal>(Delegate callback)
+        {
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback.Method} - Not subscribed");
         }
 
         private bool TryUnsubscribeInternal<TSignal>(Delegate callback)
