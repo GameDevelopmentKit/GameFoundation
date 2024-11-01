@@ -30,12 +30,12 @@ namespace GameFoundation.Signals
 
         public void Subscribe<TSignal>(Action callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback already subscribed");
+            this.SubscribeInternal<TSignal>(callback);
         }
 
         public void Subscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback already subscribed");
+            this.SubscribeInternal<TSignal>(callback);
         }
 
         public bool TrySubscribe<TSignal>(Action callback)
@@ -50,12 +50,12 @@ namespace GameFoundation.Signals
 
         public void Unsubscribe<TSignal>(Action callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback not subscribed");
+            this.UnsubscribeInternal<TSignal>(callback);
         }
 
         public void Unsubscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback} - Callback not subscribed");
+            this.UnsubscribeInternal<TSignal>(callback);
         }
 
         public bool TryUnsubscribe<TSignal>(Action callback)
@@ -80,6 +80,11 @@ namespace GameFoundation.Signals
             return subscriber;
         }
 
+        private void SubscribeInternal<TSignal>(Delegate callback)
+        {
+            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback.Method} - Already subscribed");
+        }
+
         private bool TrySubscribeInternal<TSignal>(Delegate callback)
         {
             if (this.isDisposed) return true;
@@ -95,6 +100,11 @@ namespace GameFoundation.Signals
             var subscription = this.GetSubscriber<TSignal>().Subscribe(wrapper);
             this.subscriptions.Add(key, subscription);
             return true;
+        }
+
+        private void UnsubscribeInternal<TSignal>(Delegate callback)
+        {
+            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"{typeof(TSignal).Name} - {callback.Method} - Not subscribed");
         }
 
         private bool TryUnsubscribeInternal<TSignal>(Delegate callback)
