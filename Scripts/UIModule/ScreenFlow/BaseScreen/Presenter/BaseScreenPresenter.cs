@@ -30,15 +30,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         {
             this.View     = (TView)viewInstance;
             this.ScreenId = ScreenHelper.GetScreenId<TView>();
-            if (this.View.IsReadyToUse)
-            {
-                this.OnViewReady();
-            }
-            else
-            {
-                await UniTask.WaitUntil(() => this.View.IsReadyToUse);
-                this.OnViewReady();
-            }
+            if (!this.View.IsReadyToUse) await UniTask.WaitUntil(this, state => state.View.IsReadyToUse);
+            this.OnViewReady();
         }
 
         public void SetViewParent(Transform parent)
@@ -82,9 +75,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.Dispose();
         }
 
-        public virtual async void CloseView()
+        public virtual void CloseView()
         {
-            await this.CloseViewAsync();
+            this.CloseViewAsync().Forget();
         }
 
         public virtual void HideView()
