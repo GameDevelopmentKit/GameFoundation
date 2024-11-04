@@ -699,7 +699,10 @@ namespace DigitalRuby.SoundManagerNamespace
         {
             foreach (var s in listSoundOneshot)
             {
-                s?.Stop();
+                if (s != null)
+                {
+                    s.Stop();
+                }
             }
 
             listSoundOneshot.RemoveAll(x => x == null);
