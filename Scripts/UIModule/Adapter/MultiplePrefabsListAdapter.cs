@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Com.ForbiddenByte.OSA.Core;
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
@@ -18,10 +19,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public           SimpleDataHelper<TModel> Models { get; private set; }
-        private          IDependencyContainer     container;
-        private readonly List<TPresenter>         presenters     = new();
-        private readonly HashSet<TView>           readiedViewSet = new();
+        public           SimpleDataHelper<TModel>      Models { get; private set; }
+        private          IDependencyContainer          container;
+        private readonly Dictionary<TView, TPresenter> viewToPresenter  = new();
+        private readonly Dictionary<int, TPresenter>   indexToPresenter = new();
 
         #region OSA implementation
 
@@ -52,33 +53,23 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             var index = vh.ItemIndex;
 
             if (this.Models.Count <= index || index < 0) return;
+            var model = this.Models[index];
+            var view  = vh.root.GetComponentInChildren<TView>(true);
 
-            var model      = this.Models[index];
-            var viewObject = vh.root.GetComponentInChildren<TView>(true);
-
-            if (this.presenters.Count <= index)
+            if (this.viewToPresenter.TryGetValue(view, out var presenter))
             {
-                var presenter = this.container.Instantiate(this.Models[index].PresenterType) as TPresenter;
-                presenter.SetView(viewObject);
-                presenter.BindData(model);
-                this.presenters.Add(presenter);
-                CallOnViewReady(viewObject, presenter);
+                presenter.Dispose();
             }
             else
             {
-                var presenter = this.presenters[index];
-                presenter.SetView(viewObject);
-                presenter.Dispose();
-                presenter.BindData(model);
-                CallOnViewReady(viewObject, presenter);
+                presenter = this.viewToPresenter[view] = this.container.Instantiate(this.Models[index].PresenterType) as TPresenter;
+                presenter.SetView(view);
+                presenter.OnViewReady();
             }
 
-            return;
+            this.indexToPresenter[index] = presenter;
 
-            void CallOnViewReady(TView view, TPresenter presenter)
-            {
-                if (this.readiedViewSet.Add(view)) presenter.OnViewReady();
-            }
+            presenter.BindData(model);
         }
 
         protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _)
@@ -95,7 +86,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> models)
         {
-            foreach (var baseUIItemPresenter in this.presenters) baseUIItemPresenter.Dispose();
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(models);
