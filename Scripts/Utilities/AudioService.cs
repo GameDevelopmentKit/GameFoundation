@@ -39,7 +39,7 @@
         public static string       AudioSourceKey = "AudioSource";
         public static AudioService Instance { get; private set; }
 
-        private readonly SignalBus         signalBus;
+        private readonly ISignalBus        signalBus;
         private readonly SoundSetting      soundSetting;
         private readonly IGameAssets       gameAssets;
         private readonly ObjectPoolManager objectPoolManager;
@@ -50,7 +50,7 @@
         private AudioSource                     MusicAudioSource;
 
         public AudioService(
-            SignalBus signalBus,
+            ISignalBus signalBus,
             SoundSetting SoundSetting,
             IGameAssets gameAssets,
             ObjectPoolManager objectPoolManager,

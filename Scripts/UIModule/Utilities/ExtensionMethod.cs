@@ -77,7 +77,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         {
             container.Bind<T>().AsSingle().OnInstantiated<T>((context, presenter) =>
                 {
-                    context.Container.Resolve<SignalBus>().Fire(new ManualInitScreenSignal()
+                    context.Container.Resolve<ISignalBus>().Fire(new ManualInitScreenSignal()
                     {
                         ScreenPresenter   = presenter,
                         IncludingBindData = autoBindData

@@ -98,7 +98,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private Dictionary<Type, IScreenPresenter>          typeToLoadedScreenPresenter;
         private Dictionary<Type, UniTask<IScreenPresenter>> typeToPendingScreen;
 
-        private SignalBus    signalBus;
+        private ISignalBus   signalBus;
         private RootUICanvas rootUICanvas;
         private ILogService  logService;
         private IGameAssets  gameAssets;
@@ -107,7 +107,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         #endregion
 
         [Inject]
-        public void Init(SignalBus signalBusParam, ILogService logServiceParam, IGameAssets gameAssetsParam)
+        public void Init(ISignalBus signalBusParam, ILogService logServiceParam, IGameAssets gameAssetsParam)
         {
             this.signalBus  = signalBusParam;
             this.logService = logServiceParam;

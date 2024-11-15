@@ -12,7 +12,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         public static GameQueueActionServices Instance { get; private set; }
 
         private          IScreenManager screenManager;
-        private readonly SignalBus      signalBus;
+        private readonly ISignalBus     signalBus;
 
 
         private Dictionary<string, List<IGameQueueAction>> queueActions           = new Dictionary<string, List<IGameQueueAction>>();
@@ -20,7 +20,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         private bool                                       isDequeuing;
         private string                                     curLocation;
 
-        public GameQueueActionServices(IScreenManager screenManager, SignalBus signalBus)
+        public GameQueueActionServices(IScreenManager screenManager, ISignalBus signalBus)
         {
             this.screenManager = screenManager;
             this.signalBus     = signalBus;

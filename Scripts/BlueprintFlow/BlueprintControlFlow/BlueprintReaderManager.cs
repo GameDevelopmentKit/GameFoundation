@@ -22,7 +22,7 @@ namespace BlueprintFlow.BlueprintControlFlow
     {
         #region zeject
 
-        private readonly SignalBus               signalBus;
+        private readonly ISignalBus              signalBus;
         private readonly ILogService             logService;
         private readonly DiContainer             diContainer;
         private readonly IHandleUserDataServices handleUserDataServices;
@@ -34,7 +34,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         private readonly ReadBlueprintProgressSignal readBlueprintProgressSignal = new();
 
-        public BlueprintReaderManager(SignalBus signalBus, ILogService logService, DiContainer diContainer, IHandleUserDataServices handleUserDataServices, BlueprintConfig blueprintConfig,
+        public BlueprintReaderManager(ISignalBus signalBus, ILogService logService, DiContainer diContainer, IHandleUserDataServices handleUserDataServices, BlueprintConfig blueprintConfig,
             FetchBlueprintInfo fetchBlueprintInfo, BlueprintDownloader blueprintDownloader)
         {
             this.signalBus               = signalBus;

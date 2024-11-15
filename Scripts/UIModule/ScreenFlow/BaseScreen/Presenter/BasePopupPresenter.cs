@@ -9,7 +9,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
     public abstract class BasePopupPresenter<TView> : BaseScreenPresenter<TView> where TView : IScreenView
     {
-        public BasePopupPresenter(SignalBus signalBus) : base(signalBus) { }
+        public BasePopupPresenter(ISignalBus signalBus) : base(signalBus) { }
 
         public override async UniTask OpenViewAsync()
         {
@@ -48,7 +48,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         protected readonly ILogService logService;
         protected          TModel      Model;
 
-        protected BasePopupPresenter(SignalBus signalBus, ILogService logService) : base(signalBus) { this.logService = logService; }
+        protected BasePopupPresenter(ISignalBus signalBus, ILogService logService) : base(signalBus) { this.logService = logService; }
 
         public async UniTask OpenView(TModel model)
         {

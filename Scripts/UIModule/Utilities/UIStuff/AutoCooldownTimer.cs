@@ -21,10 +21,10 @@
         private Action<long> onEveryCycle;
         private Action       onComplete;
 
-        private readonly SignalBus   signalBus;
+        private readonly ISignalBus  signalBus;
         private          IMemoryPool pool;
 
-        public AutoCooldownTimer(SignalBus signalBus, int minMinutes = 60, int minHours = 24, int minDays = 30)
+        public AutoCooldownTimer(ISignalBus signalBus, int minMinutes = 60, int minHours = 24, int minDays = 30)
         {
             this.signalBus = signalBus;
 

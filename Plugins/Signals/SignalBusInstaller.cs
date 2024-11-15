@@ -8,7 +8,8 @@ namespace Zenject
         public override void InstallBindings()
         {
             this.Container.BindMessagePipe();
-            this.Container.BindInterfacesAndSelfTo<SignalBus>().AsSingle().CopyIntoAllSubContainers();
+
+            this.Container.Bind(typeof(ISignalBus), typeof(ILateDisposable)).To<SignalBus>().AsSingle().CopyIntoAllSubContainers();
             this.Container.BindLateDisposableExecutionOrder<SignalBus>(-999);
         }
     }

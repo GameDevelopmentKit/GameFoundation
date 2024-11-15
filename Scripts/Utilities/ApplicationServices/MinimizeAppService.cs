@@ -8,7 +8,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
     /// <summary>Catch application event ex pause, focus and more.... </summary>
     public class MinimizeAppService : MonoBehaviour
     {
-        [Inject] private SignalBus               signalBus;
+        [Inject] private ISignalBus              signalBus;
         [Inject] private IHandleUserDataServices handleUserDataServices;
 
         private readonly ApplicationPauseSignal     applicationPauseSignal     = new(false);

@@ -15,10 +15,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public virtual bool         IsClosePrevious { get; protected set; } = false;
         public         ScreenStatus ScreenStatus    { get; protected set; } = ScreenStatus.Closed;
 
-        public             TView     View;
-        protected readonly SignalBus SignalBus;
+        public             TView      View;
+        protected readonly ISignalBus SignalBus;
 
-        public BaseScreenPresenter(SignalBus signalBus) { this.SignalBus = signalBus; }
+        public BaseScreenPresenter(ISignalBus signalBus) { this.SignalBus = signalBus; }
 
         #region Implement IUIPresenter
 
@@ -113,7 +113,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     {
         protected readonly ILogService Logger;
         protected          TModel      Model;
-        protected BaseScreenPresenter(SignalBus signalBus, ILogService logger) : base(signalBus) { this.Logger = logger; }
+        protected BaseScreenPresenter(ISignalBus signalBus, ILogService logger) : base(signalBus) { this.Logger = logger; }
 
         public override async UniTask OpenViewAsync()
         {

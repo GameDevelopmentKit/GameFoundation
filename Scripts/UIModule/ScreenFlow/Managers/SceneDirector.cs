@@ -13,11 +13,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     /// <summary>Load, unload scenes are wrapped here </summary>
     public class SceneDirector
     {
-        private readonly   SignalBus   signalBus;
+        private readonly   ISignalBus  signalBus;
         protected readonly IGameAssets GameAssets;
         public static      string      CurrentSceneName;
 
-        public SceneDirector(SignalBus signalBus, IGameAssets gameAssets)
+        public SceneDirector(ISignalBus signalBus, IGameAssets gameAssets)
         {
             this.signalBus  = signalBus;
             this.GameAssets = gameAssets;
