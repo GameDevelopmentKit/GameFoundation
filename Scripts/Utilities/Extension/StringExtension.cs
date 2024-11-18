@@ -17,13 +17,11 @@ namespace Utilities.Extension
         public static string ToSnakeCase(this string str)
         {
             return string.Concat(str.Select((x, i) => 
-            {
-                if (i > 0 && (char.IsUpper(x) || char.IsDigit(x)) && !char.IsDigit(str[i-1]))
-                {
-                    return "_" + x.ToString().ToLower();
-                }
-                return x.ToString().ToLower();
-            }));
+                                                (i > 0 && (char.IsUpper(x) || char.IsDigit(x) && !char.IsDigit(str[i - 1])) || 
+                                                 (char.IsDigit(x) && i > 0 && !char.IsDigit(str[i - 1])) )
+                                                    ? "_" + x.ToString() 
+                                                    : x.ToString()))
+                         .ToLower();
         }
 
         public static string ToJson(this object obj)
