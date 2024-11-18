@@ -16,9 +16,14 @@ namespace Utilities.Extension
         /// <remarks>from https://www.30secondsofcode.org/c-sharp/s/to-snake-case</remarks>
         public static string ToSnakeCase(this string str)
         {
-            return string.Concat(str.Select((x, i) => i > 0 && char.IsUpper(x)
-                ? "_" + x.ToString()
-                : x.ToString())).ToLower();
+            return string.Concat(str.Select((x, i) => 
+            {
+                if (i > 0 && (char.IsUpper(x) || char.IsDigit(x)) && !char.IsDigit(str[i-1]))
+                {
+                    return "_" + x.ToString().ToLower();
+                }
+                return x.ToString().ToLower();
+            }));
         }
 
         public static string ToJson(this object obj)
