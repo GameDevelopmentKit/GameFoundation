@@ -1,7 +1,9 @@
 fileFormatVersion: 2
-guid: d92d0eb8b980c6d44b5f0e64a620355b
-DefaultImporter:
+guid: 0675e2791073a4147b190e55f1da7ac2
+ShaderImporter:
   externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -10,5 +12,5 @@ AssetOrigin:
   productId: 89041
   packageName: Odin Inspector and Serializer
   packageVersion: 3.3.1.10
-  assetPath: Packages/com.gdk.core/Plugins/Sirenix/Odin Inspector/Modules/Unity.Addressables.data
+  assetPath: Packages/com.gdk.core/Plugins/Sirenix/Odin Inspector/Assets/Editor/Hidden/ExtractSpriteShader.shader
   uploadId: 702916
