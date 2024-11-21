@@ -6,3 +6,10 @@ TextScriptImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 89041
+  packageName: Odin Inspector and Serializer
+  packageVersion: 3.3.1.10
+  assetPath: Packages/com.gdk.core/Plugins/Sirenix/Odin Inspector/Assets/Editor/ConfigData.bytes
+  uploadId: 702916
