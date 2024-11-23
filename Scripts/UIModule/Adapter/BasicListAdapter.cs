@@ -12,7 +12,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
     // There are 2 important callbacks you need to implement, apart from Start(): CreateViewsHolder() and UpdateViewsHolder()
     // See explanations below
-    public class BasicListAdapter<TModel, TView, TPresenter> : OSA<BaseParamsWithPrefab, MyListItemViewsHolder>
+    public class BasicListAdapter<TModel, TView, TPresenter> : OSA<BaseParamsWithPrefab, MyListItemViewsHolder>,IAdapter
         where TPresenter : BaseUIItemPresenter<TView, TModel>, IDisposable where TView : MonoBehaviour, IUIView
     {
         // Helper that stores data and notifies the adapter when items count changes
@@ -20,6 +20,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private SimpleDataHelper<TModel> Models { get; set; }
         private CanvasGroup              canvasGroup;
         private List<TPresenter>         presenters;
+        public  bool                     IsInitItemCompleted            { get; set; }
 
         private DiContainer diContainer;
 
@@ -102,6 +103,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
+            this.IsInitItemCompleted = true;
         }
         
         /// <summary>

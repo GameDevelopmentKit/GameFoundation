@@ -11,7 +11,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
     // There is 1 important callback you need to implement, apart from Start(): UpdateCellViewsHolder()
     // See explanations below
-    public class BasicGridAdapter<TModel, TView, TPresenter> : GridAdapter<GridParams, MyGridItemViewsHolder> where TPresenter : BaseUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
+    public class BasicGridAdapter<TModel, TView, TPresenter> : GridAdapter<GridParams, MyGridItemViewsHolder>,IAdapter where TPresenter : BaseUIItemPresenter<TView, TModel> where TView : MonoBehaviour, IUIView
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
@@ -20,6 +20,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private List<TPresenter>         presenters;
 
         private DiContainer diContainer;
+        public  bool        IsInitItemCompleted { get; set; }
 
         #region GridAdapter implementation
 
@@ -85,6 +86,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
+            this.IsInitItemCompleted=true;
         }
         
         /// <summary>
@@ -105,7 +107,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
         
-        public List<TPresenter> GetPresenters() => this.presenters;
+        public List<TPresenter> GetPresenters()     => this.presenters;
     }
 
     // This class keeps references to an item's views.
