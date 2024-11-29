@@ -58,10 +58,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private UniTask PlayAnim(PlayableDirector anim)
         {
-            if (!anim.playableAsset || this.animationTask?.Task.Status == UniTaskStatus.Pending) return UniTask.CompletedTask;
+            if (!anim.playableAsset) return UniTask.CompletedTask;
 
             this.animationTask = new();
-            this.SetLookInput(false);
+            this.SetActiveInput(false);
 
             anim.Play();
             return this.animationTask.Task;
@@ -70,10 +70,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         private void OnAnimComplete(PlayableDirector obj)
         {
             this.animationTask.TrySetResult();
-            this.SetLookInput(true);
+            this.SetActiveInput(true);
         }
 
-        private void SetLookInput(bool value)
+        private void SetActiveInput(bool value)
         {
             if (this.lockInput && this.eventSystem != null) this.eventSystem.enabled = value;
         }
