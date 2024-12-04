@@ -69,6 +69,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public UniTask CloseCurrentScreen();
 
         /// <summary>
+        /// Close to a screen in queue
+        /// </summary>
+        public UniTask CloseAllLastOverlayScreens();
+
+        /// <summary>
         /// Close all screen on current scene
         /// </summary>
         public void CloseAllScreen();
@@ -210,6 +215,19 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             if (this.activeScreens.Count > 0) await this.activeScreens.Last().CloseViewAsync();
         }
 
+        public async UniTask CloseAllLastOverlayScreens()
+        {
+            if (!this.CheckPopupIsOverlay(this.activeScreens.Last())) return;
+
+            //remove all overlay screens from this.activeScreens from last until first no overlay screen
+            while (this.activeScreens.Count > 2 && this.CheckPopupIsOverlay(this.activeScreens[^2]))
+            {
+                this.activeScreens.RemoveAt(this.activeScreens.Count - 2);
+            }
+
+            await this.CloseCurrentScreen();
+        }
+
         public void CloseAllScreen()
         {
             var cacheActiveScreens = this.activeScreens.ToList();
@@ -254,23 +272,15 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #region Check Overlay Popup
 
-        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter)
-        {
-            return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>));
-        }
+        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter) { return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>)); }
 
-        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter)
-        {
-            return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay;
-        }
+        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter) { return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay; }
 
         #endregion
 
         #region Handle events
 
-        void IInitializable.Initialize()
-        {
-        }
+        void IInitializable.Initialize() { }
 
         void IDisposable.Dispose()
         {
@@ -382,10 +392,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private bool enableBackToClose = false;
 
-        public void EnableBackToClose(bool enable)
-        {
-            this.enableBackToClose = enable;
-        }
+        public void EnableBackToClose(bool enable) { this.enableBackToClose = enable; }
 
         void ITickable.Tick()
         {
