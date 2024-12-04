@@ -71,7 +71,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <summary>
         /// Close to a screen in queue
         /// </summary>
-        public UniTask CloseAllLastOverlayScreens();
+        public UniTask CloseAllLastOverlayScreenAsync();
 
         /// <summary>
         /// Close all screen on current scene
@@ -215,17 +215,23 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             if (this.activeScreens.Count > 0) await this.activeScreens.Last().CloseViewAsync();
         }
 
-        public async UniTask CloseAllLastOverlayScreens()
+        public async UniTask CloseAllLastOverlayScreenAsync()
         {
-            if (!this.CheckPopupIsOverlay(this.activeScreens.Last())) return;
+            if (this.activeScreens.Count == 0 || !this.CheckPopupIsOverlay(this.activeScreens.Last())) return;
 
-            //remove all overlay screens from this.activeScreens from last until first no overlay screen
-            while (this.activeScreens.Count > 2 && this.CheckPopupIsOverlay(this.activeScreens[^2]))
+            var tasks = new List<UniTask>();
+            for (var i = this.activeScreens.Count - 1; i > 0; i--)
             {
-                this.activeScreens.RemoveAt(this.activeScreens.Count - 2);
+                if (this.CheckPopupIsOverlay(this.activeScreens[i]))
+                    tasks.Add(this.activeScreens[i].CloseViewAsync());
+                else
+                    break;
             }
 
-            await this.CloseCurrentScreen();
+            this.CurrentActiveScreen.Value = this.activeScreens.Last();
+            this.previousActiveScreen      = null;
+
+            await UniTask.WhenAll(tasks);
         }
 
         public void CloseAllScreen()
