@@ -68,10 +68,7 @@
             Instance               = this;
         }
 
-        public void Initialize()
-        {
-            this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio);
-        }
+        public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
 
         private void SubscribeMasterAudio()
         {
@@ -113,8 +110,7 @@
                 audioSource.clip = audioClip;
                 audioSource.PlayLoopingSoundManaged(volumeScale, fadeSeconds);
                 this.loopingSoundNameToSources.Add(name, audioSource);
-            }
-            else
+            } else
             {
                 audioSource.PlayOneShotSoundManaged(audioClip);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
@@ -157,7 +153,14 @@
 
         public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
-            this.StopPlayList();
+            try
+            {
+                this.StopPlayList();
+            }
+            catch
+            {
+                Debug.LogError("Already recycle playlist audio source");
+            }
 
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
@@ -219,10 +222,7 @@
             return this.MusicAudioSource.isPlaying;
         }
 
-        public void StopAllPlayList()
-        {
-            this.StopPlayList();
-        }
+        public void StopAllPlayList() { this.StopPlayList(); }
 
         public void PauseEverything()
         {
@@ -236,19 +236,10 @@
             SoundManager.ResumeAll();
         }
 
-        protected virtual void SetSoundValue(float value)
-        {
-            SoundManager.SoundVolume = value;
-        }
+        protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
-        protected virtual void SetMusicValue(float value)
-        {
-            SoundManager.MusicVolume = value;
-        }
+        protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
 
-        public void Dispose()
-        {
-            this.compositeDisposable?.Dispose();
-        }
+        public void Dispose() { this.compositeDisposable?.Dispose(); }
     }
 }
