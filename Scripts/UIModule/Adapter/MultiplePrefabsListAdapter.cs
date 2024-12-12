@@ -91,6 +91,16 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             this.Models.ResetItems(models);
             for (var i = 0; i < models.Count; ++i) this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
         }
+        
+        public TPresenter GetPresenterAtIndex(int index)
+        {
+            return this.indexToPresenter[index];
+        }
+
+        public List<TPresenter> GetPresenters()
+        {
+            return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        }
     }
 
     [Serializable]
