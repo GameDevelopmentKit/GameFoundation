@@ -5,6 +5,7 @@ namespace GameFoundation.DI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using UnityEngine;
     using UnityEngine.Scripting;
     using VContainer.Internal;
 
@@ -34,27 +35,42 @@ namespace GameFoundation.DI
 
         void VContainer.Unity.IStartable.Start()
         {
-            foreach (var initializable in this.initializables) initializable.Initialize();
+            SafeForEach(this.initializables, initializable => initializable.Initialize());
         }
 
         void VContainer.Unity.ITickable.Tick()
         {
-            foreach (var tickable in this.tickables) tickable.Tick();
+            SafeForEach(this.tickables, tickable => tickable.Tick());
         }
 
         void VContainer.Unity.ILateTickable.LateTick()
         {
-            foreach (var lateTickable in this.lateTickables) lateTickable.LateTick();
+            SafeForEach(this.lateTickables, lateTickable => lateTickable.LateTick());
         }
 
         void VContainer.Unity.IFixedTickable.FixedTick()
         {
-            foreach (var fixedTickable in this.fixedTickables) fixedTickable.FixedTick();
+            SafeForEach(this.fixedTickables, fixedTickable => fixedTickable.FixedTick());
         }
 
         void IDisposable.Dispose()
         {
-            foreach (var lateDisposable in this.lateDisposables) lateDisposable.LateDispose();
+            SafeForEach(this.lateDisposables, lateDisposable => lateDisposable.LateDispose());
+        }
+
+        private static void SafeForEach<T>(IEnumerable<T> enumerable, Action<T> action)
+        {
+            foreach (var item in enumerable)
+            {
+                try
+                {
+                    action(item);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
         }
     }
 }
