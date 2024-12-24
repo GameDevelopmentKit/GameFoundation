@@ -21,6 +21,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Signals
     {
         public IScreenPresenter ScreenPresenter;
         public bool             IncludingBindData;
+        public object           Data;
     }
 
     public class ScreenSelfDestroyedSignal

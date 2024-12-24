@@ -3,7 +3,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.CommonScreen;
@@ -338,7 +337,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             closeScreenPresenter?.SetViewParent(this.CurrentHiddenRoot);
         }
 
-        private void OnManualInitScreen(ManualInitScreenSignal signal)
+        private async void OnManualInitScreen(ManualInitScreenSignal signal)
         {
             var screenPresenter = signal.ScreenPresenter;
             var screenType      = screenPresenter.GetType();
@@ -351,15 +350,44 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             if (viewObj != null)
             {
+                var view = viewObj.GetComponent<IScreenView>();
                 screenPresenter.SetView(viewObj.GetComponent<IScreenView>());
 
                 if (signal.IncludingBindData)
                 {
-                    screenPresenter.BindData();
+                    await UniTask.WaitUntil(() => view.IsReadyToUse);
+
+                    if (signal.Data != null)
+                    {
+                        this.CallOpenView(screenPresenter, signal.Data).Forget();
+                    }
+                    else
+                    {
+                        screenPresenter.OpenViewAsync();
+                    }
                 }
             }
             else
                 this.logService.Error($"The {screenInfo.AddressableScreenPath} object may be not instantiated in the RootUICanvas!!!");
+        }
+
+        private async UniTask CallOpenView(IScreenPresenter presenter, object modelInstance)
+        {
+            var presenterType = presenter.GetType();
+
+            var interfaceType = presenterType.GetInterface($"IScreenPresenter`1");
+
+            if (interfaceType != null)
+            {
+                var openViewMethod = interfaceType.GetMethod("OpenView");
+
+                if (openViewMethod != null)
+                {
+                    var task = (UniTask)openViewMethod.Invoke(presenter, new[] { modelInstance });
+
+                    await task;
+                }
+            }
         }
 
         private void OnDestroyScreen(ScreenSelfDestroyedSignal signal)

@@ -73,17 +73,28 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         /// <param name="container"></param>
         /// <param name="autoBindData"></param>
         /// <typeparam name="T"> Type of screen presenter</typeparam>
-        public static void InitScreenManually<T>(this DiContainer container, bool autoBindData = false) where T : IScreenPresenter
+        public static void InitScreenManually<T>(this DiContainer container, bool autoBindData = false,object data =null) where T : IScreenPresenter
         {
-            container.Bind<T>().AsSingle().OnInstantiated<T>((context, presenter) =>
-                {
-                    context.Container.Resolve<ISignalBus>().Fire(new ManualInitScreenSignal()
-                    {
-                        ScreenPresenter   = presenter,
-                        IncludingBindData = autoBindData
-                    });
-                })
-                .NonLazy();
+            var presenter = container.Instantiate<T>();
+            
+            container.Resolve<ISignalBus>().Fire(new ManualInitScreenSignal()
+            {
+                ScreenPresenter   = presenter,
+                IncludingBindData = autoBindData,
+                Data              = data
+            });
+            
+            // container.Bind<T>().AsSingle().OnInstantiated<T>((context, presenter) =>
+            //     {
+            //         context.Container.Resolve<ISignalBus>().Fire(new ManualInitScreenSignal()
+            //         {
+            //             ScreenPresenter   = presenter,
+            //             IncludingBindData = autoBindData,
+            //             Data = data
+            //         });
+            //     })
+            //     .NonLazy();
         }
+        
     }
 }
