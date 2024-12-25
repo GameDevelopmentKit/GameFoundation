@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Com.ForbiddenByte.OSA.Core;
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
@@ -18,26 +19,17 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        private CanvasGroup              canvasGroup;
-        private SimpleDataHelper<TModel> models;
-        private List<TPresenter>         presenters;
-        private HashSet<TView>           readiedViewSet = new();
-
-        private DiContainer diContainer;
+        public           SimpleDataHelper<TModel>      Models { get; private set; }
+        private          DiContainer                   container;
+        private readonly Dictionary<TView, TPresenter> viewToPresenter  = new();
+        private readonly Dictionary<int, TPresenter>   indexToPresenter = new();
 
         #region OSA implementation
 
-        protected override void Start()
+        protected override void Awake()
         {
-            this.models = new SimpleDataHelper<TModel>(this);
-
-            // Calling this initializes internal data and prepares the adapter to handle item count changes
-            base.Start();
-
-            // Retrieve the models from your data source and set the items count
-            /*
-            RetrieveDataAndUpdate(500);
-            */
+            base.Awake();
+            this.Models = new(this);
         }
 
         // This is called initially, as many times as needed to fill the viewport,
@@ -47,7 +39,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override BaseItemViewsHolder CreateViewsHolder(int itemIndex)
         {
             var vh = new BaseItemViewsHolder();
-            vh.Init(this.Parameters.ItemPrefabs[this.models[itemIndex].PrefabName], this.Parameters.Content, itemIndex);
+            vh.Init(this.Parameters.ItemPrefabs[this.Models[itemIndex].PrefabName], this.Parameters.Content, itemIndex);
 
             return vh;
         }
@@ -60,28 +52,26 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             var index = vh.ItemIndex;
 
-            if (this.models.Count <= index || index < 0) return;
+            if (this.Models.Count <= index || index < 0) return;
+            var model = this.Models[index];
+            var view  = vh.root.GetComponentInChildren<TView>(true);
 
-            var model      = this.models[index];
-            var viewObject = vh.root.GetComponentInChildren<TView>(true);
-
-            if (this.presenters.Count <= index)
+            if (this.viewToPresenter.TryGetValue(view, out var presenter))
             {
-                var presenter = this.diContainer.Instantiate(this.models[index].PresenterType) as TPresenter;
-                presenter.SetView(viewObject);
-                presenter.BindData(model);
-                this.presenters.Add(presenter);
+                presenter.Dispose();
             }
             else
             {
-                var presenter = this.presenters[index];
-                presenter.SetView(viewObject);
-                presenter.Dispose();
-                presenter.BindData(model);
+                presenter = this.viewToPresenter[view] = this.container.Instantiate(this.Models[index].PresenterType) as TPresenter;
+                presenter.SetView(view);
             }
+
+            this.indexToPresenter[index] = presenter;
+
+            presenter.BindData(model);
         }
 
-        protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _) { return this.models[vh.ItemIndex].PresenterType == this.models[itemIndex].PresenterType; }
+        protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _) { return this.Models[vh.ItemIndex].PresenterType == this.Models[itemIndex].PresenterType; }
 
         #endregion
 
@@ -92,28 +82,19 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> models, DiContainer diContainer)
         {
-            this.diContainer = diContainer;
-            this.models      = new SimpleDataHelper<TModel>(this);
-
-            if (this.presenters != null)
+            this.container = diContainer;
+            if (!this.IsInitialized)
             {
-                foreach (var baseUIItemPresenter in this.presenters)
-                {
-                    baseUIItemPresenter.Dispose();
-                }
+                await UniTask.WaitUntil(() => this.IsInitialized);
             }
-
-            this.presenters = new List<TPresenter>();
-
-            await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
-            this.models.ResetItems(models);
-
-            for (var i = 0; i < models.Count; ++i)
-            {
-                this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
-            }
+            this.Models.ResetItems(models);
+            for (var i = 0; i < models.Count; ++i) this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
         }
+
+        public TPresenter GetPresenterAtIndex(int index) { return this.indexToPresenter[index]; }
+
+        public List<TPresenter> GetPresenters() { return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList(); }
     }
 
     [Serializable]
