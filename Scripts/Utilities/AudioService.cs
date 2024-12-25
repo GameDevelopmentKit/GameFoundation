@@ -120,7 +120,7 @@
             }
         }
 
-        public void StopAllSound()
+        public virtual void StopAllSound()
         {
             SoundManager.StopAllLoopingSounds();
             SoundManager.StopAllNonLoopingSounds();
@@ -134,7 +134,7 @@
             this.loopingSoundNameToSources.Clear();
         }
 
-        public void StopAll()
+        public virtual void StopAll()
         {
             this.StopAllSound();
             this.StopAllPlayList();
@@ -166,7 +166,7 @@
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
-        public void StopPlayList()
+        public virtual void StopPlayList()
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.StopLoopingMusicManaged();
@@ -175,7 +175,7 @@
             this.MusicAudioSource = null;
         }
 
-        public void SetPlayListTime(float time)
+        public virtual void SetPlayListTime(float time)
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.time = time;
@@ -185,51 +185,51 @@
         /// Get playlist time
         /// </summary>
         /// <returns>Return playlist time, -1 if no playlist is playing</returns>
-        public float GetPlayListTime()
+        public virtual float GetPlayListTime()
         {
             if (this.MusicAudioSource == null) return -1f;
 
             return this.MusicAudioSource.time;
         }
 
-        public void SetPlayListPitch(float pitch)
+        public virtual void SetPlayListPitch(float pitch)
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.pitch = pitch;
         }
 
-        public void SetPlayListLoop(bool isLoop)
+        public virtual void SetPlayListLoop(bool isLoop)
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.loop = isLoop;
         }
 
-        public void PausePlayList()
+        public virtual void PausePlayList()
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.Pause();
         }
 
-        public void ResumePlayList()
+        public virtual void ResumePlayList()
         {
             if (this.MusicAudioSource == null) return;
-            this.MusicAudioSource.Play();
+            this.MusicAudioSource.UnPause();
         }
-        public bool IsPlayingPlayList()
+        public virtual bool IsPlayingPlayList()
         {
             if (this.MusicAudioSource == null) return false;
             return this.MusicAudioSource.isPlaying;
         }
 
-        public void StopAllPlayList() { this.StopPlayList(); }
+        public virtual void StopAllPlayList() { this.StopPlayList(); }
 
-        public void PauseEverything()
+        public virtual void PauseEverything()
         {
             SoundManager.PauseAll();
             AudioListener.pause = true;
         }
 
-        public void ResumeEverything()
+        public virtual void ResumeEverything()
         {
             AudioListener.pause = false;
             SoundManager.ResumeAll();
