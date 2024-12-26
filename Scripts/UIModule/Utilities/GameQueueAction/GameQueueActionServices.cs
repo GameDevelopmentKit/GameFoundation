@@ -33,7 +33,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             this.isDequeuing = false;
             if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0) return;
             this.isDequeuing = true;
-            Observable.TimerFrame(1, UnityFrameProvider.PostLateUpdate).ObserveOnMainThread().Subscribe(l => { this.Dequeue(listAction); });
+            Observable.EveryUpdate().Subscribe(l => { this.Dequeue(listAction); });
         }
 
         public bool Insert(string location, IGameQueueAction action, int index = -1)
