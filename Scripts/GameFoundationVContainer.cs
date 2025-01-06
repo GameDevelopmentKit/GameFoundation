@@ -13,10 +13,12 @@ namespace GameFoundation.Scripts
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
+    using GameFoundation.Scripts.Utilities.Utils;
     using GameFoundation.Signals;
     using GameFoundation.UIModule.UIModule;
     using GameFoundation.Utilities.ApplicationServices;
     using GameFoundation.Utilities.GameQueueAction;
+    using I2.Loc;
     using UnityEngine;
     using VContainer;
     using VContainer.Unity;
@@ -38,6 +40,8 @@ namespace GameFoundation.Scripts
 
             builder.Register<GameAssets>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ObjectPoolManager>(Lifetime.Singleton);
+            builder.RegisterComponentOnNewGameObject<SetLanguage>(Lifetime.Singleton).UnderTransform(rootTransform);
+            builder.Register<LocalizationService>(Lifetime.Singleton);
             builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LogService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<HandleLocalUserDataServices>(Lifetime.Singleton).AsImplementedInterfaces();
