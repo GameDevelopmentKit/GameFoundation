@@ -37,9 +37,9 @@ namespace Models
         #region private feild
 
         [SerializeField] private string configVersion;
-        [SerializeField] private string apiKey = "HGDHSGDHSSFDDS";
+        [SerializeField] private string apiKey = "";
         [SerializeField] private string gameName;
-        [SerializeField] private string gameId = "8a5ddf62-4c95-44b0-9db0-be5f8f9ef819";
+        [SerializeField] private string gameId = "";
 
         [SerializeField] private List<IGameConfig> gameConfigs;
 
