@@ -14,19 +14,17 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
         public event Action                         ViewDidOpen;
         public event Action                         ViewDidDestroy;
 
-        
         protected         UIScreenTransition ScreenTransition => this.screenTransition;
         protected virtual CanvasGroup        ViewRoot         { get => this.viewRoot; set => this.viewRoot = value; }
         public            RectTransform      RectTransform    { get;                  private set; }
-
 
         #region Unity3D Event
 
         private void Awake()
         {
             // This will allow to set the view in the inspector if we want to
-            if (!this.ViewRoot) this.ViewRoot                 = this.GetComponent<CanvasGroup>();
-            
+            if (!this.ViewRoot) this.ViewRoot = this.GetComponent<CanvasGroup>();
+
             this.screenTransition = this.ScreenTransition ? this.ScreenTransition : this.GetComponent<UIScreenTransition>();
 
             if (this.ScreenTransition == null)
@@ -70,18 +68,28 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
         public virtual async UniTask Open()
         {
             this.UpdateAlpha(1f);
-            await this.ScreenTransition.PlayIntroAnim();
+
+            if (this.ScreenTransition != null)
+            {
+                await this.ScreenTransition.PlayIntroAnim();
+            }
+
             Debug.Log($"open screen view {this.name}");
             this.ViewDidOpen?.Invoke();
         }
 
         public virtual async UniTask Close()
         {
-            await this.ScreenTransition.PlayOutroAnim();
+            if (this.ScreenTransition != null)
+            {
+                await this.ScreenTransition.PlayOutroAnim();
+            }
+
             Debug.Log($"Close screen view {this.name}");
             this.UpdateAlpha(0);
             this.ViewDidClose?.Invoke();
         }
+
         public void Hide() { this.UpdateAlpha(0); }
         public void Show() { this.UpdateAlpha(1); }
 
@@ -89,6 +97,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         protected void UpdateAlpha(float value)
         {
+            if(this.gameObject==null)return;
             this.ViewRoot.alpha          = value;
             this.ViewRoot.blocksRaycasts = value >= 1;
         }

@@ -9,15 +9,15 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
     {
         [SerializeField] private PlayableDirector introAnimation;
         [SerializeField] private PlayableDirector outroAnimation;
-        
-        [Tooltip("if lockInput = true, disable event system while anim is running and otherwise.")]
-        [SerializeField] private bool             lockInput = true;
+
+        [Tooltip("if lockInput = true, disable event system while anim is running and otherwise.")] [SerializeField]
+        private bool lockInput = true;
 
         public DirectorUpdateMode DirectorUpdateMode = DirectorUpdateMode.UnscaledGameTime;
 
         private EventSystem             eventSystem;
         private UniTaskCompletionSource animationTask;
-        
+
         public PlayableDirector IntroAnimation => this.introAnimation;
         public PlayableDirector OutroAnimation => this.outroAnimation;
 
@@ -26,6 +26,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             this.eventSystem                   = EventSystem.current;
             this.introAnimation.timeUpdateMode = this.DirectorUpdateMode;
             this.outroAnimation.timeUpdateMode = this.DirectorUpdateMode;
+
             if (!this.introAnimation.playableAsset)
                 Debug.LogWarning($"Intro Animation for {this.gameObject.name} is not available", this);
             else
@@ -43,15 +44,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             }
         }
 
-        public UniTask PlayIntroAnim()
-        {
-            return this.PlayAnim(this.introAnimation);
-        }
+        public UniTask PlayIntroAnim() { return this.PlayAnim(this.introAnimation); }
 
-        public UniTask PlayOutroAnim()
-        {
-            return this.PlayAnim(this.outroAnimation);
-        }
+        public UniTask PlayOutroAnim() { return this.PlayAnim(this.outroAnimation); }
 
         private UniTask PlayAnim(PlayableDirector anim)
         {
@@ -59,15 +54,18 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             {
                 return UniTask.CompletedTask;
             }
-            
+
             this.animationTask = new UniTaskCompletionSource();
             this.SetLookInput(false);
 
-            anim.Play();
+            if (anim != null)
+            {
+                anim.Play();
+            }
+
             return this.animationTask.Task;
-           
         }
-        
+
         private void OnAnimComplete(PlayableDirector obj)
         {
             this.animationTask.TrySetResult();
