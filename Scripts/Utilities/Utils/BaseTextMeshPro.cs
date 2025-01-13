@@ -21,7 +21,7 @@
 
         private void OnLanguageChange() { this.SetTextWithLocalization(this.lastKey); }
 
-        public async void SetTextWithLocalization(string key, Color colorCode = default)
+        private async void SetTextWithLocalization(string key, Color colorCode = default)
         {
             this.txtText      ??= this.GetComponent<TextMeshProUGUI>();
             this.txtText.text =   LocalizationService.Instance.GetTextWithKey(key);
@@ -35,10 +35,10 @@
 
             //TODO change font with language
 
-            // var font = await LocalizationService.Instance.GetFontAsset();
-            //
-            // if (font == null) return;
-            // this.txtText.font = LocalizationManager.CurrentLanguage == "English" ? this.currentFont : font;
+            var font = await LocalizationService.Instance.GetFontAsset();
+            
+            if (font == null) return;
+            this.txtText.font = LocalizationManager.CurrentLanguage == "English" ? this.currentFont : font;
         }
     }
 }

@@ -43,7 +43,6 @@
             return output;
         }
 
-        //todo for change language
         public void ChangeLanguage(string language)
         {
             this.setLanguage._Language = language;
@@ -51,11 +50,10 @@
             this.OnLanguageChange?.Invoke();
         }
 
-        //todo for change font asset
         public async UniTask<TMP_FontAsset> GetFontAsset()
         {
             TMP_FontAsset fontAsset   = null;
-            const string  fontKey     = "!!FONT_SETTING";
+            const string  fontKey     = "TextMeshFontSmart";
             var           fontAddress = LocalizationManager.TryGetTranslation(fontKey, out var localization) ? localization : fontKey;
             fontAsset = await this.gameAssets.LoadAssetAsync<TMP_FontAsset>(fontAddress);
 
