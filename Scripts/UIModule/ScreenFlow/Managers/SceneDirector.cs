@@ -33,6 +33,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 TargetScreenName  = new List<string>() { sceneName },
                 ActiveScreenName  = sceneName
             });
+
             await this.GameAssets.UnloadSceneAsync(sceneName);
 
             CurrentSceneName = sceneName;
@@ -44,6 +45,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 TargetScreenName  = new List<string>() { sceneName },
                 ActiveScreenName  = sceneName
             });
+
             return screenInstance;
         }
 
@@ -53,8 +55,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             return this.LoadSingleSceneByAddressableAsync(sceneName, loadMode, activeOnLoad);
         }
 
-        /// <summary>Load scene async by name </summary>
-        public async UniTask<SceneInstance> LoadSingleSceneByAddressableAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
+        /// <summary>
+        /// For Preload scene and wait it
+        /// </summary>
+        /// <param name="sceneName"></param>
+        /// <returns></returns>
+        public async UniTask<SceneInstance> LoadSceneInstanceByAddressAble(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)
         {
             this.signalBus.Fire(new StartLoadingNewSceneSignal
             {
@@ -63,9 +69,39 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 ActiveScreenName  = sceneName
             });
 
+            var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName, mode, false);
+
+            return screenInstance;
+        }
+
+        /// <summary>
+        /// Active an scene instance
+        /// </summary>
+        /// <param name="sceneName"></param>
+        /// <param name="sceneInstance"></param>
+        public async UniTask ActiveSceneInstance(string sceneName, SceneInstance sceneInstance)
+        {
             var lastScene = CurrentSceneName;
             CurrentSceneName = sceneName;
-            var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName, loadMode, false);
+            await this.UnloadSceneAsync(lastScene);
+            _ = Resources.UnloadUnusedAssets();
+            await sceneInstance.ActivateAsync();
+
+            this.signalBus.Fire(new FinishLoadingNewSceneSignal
+            {
+                CurrentScreenName = new List<string>() { lastScene },
+                TargetScreenName  = new List<string>() { sceneName },
+                ActiveScreenName  = sceneName
+            });
+        }
+
+        /// <summary>Load scene async by name </summary>
+        public async UniTask<SceneInstance> LoadSingleSceneByAddressableAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
+        {
+            var screenInstance = await this.LoadSceneInstanceByAddressAble(sceneName, loadMode);
+
+            var lastScene = CurrentSceneName;
+            CurrentSceneName = sceneName;
             await this.UnloadSceneAsync(lastScene);
             _ = Resources.UnloadUnusedAssets();
 

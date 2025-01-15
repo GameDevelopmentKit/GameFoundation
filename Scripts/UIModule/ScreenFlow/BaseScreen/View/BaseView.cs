@@ -69,7 +69,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
         {
             this.UpdateAlpha(1f);
 
-            if (this.ScreenTransition != null)
+            if (this!=null||this.ScreenTransition != null)
             {
                 await this.ScreenTransition.PlayIntroAnim();
             }
@@ -80,7 +80,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         public virtual async UniTask Close()
         {
-            if (this.ScreenTransition != null)
+            if (this!=null||this.ScreenTransition != null)
             {
                 await this.ScreenTransition.PlayOutroAnim();
             }
@@ -97,7 +97,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         protected void UpdateAlpha(float value)
         {
-            if(this.gameObject==null)return;
+            if(this==null||this.gameObject==null)return;
             this.ViewRoot.alpha          = value;
             this.ViewRoot.blocksRaycasts = value >= 1;
         }
