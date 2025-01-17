@@ -28,14 +28,20 @@ namespace GameFoundation.Scripts
             builder.Register<VContainerWrapper>(Lifetime.Scoped).AsImplementedInterfaces();
             builder.Register<VContainerAdapter>(Lifetime.Scoped).AsImplementedInterfaces();
 
+            Debug.Log($"cuonglog: GameLifetimeScope. Begin");
+
             builder.RegisterSignalBus();
             builder.RegisterBlueprints();
             builder.RegisterScreenManager();
             builder.RegisterApplicationServices(rootTransform);
             builder.RegisterGameQueueActionService();
+            
+            Debug.Log($"cuonglog: GameLifetimeScope. Check resources before");
 
             builder.RegisterInstance(Resources.Load<GDKConfig>("GameConfigs/GDKConfig"));
 
+            Debug.Log($"cuonglog: GameLifetimeScope. Check resources after");
+            
             builder.Register<GameAssets>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ObjectPoolManager>(Lifetime.Singleton);
             builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
