@@ -37,6 +37,9 @@ namespace GameFoundation.Scripts
             builder.RegisterGameQueueActionService();
             
             Debug.Log($"cuonglog: GameLifetimeScope. Check resources before");
+            
+            Debug.Log(Resources.Load("GameConfigs/GDKConfig"));
+            Debug.Log(Resources.Load<GDKConfig>("GameConfigs/GDKConfig"));
 
             builder.RegisterInstance(Resources.Load<GDKConfig>("GameConfigs/GDKConfig"));
 
