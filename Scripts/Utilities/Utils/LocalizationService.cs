@@ -61,5 +61,7 @@
         }
 
         public List<string> ListLanguages() { return LocalizationManager.GetAllLanguages(); }
+        
+        public string CurrentLanguage => LocalizationManager.CurrentLanguage;
     }
 }
