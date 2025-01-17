@@ -23,7 +23,7 @@ namespace GameFoundation.Scripts
 
     public static class GameFoundationVContainer
     {
-        public static void RegisterGameFoundation(this IContainerBuilder builder, Transform rootTransform)
+        public static void RegisterGameFoundation(this IContainerBuilder builder, Transform rootTransform, GDKConfig config)
         {
             builder.Register<VContainerWrapper>(Lifetime.Scoped).AsImplementedInterfaces();
             builder.Register<VContainerAdapter>(Lifetime.Scoped).AsImplementedInterfaces();
@@ -38,7 +38,7 @@ namespace GameFoundation.Scripts
             
             Debug.Log($"cuonglog: GameLifetimeScope. Check resources before");
 
-            builder.RegisterInstance(Resources.Load<GDKConfig>("GameConfigs/GDKConfig"));
+            builder.RegisterInstance(config);
 
             Debug.Log($"cuonglog: GameLifetimeScope. Check resources after");
             
