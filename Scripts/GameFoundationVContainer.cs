@@ -37,6 +37,8 @@ namespace GameFoundation.Scripts
             builder.RegisterGameQueueActionService();
             
             Debug.Log($"cuonglog: GameLifetimeScope. Check resources before");
+            Debug.Log($"cuonglog: {Resources.Load("TextureInfoData")}");
+            Debug.Log($"cuonglog: {Resources.Load("LoadingSceneScope")}");
             
             builder.RegisterInstance(Resources.Load<GDKConfig>("GameConfigs/GDKConfig"));
 
