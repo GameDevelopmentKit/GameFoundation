@@ -23,7 +23,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.GameAssets = gameAssets;
         }
 
-        public async UniTask<SceneInstance> ReloadCurrentScene()
+        public virtual async UniTask<SceneInstance> ReloadCurrentScene()
         {
             var sceneName = CurrentSceneName;
 
@@ -50,7 +50,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         }
 
         //to backup for old version
-        public UniTask<SceneInstance> LoadSingleSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
+        public virtual UniTask<SceneInstance> LoadSingleSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
         {
             return this.LoadSingleSceneByAddressableAsync(sceneName, loadMode, activeOnLoad);
         }
@@ -60,7 +60,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// </summary>
         /// <param name="sceneName"></param>
         /// <returns></returns>
-        public async UniTask<SceneInstance> LoadSceneInstanceByAddressAble(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)
+        public virtual async UniTask<SceneInstance> LoadSceneInstanceByAddressAble(string sceneName, LoadSceneMode mode = LoadSceneMode.Single)
         {
             this.signalBus.Fire(new StartLoadingNewSceneSignal
             {
@@ -79,7 +79,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// </summary>
         /// <param name="sceneName"></param>
         /// <param name="sceneInstance"></param>
-        public async UniTask ActiveSceneInstance(string sceneName, SceneInstance sceneInstance)
+        public virtual async UniTask ActiveSceneInstance(string sceneName, SceneInstance sceneInstance)
         {
             var lastScene = CurrentSceneName;
             CurrentSceneName = sceneName;
@@ -96,7 +96,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         }
 
         /// <summary>Load scene async by name </summary>
-        public async UniTask<SceneInstance> LoadSingleSceneByAddressableAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
+        public virtual async UniTask<SceneInstance> LoadSingleSceneByAddressableAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool activeOnLoad = true)
         {
             var screenInstance = await this.LoadSceneInstanceByAddressAble(sceneName, loadMode);
 
@@ -120,7 +120,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             return screenInstance;
         }
 
-        public async UniTask LoadSingleSceneBySceneManagerAsync(string sceneName)
+        public virtual async UniTask LoadSingleSceneBySceneManagerAsync(string sceneName)
         {
             this.signalBus.Fire(new StartLoadingNewSceneSignal
             {
@@ -143,7 +143,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             });
         }
 
-        public async UniTask LoadMultipleSceneAsync(string activesScene, params string[] sceneNames)
+        public virtual async UniTask LoadMultipleSceneAsync(string activesScene, params string[] sceneNames)
         {
             this.signalBus.Fire(new StartLoadingNewSceneSignal
             {
@@ -177,7 +177,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         }
 
         /// <summary>Unload scene async by name </summary>
-        public async UniTask UnloadSceneAsync(string sceneName)
+        public virtual async UniTask UnloadSceneAsync(string sceneName)
         {
             await this.GameAssets.UnloadSceneAsync(sceneName);
             this.GameAssets.UnloadUnusedAssets(sceneName);
