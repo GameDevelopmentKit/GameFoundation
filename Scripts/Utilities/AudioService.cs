@@ -229,19 +229,19 @@
 
         public void PauseEverything()
         {
-            audioConfiguration = AudioSettings.GetConfiguration();
-            this.musicVolume        = this.MusicAudioSource.volume;
-            SoundManager.PauseAll();
+            // audioConfiguration = AudioSettings.GetConfiguration();
+            // this.musicVolume        = this.MusicAudioSource.volume;
+            // SoundManager.PauseAll();
             AudioListener.pause = true;
         }
 
         public void ResumeEverything()
         {
             AudioListener.pause = false;
-            AudioSettings.Reset(audioConfiguration);
-            SoundManager.ResumeAll();
-            this.MusicAudioSource.volume = this.musicVolume; // this fix applovin bug in some ads
-            this.MusicAudioSource.Play();
+            // AudioSettings.Reset(audioConfiguration);
+            // SoundManager.ResumeAll();
+            // this.MusicAudioSource.volume = this.musicVolume; // this fix applovin bug in some ads
+            // this.MusicAudioSource.Play();
         }
 
         protected virtual void SetSoundValue(float value)
