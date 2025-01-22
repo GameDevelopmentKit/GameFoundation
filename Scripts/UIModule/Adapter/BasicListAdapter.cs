@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System;
@@ -85,7 +87,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
+        public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer, CancellationToken cancelToken = default)
         {
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
@@ -99,7 +101,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             }
             this.presenters  = new List<TPresenter>();
 
-            await UniTask.WaitUntil(() => this.IsInitialized);
+            await UniTask.WaitUntil(() => this.IsInitialized, PlayerLoopTiming.Update, cancelToken);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
