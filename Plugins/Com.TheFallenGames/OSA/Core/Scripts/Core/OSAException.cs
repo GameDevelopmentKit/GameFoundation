@@ -9,19 +9,22 @@ using frame8.Logic.Misc.Visual.UI;
 
 namespace Com.ForbiddenByte.OSA.Core
 {
-    [Serializable]
-    public class OSAException : SystemException
-    {
-        public OSAException() : base()
-        {
-        }
+	[Serializable]
+	public class OSAException : SystemException
+	{
+		public OSAException() : base()
+		{
 
-        public OSAException(string message) : base(message)
-        {
-        }
+		}
 
-        public OSAException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }
+		public OSAException(string message) : base(message)
+		{
+
+		}
+
+		public OSAException(string message, Exception innerException) : base(message, innerException)
+		{
+
+		}
+	}
 }

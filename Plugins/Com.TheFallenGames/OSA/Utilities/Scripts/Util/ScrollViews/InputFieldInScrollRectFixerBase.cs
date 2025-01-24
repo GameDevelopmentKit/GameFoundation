@@ -5,187 +5,192 @@ using UnityEngine.EventSystems;
 
 namespace Com.ForbiddenByte.OSA.AdditionalComponents
 {
-    /// <summary>
-    /// Utility that allows dragging a ScrollRect even if the PointerDown event has started inside a child InputField (which cancels the dragging by default)
-    /// </summary>
-    public abstract class InputFieldInScrollRectFixerBase : MonoBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IScrollHandler
-    {
-        protected     Selectable _InputField;
-        private       Image      _ImageOnMeIfChild;
-        private const string     CHILD_NAME = "InputFieldFixer-Child";
+	/// <summary>
+	/// Utility that allows dragging a ScrollRect even if the PointerDown event has started inside a child InputField (which cancels the dragging by default)
+	/// </summary>
+	public abstract class InputFieldInScrollRectFixerBase : MonoBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IScrollHandler
+	{
+		protected Selectable _InputField;
+		Image _ImageOnMeIfChild;
+		const string CHILD_NAME = "InputFieldFixer-Child";
 
-        private bool _IAmChild;
-        private bool _DragInProgress;
+		bool _IAmChild;
+		bool _DragInProgress;
 
-        protected virtual void Awake()
-        {
-            this._InputField = this.GetComponent<Selectable>();
-            this._IAmChild   = this._InputField == null;
-            if (this._IAmChild)
-            {
-                this.InitAsChild();
-            }
-            else
-            {
-                this.CacheMethods();
-                this.InitAsParent();
-            }
-        }
 
-        protected abstract void CacheMethods();
+		protected virtual void Awake()
+		{
+			_InputField = GetComponent<Selectable>();
+			_IAmChild = _InputField == null;
+			if (_IAmChild)
+			{
+				InitAsChild();
+			}
+			else
+			{
+				CacheMethods();
+				InitAsParent();
+			}
+		}
 
-        private void OnDisable()
-        {
-            this._DragInProgress = false;
-        }
+		protected abstract void CacheMethods();
 
-        private void InitAsParent()
-        {
-            var inputFieldImg                              = this._InputField.image;
-            if (inputFieldImg) inputFieldImg.raycastTarget = false;
+		void OnDisable()
+		{
+			_DragInProgress = false;
+		}
 
-            var           tr = this.transform.Find(CHILD_NAME);
-            GameObject    go;
-            RectTransform goRT;
+		void InitAsParent()
+		{
+			var inputFieldImg = _InputField.image;
+			if (inputFieldImg)
+				inputFieldImg.raycastTarget = false;
 
-            // The child may already exist if you'll instantiate an existing InputField with InputFieldInScrollRectFixer attached
-            if (tr == null)
-            {
-                go   = new(CHILD_NAME, typeof(RectTransform));
-                goRT = go.transform as RectTransform;
-                goRT.SetParent(this._InputField.transform, false);
-                go.AddComponent(this.GetType() /*add the same component as <this>'s type, i.e. the one for InputField or TMPro.TMP_InputField*/);
-            }
+			var tr = transform.Find(CHILD_NAME);
+			GameObject go;
+			RectTransform goRT;
 
-            // Parent not needed anymore
-            Destroy(this);
-        }
+			// The child may already exist if you'll instantiate an existing InputField with InputFieldInScrollRectFixer attached
+			if (tr == null)
+			{
+				go = new GameObject(CHILD_NAME, typeof(RectTransform));
+				goRT = go.transform as RectTransform;
+				goRT.SetParent(_InputField.transform, false);
+				go.AddComponent(GetType() /*add the same component as <this>'s type, i.e. the one for InputField or TMPro.TMP_InputField*/);
+			}
 
-        private void InitAsChild()
-        {
-            this.name        = CHILD_NAME;
-            this._InputField = this.transform.parent.GetComponent<Selectable>();
-            if (!this._InputField) throw new InvalidOperationException("Child InputFieldInScrollRectFixer: InputField not found in parent");
+			// Parent not needed anymore
+			Destroy(this);
+		}
 
-            this.CacheMethods();
+		void InitAsChild()
+		{
+			name = CHILD_NAME;
+			_InputField = transform.parent.GetComponent<Selectable>();
+			if (!_InputField)
+				throw new InvalidOperationException("Child InputFieldInScrollRectFixer: InputField not found in parent");
 
-            var inputFieldImg = this._InputField.image;
-            if (!inputFieldImg) throw new InvalidOperationException("Child InputFieldInScrollRectFixer: InputField must have an image attached (can be invisible)");
+			CacheMethods();
 
-            // May have already been created if this is an instance of a another runtime instance
-            this._ImageOnMeIfChild = this.GetComponent<Image>();
-            if (!this._ImageOnMeIfChild)
-            {
-                this._ImageOnMeIfChild        = this.gameObject.AddComponent<Image>();
-                this._ImageOnMeIfChild.sprite = inputFieldImg.sprite;
-            }
+			var inputFieldImg = _InputField.image;
+			if (!inputFieldImg)
+				throw new InvalidOperationException("Child InputFieldInScrollRectFixer: InputField must have an image attached (can be invisible)");
 
-            var goRT = this.transform as RectTransform;
+			// May have already been created if this is an instance of a another runtime instance
+			_ImageOnMeIfChild = GetComponent<Image>();
+			if (!_ImageOnMeIfChild)
+			{
+				_ImageOnMeIfChild = gameObject.AddComponent<Image>();
+				_ImageOnMeIfChild.sprite = inputFieldImg.sprite;
+			}
 
-            goRT.SetAsLastSibling();
-            goRT.anchorMin = Vector2.zero;
-            goRT.anchorMax = Vector2.one;
-            goRT.sizeDelta = Vector2.zero;
+			var goRT = transform as RectTransform;
 
-            this._ImageOnMeIfChild.color = Color.clear;
-        }
+			goRT.SetAsLastSibling();
+			goRT.anchorMin = Vector2.zero;
+			goRT.anchorMax = Vector2.one;
+			goRT.sizeDelta = Vector2.zero;
 
-        protected abstract void ActivateInputField();
-        protected abstract bool IsInputFieldFocused();
+			_ImageOnMeIfChild.color = Color.clear;
+		}
 
-        void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
-        {
-            var par = this.GetInputFieldIfActiveOrNextComponentInItsParents<IPointerDownHandler>();
-            if (par != null) par.OnPointerDown(eventData);
-        }
+		protected abstract void ActivateInputField();
+		protected abstract bool IsInputFieldFocused();
 
-        void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
-        {
-            var par = this.GetInputFieldIfActiveOrNextComponentInItsParents<IPointerUpHandler>();
-            if (par != null) par.OnPointerUp(eventData);
-        }
+		void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
+		{
+			var par = GetInputFieldIfActiveOrNextComponentInItsParents<IPointerDownHandler>();
+			if (par != null)
+				par.OnPointerDown(eventData);
+		}
 
-        void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
-        {
-            if (this.InputFieldActiveAndFocused())
-            {
-                (this._InputField as IPointerClickHandler).OnPointerClick(eventData);
-                return;
-            }
+		void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
+		{
+			var par = GetInputFieldIfActiveOrNextComponentInItsParents<IPointerUpHandler>();
+			if (par != null)
+				par.OnPointerUp(eventData);
+		}
 
-            if (this._DragInProgress) return;
+		void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+		{
+			if (InputFieldActiveAndFocused())
+			{
+				(_InputField as IPointerClickHandler).OnPointerClick(eventData);
+				return;
+			}
+			
+			if (_DragInProgress)
+				return;
 
-            if (eventData.useDragThreshold)
-            {
-                var dragDist = Vector2.Distance(eventData.pressPosition, eventData.position);
-                if (dragDist > EventSystem.current.pixelDragThreshold) return;
-            }
+			if (eventData.useDragThreshold)
+			{
+				var dragDist = Vector2.Distance(eventData.pressPosition, eventData.position);
+				if (dragDist > EventSystem.current.pixelDragThreshold)
+					return;
+			}
 
-            if (this.CanInputFieldBeFocused())
-            {
-                this.ActivateInputField();
-                return;
-            }
+			if (CanInputFieldBeFocused())
+			{
+				ActivateInputField();
+				return;
+			}
 
-            var par = this.GetComponentInInputFieldParents<IPointerClickHandler>();
-            if (par != null) par.OnPointerClick(eventData);
-        }
+			var par = GetComponentInInputFieldParents<IPointerClickHandler>();
+			if (par != null)
+				par.OnPointerClick(eventData);
+		}
 
-        void IInitializePotentialDragHandler.OnInitializePotentialDrag(PointerEventData eventData)
-        {
-            if (!this.InputFieldActiveAndFocused())
-            {
-                var par = this.GetComponentInInputFieldParents<IInitializePotentialDragHandler>();
-                if (par != null) par.OnInitializePotentialDrag(eventData);
-            }
-        }
+		void IInitializePotentialDragHandler.OnInitializePotentialDrag(PointerEventData eventData)
+		{
+			if (!InputFieldActiveAndFocused())
+			{
+				var par = GetComponentInInputFieldParents<IInitializePotentialDragHandler>();
+				if (par != null)
+					par.OnInitializePotentialDrag(eventData);
+			}
+		}
 
-        void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
-        {
-            this._DragInProgress = true;
-            var par = this.GetInputFieldIfActiveOrNextComponentInItsParents<IBeginDragHandler>();
-            if (par != null) par.OnBeginDrag(eventData);
-        }
+		void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
+		{
+			_DragInProgress = true;
+			var par = GetInputFieldIfActiveOrNextComponentInItsParents<IBeginDragHandler>();
+			if (par != null)
+				par.OnBeginDrag(eventData);
+		}
 
-        void IDragHandler.OnDrag(PointerEventData eventData)
-        {
-            var par = this.GetInputFieldIfActiveOrNextComponentInItsParents<IDragHandler>();
-            if (par != null) par.OnDrag(eventData);
-        }
+		void IDragHandler.OnDrag(PointerEventData eventData)
+		{
+			var par = GetInputFieldIfActiveOrNextComponentInItsParents<IDragHandler>();
+			if (par != null)
+				par.OnDrag(eventData);
+		}
 
-        void IScrollHandler.OnScroll(PointerEventData eventData)
-        {
-            var par = this.GetInputFieldIfActiveOrNextComponentInItsParents<IScrollHandler>();
-            if (par != null) par.OnScroll(eventData);
-        }
+		void IScrollHandler.OnScroll(PointerEventData eventData)
+		{
+			var par = GetInputFieldIfActiveOrNextComponentInItsParents<IScrollHandler>();
+			if (par != null)
+				par.OnScroll(eventData);
+		}
 
-        void IEndDragHandler.OnEndDrag(PointerEventData eventData)
-        {
-            this._DragInProgress = false;
-            var par = this.GetInputFieldIfActiveOrNextComponentInItsParents<IEndDragHandler>();
-            if (par != null) par.OnEndDrag(eventData);
-        }
+		void IEndDragHandler.OnEndDrag(PointerEventData eventData)
+		{
+			_DragInProgress = false;
+			var par = GetInputFieldIfActiveOrNextComponentInItsParents<IEndDragHandler>();
+			if (par != null)
+				par.OnEndDrag(eventData);
+		}
 
-        private bool InputFieldActiveAndFocused()
-        {
-            return this.CanInputFieldBeFocused() && this.IsInputFieldFocused();
-        }
+		bool InputFieldActiveAndFocused() { return CanInputFieldBeFocused() && IsInputFieldFocused(); }
+		bool CanInputFieldBeFocused() { return _InputField.isActiveAndEnabled && _InputField.interactable; }
 
-        private bool CanInputFieldBeFocused()
-        {
-            return this._InputField.isActiveAndEnabled && this._InputField.interactable;
-        }
+		T GetInputFieldIfActiveOrNextComponentInItsParents<T>()
+		{
+			if (InputFieldActiveAndFocused())
+				return (T)(object)_InputField;
 
-        private T GetInputFieldIfActiveOrNextComponentInItsParents<T>()
-        {
-            if (this.InputFieldActiveAndFocused()) return (T)(object)this._InputField;
+			return GetComponentInInputFieldParents<T>();
+		}
 
-            return this.GetComponentInInputFieldParents<T>();
-        }
-
-        private T GetComponentInInputFieldParents<T>()
-        {
-            return (T)(object)this._InputField.transform.parent.GetComponentInParent(typeof(T));
-        }
-    }
+		T GetComponentInInputFieldParents<T>() { return (T)(object)_InputField.transform.parent.GetComponentInParent(typeof(T)); }
+	}
 }

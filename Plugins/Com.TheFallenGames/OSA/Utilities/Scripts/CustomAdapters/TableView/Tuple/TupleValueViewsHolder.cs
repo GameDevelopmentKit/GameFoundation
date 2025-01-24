@@ -7,76 +7,78 @@ using UnityEngine.UI;
 
 namespace Com.ForbiddenByte.OSA.CustomAdapters.TableView.Tuple
 {
-    public abstract class TupleValueViewsHolder : BaseItemViewsHolder
-    {
-        public bool              HasPendingTransversalSizeChanges { get; set; }
-        public ContentSizeFitter CSF                              => this._CSF;
+	public abstract class TupleValueViewsHolder : BaseItemViewsHolder
+	{
+		public bool HasPendingTransversalSizeChanges { get; set; }
+		public ContentSizeFitter CSF { get { return _CSF; } }
+		//public LayoutGroup LayoutGroup { get { return _LayoutGroup; } }
+		public TableViewText TextComponent { get { return _TextComponent; } }
 
-        //public LayoutGroup LayoutGroup { get { return _LayoutGroup; } }
-        public TableViewText TextComponent => this._TextComponent;
+		TableViewText _TextComponent;
+		Button _Button;
+		ContentSizeFitter _CSF;
+		//LayoutGroup _LayoutGroup;
+		UnityAction<object> _ValueChangedFromInput;
 
-        private TableViewText _TextComponent;
-        private Button        _Button;
 
-        private ContentSizeFitter _CSF;
+		public override void CollectViews()
+		{
+			base.CollectViews();
 
-        //LayoutGroup _LayoutGroup;
-        private UnityAction<object> _ValueChangedFromInput;
+			_Button = root.GetComponent<Button>();
+			_CSF = root.GetComponent<UnityEngine.UI.ContentSizeFitter>();
+			//_LayoutGroup = root.GetComponent<UnityEngine.UI.LayoutGroup>();
+			root.GetComponentAtPath("TextPanel/Text", out _TextComponent);
+		}
 
-        public override void CollectViews()
-        {
-            base.CollectViews();
+		public virtual void SetClickListener(UnityAction action)
+		{
+			if (_Button)
+			{
+				if (action == null)
+					_Button.onClick.RemoveAllListeners();
+				else
+					_Button.onClick.AddListener(action);
+			}
+		}
 
-            this._Button = this.root.GetComponent<Button>();
-            this._CSF    = this.root.GetComponent<ContentSizeFitter>();
-            //_LayoutGroup = root.GetComponent<UnityEngine.UI.LayoutGroup>();
-            this.root.GetComponentAtPath("TextPanel/Text", out this._TextComponent);
-        }
+		public virtual void SetValueChangedFromInputListener(UnityAction<object> action)
+		{
+			_ValueChangedFromInput = action;
+		}
 
-        public virtual void SetClickListener(UnityAction action)
-        {
-            if (this._Button)
-            {
-                if (action == null)
-                    this._Button.onClick.RemoveAllListeners();
-                else
-                    this._Button.onClick.AddListener(action);
-            }
-        }
+		public abstract void UpdateViews(object value, ITableColumns columnsProvider);
 
-        public virtual void SetValueChangedFromInputListener(UnityAction<object> action)
-        {
-            this._ValueChangedFromInput = action;
-        }
+		/// <summary>
+		/// Called by the controller of this Views Holder, when a click is not handled by it and should be processed by this Views Holder itself
+		/// </summary>
+		public virtual void ProcessUnhandledClick()
+		{
 
-        public abstract void UpdateViews(object value, ITableColumns columnsProvider);
+		}
 
-        /// <summary>
-        /// Called by the controller of this Views Holder, when a click is not handled by it and should be processed by this Views Holder itself
-        /// </summary>
-        public virtual void ProcessUnhandledClick()
-        {
-        }
+		public override void MarkForRebuild()
+		{
+			// Don't LayoutRebuilder.MarkLayoutForRebuild(), because the tuples in a TableView are rebuilt 
+			// via LayoutRebuilder.ForceRebuildLayoutImmediate() by the TupleAdapter itself
+			//base.MarkForRebuild();
 
-        public override void MarkForRebuild()
-        {
-            // Don't LayoutRebuilder.MarkLayoutForRebuild(), because the tuples in a TableView are rebuilt 
-            // via LayoutRebuilder.ForceRebuildLayoutImmediate() by the TupleAdapter itself
-            //base.MarkForRebuild();
+			if (CSF)
+				CSF.enabled = true;
+		}
 
-            if (this.CSF) this.CSF.enabled = true;
-        }
+		public override void UnmarkForRebuild()
+		{
+			if (CSF)
+				CSF.enabled = false;
 
-        public override void UnmarkForRebuild()
-        {
-            if (this.CSF) this.CSF.enabled = false;
+			base.UnmarkForRebuild();
+		}
 
-            base.UnmarkForRebuild();
-        }
-
-        protected void NotifyValueChangedFromInput(object newValue)
-        {
-            if (this._ValueChangedFromInput != null) this._ValueChangedFromInput(newValue);
-        }
-    }
+		protected void NotifyValueChangedFromInput(object newValue)
+		{
+			if (_ValueChangedFromInput != null)
+				_ValueChangedFromInput(newValue);
+		}
+	}
 }

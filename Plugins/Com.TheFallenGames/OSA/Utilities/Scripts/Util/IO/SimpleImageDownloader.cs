@@ -1,5 +1,4 @@
 // WWW class usage
-
 #pragma warning disable 0618
 
 using UnityEngine;
@@ -21,56 +20,61 @@ namespace Com.ForbiddenByte.OSA.Util.IO
         {
             get
             {
-                if (_Instance == null) _Instance = new GameObject(typeof(SimpleImageDownloader).Name).AddComponent<SimpleImageDownloader>();
+                if (_Instance == null)
+                    _Instance = new GameObject(typeof(SimpleImageDownloader).Name).AddComponent<SimpleImageDownloader>();
 
                 return _Instance;
             }
         }
 
-        private static SimpleImageDownloader _Instance;
+        static SimpleImageDownloader _Instance;
+
 
         public int MaxConcurrentRequests { get; set; }
 
-        private const int DEFAULT_MAX_CONCURRENT_REQUESTS = 20;
+        const int DEFAULT_MAX_CONCURRENT_REQUESTS = 20;
 
-        private List<Request>  _QueuedRequests    = new();
-        private List<Request>  _ExecutingRequests = new();
-        private WaitForSeconds _Wait1Sec          = new(1f);
+        List<Request> _QueuedRequests = new List<Request>();
+        List<Request> _ExecutingRequests = new List<Request>();
+        WaitForSeconds _Wait1Sec = new WaitForSeconds(1f);
 
-        private IEnumerator Start()
+
+        IEnumerator Start()
         {
-            if (this.MaxConcurrentRequests == 0) this.MaxConcurrentRequests = DEFAULT_MAX_CONCURRENT_REQUESTS;
+            if (MaxConcurrentRequests == 0)
+                MaxConcurrentRequests = DEFAULT_MAX_CONCURRENT_REQUESTS;
 
             while (true)
             {
-                while (this._ExecutingRequests.Count >= this.MaxConcurrentRequests) yield return this._Wait1Sec;
+                while (_ExecutingRequests.Count >= MaxConcurrentRequests)
+                {
+                    yield return _Wait1Sec;
+                }
 
-                var lastIndex = this._QueuedRequests.Count - 1;
+                int lastIndex = _QueuedRequests.Count - 1;
                 if (lastIndex >= 0)
                 {
-                    var lastRequest = this._QueuedRequests[lastIndex];
-                    this._QueuedRequests.RemoveAt(lastIndex);
+                    var lastRequest = _QueuedRequests[lastIndex];
+                    _QueuedRequests.RemoveAt(lastIndex);
 
-                    this.StartCoroutine(this.DownloadCoroutine(lastRequest));
+                    StartCoroutine(DownloadCoroutine(lastRequest));
                 }
 
                 yield return null;
             }
         }
 
-        private void OnDestroy()
-        {
-            _Instance = null;
-        }
+		void OnDestroy()
+		{
+			_Instance = null;
+		}
 
-        public void Enqueue(Request request)
-        {
-            this._QueuedRequests.Add(request);
-        }
+		public void Enqueue(Request request)
+        { _QueuedRequests.Add(request); }
 
-        private IEnumerator DownloadCoroutine(Request request)
+        IEnumerator DownloadCoroutine(Request request)
         {
-            this._ExecutingRequests.Add(request);
+            _ExecutingRequests.Add(request);
             var www = UnityWebRequestTexture.GetTexture(request.url);
 
             yield return www.SendWebRequest();
@@ -85,32 +89,32 @@ namespace Com.ForbiddenByte.OSA.Util.IO
             }
             else
             {
-                if (request.onError != null) request.onError();
+                if (request.onError != null)
+                    request.onError();
             }
             www.Dispose();
-            this._ExecutingRequests.Remove(request);
+            _ExecutingRequests.Remove(request);
         }
 
         public class Request
         {
-            public string         url;
+            public string url;
             public Action<Result> onDone;
-            public Action         onError;
+            public Action onError;
         }
 
         public class Result
         {
-            private UnityWebRequest _UsedRequest;
+            UnityEngine.Networking.UnityWebRequest _UsedRequest;
 
-            public Result(UnityWebRequest www)
-            {
-                this._UsedRequest = www;
-            }
+
+			public Result(UnityWebRequest www)
+            { _UsedRequest = www; }
+
 
             public Texture2D CreateTextureFromReceivedData()
-            {
-                return DownloadHandlerTexture.GetContent(this._UsedRequest);
-            }
+            { return DownloadHandlerTexture.GetContent(_UsedRequest); }
+
         }
     }
 }

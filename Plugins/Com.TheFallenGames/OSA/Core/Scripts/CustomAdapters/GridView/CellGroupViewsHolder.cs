@@ -14,35 +14,38 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
         /// <summary>Uses base's implementation, but also updates the indices of all containing cells each time the setter is called</summary>
         public override int ItemIndex
         {
-            get => base.ItemIndex;
+            get { return base.ItemIndex; }
             set
             {
                 base.ItemIndex = value;
-                if (this._Capacity > 0) this.OnGroupIndexChanged();
+                if (_Capacity > 0)
+                    OnGroupIndexChanged();
             }
         }
 
         /// <summary>The number of visible cells, i.e. that are used to display real data. The other ones are disabled and are either empty or hold obsolete data</summary>
         public int NumActiveCells
         {
-            get => this._NumActiveCells;
+            get { return _NumActiveCells; }
             set
             {
-                if (this._NumActiveCells != value)
+                if (_NumActiveCells != value)
                 {
-                    this._NumActiveCells = value;
-                    TCellVH    cellVH;
-                    GameObject viewsGO;
-                    bool       active;
-                    // TODO (low-priority) also integrate the new SetViewsHolderEnabled functionality here, for grids
-                    for (var i = 0; i < this._Capacity; ++i)
-                    {
-                        cellVH  = this.ContainingCellViewsHolders[i];
-                        viewsGO = cellVH.views.gameObject;
-                        active  = i < this._NumActiveCells;
-                        if (viewsGO.activeSelf != active) viewsGO.SetActive(active);
-                        if (cellVH.rootLayoutElement.ignoreLayout == active) cellVH.rootLayoutElement.ignoreLayout = !active;
-                    }
+                    _NumActiveCells = value;
+					TCellVH cellVH;
+					GameObject viewsGO;
+					bool active;
+					// TODO (low-priority) also integrate the new SetViewsHolderEnabled functionality here, for grids
+                    for (int i = 0; i < _Capacity; ++i)
+					{
+						cellVH = ContainingCellViewsHolders[i];
+						viewsGO = cellVH.views.gameObject;
+						active = i < _NumActiveCells;
+						if (viewsGO.activeSelf != active)
+							viewsGO.SetActive(active);
+						if (cellVH.rootLayoutElement.ignoreLayout == active)
+							cellVH.rootLayoutElement.ignoreLayout = !active;
+					}
                 }
             }
         }
@@ -50,11 +53,12 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
         /// <summary>The views holders of all containing cells, active or not</summary>
         public TCellVH[] ContainingCellViewsHolders { get; private set; }
 
-        //protected HorizontalOrVerticalLayoutGroup _LayoutGroup;
-        protected int _Capacity       = -1;
+
+		//protected HorizontalOrVerticalLayoutGroup _LayoutGroup;
+		protected int _Capacity = -1;
         protected int _NumActiveCells = 0;
 
-        private RectTransform[] _ContainingCellInstances;
+		RectTransform[] _ContainingCellInstances;
 
         /// <summary>
         /// <para>Called by <see cref="Init(GameObject, int, RectTransform, int)"/>, after the GameObjects for the group and all containing cells are instantiated</para>
@@ -69,18 +73,19 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
 
             //_LayoutGroup = root.GetComponent<HorizontalOrVerticalLayoutGroup>();
 
-            this.ContainingCellViewsHolders = new TCellVH[this._Capacity];
-            for (var i = 0; i < this._Capacity; ++i)
+            ContainingCellViewsHolders = new TCellVH[_Capacity];
+            for (int i = 0; i < _Capacity; ++i)
             {
-                this.ContainingCellViewsHolders[i] = new();
-                //ContainingCellViewsHolders[i].InitWithExistingRootPrefab(root.GetChild(i) as RectTransform);
-                var cellRT = this._ContainingCellInstances[i];
-                this.ContainingCellViewsHolders[i].InitWithExistingRoot(cellRT, this.root, -1);
-                // TODO also integrate the new SetViewsHolderEnabled functionality here, for grids
-                this.ContainingCellViewsHolders[i].views.gameObject.SetActive(false); // not visible, initially
+                ContainingCellViewsHolders[i] = new TCellVH();
+				//ContainingCellViewsHolders[i].InitWithExistingRootPrefab(root.GetChild(i) as RectTransform);
+				var cellRT = _ContainingCellInstances[i];
+				ContainingCellViewsHolders[i].InitWithExistingRoot(cellRT, root, -1);
+				// TODO also integrate the new SetViewsHolderEnabled functionality here, for grids
+				ContainingCellViewsHolders[i].views.gameObject.SetActive(false); // not visible, initially
             }
 
-            if (this.ItemIndex != -1 && this._Capacity > 0) this.UpdateIndicesOfContainingCells();
+            if (ItemIndex != -1 && _Capacity > 0)
+                UpdateIndicesOfContainingCells();
         }
 
         /// <summary>The only way to instantiate the group views holder</summary>
@@ -89,52 +94,58 @@ namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
         {
             base.Init(
                 groupPrefab,
-                parent,
-                itemIndex,
+				parent,
+				itemIndex, 
                 true,
                 false // not calling CollectViews, because we'll call it below
             );
 
-            this._Capacity = numCellsPerGroup;
+            _Capacity = numCellsPerGroup;
 
-            // Instantiate all the cells in the group
-            this._ContainingCellInstances = new RectTransform[this._Capacity];
-            for (var i = 0; i < this._Capacity; ++i)
+			// Instantiate all the cells in the group
+			_ContainingCellInstances = new RectTransform[_Capacity];
+			for (int i = 0; i < _Capacity; ++i)
             {
-                var cellInstance = (Object.Instantiate(cellPrefab.gameObject, this.root, false) as GameObject).transform as RectTransform;
-                // TODO also integrate the new SetViewsHolderEnabled functionality here, for grids
-                cellInstance.gameObject.SetActive(true); // just in case the prefab was disabled
-                this._ContainingCellInstances[i] = cellInstance;
-            }
-            this.CollectViews();
+                var cellInstance = (GameObject.Instantiate(cellPrefab.gameObject, root, false) as GameObject).transform as RectTransform;
+				// TODO also integrate the new SetViewsHolderEnabled functionality here, for grids
+				cellInstance.gameObject.SetActive(true); // just in case the prefab was disabled
+				_ContainingCellInstances[i] = cellInstance;
+			}
+            CollectViews();
 
             // Important. Fixes a bug where ScrollTo would scroll to the wrong group
-            LayoutRebuilder.ForceRebuildLayoutImmediate(this.root);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(root);
         }
 
-        /// <inheritdoc/>
-        public override void OnBeforeDestroy()
-        {
-            // Calling OnBeforeDestroy for all the child cells
-            if (this.ContainingCellViewsHolders != null)
-                for (var i = 0; i < this.ContainingCellViewsHolders.Length; i++)
-                {
-                    var c = this.ContainingCellViewsHolders[i];
-                    if (c != null) c.OnBeforeDestroy();
-                }
+		/// <inheritdoc/>
+		public override void OnBeforeDestroy()
+		{
+			// Calling OnBeforeDestroy for all the child cells
+			if (ContainingCellViewsHolders != null)
+			{
+				for (int i = 0; i < ContainingCellViewsHolders.Length; i++)
+				{
+					var c = ContainingCellViewsHolders[i];
+					if (c != null)
+						c.OnBeforeDestroy();
+				}
+			}
 
-            base.OnBeforeDestroy();
-        }
+			base.OnBeforeDestroy();
+		}
 
-        /// <summary>This happens when the views holder is recycled or first created</summary>
-        protected virtual void OnGroupIndexChanged()
+		/// <summary>This happens when the views holder is recycled or first created</summary>
+		protected virtual void OnGroupIndexChanged()
         {
-            if (this._Capacity > 0) this.UpdateIndicesOfContainingCells();
+            if (_Capacity > 0)
+                UpdateIndicesOfContainingCells();
         }
 
         protected virtual void UpdateIndicesOfContainingCells()
         {
-            for (var i = 0; i < this._Capacity; ++i) this.ContainingCellViewsHolders[i].ItemIndex = this.ItemIndex * this._Capacity + i;
+            for (int i = 0; i < _Capacity; ++i)
+                ContainingCellViewsHolders[i].ItemIndex = ItemIndex * _Capacity + i; 
         }
     }
+
 }

@@ -4,20 +4,23 @@ using UnityEngine.Serialization;
 
 namespace Com.ForbiddenByte.OSA.Core.Data.Animations
 {
-    /// <summary>
-    /// Parameters for animations in general
-    /// </summary>
-    [Serializable]
-    public class AnimationParams
-    {
-        [SerializeField] private AnimationFunctionType _SmoothScrollType = AnimationFunctionType.SLOW_OUT;
-        public                   AnimationFunctionType SmoothScrollType { get => this._SmoothScrollType; set => this._SmoothScrollType = value; }
+	/// <summary>
+	/// Parameters for animations in general
+	/// </summary>
+	[Serializable]
+	public class AnimationParams
+	{
+		[SerializeField]
+		AnimationFunctionType _SmoothScrollType = AnimationFunctionType.SLOW_OUT;
+		public AnimationFunctionType SmoothScrollType { get { return _SmoothScrollType; } set { _SmoothScrollType = value; } }
 
-        [SerializeField] private AnimationCancelling _Cancel = new();
-        public                   AnimationCancelling Cancel { get => this._Cancel; set => this._Cancel = value; }
+		[SerializeField]
+		AnimationCancelling _Cancel = new AnimationCancelling();
+		public AnimationCancelling Cancel { get { return _Cancel; } set { _Cancel = value; } }
 
-        public bool CallDoneOnScrollCancel { get => this._OnDoneWhenCancelled; set => this._OnDoneWhenCancelled = value; }
+        public bool CallDoneOnScrollCancel { get { return _OnDoneWhenCancelled; } set { _OnDoneWhenCancelled = value; } }
 
-        [SerializeField] private bool _OnDoneWhenCancelled;
+		[SerializeField]
+		bool _OnDoneWhenCancelled;
     }
 }
