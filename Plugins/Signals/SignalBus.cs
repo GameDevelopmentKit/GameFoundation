@@ -2,8 +2,10 @@ namespace Zenject
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Reflection;
     using MessagePipe;
-    using UnityEngine;
+    using Debug = UnityEngine.Debug;
 
     public class SignalBus : ISignalBus, ILateDisposable
     {
@@ -23,7 +25,6 @@ namespace Zenject
             {
                 Debug.LogError($"Callback {typeof(TSignal)} already subscribed");
             }
-
         }
 
         public virtual void Subscribe<TSignal>(Action<TSignal> callback)
@@ -42,6 +43,15 @@ namespace Zenject
         {
             if (!this.TryUnsubscribeInternal<TSignal>(callback))
             {
+                var stackTrace   = new StackTrace();
+                var frame        = stackTrace.GetFrame(1);
+                var method       = frame.GetMethod();
+                var callerMethod = method.Name;
+                if (callerMethod.Contains("OnDestroy"))
+                {
+                    return;
+                }
+
                 Debug.LogError($"Callback {typeof(TSignal)} not subscribed");
             }
         }
@@ -103,10 +113,7 @@ namespace Zenject
             return true;
         }
 
-        void ILateDisposable.LateDispose()
-        {
-            this.LateDispose();
-        }
+        void ILateDisposable.LateDispose() { this.LateDispose(); }
 
         public virtual void LateDispose()
         {
