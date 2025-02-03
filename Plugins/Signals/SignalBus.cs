@@ -3,6 +3,7 @@ namespace Zenject
     using System;
     using System.Collections.Generic;
     using MessagePipe;
+    using UnityEngine;
 
     public class SignalBus : ISignalBus, ILateDisposable
     {
@@ -18,12 +19,19 @@ namespace Zenject
 
         public virtual void Subscribe<TSignal>(Action callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback))
+            {
+                Debug.LogError($"Callback {typeof(TSignal)} already subscribed");
+            }
+
         }
 
         public virtual void Subscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TrySubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} already subscribed");
+            if (!this.TrySubscribeInternal<TSignal>(callback))
+            {
+                Debug.LogError($"Callback {typeof(TSignal)} already subscribed");
+            }
         }
 
         public virtual bool TrySubscribe<TSignal>(Action callback) { return this.TrySubscribeInternal<TSignal>(callback); }
@@ -32,12 +40,18 @@ namespace Zenject
 
         public virtual void Unsubscribe<TSignal>(Action callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback))
+            {
+                Debug.LogError($"Callback {typeof(TSignal)} not subscribed");
+            }
         }
 
         public virtual void Unsubscribe<TSignal>(Action<TSignal> callback)
         {
-            if (!this.TryUnsubscribeInternal<TSignal>(callback)) throw new ArgumentException($"Callback {typeof(TSignal)} not subscribed");
+            if (!this.TryUnsubscribeInternal<TSignal>(callback))
+            {
+                Debug.LogError($"Callback {typeof(TSignal)} not subscribed");
+            }
         }
 
         public virtual bool TryUnsubscribe<TSignal>(Action callback) { return this.TryUnsubscribeInternal<TSignal>(callback); }
