@@ -2,7 +2,7 @@
 {
     public interface ILocalData
     {
-        void Init();
+        void Init() { }
     }
 
     public interface IIgnoreCreateFromReflection
