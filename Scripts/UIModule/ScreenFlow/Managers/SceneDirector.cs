@@ -132,8 +132,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var lastScene = CurrentSceneName;
             CurrentSceneName = sceneName;
             await SceneManager.LoadSceneAsync(sceneName);
-            await this.UnloadSceneAsync(lastScene);
-            _ = Resources.UnloadUnusedAssets();
+            await this.GameAssets.UnloadUnusedAssets(lastScene);
+            await Resources.UnloadUnusedAssets();
 
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {

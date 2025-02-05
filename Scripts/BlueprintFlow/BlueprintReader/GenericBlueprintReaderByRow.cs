@@ -188,7 +188,7 @@ namespace BlueprintFlow.BlueprintReader
 
             object record = null;
 
-            if (!string.IsNullOrEmpty(inputCsv.GetField(this.RequireKey)))
+            if (!string.IsNullOrEmpty(inputCsv.GetField(this.RequireKey,this.recordType)))
             {
                 record = Activator.CreateInstance(this.recordType);
 
