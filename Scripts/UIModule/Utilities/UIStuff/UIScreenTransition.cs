@@ -11,9 +11,18 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         void    SetupAnim();
     }
 
+    public abstract class TransitionAnimationUnit : MonoBehaviour, ITransitionAnimationUnit
+    {
+        public virtual UniTask PlayAnimation(string animType) {return UniTask.CompletedTask;}
+
+        public virtual void OnCompleteAnim() { }
+
+        public virtual void SetupAnim() { }
+    }
+
     public class UIScreenTransition : MonoBehaviour
     {
-        [SerializeField] public MonoBehaviour transitionAnimationUnit;
+        [SerializeField] public TransitionAnimationUnit transitionAnimationUnit;
 
         [Tooltip("If true, disable EventSystem while animation is running.")] [SerializeField]
         private bool lockInput = true;
@@ -26,14 +35,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             this.eventSystem = EventSystem.current;
 
             if (this.transitionAnimationUnit == null) return;
-            if (this.transitionAnimationUnit is ITransitionAnimationUnit animationUnit)
-            {
-                animationUnit.SetupAnim();
-            }
-            else
-            {
-                Debug.LogError("transitionAnimationUnit must implement ITransitionAnimationUnit!");
-            }
+            this.transitionAnimationUnit.SetupAnim();
         }
 
         public UniTask PlayIntroAnim() => PlayAnim("Intro");
@@ -49,7 +51,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
             this.animationTask = new UniTaskCompletionSource();
             this.SetLockInput(true);
 
-            var task = transitionAnimationUnit.GetComponent<ITransitionAnimationUnit>().PlayAnimation(animType);
+            var task = transitionAnimationUnit.PlayAnimation(animType);
 
             task.ContinueWith(() =>
             {

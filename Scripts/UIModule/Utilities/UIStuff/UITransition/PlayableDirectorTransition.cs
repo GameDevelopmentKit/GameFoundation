@@ -7,7 +7,7 @@
     using UnityEngine.Playables;
 
     [System.Serializable]
-    public class PlayableDirectorTransition : MonoBehaviour, ITransitionAnimationUnit
+    public class PlayableDirectorTransition : TransitionAnimationUnit
     {
         [SerializeField] private List<DirectorData>                   directorAnimations;
         private                  Dictionary<string, PlayableDirector> directorDict = new Dictionary<string, PlayableDirector>();
@@ -22,7 +22,7 @@
             }
         }
 
-        public UniTask PlayAnimation(string animationType)
+        public override UniTask PlayAnimation(string animationType)
         {
             if (!this.directorDict.TryGetValue(animationType, out PlayableDirector director) || director == null || director.playableAsset == null)
                 return UniTask.CompletedTask;
@@ -32,9 +32,9 @@
             return this.animationTask.Task;
         }
 
-        public void OnCompleteAnim() => this.animationTask?.TrySetResult();
+        public override void OnCompleteAnim() => this.animationTask?.TrySetResult();
 
-        public void SetupAnim()
+        public override void SetupAnim()
         {
             foreach (var director in this.directorDict.Values)
             {

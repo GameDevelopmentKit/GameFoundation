@@ -16,7 +16,8 @@
         "Zenject-Signals",
         "DOTween.Modules",
         "LeTai.TranslucentImage",
-        "GameFoundation.SoundManager"
+        "GameFoundation.SoundManager",
+        "DOTweenPro.Scripts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

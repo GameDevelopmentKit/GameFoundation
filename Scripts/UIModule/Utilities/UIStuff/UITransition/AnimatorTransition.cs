@@ -5,13 +5,13 @@
     using UnityEngine;
 
     [System.Serializable]
-    public class AnimatorTransition : MonoBehaviour, ITransitionAnimationUnit
+    public class AnimatorTransition : TransitionAnimationUnit
     {
         [SerializeField] private Animator animator;
 
         private UniTaskCompletionSource animationTask;
 
-        public UniTask PlayAnimation(string animType)
+        public override UniTask PlayAnimation(string animType)
         {
             if (this.animator == null)
                 return UniTask.CompletedTask;
@@ -23,8 +23,6 @@
             return this.animationTask.Task;
         }
 
-        public void OnCompleteAnim() => this.animationTask?.TrySetResult();
-
-        public void SetupAnim() { }
+        public override void OnCompleteAnim() => this.animationTask?.TrySetResult();
     }
 }
