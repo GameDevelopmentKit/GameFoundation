@@ -1,35 +1,30 @@
-﻿namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+﻿namespace UIModule.Utilities.UIStuff.UITransition
 {
     using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
     using UnityEngine;
 
+    [System.Serializable]
     public class AnimatorTransition : MonoBehaviour, ITransitionAnimationUnit
     {
-        private Animator                animator;
-        private string                  triggerName;
+        [SerializeField] private Animator animator;
+
         private UniTaskCompletionSource animationTask;
 
-        public AnimatorTransition(Animator animator, string triggerName)
+        public UniTask PlayAnimation(string animType)
         {
-            this.animator    = animator;
-            this.triggerName = triggerName;
-        }
-
-        public UniTask PlayAnim()
-        {
-            if (animator == null)
+            if (this.animator == null)
                 return UniTask.CompletedTask;
-            
-            animationTask = new UniTaskCompletionSource();
-            animator.SetTrigger(triggerName);
-            return animationTask.Task;
+
+            this.animationTask = new UniTaskCompletionSource();
+
+            this.animator.SetTrigger(animType);
+
+            return this.animationTask.Task;
         }
 
-        public UniTask PlayIntro() => PlayAnim();
-        public UniTask PlayOutro() => PlayAnim();
-        
-        public void OnCompleteAnim() => animationTask?.TrySetResult();
-        
-        public void SetupAnim() {}
+        public void OnCompleteAnim() => this.animationTask?.TrySetResult();
+
+        public void SetupAnim() { }
     }
 }

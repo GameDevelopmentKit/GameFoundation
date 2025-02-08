@@ -1,39 +1,53 @@
-﻿namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+﻿namespace UIModule.Utilities.UIStuff.UITransition
 {
+    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
     using UnityEngine;
     using UnityEngine.Playables;
 
-    public class PlayableDirectorTransition : MonoBehaviour,ITransitionAnimationUnit
+    [System.Serializable]
+    public class PlayableDirectorTransition : MonoBehaviour, ITransitionAnimationUnit
     {
-        private PlayableDirector        director;
+        [SerializeField] private List<DirectorData>                   directorAnimations;
+        private                  Dictionary<string, PlayableDirector> directorDict = new Dictionary<string, PlayableDirector>();
+
         private UniTaskCompletionSource animationTask;
 
-        public PlayableDirectorTransition(PlayableDirector director)
+        private void Awake()
         {
-            this.director = director;
-            SetupAnim();
+            foreach (var data in this.directorAnimations)
+            {
+                this.directorDict[data.animationType] = data.director;
+            }
         }
 
-        public UniTask PlayAnim()
+        public UniTask PlayAnimation(string animationType)
         {
-            if (director == null || director.playableAsset == null)
+            if (!this.directorDict.TryGetValue(animationType, out PlayableDirector director) || director == null || director.playableAsset == null)
                 return UniTask.CompletedTask;
-            
-            animationTask = new UniTaskCompletionSource();
+
+            this.animationTask = new UniTaskCompletionSource();
             director.Play();
-            return animationTask.Task;
+            return this.animationTask.Task;
         }
 
-        public UniTask PlayIntro() => PlayAnim();
-        public UniTask PlayOutro() => PlayAnim();
-        
-        public void OnCompleteAnim() => animationTask?.TrySetResult();
-        
+        public void OnCompleteAnim() => this.animationTask?.TrySetResult();
+
         public void SetupAnim()
         {
-            if (director != null)
-                director.stopped += _ => OnCompleteAnim();
+            foreach (var director in this.directorDict.Values)
+            {
+                if (director != null)
+                    director.stopped += _ => this.OnCompleteAnim();
+            }
         }
+    }
+
+    [System.Serializable]
+    public class DirectorData
+    {
+        public string           animationType;
+        public PlayableDirector director;
     }
 }
