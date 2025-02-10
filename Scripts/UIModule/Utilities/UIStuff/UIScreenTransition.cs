@@ -1,72 +1,69 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 {
     using Cysharp.Threading.Tasks;
+    using Sirenix.OdinInspector;
     using UnityEngine;
     using UnityEngine.EventSystems;
-    using UnityEngine.Playables;
+    using UnityEngine.Serialization;
+
+    public interface ITransitionAnimationUnit
+    {
+        UniTask PlayAnimation(string animType);
+        void    OnCompleteAnim();
+        void    SetupAnim();
+    }
+
+    public abstract class TransitionAnimationUnit : MonoBehaviour, ITransitionAnimationUnit
+    {
+        public virtual UniTask PlayAnimation(string animType) {return UniTask.CompletedTask;}
+
+        public virtual void OnCompleteAnim() { }
+
+        public virtual void SetupAnim() { }
+    }
 
     public class UIScreenTransition : MonoBehaviour
     {
-        [SerializeField] private PlayableDirector introAnimation;
-        [SerializeField] private PlayableDirector outroAnimation;
+        [SerializeField] public TransitionAnimationUnit transitionAnimationUnit;
 
-        [Tooltip("if lockInput = true, disable event system while anim is running and otherwise.")] [SerializeField]
+        [Tooltip("If true, disable EventSystem while animation is running.")] [SerializeField]
         private bool lockInput = true;
+        [SerializeField] private bool waitTransition = true;
 
         private EventSystem             eventSystem;
         private UniTaskCompletionSource animationTask;
 
-        public PlayableDirector IntroAnimation => this.introAnimation;
-        public PlayableDirector OutroAnimation => this.outroAnimation;
-
-
         private void Awake()
         {
             this.eventSystem = EventSystem.current;
-            SetupAnimation(this.introAnimation, "Intro");
-            SetupAnimation(this.outroAnimation, "Outro");
+
+            if (this.transitionAnimationUnit == null) return;
+            this.transitionAnimationUnit.SetupAnim();
         }
 
-        public UniTask PlayIntroAnim() { return this.PlayAnim(this.introAnimation); }
+        public UniTask PlayIntroAnim() => PlayAnim("Intro");
+        public UniTask PlayOutroAnim() => PlayAnim("Outro");
 
-        public UniTask PlayOutroAnim() { return this.PlayAnim(this.outroAnimation); }
-
-        private void SetupAnimation(PlayableDirector anim, string animationType)
+        [Button]
+        private UniTask PlayAnim(string animType)
         {
-            if (anim == null) return;
+            if (transitionAnimationUnit == null) return UniTask.CompletedTask;
 
-            if (!anim.playableAsset)
-            {
-                Debug.LogWarning($"{animationType} Animation for {this.gameObject.name} is not available", this);
-            }
-            else
-            {
-                anim.playOnAwake =  false;
-                anim.stopped     += this.OnAnimComplete;
-            }
-        }
-
-
-        private UniTask PlayAnim(PlayableDirector anim)
-        {
-            if (anim == null) return UniTask.CompletedTask;
-
-            if (!anim.playableAsset || this.animationTask?.Task.Status == UniTaskStatus.Pending)
-            {
+            if (this.animationTask?.Task.Status == UniTaskStatus.Pending)
                 return UniTask.CompletedTask;
-            }
 
             this.animationTask = new UniTaskCompletionSource();
             this.SetLockInput(true);
 
-            anim.Play();
-            return this.animationTask.Task;
-        }
+            var task = transitionAnimationUnit.PlayAnimation(animType);
 
-        private void OnAnimComplete(PlayableDirector obj)
-        {
-            this.animationTask.TrySetResult();
-            this.SetLockInput(false);
+            task.ContinueWith(() =>
+            {
+                this.animationTask.TrySetResult();
+                this.SetLockInput(false);
+            });
+            
+            return !waitTransition ? UniTask.CompletedTask : this.animationTask.Task;
         }
 
         private void SetLockInput(bool value)
