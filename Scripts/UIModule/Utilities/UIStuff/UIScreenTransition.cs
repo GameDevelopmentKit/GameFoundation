@@ -1,8 +1,10 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 {
     using Cysharp.Threading.Tasks;
+    using Sirenix.OdinInspector;
     using UnityEngine;
     using UnityEngine.EventSystems;
+    using UnityEngine.Serialization;
 
     public interface ITransitionAnimationUnit
     {
@@ -26,6 +28,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         [Tooltip("If true, disable EventSystem while animation is running.")] [SerializeField]
         private bool lockInput = true;
+        [SerializeField] private bool waitTransition = true;
 
         private EventSystem             eventSystem;
         private UniTaskCompletionSource animationTask;
@@ -41,6 +44,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         public UniTask PlayIntroAnim() => PlayAnim("Intro");
         public UniTask PlayOutroAnim() => PlayAnim("Outro");
 
+        [Button]
         private UniTask PlayAnim(string animType)
         {
             if (transitionAnimationUnit == null) return UniTask.CompletedTask;
@@ -58,7 +62,8 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
                 this.animationTask.TrySetResult();
                 this.SetLockInput(false);
             });
-            return UniTask.CompletedTask;
+            
+            return !waitTransition ? UniTask.CompletedTask : this.animationTask.Task;
         }
 
         private void SetLockInput(bool value)

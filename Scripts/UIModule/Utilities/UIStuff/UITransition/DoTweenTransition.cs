@@ -10,50 +10,28 @@
     [System.Serializable]
     public class DoTweenTransition : TransitionAnimationUnit
     {
-        [SerializeField] private List<TweenData>              tweenAnimations;
-        private                  Dictionary<string, Sequence> tweenSequences = new Dictionary<string, Sequence>();
+        [SerializeField] private List<TweenData>               tweenAnimations;
+        private                  Dictionary<string, TweenData> tweenSequences = new Dictionary<string, TweenData>();
 
         private UniTaskCompletionSource animationTask;
 
-        private void Awake()
+        public override void SetupAnim()
         {
+            base.SetupAnim();
             foreach (var data in this.tweenAnimations)
             {
-                Sequence sequence = DOTween.Sequence();
-                
-                if (data.sequenceDelay > 0)
-                    sequence.PrependInterval(data.sequenceDelay);
-
-                foreach (var tweenInfo in data.tweens)
-                {
-                    if (data.playInSequence)
-                    {
-                        foreach (var tween in tweenInfo.GetTweens())
-                        {
-                            sequence.Append(tween);
-                        }
-                    }
-                    else
-                    {
-                        foreach (var tween in tweenInfo.GetTweens())
-                        {
-                            sequence.Join(tween);
-                        }
-                    }
-                }
-
-                this.tweenSequences[data.animationType] = sequence;
+                this.tweenSequences[data.animationType] = data;
+                data.SetupTweens();
             }
         }
 
         public override UniTask PlayAnimation(string animationType)
         {
-            if (!this.tweenSequences.TryGetValue(animationType, out Sequence sequence) || sequence == null)
+            if (!this.tweenSequences.TryGetValue(animationType, out TweenData data) || data == null)
                 return UniTask.CompletedTask;
 
             this.animationTask = new UniTaskCompletionSource();
-            sequence.Restart();
-            sequence.OnComplete(this.OnCompleteAnim);
+            data.GetSequence().Play().OnComplete(this.OnCompleteAnim);
 
             return this.animationTask.Task;
         }
@@ -68,5 +46,45 @@
         public List<DOTweenAnimation> tweens         = new List<DOTweenAnimation>();
         public bool                   playInSequence = false;
         public float                  sequenceDelay  = 0f;
+
+        private Sequence currentSequence;
+
+        public void SetupTweens()
+        {
+            foreach (var tweenInfo in this.tweens)
+            {
+                tweenInfo.autoKill = false;
+                tweenInfo.autoPlay = false;
+            }
+        }
+
+        public Sequence GetSequence()
+        {
+            if (currentSequence == null)
+            {
+                currentSequence = DOTween.Sequence();
+                currentSequence.SetAutoKill(false);
+
+                if (this.sequenceDelay > 0)
+                    currentSequence.PrependInterval(this.sequenceDelay);
+
+                foreach (var tweenInfo in this.tweens)
+                {
+                    tweenInfo.tween.SetAutoKill(false);
+                    tweenInfo.tween.Rewind();
+                    if (this.playInSequence)
+                    {
+                        currentSequence.Append(tweenInfo.tween);
+                    }
+                    else
+                    {
+                        currentSequence.Join(tweenInfo.tween);
+                    }
+                }
+            }
+
+            currentSequence.Rewind(false);
+            return currentSequence;
+        }
     }
 }
