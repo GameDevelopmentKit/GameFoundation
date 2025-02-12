@@ -11,18 +11,28 @@
 
         private UniTaskCompletionSource animationTask;
 
-        public override UniTask PlayAnimation(string animType)
+        public override async UniTask PlayAnimation(string animType)
         {
+            Debug.Log($"PlayAnimation called with {animType}");
             if (this.animator == null)
-                return UniTask.CompletedTask;
+                return;
 
             this.animationTask = new UniTaskCompletionSource();
 
             this.animator.SetTrigger(animType);
+            await UniTask.WaitUntil(() =>
+            {
+                var stateInfo = this.animator.GetCurrentAnimatorStateInfo(0);
+                return stateInfo.normalizedTime >= 1.0f && !this.animator.IsInTransition(0);
+            });
 
-            return this.animationTask.Task;
+            this.OnCompleteAnim();
         }
 
-        public override void OnCompleteAnim() => this.animationTask?.TrySetResult();
+        public override void OnCompleteAnim()
+        {
+            Debug.Log("OnCompleteAnim called");
+            this.animationTask?.TrySetResult();
+        }
     }
 }

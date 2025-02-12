@@ -42,15 +42,30 @@
     [Serializable]
     public class TweenData
     {
-        public string                 animationType;
-        public List<DOTweenAnimation> tweens         = new List<DOTweenAnimation>();
-        public bool                   playInSequence = false;
-        public float                  sequenceDelay  = 0f;
-
-        private Sequence currentSequence;
+        public string     animationType;
+        public GameObject[] targetGameObjects;
+        public bool       playInSequence = false;
+        public float      sequenceDelay  = 0f;
+    
+        private List<DOTweenAnimation> tweens = new List<DOTweenAnimation>();
+        private Sequence               currentSequence;
 
         public void SetupTweens()
         {
+            foreach (var targetObject in targetGameObjects)
+            {
+                if (targetObject != null)
+                {
+                    var allTweenFounded = new List<DOTweenAnimation>(targetObject.GetComponents<DOTweenAnimation>());
+
+                    foreach (var tween in allTweenFounded)
+                    {
+                        if (!tween.id.Equals(this.animationType)) continue;
+                        this.tweens.Add(tween);
+                    }
+                }
+            }
+
             foreach (var tweenInfo in this.tweens)
             {
                 tweenInfo.autoKill = false;
@@ -87,4 +102,5 @@
             return currentSequence;
         }
     }
+
 }

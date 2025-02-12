@@ -42,6 +42,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         }
 
         public UniTask PlayIntroAnim() => PlayAnim("Intro");
+
         public UniTask PlayOutroAnim() => PlayAnim("Outro");
 
         [Button]
