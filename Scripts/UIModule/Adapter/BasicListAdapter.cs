@@ -21,8 +21,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public  SimpleDataHelper<TModel> Models { get; private set; }
         private IDependencyContainer     container;
 
-        private readonly Dictionary<TView, TPresenter> viewToPresenter  = new();
-        private readonly Dictionary<int, TPresenter>   indexToPresenter = new();
+        private readonly   Dictionary<TView, TPresenter> viewToPresenter  = new();
+        private readonly   Dictionary<int, TPresenter>   indexToPresenter = new();
+        protected readonly Dictionary<TPresenter, int>   presenterToIndex = new();
 
         #region OSA implementation
 
@@ -69,7 +70,14 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.OnViewReady();
             }
 
-            this.indexToPresenter[index] = presenter;
+            // uncomment this after fixing battle pass - frostbun
+            // if (this.presenterToIndex.TryGetValue(presenter, out var value))
+            // {
+            //     this.indexToPresenter.Remove(value);
+            // }
+
+            this.presenterToIndex[presenter] = index;
+            this.indexToPresenter[index]     = presenter;
 
             presenter.BindData(model);
         }
