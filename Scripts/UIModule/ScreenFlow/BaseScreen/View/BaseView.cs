@@ -3,6 +3,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
     using System;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
+    using global::UIModule.Utilities.UIStuff;
+    using global::UIModule.Utilities.UIStuff.UITransition;
     using UnityEngine;
 
     [RequireComponent(typeof(CanvasGroup))]

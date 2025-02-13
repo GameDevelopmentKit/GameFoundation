@@ -15,7 +15,8 @@
         "Zenject",
         "Zenject-Signals",
         "DOTween.Modules",
-        "R3.Unity"
+        "R3.Unity",
+        "DOTweenPro.Scripts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -25,7 +26,8 @@
         "DOTween.dll",
         "Sirenix.OdinInspector.Attributes.dll",
         "Zenject-usage.dll",
-        "R3.dll"
+        "R3.dll",
+        "DOTweenPro.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
