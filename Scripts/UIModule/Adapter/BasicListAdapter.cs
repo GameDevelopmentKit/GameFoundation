@@ -21,8 +21,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public  SimpleDataHelper<TModel> Models { get; private set; }
         private IDependencyContainer     container;
 
-        private readonly Dictionary<TView, TPresenter> viewToPresenter  = new();
-        private readonly Dictionary<int, TPresenter>   indexToPresenter = new();
+        private readonly   Dictionary<TView, TPresenter> viewToPresenter  = new();
+        private readonly   Dictionary<int, TPresenter>   indexToPresenter = new();
+        protected readonly Dictionary<TPresenter, int>   presenterToIndex = new();
 
         #region OSA implementation
 
@@ -69,7 +70,13 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.OnViewReady();
             }
 
-            this.indexToPresenter[index] = presenter;
+            if (this.presenterToIndex.TryGetValue(presenter, out var value))
+            {
+                this.indexToPresenter.Remove(value);
+            }
+
+            this.presenterToIndex[presenter] = index;
+            this.indexToPresenter[index]     = presenter;
 
             presenter.BindData(model);
         }
@@ -86,6 +93,14 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
+        }
+
+        public override void ResetItems(int itemsCount, bool contentPanelEndEdgeStationary = false, bool keepVelocity = false)
+        {
+            base.ResetItems(itemsCount, contentPanelEndEdgeStationary, keepVelocity);
+            this.viewToPresenter.Clear();
+            this.presenterToIndex.Clear();
+            this.indexToPresenter.Clear();
         }
 
         /// <summary>
