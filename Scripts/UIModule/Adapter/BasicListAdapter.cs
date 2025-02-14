@@ -70,11 +70,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 presenter.OnViewReady();
             }
 
-            // uncomment this after fixing battle pass - frostbun
-            // if (this.presenterToIndex.TryGetValue(presenter, out var value))
-            // {
-            //     this.indexToPresenter.Remove(value);
-            // }
+            if (this.presenterToIndex.TryGetValue(presenter, out var value))
+            {
+                this.indexToPresenter.Remove(value);
+            }
 
             this.presenterToIndex[presenter] = index;
             this.indexToPresenter[index]     = presenter;
