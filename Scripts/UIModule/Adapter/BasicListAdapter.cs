@@ -96,6 +96,14 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             this.Models.ResetItems(modelList);
         }
 
+        public override void ResetItems(int itemsCount, bool contentPanelEndEdgeStationary = false, bool keepVelocity = false)
+        {
+            base.ResetItems(itemsCount, contentPanelEndEdgeStationary, keepVelocity);
+            this.viewToPresenter.Clear();
+            this.presenterToIndex.Clear();
+            this.indexToPresenter.Clear();
+        }
+
         /// <summary>
         /// We need this because the original method only update to  this.VisibleItemsCount - 1
         /// </summary>
