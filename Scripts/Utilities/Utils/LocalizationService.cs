@@ -24,11 +24,13 @@
             //this.ChangeLanguage(gameFoundationLocalData.IndexSettingRecord.Language);
         }
 
-        public string GetTextWithKey(string key, List<string> formation = null)
+        public string GetTextWithKey(string key, List<string> formation = null, string overrideLanguage = null)
         {
             if (string.IsNullOrEmpty(key)) return string.Empty;
 
-            var output = LocalizationManager.TryGetTranslation(key, out var localization) ? localization : key;
+            var output = string.Empty;
+
+            output = LocalizationManager.TryGetTranslation(key, out var localization, overrideLanguage: overrideLanguage) ? localization : key;
 
             if (formation is { Count: > 0 })
             {
@@ -61,7 +63,7 @@
         }
 
         public List<string> ListLanguages() { return LocalizationManager.GetAllLanguages(); }
-        
+
         public string CurrentLanguage => LocalizationManager.CurrentLanguage;
     }
 }
