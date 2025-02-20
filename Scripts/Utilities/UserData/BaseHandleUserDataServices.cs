@@ -72,6 +72,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
                             if (string.IsNullOrEmpty(json)) data.Init();
 
+                            data.OnDataLoaded();
                             this.logService.LogWithColor($"Loaded {key}", Color.green);
                             return data;
                         });
