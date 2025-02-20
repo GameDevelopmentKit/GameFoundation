@@ -124,6 +124,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             get
             {
                 if (!this.rootUICanvas) this.rootUICanvas = Object.FindObjectOfType<RootUICanvas>();
+
                 return this.rootUICanvas;
             }
         }
@@ -254,23 +255,15 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #region Check Overlay Popup
 
-        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter)
-        {
-            return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>));
-        }
+        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter) { return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>)); }
 
-        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter)
-        {
-            return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay;
-        }
+        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter) { return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay; }
 
         #endregion
 
         #region Handle events
 
-        void IInitializable.Initialize()
-        {
-        }
+        void IInitializable.Initialize() { }
 
         void IDisposable.Dispose()
         {
@@ -306,7 +299,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     this.previousActiveScreen.OnOverlap();
 
                     //With the current screen is popup, the previous screen will be hide after the blur background is shown
-                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen.Value)) this.previousActiveScreen.HideView();
+                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen.Value) && this.previousActiveScreen.CurrentTransform != null)
+                    {
+                        this.previousActiveScreen.HideView();
+                    }
                 }
             }
         }
@@ -382,10 +378,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private bool enableBackToClose = false;
 
-        public void EnableBackToClose(bool enable)
-        {
-            this.enableBackToClose = enable;
-        }
+        public void EnableBackToClose(bool enable) { this.enableBackToClose = enable; }
 
         void ITickable.Tick()
         {
@@ -413,11 +406,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private void QuitApplication()
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             EditorApplication.isPlaying = false;
-            #else
+#else
             Application.Quit();
-            #endif
+#endif
         }
 
         #endregion
