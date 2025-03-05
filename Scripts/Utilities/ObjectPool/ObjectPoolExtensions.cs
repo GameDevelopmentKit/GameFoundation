@@ -85,6 +85,15 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             return ObjectPoolManager.Instance.Spawn(prefab, null, Vector3.zero, Quaternion.identity);
         }
 
+        public static GameObject SpawnWithAutoInject(this GameObject prefab, Transform parent, Vector3 position)
+        {
+            return ObjectPoolManager.Instance.SpawnWithAutoInject(prefab, parent, position, Quaternion.identity);
+        }
+        public static GameObject SpawnWithAutoInject(this GameObject prefab, Vector3 position, Quaternion rotation)
+        {
+            return ObjectPoolManager.Instance.SpawnWithAutoInject(prefab, null, position, rotation);
+        }
+
         public static void Recycle<T>(this T obj) where T : Component
         {
             ObjectPoolManager.Instance.Recycle(obj);
