@@ -17,7 +17,6 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         #region inject
 
         private readonly IGameAssets gameAssets;
-        private readonly IObjectResolver objectResolver;
 
         #endregion
 
@@ -35,16 +34,13 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         [UnityEngine.Scripting.Preserve]
         public ObjectPoolManager(IGameAssets gameAsset)
         {
-            this.gameAssets = gameAssets;
+            this.gameAssets = gameAsset;
             Instance        = this;
         }
 
         #region Pool
 
-        public ObjectPool CreatePool<T>(T prefab, int initialPoolSize, GameObject root) where T : Component
-        {
-            return this.CreatePool(prefab.gameObject, initialPoolSize, root);
-        }
+        public ObjectPool CreatePool<T>(T prefab, int initialPoolSize, GameObject root) where T : Component { return this.CreatePool(prefab.gameObject, initialPoolSize, root); }
 
         public ObjectPool CreatePool(GameObject prefab, int initialPoolSize, GameObject root)
         {
@@ -71,6 +67,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
             return pool;
         }
+
         public ObjectPool CreatePoolForAutoInject(GameObject prefab, int initialPoolSize, GameObject root)
         {
             if (prefab == null) return null;
@@ -105,30 +102,19 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             return this.defaultRoot;
         }
 
-        public int CountPooled<T>(T prefab) where T : Component
-        {
-            return this.CountPooled(prefab.gameObject);
-        }
+        public int CountPooled<T>(T prefab) where T : Component { return this.CountPooled(prefab.gameObject); }
 
-        public int CountPooled(GameObject prefab)
-        {
-            return this.prefabToObjectPool.TryGetValue(prefab, out var pool) ? pool.pooledObjects.Count : 0;
-        }
+        public int CountPooled(GameObject prefab) { return this.prefabToObjectPool.TryGetValue(prefab, out var pool) ? pool.pooledObjects.Count : 0; }
 
-        public int CountSpawned<T>(T prefab) where T : Component
-        {
-            return this.CountSpawned(prefab.gameObject);
-        }
+        public int CountSpawned<T>(T prefab) where T : Component { return this.CountSpawned(prefab.gameObject); }
 
-        public int CountSpawned(GameObject prefab)
-        {
-            return this.prefabToObjectPool.TryGetValue(prefab, out var pool) ? pool.spawnedObjects.Count : 0;
-        }
+        public int CountSpawned(GameObject prefab) { return this.prefabToObjectPool.TryGetValue(prefab, out var pool) ? pool.spawnedObjects.Count : 0; }
 
         public int CountAllPooled()
         {
             var count                                                  = 0;
             foreach (var pool in this.prefabToObjectPool.Values) count += pool.pooledObjects.Count;
+
             return count;
         }
 
@@ -137,6 +123,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (list == null) list = new();
             if (!appendList) list.Clear();
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool)) list.AddRange(pool.pooledObjects);
+
             return list;
         }
 
@@ -160,6 +147,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (list == null) list = new();
             if (!appendList) list.Clear();
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool)) list.AddRange(pool.spawnedObjects);
+
             return list;
         }
 
@@ -218,10 +206,12 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             {
                 var spawnedObj = pool.Spawn(parent, position, rotation);
                 this.spawnedObjToObjectPool.Add(spawnedObj, pool);
+
                 return spawnedObj;
             }
 
             this.CreatePool(prefab, 1, null);
+
             return this.Spawn(prefab, parent, position, rotation);
         }
 
@@ -231,99 +221,50 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
             {
-                var spawnedObj = pool.SpawnWithAutoInject(parent, position, rotation,this.GetCurrentObjectResolver());
+                var spawnedObj = pool.SpawnWithAutoInject(parent, position, rotation, this.GetCurrentObjectResolver());
                 this.spawnedObjToObjectPool.Add(spawnedObj, pool);
+
                 return spawnedObj;
             }
 
             this.CreatePoolForAutoInject(prefab, 1, null);
+
             return this.Spawn(prefab, parent, position, rotation);
         }
 
-        public GameObject Spawn(GameObject prefab, Transform parent, Vector3 position)
-        {
-            return this.Spawn(prefab, parent, position, Quaternion.identity);
-        }
+        public GameObject Spawn(GameObject prefab, Transform parent, Vector3 position) { return this.Spawn(prefab, parent, position, Quaternion.identity); }
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation)
-        {
-            return this.Spawn(prefab, null, position, rotation);
-        }
+        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation) { return this.Spawn(prefab, null, position, rotation); }
 
-        public GameObject Spawn(GameObject prefab, Transform parent)
-        {
-            return this.Spawn(prefab, parent, Vector3.zero, Quaternion.identity);
-        }
+        public GameObject Spawn(GameObject prefab, Transform parent) { return this.Spawn(prefab, parent, Vector3.zero, Quaternion.identity); }
 
-        public GameObject Spawn(GameObject prefab, Vector3 position)
-        {
-            return this.Spawn(prefab, null, position, Quaternion.identity);
-        }
+        public GameObject Spawn(GameObject prefab, Vector3 position) { return this.Spawn(prefab, null, position, Quaternion.identity); }
 
-        public GameObject Spawn(GameObject prefab)
-        {
-            return this.Spawn(prefab, null, Vector3.zero, Quaternion.identity);
-        }
+        public GameObject Spawn(GameObject prefab) { return this.Spawn(prefab, null, Vector3.zero, Quaternion.identity); }
 
-        public T Spawn<T>(T prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Component
-        {
-            return this.Spawn(prefab.gameObject, parent, position, rotation).GetComponent<T>();
-        }
+        public T Spawn<T>(T prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Component { return this.Spawn(prefab.gameObject, parent, position, rotation).GetComponent<T>(); }
 
-        public T Spawn<T>(T prefab, Vector3 position, Quaternion rotation) where T : Component
-        {
-            return this.Spawn(prefab.gameObject, null, position, rotation).GetComponent<T>();
-        }
+        public T Spawn<T>(T prefab, Vector3 position, Quaternion rotation) where T : Component { return this.Spawn(prefab.gameObject, null, position, rotation).GetComponent<T>(); }
 
-        public T Spawn<T>(T prefab, Transform parent, Vector3 position) where T : Component
-        {
-            return this.Spawn(prefab.gameObject, parent, position, Quaternion.identity).GetComponent<T>();
-        }
+        public T Spawn<T>(T prefab, Transform parent, Vector3 position) where T : Component { return this.Spawn(prefab.gameObject, parent, position, Quaternion.identity).GetComponent<T>(); }
 
-        public T Spawn<T>(T prefab, Vector3 position) where T : Component
-        {
-            return this.Spawn(prefab.gameObject, null, position, Quaternion.identity).GetComponent<T>();
-        }
+        public T Spawn<T>(T prefab, Vector3 position) where T : Component { return this.Spawn(prefab.gameObject, null, position, Quaternion.identity).GetComponent<T>(); }
 
-        public T Spawn<T>(T prefab, Transform parent) where T : Component
-        {
-            return this.Spawn(prefab.gameObject, parent, Vector3.zero, Quaternion.identity).GetComponent<T>();
-        }
+        public T Spawn<T>(T prefab, Transform parent) where T : Component { return this.Spawn(prefab.gameObject, parent, Vector3.zero, Quaternion.identity).GetComponent<T>(); }
 
-        public T Spawn<T>(T prefab) where T : Component
-        {
-            return this.Spawn(prefab.gameObject, null, Vector3.zero, Quaternion.identity).GetComponent<T>();
-        }
+        public T Spawn<T>(T prefab) where T : Component { return this.Spawn(prefab.gameObject, null, Vector3.zero, Quaternion.identity).GetComponent<T>(); }
 
-        public UniTask<GameObject> Spawn(string prefabName, Transform parent)
-        {
-            return this.Spawn(prefabName, parent, Vector3.zero, Quaternion.identity);
-        }
+        public UniTask<GameObject> Spawn(string prefabName, Transform parent) { return this.Spawn(prefabName, parent, Vector3.zero, Quaternion.identity); }
 
-        public UniTask<GameObject> Spawn(string prefabName, Vector3 position)
-        {
-            return this.Spawn(prefabName, null, position, Quaternion.identity);
-        }
+        public UniTask<GameObject> Spawn(string prefabName, Vector3 position) { return this.Spawn(prefabName, null, position, Quaternion.identity); }
 
-        public UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position)
-        {
-            return this.Spawn(prefabName, parent, position, Quaternion.identity);
-        }
+        public UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position) { return this.Spawn(prefabName, parent, position, Quaternion.identity); }
 
-        public UniTask<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation)
-        {
-            return this.Spawn(prefabName, null, position, rotation);
-        }
+        public UniTask<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation) { return this.Spawn(prefabName, null, position, rotation); }
 
-        public UniTask<GameObject> Spawn(string prefabName)
-        {
-            return this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
-        }
+        public UniTask<GameObject> Spawn(string prefabName) { return this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity); }
 
-        public async UniTask<T> Spawn<T>(string prefabName) where T : Component
-        {
-            return (await this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity)).GetComponent<T>();
-        }
+        public async UniTask<T> Spawn<T>(string prefabName) where T : Component { return (await this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity)).GetComponent<T>(); }
 
         #endregion
 
@@ -349,15 +290,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             this.Recycle(obj);
         }
 
-        public void Recycle<T>(T obj) where T : Component
-        {
-            this.Recycle(obj.gameObject);
-        }
+        public void Recycle<T>(T obj) where T : Component { this.Recycle(obj.gameObject); }
 
-        public void Recycle(GameObject obj)
-        {
-            this.Recycle(obj, null);
-        }
+        public void Recycle(GameObject obj) { this.Recycle(obj, null); }
 
         public void RecycleAll(GameObject prefab)
         {
@@ -376,10 +311,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             this.tempList.Clear();
         }
 
-        public void RecycleAll<T>(T prefab) where T : Component
-        {
-            this.RecycleAll(prefab.gameObject);
-        }
+        public void RecycleAll<T>(T prefab) where T : Component { this.RecycleAll(prefab.gameObject); }
 
         #endregion
 
@@ -390,10 +322,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (prefab != null && this.prefabToObjectPool.TryGetValue(prefab, out var pool)) pool.CleanUpPooled();
         }
 
-        public void CleanUpPooled<T>(T prefab) where T : Component
-        {
-            this.CleanUpPooled(prefab.gameObject);
-        }
+        public void CleanUpPooled<T>(T prefab) where T : Component { this.CleanUpPooled(prefab.gameObject); }
 
         public void CleanUpAll(GameObject prefab)
         {
@@ -409,10 +338,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             this.prefabToObjectPool.Remove(prefab);
         }
 
-        public void CleanUpAll<T>(T prefab) where T : Component
-        {
-            this.CleanUpAll(prefab.gameObject);
-        }
+        public void CleanUpAll<T>(T prefab) where T : Component { this.CleanUpAll(prefab.gameObject); }
 
         public void DestroyPool(GameObject prefab)
         {
