@@ -4,6 +4,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using System.Collections;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
@@ -32,10 +33,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         private GameObject defaultRoot;
 
         [UnityEngine.Scripting.Preserve]
-        public ObjectPoolManager(IGameAssets gameAssets, IObjectResolver objectResolver)
+        public ObjectPoolManager(IGameAssets gameAsset)
         {
             this.gameAssets = gameAssets;
-            this.objectResolver = objectResolver;
             Instance        = this;
         }
 
@@ -86,7 +86,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (initialPoolSize > 0)
                 while (list.Count < initialPoolSize)
                 {
-                    var obj = this.objectResolver.Instantiate(prefab, pool.transform);
+                    var obj = this.GetCurrentObjectResolver().Instantiate(prefab, pool.transform);
                     obj.SetActive(false);
                     list.Add(obj);
                 }
@@ -231,7 +231,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
             {
-                var spawnedObj = pool.SpawnWithAutoInject(parent, position, rotation,this.objectResolver);
+                var spawnedObj = pool.SpawnWithAutoInject(parent, position, rotation,this.GetCurrentObjectResolver());
                 this.spawnedObjToObjectPool.Add(spawnedObj, pool);
                 return spawnedObj;
             }
