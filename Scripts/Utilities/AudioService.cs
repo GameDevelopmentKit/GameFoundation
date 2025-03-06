@@ -17,23 +17,41 @@
 
     public interface IAudioService
     {
-        void  PlaySound(string name, AudioSource sender);
-        void  PlaySound(string name, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
-        void  StopAllSound();
-        void  StopAll();
-        void  PlayPlayList(string    musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void  PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void  StopPlayList();
-        void  SetPlayListTime(float time);
+        void PlaySound(string name, AudioSource sender);
+
+        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+
+        void PlayAudioClip(AudioClip audioClip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+
+        void StopAllSound();
+
+        void StopAll();
+
+        void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+
+        void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+
+        void StopPlayList();
+
+        void SetPlayListTime(float time);
+
         float GetPlayListTime();
-        void  SetPlayListPitch(float pitch);
-        void  SetPlayListLoop(bool   isLoop);
-        void  PausePlayList();
-        void  ResumePlayList();
-        bool  IsPlayingPlayList();
-        void  StopAllPlayList();
-        void  PauseEverything();
-        void  ResumeEverything();
+
+        void SetPlayListPitch(float pitch);
+
+        void SetPlayListLoop(bool isLoop);
+
+        void PausePlayList();
+
+        void ResumePlayList();
+
+        bool IsPlayingPlayList();
+
+        void StopAllPlayList();
+
+        void PauseEverything();
+
+        void ResumeEverything();
     }
 
     public class AudioService : IAudioService, IInitializable, IDisposable
@@ -53,11 +71,11 @@
 
         [Preserve]
         public AudioService(
-            SignalBus         signalBus,
-            SoundSetting      SoundSetting,
-            IGameAssets       gameAssets,
+            SignalBus signalBus,
+            SoundSetting SoundSetting,
+            IGameAssets gameAssets,
             ObjectPoolManager objectPoolManager,
-            ILogService       logService
+            ILogService logService
         )
         {
             this.signalBus         = signalBus;
@@ -68,10 +86,7 @@
             Instance               = this;
         }
 
-        public void Initialize()
-        {
-            this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio);
-        }
+        public void Initialize() { this.signalBus.Subscribe<UserDataLoadedSignal>(this.SubscribeMasterAudio); }
 
         private void SubscribeMasterAudio()
         {
@@ -89,6 +104,7 @@
             var audioSource = await this.objectPoolManager.Spawn<AudioSource>(AudioSourceKey);
             audioSource.clip   = null;
             audioSource.volume = 1;
+
             return audioSource;
         }
 
@@ -107,12 +123,30 @@
                 if (this.loopingSoundNameToSources.ContainsKey(name))
                 {
                     this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
+
                     return;
                 }
 
                 audioSource.clip = audioClip;
                 audioSource.PlayLoopingSoundManaged(volumeScale, fadeSeconds);
                 this.loopingSoundNameToSources.Add(name, audioSource);
+            }
+            else
+            {
+                audioSource.PlayOneShotSoundManaged(audioClip);
+                await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
+                audioSource.Recycle();
+            }
+        }
+
+        public async void PlayAudioClip(AudioClip audioClip, bool isLoop = false, float volumeScale = 1, float fadeSeconds = 1, bool isAverage = false)
+        {
+            var audioSource = await this.GetAudioSource();
+
+            if (isLoop)
+            {
+                audioSource.clip = audioClip;
+                audioSource.PlayLoopingSoundManaged(volumeScale, fadeSeconds);
             }
             else
             {
@@ -186,6 +220,7 @@
         public float GetPlayListTime()
         {
             if (this.MusicAudioSource == null) return -1f;
+
             return this.MusicAudioSource.time;
         }
 
@@ -216,13 +251,11 @@
         public bool IsPlayingPlayList()
         {
             if (this.MusicAudioSource == null) return false;
+
             return this.MusicAudioSource.isPlaying;
         }
 
-        public void StopAllPlayList()
-        {
-            this.StopPlayList();
-        }
+        public void StopAllPlayList() { this.StopPlayList(); }
 
         public void PauseEverything()
         {
@@ -236,19 +269,10 @@
             SoundManager.ResumeAll();
         }
 
-        protected virtual void SetSoundValue(float value)
-        {
-            SoundManager.SoundVolume = value;
-        }
+        protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
-        protected virtual void SetMusicValue(float value)
-        {
-            SoundManager.MusicVolume = value;
-        }
+        protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
 
-        public void Dispose()
-        {
-            this.compositeDisposable?.Dispose();
-        }
+        public void Dispose() { this.compositeDisposable?.Dispose(); }
     }
 }
