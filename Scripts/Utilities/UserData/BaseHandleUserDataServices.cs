@@ -52,31 +52,28 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         public async UniTask<ILocalData[]> Load(params Type[] types)
         {
-            var keys = types.Select(KeyOf).ToArray();
+            var keys  = types.Select(KeyOf).ToArray();
+            var jsons = await this.LoadJsons(keys);
 
-            return IterTools.Zip(types,
-                keys,
-                await this.LoadJsons(keys),
-                (type, key, json) =>
+            await UniTask.WaitForSeconds(3);
+
+            return IterTools.Zip(types, keys, jsons, (type, key, json) => this.userDataCache.GetOrAdd(key, () =>
+            {
+                this.logService.Log($"{key} - {json}");
+                var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type, JsonSetting);
+
+                if (result is not ILocalData data)
                 {
-                    return this.userDataCache.GetOrAdd(key,
-                        () =>
-                        {
-                            var result = string.IsNullOrEmpty(json) ? Activator.CreateInstance(type) : JsonConvert.DeserializeObject(json, type, JsonSetting);
+                    this.logService.Error($"Failed to load data {key}");
+                    return null;
+                }
 
-                            if (result is not ILocalData data)
-                            {
-                                this.logService.Error($"Failed to load data {key}");
-                                return null;
-                            }
+                if (string.IsNullOrEmpty(json)) data.Init();
 
-                            if (string.IsNullOrEmpty(json)) data.Init();
-
-                            data.OnDataLoaded();
-                            this.logService.LogWithColor($"Loaded {key}", Color.green);
-                            return data;
-                        });
-                }).ToArray();
+                data.OnDataLoaded();
+                this.logService.LogWithColor($"Loaded {key}", Color.green);
+                return data;
+            })).ToArray();
         }
 
         public async UniTask SaveAll()
