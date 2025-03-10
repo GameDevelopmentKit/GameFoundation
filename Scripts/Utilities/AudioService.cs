@@ -19,6 +19,8 @@
     {
         void  PlaySound(string name, AudioSource sender);
         void  PlaySound(string name, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        AudioSource GetLoopingSound(string name);
+        void StopLoopingSound(string name);
         void  StopAllSound();
         void  StopAll();
         void  PlayPlayList(string    musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
@@ -120,6 +122,18 @@
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
+        }
+
+        public AudioSource GetLoopingSound(string name) => this.loopingSoundNameToSources.GetValueOrDefault(name);
+
+        public void StopLoopingSound(string name)
+        {
+            var audioSource = this.GetLoopingSound(name);
+            if (!audioSource) return;
+            
+            audioSource.StopLoopingSoundManaged();
+            audioSource.gameObject.Recycle();
+            this.loopingSoundNameToSources.Remove(name);
         }
 
         public void StopAllSound()
