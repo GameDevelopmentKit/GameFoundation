@@ -129,10 +129,11 @@
         public void StopLoopingSound(string name)
         {
             var audioSource = this.GetLoopingSound(name);
-            if (audioSource)
-            {
-                audioSource.StopLoopingSoundManaged();
-            }
+            if (!audioSource) return;
+            
+            audioSource.StopLoopingSoundManaged();
+            audioSource.gameObject.Recycle();
+            this.loopingSoundNameToSources.Remove(name);
         }
 
         public void StopAllSound()
