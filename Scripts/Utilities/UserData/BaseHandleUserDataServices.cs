@@ -37,7 +37,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
             var key = KeyOf(typeof(T));
 
-            if (!this.userDataCache.ContainsKey(key)) this.userDataCache.Add(key, data);
+            this.userDataCache.TryAdd(key, data);
 
             if (!force) return;
 
@@ -55,7 +55,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
             var keys  = types.Select(KeyOf).ToArray();
             var jsons = await this.LoadJsons(keys);
 
-            await UniTask.WaitForSeconds(3);
+            await UniTask.WaitForSeconds(1);
 
             return IterTools.Zip(types, keys, jsons, (type, key, json) => this.userDataCache.GetOrAdd(key, () =>
             {
