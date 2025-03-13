@@ -55,6 +55,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <typeparam name="TPresenter">Type of screen presenter</typeparam>
         public UniTask<TPresenter> GetScreen<TPresenter>() where TPresenter : IScreenPresenter;
 
+        public UniTask<IScreenPresenter> GetScreen(Type presenterType);
+
         /// <summary>
         /// Open a screen by type
         /// </summary>
@@ -182,7 +184,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         {
             var screenType = typeof(T);
 
-            if (this.typeToLoadedScreenPresenter.TryGetValue(screenType, out var screenPresenter)) return (T)screenPresenter;
+            return (T)await this.GetScreen(screenType);
+        }
+
+        public async UniTask<IScreenPresenter> GetScreen(Type screenType)
+        {
+            if (this.typeToLoadedScreenPresenter.TryGetValue(screenType, out var screenPresenter)) return screenPresenter;
 
             if (!this.typeToPendingScreen.TryGetValue(screenType, out var loadingTask))
             {
@@ -193,11 +200,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var result = await loadingTask;
             this.typeToPendingScreen.Remove(screenType);
 
-            return (T)result;
+            return result;
 
             async Task<IScreenPresenter> InstantiateScreen()
             {
-                screenPresenter = this.GetCurrentContainer().Instantiate<T>();
+                screenPresenter = this.GetCurrentContainer().Instantiate(screenType) as IScreenPresenter;
                 var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
 
                 var viewObject = Object.Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
@@ -206,7 +213,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 screenPresenter.SetView(viewObject);
                 this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
 
-                return (T)screenPresenter;
+                return screenPresenter;
             }
         }
 
@@ -278,15 +285,23 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #region Check Overlay Popup
 
-        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter) { return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>)); }
+        private bool CheckScreenIsPopup(IScreenPresenter screenPresenter)
+        {
+            return screenPresenter.GetType().IsSubclassOfRawGeneric(typeof(BasePopupPresenter<>));
+        }
 
-        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter) { return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay; }
+        private bool CheckPopupIsOverlay(IScreenPresenter screenPresenter)
+        {
+            return this.CheckScreenIsPopup(screenPresenter) && screenPresenter.GetCustomAttribute<PopupInfoAttribute>().IsOverlay;
+        }
 
         #endregion
 
         #region Handle events
 
-        void IInitializable.Initialize() { }
+        void IInitializable.Initialize()
+        {
+        }
 
         void IDisposable.Dispose()
         {
@@ -398,7 +413,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private bool enableBackToClose = false;
 
-        public void EnableBackToClose(bool enable) { this.enableBackToClose = enable; }
+        public void EnableBackToClose(bool enable)
+        {
+            this.enableBackToClose = enable;
+        }
 
         void ITickable.Tick()
         {
