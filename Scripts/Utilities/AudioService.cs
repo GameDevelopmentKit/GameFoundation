@@ -71,11 +71,11 @@
 
         [Preserve]
         public AudioService(
-            SignalBus signalBus,
-            SoundSetting SoundSetting,
-            IGameAssets gameAssets,
+            SignalBus         signalBus,
+            SoundSetting      SoundSetting,
+            IGameAssets       gameAssets,
             ObjectPoolManager objectPoolManager,
-            ILogService logService
+            ILogService       logService
         )
         {
             this.signalBus         = signalBus;
@@ -137,6 +137,20 @@
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
+        }
+
+        public async void StopAudioByName(string name)
+        {
+            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            this.StopAudioClip(audioClip);
+        }
+
+        public async void StopAudioClip(AudioClip audioClip)
+        {
+            var audioSource = await this.GetAudioSource();
+            audioSource.clip = audioClip;
+            audioSource.Stop();
+            audioSource.Recycle();
         }
 
         public async void PlayAudioClip(AudioClip audioClip, bool isLoop = false, float volumeScale = 1, float fadeSeconds = 1, bool isAverage = false)
