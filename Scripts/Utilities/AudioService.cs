@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.DI;
@@ -141,16 +142,26 @@
 
         public async void StopAudioByName(string name)
         {
-            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
-            this.StopAudioClip(audioClip);
+            if (!this.loopingSoundNameToSources.TryGetValue(name, out var audioSource))
+            {
+                this.logService.Warning($"You didn't play looping - {name}!!!!, do you want to stop it?");
+
+                return;
+            }
+
+            audioSource.Stop();
+            audioSource.Recycle();
+            this.loopingSoundNameToSources.Remove(name);
         }
 
         public async void StopAudioClip(AudioClip audioClip)
         {
-            var audioSource = await this.GetAudioSource();
-            audioSource.clip = audioClip;
-            audioSource.Stop();
-            audioSource.Recycle();
+            foreach (var audioSource in this.loopingSoundNameToSources.Values.Where(audioSource => audioSource.clip == audioClip))
+            {
+                audioSource.Stop();
+                audioSource.Recycle();
+                this.loopingSoundNameToSources.Remove(audioClip.name);
+            }
         }
 
         public async void PlayAudioClip(AudioClip audioClip, bool isLoop = false, float volumeScale = 1, float fadeSeconds = 1, bool isAverage = false)
