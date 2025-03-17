@@ -92,12 +92,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
+            this.ClearCached();
             this.Models.ResetItems(modelList);
         }
 
-        public override void ResetItems(int itemsCount, bool contentPanelEndEdgeStationary = false, bool keepVelocity = false)
+        private void ClearCached()
         {
-            base.ResetItems(itemsCount, contentPanelEndEdgeStationary, keepVelocity);
             this.viewToPresenter.Clear();
             this.presenterToIndex.Clear();
             this.indexToPresenter.Clear();
