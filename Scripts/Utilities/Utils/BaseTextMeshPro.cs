@@ -30,7 +30,16 @@
 
         private async void SetTextWithLocalization(string key, Color colorCode = default)
         {
-            this.txtText ??= this.GetComponent<TMP_Text>();
+            this.txtText      ??= this.GetComponent<TMP_Text>();
+            this.txtText.text =   LocalizationService.Instance.GetTextWithKey(key);
+
+            if (colorCode != default)
+            {
+                this.txtText.color = colorCode;
+            }
+
+            this.lastKey = key;
+
             var font = await LocalizationService.Instance.GetFontAsset();
 
             if (font != null)
@@ -48,16 +57,6 @@
 
                 this.txtText.fontSharedMaterial = (mat == null || mat.value == null) ? this.defaultMat : mat.value;
             }
-
-            // put set text after setting font/materials
-            this.txtText.text = LocalizationService.Instance.GetTextWithKey(key);
-
-            if (colorCode != default)
-            {
-                this.txtText.color = colorCode;
-            }
-
-            this.lastKey = key;
         }
     }
 
@@ -66,5 +65,5 @@
     {
         public string   key;
         public Material value;
-    } 
+    }
 }
