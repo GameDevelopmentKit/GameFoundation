@@ -265,6 +265,8 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         public UniTask<GameObject> Spawn(string prefabName) { return this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity); }
 
         public async UniTask<T> Spawn<T>(string prefabName) where T : Component { return (await this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity)).GetComponent<T>(); }
+        
+        public bool IsSpawned(GameObject obj) { return this.spawnedObjToObjectPool.ContainsKey(obj); }
 
         #endregion
 
