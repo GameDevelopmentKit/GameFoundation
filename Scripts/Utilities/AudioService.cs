@@ -67,8 +67,7 @@
         private readonly ILogService       logService;
 
         private CompositeDisposable             compositeDisposable;
-        private Dictionary<string, AudioSource> loopingSoundNameToSources     = new();
-        private Dictionary<string, AudioSource> noneloopingSoundNameToSources = new();
+        private Dictionary<string, AudioSource> listSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
         [Preserve]
@@ -120,9 +119,10 @@
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
+
             if (isLoop)
             {
-                if (this.loopingSoundNameToSources.ContainsKey(name))
+                if (this.listSoundNameToSources.ContainsKey(name))
                 {
                     this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
 
@@ -131,22 +131,20 @@
 
                 audioSource.clip = audioClip;
                 audioSource.PlayLoopingSoundManaged(volumeScale, fadeSeconds);
-                this.loopingSoundNameToSources.Add(name, audioSource);
+                this.listSoundNameToSources.Add(name, audioSource);
             }
             else
             {
-                this.StopNoneLoopingSound(name);
-
                 audioSource.PlayOneShotSoundManaged(audioClip);
+                this.listSoundNameToSources.Add(name, audioSource);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
-                this.noneloopingSoundNameToSources.Add(name, audioSource);
             }
         }
 
         public async void StopAudioByName(string name)
         {
-            if (!this.loopingSoundNameToSources.TryGetValue(name, out var audioSource))
+            if (!this.listSoundNameToSources.TryGetValue(name, out var audioSource))
             {
                 this.logService.Warning($"You didn't play looping - {name}!!!!, do you want to stop it?");
 
@@ -155,16 +153,16 @@
 
             audioSource.Stop();
             audioSource.Recycle();
-            this.loopingSoundNameToSources.Remove(name);
+            this.listSoundNameToSources.Remove(name);
         }
 
         public async void StopAudioClip(AudioClip audioClip)
         {
-            foreach (var audioSource in this.loopingSoundNameToSources.Values.Where(audioSource => audioSource.clip == audioClip))
+            foreach (var audioSource in this.listSoundNameToSources.Values.Where(audioSource => audioSource.clip == audioClip))
             {
                 audioSource.Stop();
                 audioSource.Recycle();
-                this.loopingSoundNameToSources.Remove(audioClip.name);
+                this.listSoundNameToSources.Remove(audioClip.name);
             }
         }
 
@@ -185,20 +183,14 @@
             }
         }
 
-        public void StopNoneLoopingSound(string name)
-        {
-            if (!this.noneloopingSoundNameToSources.TryGetValue(name, out var source)) return;
-            source.Stop();
-        }
-
         public void StopAllSound()
         {
             SoundManager.StopAllLoopingSounds();
             SoundManager.StopAllNonLoopingSounds();
 
-            foreach (var audioSource in this.loopingSoundNameToSources.Values) audioSource.gameObject.Recycle();
+            foreach (var audioSource in this.listSoundNameToSources.Values) audioSource.gameObject.Recycle();
 
-            this.loopingSoundNameToSources.Clear();
+            this.listSoundNameToSources.Clear();
         }
 
         public void StopAll()
