@@ -81,6 +81,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 89041
   packageName: Odin Inspector and Serializer
-  packageVersion: 3.3.1.10
+  packageVersion: 3.3.1.11
   assetPath: Packages/com.gdk.core/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Serialization.dll
-  uploadId: 702916
+  uploadId: 712389
