@@ -67,7 +67,8 @@
         private readonly ILogService       logService;
 
         private CompositeDisposable             compositeDisposable;
-        private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
+        private Dictionary<string, AudioSource> loopingSoundNameToSources     = new();
+        private Dictionary<string, AudioSource> noneloopingSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
         [Preserve]
@@ -134,9 +135,12 @@
             }
             else
             {
+                this.StopNoneLoopingSound(name);
+
                 audioSource.PlayOneShotSoundManaged(audioClip);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
+                this.noneloopingSoundNameToSources.Add(name, audioSource);
             }
         }
 
@@ -179,6 +183,12 @@
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
+        }
+
+        public void StopNoneLoopingSound(string name)
+        {
+            if (!this.noneloopingSoundNameToSources.TryGetValue(name, out var source)) return;
+            source.Stop();
         }
 
         public void StopAllSound()
