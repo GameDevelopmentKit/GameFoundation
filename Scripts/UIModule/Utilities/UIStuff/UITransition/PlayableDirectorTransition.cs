@@ -14,14 +14,6 @@
 
         private UniTaskCompletionSource animationTask;
 
-        private void Awake()
-        {
-            foreach (var data in this.directorAnimations)
-            {
-                this.directorDict[data.animationType] = data.director;
-            }
-        }
-
         public override UniTask PlayAnimation(string animationType)
         {
             if (!this.directorDict.TryGetValue(animationType, out PlayableDirector director) || director == null || director.playableAsset == null)
@@ -36,10 +28,13 @@
 
         public override void SetupAnim()
         {
-            foreach (var director in this.directorDict.Values)
+            if (this.directorAnimations == null || this.directorAnimations.Count == 0)
+                return;
+            foreach (var data in this.directorAnimations)
             {
-                if (director != null)
-                    director.stopped += _ => this.OnCompleteAnim();
+                this.directorDict[data.animationType] = data.director;
+                if (data.director != null)
+                    data.director.stopped += _ => this.OnCompleteAnim();
             }
         }
     }

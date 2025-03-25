@@ -4,11 +4,11 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
-    using UnityEngine.ResourceManagement.AsyncOperations;
     using Zenject;
     using Object = UnityEngine.Object;
 
@@ -168,13 +168,14 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             return this.CreatePool(prefab, initialPoolSize, root);
         }
 
-        private Dictionary<string, AsyncOperationHandle<GameObject>> prefabNameToLoadingTask = new();
+        private Dictionary<string, Task<GameObject>> prefabNameToLoadingTask = new();
         public async UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
-            if (this.cachedLoadedPrefab.ContainsKey(prefabName)) return this.Spawn(this.cachedLoadedPrefab[prefabName], parent, position, rotation);
+            if (this.cachedLoadedPrefab.TryGetValue(prefabName, out var value)) return this.Spawn(value, parent, position, rotation);
+            
             if (!this.prefabNameToLoadingTask.ContainsKey(prefabName))
             {
-                this.prefabNameToLoadingTask.Add(prefabName, this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false));
+                this.prefabNameToLoadingTask.Add(prefabName, this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false).Task);
             }
 
             var prefab = await this.prefabNameToLoadingTask[prefabName];

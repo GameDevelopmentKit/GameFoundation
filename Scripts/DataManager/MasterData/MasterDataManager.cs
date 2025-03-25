@@ -75,7 +75,7 @@ namespace DataManager.MasterData
                     // return data after constructor is called
                     await UniTask.Yield();
                     initializeDataOnStart.InitializeData(data);
-                });
+                }).Forget();
             }
         }
 
