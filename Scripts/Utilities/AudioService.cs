@@ -17,6 +17,7 @@
     {
         void  PlaySound(string name, AudioSource sender);
         void  PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void  StopSound(string name);
         void  StopAllSound();
         void  StopAll();
         void  PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
@@ -120,6 +121,21 @@
             }
         }
 
+        public void StopSound(string name)
+        {
+            var audioSource = this.loopingSoundNameToSources.GetValueOrDefault(name);
+            SoundManager.StopOneShotSound(name);
+
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.StopLoopingSoundManaged();
+            this.loopingSoundNameToSources.Remove(name);
+            audioSource.gameObject.Recycle();
+        }
+
         public virtual void StopAllSound()
         {
             SoundManager.StopAllLoopingSounds();
@@ -215,9 +231,11 @@
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.UnPause();
         }
+
         public virtual bool IsPlayingPlayList()
         {
             if (this.MusicAudioSource == null) return false;
+
             return this.MusicAudioSource.isPlaying;
         }
 

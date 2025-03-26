@@ -708,6 +708,19 @@ namespace DigitalRuby.SoundManagerNamespace
             listSoundOneshot.RemoveAll(x => x == null);
         }
 
+        public static void StopOneShotSound(string clipname)
+        {
+            foreach (var s in listSoundOneshot)
+            {
+                if (s.clip.name.Equals(clipname))
+                {
+                    s.Stop();
+                }
+            }
+
+            listSoundOneshot.RemoveAll(x => x != null && x.clip.name.Equals(clipname));
+        }
+
         /// <summary>
         /// Pause all sounds
         /// </summary>
