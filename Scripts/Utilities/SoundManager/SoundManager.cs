@@ -712,13 +712,13 @@ namespace DigitalRuby.SoundManagerNamespace
         {
             foreach (var s in listSoundOneshot)
             {
-                if (s.clip.name.Equals(clipname))
+                if (s != null && s.clip != null && s.clip.name.Equals(clipname))
                 {
                     s.Stop();
                 }
             }
 
-            listSoundOneshot.RemoveAll(x => x != null && x.clip.name.Equals(clipname));
+            listSoundOneshot.RemoveAll(x => x != null && x.clip != null && x.clip.name.Equals(clipname));
         }
 
         /// <summary>
