@@ -334,12 +334,19 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 }
                 else
                 {
-                    this.previousActiveScreen.OnOverlap();
-
                     //With the current screen is popup, the previous screen will be hide after the blur background is shown
-                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen.Value)) this.previousActiveScreen.HideView();
+                    if (!this.CheckScreenIsPopup(this.CurrentActiveScreen.Value))
+                    {
+                        this.previousActiveScreen.HideView();
+                    }
+                    else
+                    {
+                        // if the previous screen is screen, it will be overlap
+                        this.previousActiveScreen.OnOverlap(true);
+                    }
                 }
             }
+            
         }
 
         private void OnCloseScreen(ScreenCloseSignal signal)
@@ -357,7 +364,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     var nextScreen = this.activeScreens.Last();
 
                     if (nextScreen.ScreenStatus == ScreenStatus.Opened)
+                    {
                         this.OnShowScreen(new() { ScreenPresenter = nextScreen });
+                        nextScreen.OnOverlap(false);
+                    }
                     else
                         nextScreen.OpenViewAsync();
                 }

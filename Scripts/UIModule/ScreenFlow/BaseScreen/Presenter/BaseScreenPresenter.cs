@@ -97,9 +97,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.Dispose();
             this.View.DestroySelf();
         }
-
-        public virtual void OnOverlap()
+        
+        public void OnOverlap(bool isOverlap)
         {
+            this.Logger.Log($"OnOverLap: {isOverlap} - {this.ScreenId}");
         }
 
         public int ViewSiblingIndex { get => this.View.RectTransform.GetSiblingIndex(); set => this.View.RectTransform.SetSiblingIndex(value); }

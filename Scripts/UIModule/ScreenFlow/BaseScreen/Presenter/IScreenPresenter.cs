@@ -35,7 +35,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         /// <summary>
         /// Called when the screen is overlap by another screen
         /// </summary>
-        public void OnOverlap();
+        public void OnOverlap(bool isOverlap);
 
         public int ViewSiblingIndex { get; set; }
     }
