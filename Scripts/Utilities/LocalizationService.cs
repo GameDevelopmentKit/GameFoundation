@@ -1,9 +1,12 @@
 namespace GameFoundation.Scripts.Utilities
 {
+
     using System;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
+    #if LOCALIZATION
     using I2.Loc;
+    #endif
     using TMPro;
     using UnityEngine;
 
