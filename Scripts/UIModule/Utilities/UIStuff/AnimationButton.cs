@@ -45,16 +45,16 @@
         private void AnimatePressDown()
         {
             if (this.IgnoreAnimate()) return;
-            this.SetScaleTween(this.minSize, this.duration);
+            this.SetScaleTween(this.minSize * this.initialScale, this.duration);
         }
 
         private void AnimatePopup()
         {
             if (this.IgnoreAnimate()) return;
             DOTween.Sequence()
-                .Append(this.SetScaleTween(this.maxSize, this.duration))
-                .Append(this.SetScaleTween(this.minSize, this.duration))
-                .Append(this.SetScaleTween(1, this.duration))
+                .Append(this.SetScaleTween(this.maxSize * this.initialScale, this.duration))
+                .Append(this.SetScaleTween(this.minSize * this.initialScale, this.duration))
+                .Append(this.SetScaleTween(this.initialScale, this.duration))
                 .SetUpdate(true);
         }
 
@@ -63,7 +63,7 @@
             return this.ignoreAnimate || !this.button.interactable;
         }
 
-        private Tween SetScaleTween(float endValue, float animDuration)
+        private Tween SetScaleTween(Vector3 endValue, float animDuration)
         {
             return this.transform.transform.DOScale(endValue, animDuration).SetEase(Ease.Linear).SetUpdate(true);
         }
