@@ -1,6 +1,7 @@
 namespace UIModule.Utilities.UIStuff
 {
     using UnityEngine;
+    using UnityEngine.UI;
 
     /// <summary>
     ///     Safe area implementation for notched mobile devices. Usage:
@@ -17,13 +18,16 @@ namespace UIModule.Utilities.UIStuff
         [SerializeField] private bool conformX = true; // Conform to screen safe area on X-axis (default true, disable to ignore)
 
         [SerializeField] private bool conformY = true; // Conform to screen safe area on Y-axis (default true, disable to ignore)
+        [SerializeField] private bool stretch  = true; // Stretch to fill the safe area (default true, disable to ignore)
 
         private Rect          lastSafeArea = new(0, 0, 0, 0);
         private RectTransform panel;
+        private CanvasScaler  canvasScaler;
 
         private void Awake()
         {
-            this.panel = this.GetComponent<RectTransform>();
+            this.panel        = this.GetComponent<RectTransform>();
+            this.canvasScaler = this.GetComponentInParent<CanvasScaler>();
 
             if (this.panel == null)
             {
@@ -73,12 +77,24 @@ namespace UIModule.Utilities.UIStuff
             // Convert safe area rectangle from absolute pixels to normalised anchor coordinates
             var anchorMin = r.position;
             var anchorMax = r.position + r.size;
-            anchorMin.x          /= Screen.width;
-            anchorMin.y          /= Screen.height;
-            anchorMax.x          /= Screen.width;
-            anchorMax.y          /= Screen.height;
-            this.panel.anchorMin =  anchorMin;
-            this.panel.anchorMax =  anchorMax;
+            anchorMin.x /= Screen.width;
+            anchorMin.y /= Screen.height;
+            anchorMax.x /= Screen.width;
+            anchorMax.y /= Screen.height;
+            if (this.stretch)
+            {
+                this.panel.anchorMin = anchorMin;
+                this.panel.anchorMax = anchorMax;
+                this.panel.sizeDelta = Vector2.zero;
+            }
+            else
+            {
+                this.panel.anchorMin = new(0.5f, 0.5f);
+                this.panel.anchorMax = new(0.5f, 0.5f);
+                this.panel.sizeDelta = new(
+                    this.canvasScaler.referenceResolution.x * (anchorMax.x - anchorMin.x),
+                    this.canvasScaler.referenceResolution.y * (anchorMax.y - anchorMin.y));
+            }
 
             //Debug.LogFormat("New safe area applied to {0}: x={1}, y={2}, w={3}, h={4} on full extents w={5}, h={6}", name, r.x, r.y, r.width, r.height, Screen.width, Screen.height);
         }
