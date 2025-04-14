@@ -7,7 +7,6 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     {
         public GameObject       prefab;
         public List<GameObject> pooledObjects  = new List<GameObject>();
-        public List<GameObject> spawnedObjects = new List<GameObject>();
 
         private bool isDestroying;
         public GameObject Spawn(Transform parent, Vector3 position, Quaternion rotation)

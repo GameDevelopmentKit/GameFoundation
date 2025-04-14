@@ -15,15 +15,12 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     public sealed class ObjectPoolManager
     {
         #region inject
-
         private readonly IGameAssets gameAssets;
         private readonly DiContainer diContainer;
-
         #endregion
-        
-        public static    ObjectPoolManager Instance { get; private set; }
 
-        private readonly List<GameObject>                   tempList               = new List<GameObject>();
+        public static ObjectPoolManager Instance { get; private set; }
+
         private readonly Dictionary<GameObject, ObjectPool> prefabToObjectPool     = new Dictionary<GameObject, ObjectPool>();
         private readonly Dictionary<GameObject, ObjectPool> spawnedObjToObjectPool = new Dictionary<GameObject, ObjectPool>();
 
@@ -39,7 +36,6 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         }
 
         #region Pool
-
         public ObjectPool CreatePool<T>(T prefab, int initialPoolSize, GameObject root) where T : Component { return this.CreatePool(prefab.gameObject, initialPoolSize, root); }
 
         public ObjectPool CreatePool(GameObject prefab, int initialPoolSize, GameObject root)
@@ -49,7 +45,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool)) return pool;
 
             pool = new GameObject($"[Pool] {prefab.name}", typeof(ObjectPool)).GetComponent<ObjectPool>();
-            
+
             pool.transform.SetParent(this.ChooseRoot(root).transform, false);
             this.prefabToObjectPool.Add(prefab, pool);
 
@@ -87,7 +83,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public int CountSpawned<T>(T prefab) where T : Component => this.CountSpawned(prefab.gameObject);
 
-        public int CountSpawned(GameObject prefab) => this.prefabToObjectPool.TryGetValue(prefab, out var pool) ? pool.spawnedObjects.Count : 0;
+        public int CountSpawned(GameObject prefab) => this.prefabToObjectPool.TryGetValue(prefab, out var pool)
+            ? this.spawnedObjToObjectPool.Count(t => t.Value == pool)
+            : 0;
 
         public int CountAllPooled()
         {
@@ -131,7 +129,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (!appendList)
                 list.Clear();
             if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
-                list.AddRange(pool.spawnedObjects);
+                list.AddRange(spawnedObjToObjectPool.Where(t => t.Value == pool).Select(t => t.Key));
             return list;
         }
 
@@ -143,18 +141,14 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 list.Clear();
             if (this.prefabToObjectPool.TryGetValue(prefab.gameObject, out var pool))
             {
-                var spawnedObjects = pool.spawnedObjects;
-                for (int i = 0; i < spawnedObjects.Count; ++i)
-                    list.Add(spawnedObjects[i].GetComponent<T>());
+                list.AddRange(spawnedObjToObjectPool.Where(t => t.Value == pool).Select(t => t.Key.GetComponent<T>()));
             }
 
             return list;
         }
-
         #endregion
 
         #region Load prefab in bundle
-
         public async UniTask<ObjectPool> CreatePool(string prefabName, int initialPoolSize, GameObject root)
         {
             var prefab = await this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false);
@@ -172,7 +166,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         public async UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
         {
             if (this.cachedLoadedPrefab.TryGetValue(prefabName, out var value)) return this.Spawn(value, parent, position, rotation);
-            
+
             if (!this.prefabNameToLoadingTask.ContainsKey(prefabName))
             {
                 this.prefabNameToLoadingTask.Add(prefabName, this.gameAssets.LoadAssetAsync<GameObject>(prefabName, false).Task);
@@ -189,11 +183,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
             return this.Spawn(prefab, parent, position, rotation);
         }
-
         #endregion
 
         #region Spawn
-
         public GameObject Spawn(GameObject prefab, Transform parent, Vector3 position, Quaternion rotation)
         {
             if (prefab == null)
@@ -242,14 +234,11 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         public UniTask<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation) => this.Spawn(prefabName, null, position, rotation);
 
         public UniTask<GameObject> Spawn(string prefabName) => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
-        
+
         public async UniTask<T> Spawn<T>(string prefabName) where T : Component => (await this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity)).GetComponent<T>();
-
-
         #endregion
 
         #region Recycle
-
         public void Recycle(GameObject obj, Transform parent)
         {
             if (this.spawnedObjToObjectPool.TryGetValue(obj, out var pool))
@@ -260,7 +249,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             }
             else
             {
-                throw new Exception($"Can't recycle object {obj.Path()}, maybe you already recycled it!");
+                Debug.LogError(obj 
+                    ? $"Can't recycle object {obj.Path()}, maybe you already recycled it!" 
+                    : "Object is null, it's already destroyed, can't recycle it!");
             }
         }
 
@@ -277,29 +268,26 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public void RecycleAll(GameObject prefab)
         {
-            if (this.prefabToObjectPool.TryGetValue(prefab, out var pool) && pool.spawnedObjects.Count > 0)
+            if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
             {
-                this.tempList.AddRange(pool.spawnedObjects);
-                for (int i = 0; i < this.tempList.Count; ++i)
-                    this.Recycle(this.tempList[i]);
-                this.tempList.Clear();
+                foreach (var t in this.spawnedObjToObjectPool.Where(t => t.Value == pool).ToList())
+                    this.Recycle(t.Key);
             }
         }
 
         public void RecycleAll()
         {
-            this.tempList.AddRange(this.spawnedObjToObjectPool.Keys);
-            for (int i = 0; i < this.tempList.Count; ++i)
-                this.Recycle(this.tempList[i]);
-            this.tempList.Clear();
+            foreach (var pool in this.prefabToObjectPool.Values)
+            {
+                foreach (var t in this.spawnedObjToObjectPool.Where(t => t.Value == pool).ToList())
+                    this.Recycle(t.Key);
+            }
         }
 
         public void RecycleAll<T>(T prefab) where T : Component { this.RecycleAll(prefab.gameObject); }
-
         #endregion
 
         #region Destroy pool
-
         public void CleanUpPooled(GameObject prefab)
         {
             if (prefab != null && this.prefabToObjectPool.TryGetValue(prefab, out var pool))
@@ -334,7 +322,6 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 Object.Destroy(pool.gameObject);
             }
         }
-
         #endregion
     }
 }
