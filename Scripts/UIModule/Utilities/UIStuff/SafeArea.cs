@@ -89,11 +89,22 @@ namespace UIModule.Utilities.UIStuff
             }
             else
             {
-                this.panel.anchorMin = new(0.5f, 0.5f);
-                this.panel.anchorMax = new(0.5f, 0.5f);
-                this.panel.sizeDelta = new(
-                    this.canvasScaler.referenceResolution.x * (anchorMax.x - anchorMin.x),
-                    this.canvasScaler.referenceResolution.y * (anchorMax.y - anchorMin.y));
+                // Assuming that the Screen match mode is Expand
+                this.panel.anchorMin = new((anchorMax.x + anchorMin.x) / 2, (anchorMax.y + anchorMin.y) / 2);
+                this.panel.anchorMax = new((anchorMax.x + anchorMin.x) / 2, (anchorMax.y + anchorMin.y) / 2);
+                var widthRatio          = anchorMax.x - anchorMin.x;
+                var heightRatio         = anchorMax.y - anchorMin.y;
+                var rectTransformSize   = this.canvasScaler.GetComponent<RectTransform>().rect.size;
+                var referenceResolution = this.canvasScaler.referenceResolution;
+
+                // all the screens smaller than the reference resolution are also set here
+                this.panel.sizeDelta = referenceResolution * new Vector2(widthRatio, heightRatio);
+
+                // TODO: calculate dynamically. this is just for portrait reference resolution
+                if (rectTransformSize.y > this.panel.sizeDelta.y)
+                {
+                    this.panel.sizeDelta = new(this.panel.sizeDelta.x, rectTransformSize.y * heightRatio);
+                }
             }
 
             //Debug.LogFormat("New safe area applied to {0}: x={1}, y={2}, w={3}, h={4} on full extents w={5}, h={6}", name, r.x, r.y, r.width, r.height, Screen.width, Screen.height);
