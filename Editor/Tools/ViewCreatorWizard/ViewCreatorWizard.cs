@@ -1,5 +1,4 @@
-namespace GameFoundation.Editor.Tools.ViewCreatorWizard
-{
+
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -392,4 +391,3 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
 
         public TaskCreateView() { this.IsTaskComplete = true; }
     }
-}

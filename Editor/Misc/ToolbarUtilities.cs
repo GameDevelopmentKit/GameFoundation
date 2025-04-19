@@ -1,5 +1,4 @@
-﻿namespace GDK.Editor.Misc
-{
+﻿
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -130,4 +129,3 @@
             }
         }
     }
-}

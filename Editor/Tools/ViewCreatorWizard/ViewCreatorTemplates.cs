@@ -1,9 +1,7 @@
-namespace GameFoundation.Editor.Tools.ViewCreatorWizard
+public partial class ViewCreatorWizard
 {
-    public partial class ViewCreatorWizard
-    {
-        private const string ITEM_VIEW_TEMPLATE =
-            @"namespace X_NAME_SPACE
+    private const string ITEM_VIEW_TEMPLATE =
+        @"namespace X_NAME_SPACE
 {
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.MVP;
@@ -23,8 +21,8 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
     }
 }";
 
-        private const string POPUP_VIEW_TEMPLATE =
-            @"namespace X_NAME_SPACE
+    private const string POPUP_VIEW_TEMPLATE =
+        @"namespace X_NAME_SPACE
 {
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
@@ -47,8 +45,8 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
     }
 }";
 
-        private const string POPUP_VIEW_NON_MODEL_TEMPLATE =
-            @"namespace X_NAME_SPACE
+    private const string POPUP_VIEW_NON_MODEL_TEMPLATE =
+        @"namespace X_NAME_SPACE
 {
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
@@ -66,8 +64,8 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
     }
 }";
 
-        private const string SCREEN_VIEW_TEMPLATE =
-            @"namespace X_NAME_SPACE
+    private const string SCREEN_VIEW_TEMPLATE =
+        @"namespace X_NAME_SPACE
 {
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
@@ -90,8 +88,8 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
     }
 }";
 
-        private const string SCREEN_VIEW_NON_MODEL_TEMPLATE =
-            @"namespace X_NAME_SPACE
+    private const string SCREEN_VIEW_NON_MODEL_TEMPLATE =
+        @"namespace X_NAME_SPACE
 {
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
@@ -108,5 +106,4 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         public override void BindData() { }
     }
 }";
-    }
 }
