@@ -74,15 +74,6 @@ namespace GameFoundation.Scripts.AssetLibrary
         AsyncOperationHandle<T> LoadAssetAsync<T>(AssetReference assetReference, bool isAutoUnload = true);
 
         /// <summary>
-        /// Load a single asset synchronously
-        /// Warning:  a method called WaitForCompletion() that force the async operation to complete and return the Result of the operation. May have performance implications on runtime
-        /// </summary>
-        /// <param name="key">The key of the location of the asset.</param>
-        /// <param name="isAutoUnload">If true, asset will be automatically released when the current scene was unloaded</param>
-        /// <typeparam name="T">The type of the asset.</typeparam>
-        T ForceLoadAsset<T>(object key, bool isAutoUnload = true);
-
-        /// <summary>
         /// Release asset and its associated resources by key
         /// </summary>
         /// <param name="key">The key of the location of the asset to release.</param>
@@ -365,19 +356,6 @@ namespace GameFoundation.Scripts.AssetLibrary
         {
             this.CheckRuntimeKey(assetReference);
             return this.LoadAssetAsync<T>(assetReference.RuntimeKey, isAutoUnload);
-        }
-
-        /// <summary>
-        /// Load a single asset synchronously
-        /// Warning:  a method called WaitForCompletion() that force the async operation to complete and return the Result of the operation. May have performance implications on runtime
-        /// </summary>
-        /// <param name="key">The key of the location of the asset.</param>
-        /// <param name="isAutoUnload">If true, asset will be automatically released when the current scene was unloaded</param>
-        /// <typeparam name="T">The type of the asset.</typeparam>
-        public T ForceLoadAsset<T>(object key, bool isAutoUnload = true)
-        {
-            var op = this.LoadAssetAsync<T>(key, isAutoUnload);
-            return op.IsDone ? op.Result : op.WaitForCompletion();
         }
 
         /// <summary>

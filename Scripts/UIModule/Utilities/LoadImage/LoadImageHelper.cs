@@ -57,6 +57,12 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
             return await this.gameAssets.LoadAssetAsync<Sprite>(key);
         }
+        
+        public async UniTaskVoid LoadLocalSpriteToUIImage(Image image, object key)
+        {
+            var sprite = await this.LoadLocalSprite(key);
+            image.sprite = sprite;
+        }
 
         public async UniTask LoadSpriteFromUrl(Image imageComponent, string url, Action<Image> onLoadingIconLoaded = null)
         {
