@@ -60,6 +60,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         
         public async UniTaskVoid LoadLocalSpriteToUIImage(Image image, object key)
         {
+            //TODO Implement loading icon here if needed
             var sprite = await this.LoadLocalSprite(key);
             image.sprite = sprite;
         }
