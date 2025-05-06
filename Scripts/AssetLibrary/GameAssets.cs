@@ -57,8 +57,11 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// <returns></returns>
         List<AsyncOperationHandle<T>> PreloadAsync<T>(string targetScene = "", params object[] keys);
 
-        AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label);
+        UniTask<List<AsyncOperationHandle<T>>> LoadAssetsByLabelAsync<T>(string label);
+        
+        UniTask<List<AsyncOperationHandle<T>>> PreLoadAssetsByLabelAsync<T>(string label,string targetScene = "");
 
+        
         /// <summary>
         /// Load a single asset by key
         /// </summary>
@@ -331,10 +334,18 @@ namespace GameFoundation.Scripts.AssetLibrary
             return keys.Select(o => this.LoadAssetAsync<T>(o, true, targetScene)).ToList();
         }
 
-        public AsyncOperationHandle<List<AsyncOperationHandle<Object>>> LoadAssetsByLabelAsync(string label)
+        public async UniTask<List<AsyncOperationHandle<T>>> LoadAssetsByLabelAsync<T>(string label)
         {
-            var handle = Addressables.ResourceManager.StartOperation(new LoadAssetsByLabelOperation(this.loadedAssets, this.loadingAssets, label), default);
-            return handle;
+            var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
+            var keys            = (await locationsHandle).Select(resourceLocation => resourceLocation.PrimaryKey).ToHashSet();
+            return keys.Select(key => this.LoadAssetAsync<T>(key)).ToList();
+        }
+
+        public async UniTask<List<AsyncOperationHandle<T>>> PreLoadAssetsByLabelAsync<T>(string label, string targetScene = "")
+        {
+            var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
+            var keys       = (await locationsHandle).Select(resourceLocation => resourceLocation.PrimaryKey).ToHashSet().ToArray();
+            return this.PreloadAsync<T>(targetScene, keys);
         }
 
         /// <summary>
