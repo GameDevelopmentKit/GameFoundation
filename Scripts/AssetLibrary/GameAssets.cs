@@ -337,14 +337,14 @@ namespace GameFoundation.Scripts.AssetLibrary
         public async UniTask<List<AsyncOperationHandle<T>>> LoadAssetsByLabelAsync<T>(string label)
         {
             var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
-            var keys            = (await locationsHandle).Select(resourceLocation => resourceLocation.PrimaryKey).ToHashSet();
-            return keys.Select(key => this.LoadAssetAsync<T>(key)).ToList();
+            var keys            = (await locationsHandle).Select(resourceLocation => resourceLocation.PrimaryKey).Distinct().ToArray();
+            return keys.Length == 0 ? new() :keys.Select(key => this.LoadAssetAsync<T>(key)).ToList();
         }
 
         public async UniTask<List<AsyncOperationHandle<T>>> PreLoadAssetsByLabelAsync<T>(string label, string targetScene = "")
         {
             var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
-            var keys       = (await locationsHandle).Select(resourceLocation => resourceLocation.PrimaryKey).ToHashSet().ToArray();
+            var keys       = (await locationsHandle).Select(resourceLocation => resourceLocation.PrimaryKey).Distinct().ToArray();
             return keys.Length == 0 ? new() : this.PreloadAsync<T>(targetScene, keys);
         }
 
