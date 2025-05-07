@@ -345,7 +345,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         {
             var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
             var keys       = (await locationsHandle).Select(resourceLocation => resourceLocation.PrimaryKey).ToHashSet().ToArray();
-            return this.PreloadAsync<T>(targetScene, keys);
+            return keys.Length == 0 ? new() : this.PreloadAsync<T>(targetScene, keys);
         }
 
         /// <summary>
