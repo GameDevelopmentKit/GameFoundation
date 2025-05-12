@@ -14,7 +14,7 @@ namespace UIModule.Utilities.UIStuff
 
     public abstract class TransitionAnimationUnit : MonoBehaviour, ITransitionAnimationUnit
     {
-        public virtual UniTask PlayAnimation(string animType) {return UniTask.CompletedTask;}
+        public virtual UniTask PlayAnimation(string animType) { return UniTask.CompletedTask; }
 
         public virtual void OnCompleteAnim() { }
 
@@ -23,21 +23,25 @@ namespace UIModule.Utilities.UIStuff
 
     public class UIScreenTransition : MonoBehaviour
     {
-        [SerializeField] public TransitionAnimationUnit transitionAnimationUnit;
+        [SerializeField] private TransitionAnimationUnit transitionAnimationUnit;
 
         [Tooltip("If true, disable EventSystem while animation is running.")] [SerializeField]
         private bool lockInput = true;
+
         [SerializeField] private bool waitTransition = true;
 
         private EventSystem             eventSystem;
         private UniTaskCompletionSource animationTask;
 
+        private ITransitionAnimationUnit animationUnit;
+
         private void Awake()
         {
             this.eventSystem = EventSystem.current;
 
-            if (this.transitionAnimationUnit == null) return;
-            this.transitionAnimationUnit.SetupAnim();
+            this.animationUnit = this.transitionAnimationUnit != null ? this.transitionAnimationUnit.GetComponent<ITransitionAnimationUnit>() : this.GetComponentInChildren<ITransitionAnimationUnit>();
+
+            this.animationUnit?.SetupAnim();
         }
 
         public UniTask PlayIntroAnim() => this.PlayAnim("Intro");
@@ -47,7 +51,7 @@ namespace UIModule.Utilities.UIStuff
         [Button]
         private UniTask PlayAnim(string animType)
         {
-            if (this.transitionAnimationUnit == null) return UniTask.CompletedTask;
+            if (this.animationUnit == null) return UniTask.CompletedTask;
 
             if (this.animationTask?.Task.Status == UniTaskStatus.Pending)
                 return UniTask.CompletedTask;
@@ -55,14 +59,14 @@ namespace UIModule.Utilities.UIStuff
             this.animationTask = new UniTaskCompletionSource();
             this.SetLockInput(true);
 
-            var task = this.transitionAnimationUnit.PlayAnimation(animType);
+            var task = this.animationUnit.PlayAnimation(animType);
 
             task.ContinueWith(() =>
             {
                 this.animationTask.TrySetResult();
                 this.SetLockInput(false);
             });
-            
+
             return !this.waitTransition ? UniTask.CompletedTask : this.animationTask.Task;
         }
 
