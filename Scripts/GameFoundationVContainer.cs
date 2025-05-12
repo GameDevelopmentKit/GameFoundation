@@ -42,8 +42,6 @@ namespace GameFoundation.Scripts
             builder.Register<LogService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<HandleLocalUserDataServices>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LoadImageHelper>(Lifetime.Singleton);
-            builder.RegisterComponentOnNewGameObject<Fps>(Lifetime.Singleton).UnderTransform(rootTransform);
-            builder.AutoResolve<Fps>();
 
             builder.DeclareSignal<UserDataLoadedSignal>();
         }
