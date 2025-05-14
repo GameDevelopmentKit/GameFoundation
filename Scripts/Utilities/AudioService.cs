@@ -2,7 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Cysharp.Threading.Tasks;
+    using DG.Tweening;
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
@@ -17,25 +19,25 @@
 
     public interface IAudioService
     {
-        void  PlaySound(string name, AudioSource sender);
-        void  PlaySound(string name, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
-        AudioSource GetLoopingSound(string name);
-        void StopLoopingSound(string name);
-        void  StopAllSound();
-        void  StopAll();
-        void  PlayPlayList(string    musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void  PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void  StopPlayList();
-        void  SetPlayListTime(float time);
-        float GetPlayListTime();
-        void  SetPlayListPitch(float pitch);
-        void  SetPlayListLoop(bool   isLoop);
-        void  PausePlayList();
-        void  ResumePlayList();
-        bool  IsPlayingPlayList();
-        void  StopAllPlayList();
-        void  PauseEverything();
-        void  ResumeEverything();
+        void        PlaySound(string        name, AudioSource sender);
+        void        PlaySound(string        name, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        AudioSource GetLoopingSound(string  name);
+        void        StopLoopingSound(string name);
+        void        StopAllSound();
+        void        StopAll();
+        void        PlayPlayList(string    musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, float fadeProgressThreshold = 0f, bool persist = false);
+        void        PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, float fadeProgressThreshold = 0f, bool persist = false);
+        void        StopPlayList(float     fadeSeconds = 1f);
+        void        SetPlayListTime(float  time);
+        float       GetPlayListTime();
+        void        SetPlayListPitch(float pitch);
+        void        SetPlayListLoop(bool   isLoop);
+        void        PausePlayList();
+        void        ResumePlayList();
+        bool        IsPlayingPlayList();
+        void        StopAllPlayList();
+        void        PauseEverything();
+        void        ResumeEverything();
     }
 
     public class AudioService : IAudioService, IInitializable, IDisposable
@@ -155,36 +157,45 @@
         /// <summary>
         /// Play a music track and loop it until stopped, using the global music volume as a modifier
         /// </summary>
-        /// <param name="source">Audio source to play</param>
+        /// <param name="audioClip">Audio clip to play</param>
+        /// <param name="random">Whether to play a random track</param>
         /// <param name="volumeScale">Additional volume scale</param>
         /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
+        /// <param name="fadeProgressThreshold">The percent to fade in and out</param>
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
-        public virtual async void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        
+        public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, float fadeProgressThreshold = 0f, bool persist = false)
         {
-            this.StopPlayList();
+            this.StopPlayList(fadeSeconds);
+            
+            this.MusicAudioSource      = await this.GetAudioSource();
+            this.MusicAudioSource.clip = audioClip;
+            
+            var delayTime = fadeSeconds * Mathf.Clamp01(fadeProgressThreshold / 100f);
+            if (delayTime > 0f) await UniTask.Delay(TimeSpan.FromSeconds(delayTime));
 
+            this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
+        }
+        public virtual async void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, float fadeProgressThreshold = 0f, bool persist = false)
+        {
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
-            this.MusicAudioSource      = await this.GetAudioSource();
-            this.MusicAudioSource.clip = audioClip;
-            this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
+            this.PlayPlayList(audioClip, random, volumeScale, fadeSeconds, fadeProgressThreshold, persist);
         }
 
-        public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        /// <summary>
+        /// Stop play list music
+        /// </summary>
+        /// <param name="fadeSeconds">Fade time to turn off</param>
+        public void StopPlayList(float fadeSeconds = 1f)
         {
-            this.StopPlayList();
-
-            this.MusicAudioSource      = await this.GetAudioSource();
-            this.MusicAudioSource.clip = audioClip;
-            this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
-        }
-
-        public void StopPlayList()
-        {
-            if (this.MusicAudioSource == null) return;
-            this.MusicAudioSource.StopLoopingMusicManaged();
-            this.MusicAudioSource.clip = null;
-            this.MusicAudioSource.Recycle();
-            this.MusicAudioSource = null;
+            var audioSource = this.MusicAudioSource;
+            if (audioSource == null) return;
+            audioSource.DOFade(0f, fadeSeconds).OnComplete(() =>
+                {
+                    audioSource.StopLoopingMusicManaged();
+                    audioSource.clip = null;
+                    audioSource.Recycle();
+                });
         }
 
         public void SetPlayListTime(float time)

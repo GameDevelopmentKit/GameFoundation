@@ -16,7 +16,8 @@
     "Unity.Addressables",
     "Zenject",
     "VContainer",
-    "BuildScript.Runtime"
+    "BuildScript.Runtime",
+    "DOTween.Modules"
   ],
   "versionDefines": [
     {
