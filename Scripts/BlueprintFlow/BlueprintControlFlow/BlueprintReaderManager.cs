@@ -37,27 +37,29 @@ namespace BlueprintFlow.BlueprintControlFlow
         public BlueprintReaderManager(ISignalBus signalBus, ILogService logService, DiContainer diContainer, IHandleUserDataServices handleUserDataServices, BlueprintConfig blueprintConfig,
             FetchBlueprintInfo fetchBlueprintInfo, BlueprintDownloader blueprintDownloader)
         {
-            this.signalBus               = signalBus;
-            this.logService              = logService;
-            this.diContainer             = diContainer;
+            this.signalBus              = signalBus;
+            this.logService             = logService;
+            this.diContainer            = diContainer;
             this.handleUserDataServices = handleUserDataServices;
-            this.blueprintConfig         = blueprintConfig;
-            this.fetchBlueprintInfo      = fetchBlueprintInfo;
-            this.blueprintDownloader     = blueprintDownloader;
+            this.blueprintConfig        = blueprintConfig;
+            this.fetchBlueprintInfo     = fetchBlueprintInfo;
+            this.blueprintDownloader    = blueprintDownloader;
         }
 
         public virtual async UniTask LoadBlueprint()
         {
             this.logService.Log("[BlueprintReader] Start loading");
             Dictionary<string, string> listRawBlueprints = null;
+
             if (this.blueprintConfig.IsResourceMode)
             {
                 listRawBlueprints = new Dictionary<string, string>();
-                this.signalBus.Fire(new LoadBlueprintDataProgressSignal {Percent = 1f});
+                this.signalBus.Fire(new LoadBlueprintDataProgressSignal { Percent = 1f });
             }
             else
             {
                 var newBlueprintInfo = await this.fetchBlueprintInfo.GetBlueprintInfo(this.blueprintConfig.FetchBlueprintUri);
+
                 if (!await this.IsCachedBlueprintUpToDate(newBlueprintInfo.Url, newBlueprintInfo.Hash))
                 {
                     await this.DownloadBlueprint(newBlueprintInfo.Url);
@@ -78,6 +80,8 @@ namespace BlueprintFlow.BlueprintControlFlow
 #endif
                 }
             }
+
+            await this.LoadRawBlueprint(listRawBlueprints);
 
             if (listRawBlueprints == null)
             {
@@ -100,16 +104,18 @@ namespace BlueprintFlow.BlueprintControlFlow
             this.signalBus.Fire<LoadBlueprintDataSucceedSignal>();
         }
 
+        protected virtual UniTask LoadRawBlueprint(Dictionary<string, string> input) { return UniTask.CompletedTask; }
+
         protected virtual async UniTask<bool> IsCachedBlueprintUpToDate(string url, string hash) =>
             (await this.handleUserDataServices.Load<BlueprintInfoData>()).Url == url &&
             MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
-
 
         //Download new blueprints version from remote
         private async UniTask DownloadBlueprint(string blueprintDownloadLink)
         {
             var progressSignal = new LoadBlueprintDataProgressSignal { Percent = 0f };
             this.signalBus.Fire(progressSignal); //Inform that we just starting dowloading blueprint
+
             await this.blueprintDownloader.DownloadBlueprintAsync(blueprintDownloadLink, this.blueprintConfig.BlueprintZipFilepath, (downloaded, length) =>
             {
                 progressSignal.Percent = downloaded / (float)length * 100f;
@@ -120,16 +126,19 @@ namespace BlueprintFlow.BlueprintControlFlow
         protected virtual async UniTask<Dictionary<string, string>> UnzipBlueprint()
         {
             var result = new Dictionary<string, string>();
+
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
                 return result;
             }
 
             using var archive = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath);
+
             foreach (var entry in archive.Entries)
             {
                 if (!entry.FullName.EndsWith(this.blueprintConfig.BlueprintFileType, StringComparison.OrdinalIgnoreCase))
                     continue;
+
                 using var streamReader   = new StreamReader(entry.Open());
                 var       readToEndAsync = await streamReader.ReadToEndAsync();
                 result.Add(entry.Name, readToEndAsync);
@@ -148,12 +157,14 @@ namespace BlueprintFlow.BlueprintControlFlow
 
             var listReadTask    = new List<UniTask>();
             var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>();
-            this.readBlueprintProgressSignal.MaxBlueprint = allDerivedTypes.Count();
+            this.readBlueprintProgressSignal.MaxBlueprint    = allDerivedTypes.Count();
             this.readBlueprintProgressSignal.CurrentProgress = 0;
             this.signalBus.Fire(this.readBlueprintProgressSignal); // Inform that we just start reading blueprint
+
             foreach (var blueprintType in allDerivedTypes)
             {
                 var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);
+
                 if (blueprintInstance != null)
                 {
 #if !UNITY_WEBGL
@@ -174,50 +185,22 @@ namespace BlueprintFlow.BlueprintControlFlow
         private async UniTask OpenReadBlueprint(IGenericBlueprintReader blueprintReader, Dictionary<string, string> listRawBlueprints)
         {
             var bpAttribute = blueprintReader.GetCustomAttribute<BlueprintReaderAttribute>();
+
             if (bpAttribute != null)
             {
-                if (bpAttribute.BlueprintScope == BlueprintScope.Server) return;
+                if (bpAttribute.BlueprintScope is BlueprintScope.Server or BlueprintScope.Ignore) return;
 
                 // Try to load a raw blueprint file from local or resource folder
                 string rawCsv;
-                if (this.blueprintConfig.IsResourceMode || bpAttribute.IsLoadFromResource)
-                {
-                    rawCsv = await LoadRawCsvFromResourceFolder();
-                }
-                else
-                {
-                    if (!listRawBlueprints.TryGetValue(bpAttribute.DataPath + this.blueprintConfig.BlueprintFileType, out rawCsv))
-                    {
-                        this.logService.Warning($"[BlueprintReader] Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
-                        rawCsv = await LoadRawCsvFromResourceFolder();
-                    }
-                }
 
-                async UniTask<string> LoadRawCsvFromResourceFolder()
-                {
-                    await UniTask.SwitchToMainThread();
-                    var result = string.Empty;
-                    try
-                    {
-                        result = ((TextAsset)await Resources.LoadAsync<TextAsset>(this.blueprintConfig.ResourceBlueprintPath + bpAttribute.DataPath)).text;
-                    }
-                    catch (Exception e)
-                    {
-                        this.logService.Error($"Load {bpAttribute.DataPath} blueprint error!!!");
-                        this.logService.Exception(e);
-                    }
-
-#if !UNITY_WEBGL
-                    await UniTask.SwitchToThreadPool();
-#endif
-                    return result;
-                }
+                rawCsv = await this.CheckToLoadCsv(listRawBlueprints, bpAttribute, this.blueprintConfig.IsResourceMode, bpAttribute.IsLoadFromResource);
 
                 // Deserialize the raw blueprint to the blueprint reader instance
-                
+
                 if (!string.IsNullOrEmpty(rawCsv))
                 {
                     await blueprintReader.DeserializeFromCsv(rawCsv);
+
                     lock (this.readBlueprintProgressSignal)
                     {
                         this.readBlueprintProgressSignal.CurrentProgress++;
@@ -231,6 +214,47 @@ namespace BlueprintFlow.BlueprintControlFlow
             {
                 this.logService.Warning($"[BlueprintReader] Class {blueprintReader} does not have BlueprintReaderAttribute yet");
             }
+        }
+
+        protected virtual async UniTask<string> CheckToLoadCsv(Dictionary<string, string> listRawBlueprints, BlueprintReaderAttribute bpAttribute, bool resourceMode, bool attributeMode)
+        {
+            string rawCsv;
+
+            if (resourceMode || attributeMode)
+            {
+                rawCsv = await this.LoadRawCsvFromResourceFolder(bpAttribute);
+            }
+            else
+            {
+                if (!listRawBlueprints.TryGetValue(bpAttribute.DataPath + this.blueprintConfig.BlueprintFileType, out rawCsv))
+                {
+                    this.logService.Warning($"[BlueprintReader] Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
+                    rawCsv = await this.LoadRawCsvFromResourceFolder(bpAttribute);
+                }
+            }
+
+            return rawCsv;
+        }
+
+        protected async UniTask<string> LoadRawCsvFromResourceFolder(BlueprintReaderAttribute bpAttribute)
+        {
+            await UniTask.SwitchToMainThread();
+            var result = string.Empty;
+
+            try
+            {
+                result = ((TextAsset)await Resources.LoadAsync<TextAsset>(this.blueprintConfig.ResourceBlueprintPath + bpAttribute.DataPath)).text;
+            }
+            catch (Exception e)
+            {
+                this.logService.Error($"Load {bpAttribute.DataPath} blueprint error!!!");
+                this.logService.Exception(e);
+            }
+
+#if !UNITY_WEBGL
+            await UniTask.SwitchToThreadPool();
+#endif
+            return result;
         }
     }
 }

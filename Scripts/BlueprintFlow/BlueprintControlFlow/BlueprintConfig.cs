@@ -8,7 +8,7 @@ namespace BlueprintFlow.BlueprintControlFlow
     /// Contains all the constants, the configuration of Blueprint control flow
     /// </summary>
     [Serializable]
-    public class BlueprintConfig : ScriptableObject, IGameConfig
+    public class BlueprintConfig : ScriptableObject, IGameConfig, ICloneable
     {
         public string currentBlueprintVersion = "0.0.1";
         public bool   isResourceMode          = true;
@@ -24,6 +24,9 @@ namespace BlueprintFlow.BlueprintControlFlow
         public         string ResourceBlueprintPath => this.resourceBlueprintPath;
         public         string BlueprintFileType     => this.blueprintFileType;
 
-        private void OnEnable() { this.persistentDataPath = Application.persistentDataPath; }
+        private void   OnEnable() { this.persistentDataPath = Application.persistentDataPath; }
+        public  object Clone()    { return this.MemberwiseClone(); }
+
+        public BlueprintConfig CloneType() => (BlueprintConfig)this.Clone();
     }
 }

@@ -23,6 +23,7 @@ namespace BlueprintFlow.BlueprintReader
         Client,
         Server,
         Both,
-        CLI
+        CLI,
+        Ignore
     }
 }
