@@ -3,6 +3,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
     using System;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
+    using GameFoundation.Scripts.Utilities.Extension;
+    using GameFoundation.Scripts.Utilities.LogService;
     using global::UIModule.Utilities.UIStuff;
     using global::UIModule.Utilities.UIStuff.UITransition;
     using UnityEngine;
@@ -69,25 +71,27 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         public virtual async UniTask Open()
         {
+            this.GetCurrentContainer().Resolve<ILogService>().Log($"open screen view {this.name}");
+
             this.UpdateAlpha(1f);
 
-            if (this!=null||this.ScreenTransition != null)
+            if (this != null || this.ScreenTransition != null)
             {
                 await this.ScreenTransition.PlayIntroAnim();
             }
 
-            Debug.Log($"open screen view {this.name}");
             this.ViewDidOpen?.Invoke();
         }
 
         public virtual async UniTask Close()
         {
-            if (this!=null||this.ScreenTransition != null)
+            this.GetCurrentContainer().Resolve<ILogService>().Log($"Close screen view {this.name}");
+
+            if (this != null || this.ScreenTransition != null)
             {
                 await this.ScreenTransition.PlayOutroAnim();
             }
 
-            Debug.Log($"Close screen view {this.name}");
             this.UpdateAlpha(0);
             this.ViewDidClose?.Invoke();
         }
@@ -99,7 +103,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         protected void UpdateAlpha(float value)
         {
-            if(this==null||this.gameObject==null)return;
+            if (this == null || this.gameObject == null) return;
             this.ViewRoot.alpha          = value;
             this.ViewRoot.blocksRaycasts = value >= 1;
         }
