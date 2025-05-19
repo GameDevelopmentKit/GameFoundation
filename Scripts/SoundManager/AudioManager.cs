@@ -15,15 +15,24 @@
 
     public interface IAudioManager
     {
-        void PlaySound(string name, AudioSource sender);
-        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f);
-        void StopAllSound();
-        void StopAll();
-        void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void StopPlayList();
-        void StopAllPlayList();
-        void PauseEverything();
-        void ResumeEverything();
+        void  PlaySound(string name, AudioSource sender);
+        void  PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void  StopSound(string name);
+        void  StopAllSound();
+        void  StopAll();
+        void  PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+        void  PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+        void  StopPlayList();
+        void  SetPlayListTime(float time);
+        float GetPlayListTime();
+        void  SetPlayListPitch(float pitch);
+        void  SetPlayListLoop(bool isLoop);
+        void  PausePlayList();
+        void  ResumePlayList();
+        bool  IsPlayingPlayList();
+        void  StopAllPlayList();
+        void  PauseEverything();
+        void  ResumeEverything();
     }
 
     public class AudioManager : IAudioManager, IInitializable, IDisposable
@@ -41,8 +50,13 @@
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
         private AudioSource                     MusicAudioSource;
 
-        public AudioManager(SignalBus signalBus, SoundSetting SoundSetting, IGameAssets gameAssets,
-            ObjectPoolManager objectPoolManager, ILogService logService)
+        public AudioManager(
+            SignalBus signalBus,
+            SoundSetting SoundSetting,
+            IGameAssets gameAssets,
+            ObjectPoolManager objectPoolManager,
+            ILogService logService
+        )
         {
             this.signalBus         = signalBus;
             this.soundSetting      = SoundSetting;
@@ -81,7 +95,7 @@
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f)
+        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
@@ -101,16 +115,32 @@
             }
             else
             {
-                audioSource.PlayOneShotSoundManaged(audioClip);
+                audioSource.PlayOneShotSoundManaged(audioClip, volumeScale);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
         }
 
-        public void StopAllSound()
+        public void StopSound(string name)
+        {
+            var audioSource = this.loopingSoundNameToSources.GetValueOrDefault(name);
+            SoundManager.StopOneShotSound(name);
+
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.StopLoopingSoundManaged();
+            this.loopingSoundNameToSources.Remove(name);
+            audioSource.gameObject.Recycle();
+        }
+
+        public virtual void StopAllSound()
         {
             SoundManager.StopAllLoopingSounds();
             SoundManager.StopAllNonLoopingSounds();
+            SoundManager.StopAllOneShotSound();
 
             foreach (var audioSource in this.loopingSoundNameToSources.Values)
             {
@@ -120,7 +150,7 @@
             this.loopingSoundNameToSources.Clear();
         }
 
-        public void StopAll()
+        public virtual void StopAll()
         {
             this.StopAllSound();
             this.StopAllPlayList();
@@ -143,7 +173,16 @@
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
-        public void StopPlayList()
+        public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        {
+            this.StopPlayList();
+
+            this.MusicAudioSource      = await this.GetAudioSource();
+            this.MusicAudioSource.clip = audioClip;
+            this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
+        }
+
+        public virtual void StopPlayList()
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.StopLoopingMusicManaged();
@@ -152,15 +191,63 @@
             this.MusicAudioSource = null;
         }
 
-        public void StopAllPlayList() { this.StopPlayList(); }
+        public virtual void SetPlayListTime(float time)
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.time = time;
+        }
 
-        public void PauseEverything()
+        /// <summary>
+        /// Get playlist time
+        /// </summary>
+        /// <returns>Return playlist time, -1 if no playlist is playing</returns>
+        public virtual float GetPlayListTime()
+        {
+            if (this.MusicAudioSource == null) return -1f;
+
+            return this.MusicAudioSource.time;
+        }
+
+        public virtual void SetPlayListPitch(float pitch)
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.pitch = pitch;
+        }
+
+        public virtual void SetPlayListLoop(bool isLoop)
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.loop = isLoop;
+        }
+
+        public virtual void PausePlayList()
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.Pause();
+        }
+
+        public virtual void ResumePlayList()
+        {
+            if (this.MusicAudioSource == null) return;
+            this.MusicAudioSource.UnPause();
+        }
+
+        public virtual bool IsPlayingPlayList()
+        {
+            if (this.MusicAudioSource == null) return false;
+
+            return this.MusicAudioSource.isPlaying;
+        }
+
+        public virtual void StopAllPlayList() { this.StopPlayList(); }
+
+        public virtual void PauseEverything()
         {
             SoundManager.PauseAll();
             AudioListener.pause = true;
         }
 
-        public void ResumeEverything()
+        public virtual void ResumeEverything()
         {
             AudioListener.pause = false;
             SoundManager.ResumeAll();
