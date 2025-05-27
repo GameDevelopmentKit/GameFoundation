@@ -5,6 +5,7 @@
     using Cysharp.Threading.Tasks;
     using DG.Tweening;
     using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
+    using Sirenix.OdinInspector;
     using UnityEngine;
 
     [System.Serializable]
@@ -15,16 +16,17 @@
 
         private UniTaskCompletionSource animationTask;
 
+        [Button]
         public override void SetupAnim()
         {
             base.SetupAnim();
             foreach (var data in this.tweenAnimations)
             {
                 this.tweenSequences[data.animationType] = data;
-                data.SetupTweens();
+                data.SetupTweens(this.gameObject);
             }
         }
-
+        
         public override UniTask PlayAnimation(string animationType)
         {
             if (!this.tweenSequences.TryGetValue(animationType, out TweenData data) || data == null)
@@ -42,35 +44,55 @@
     [Serializable]
     public class TweenData
     {
-        public string     animationType;
+        public string       animationType;
         public GameObject[] targetGameObjects;
-        public bool       playInSequence = false;
-        public float      sequenceDelay  = 0f;
-    
-        private List<DOTweenAnimation> tweens = new List<DOTweenAnimation>();
-        private Sequence               currentSequence;
+        public bool         playInSequence = false;
+        public float        sequenceDelay  = 0f;
 
-        public void SetupTweens()
+        [SerializeField] [InlineEditor] [InlineButton("SortTweens", SdfIconType.SortAlphaDown, label: "")]
+        private List<DOTweenAnimation> tweens = new List<DOTweenAnimation>();
+        private Sequence currentSequence;
+
+
+        private void SortTweens()
         {
+            // Sort the tweens by their delay time
+            this.tweens.Sort((a, b) => (a.delay + a.duration).CompareTo(b.delay + b.duration));
+        }
+
+
+        public void SetupTweens(GameObject self)
+        {
+            var result = new HashSet<DOTweenAnimation>();
+            if (this.targetGameObjects == null || this.targetGameObjects.Length == 0)
+            {
+                Debug.LogWarning($"No target game objects specified for tween animations {this.animationType}. Automatically searching in self.");
+                this.targetGameObjects = new GameObject[] { self };
+            }
+
             foreach (var targetObject in targetGameObjects)
             {
                 if (targetObject != null)
                 {
-                    var allTweenFounded = new List<DOTweenAnimation>(targetObject.GetComponents<DOTweenAnimation>());
+                    var allTweenFounded = new List<DOTweenAnimation>(targetObject.GetComponentsInChildren<DOTweenAnimation>());
 
                     foreach (var tween in allTweenFounded)
                     {
                         if (!tween.id.Equals(this.animationType)) continue;
-                        this.tweens.Add(tween);
+
+                        result.Add(tween);
                     }
                 }
             }
 
-            foreach (var tweenInfo in this.tweens)
+            foreach (var tweenInfo in result)
             {
                 tweenInfo.autoKill = false;
                 tweenInfo.autoPlay = false;
             }
+
+            this.tweens = new List<DOTweenAnimation>(result);
+            this.SortTweens();
         }
 
         public Sequence GetSequence()
