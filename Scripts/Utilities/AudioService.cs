@@ -116,8 +116,8 @@
             else
             {
                 audioSource.PlayOneShotSoundManaged(audioClip, volumeScale);
-                await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
-                audioSource.Recycle();
+                await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length) + TimeSpan.FromSeconds(0.5f));
+                this.RecycleAudioSource(audioSource);
             }
         }
 
@@ -133,7 +133,7 @@
 
             audioSource.StopLoopingSoundManaged();
             this.loopingSoundNameToSources.Remove(name);
-            audioSource.gameObject.Recycle();
+            this.RecycleAudioSource(audioSource);
         }
 
         public virtual void StopAllSound()
@@ -144,7 +144,7 @@
 
             foreach (var audioSource in this.loopingSoundNameToSources.Values)
             {
-                audioSource.gameObject.Recycle();
+                this.RecycleAudioSource(audioSource);
             }
 
             this.loopingSoundNameToSources.Clear();
@@ -186,8 +186,7 @@
         {
             if (this.MusicAudioSource == null) return;
             this.MusicAudioSource.StopLoopingMusicManaged();
-            this.MusicAudioSource.clip = null;
-            this.MusicAudioSource.Recycle();
+            this.RecycleAudioSource(this.MusicAudioSource);
             this.MusicAudioSource = null;
         }
 
@@ -258,5 +257,15 @@
         protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
 
         public void Dispose() { this.compositeDisposable?.Dispose(); }
+
+        private void RecycleAudioSource(AudioSource audioSource)
+        {
+            if (!audioSource) return;
+
+            audioSource.clip   = null;
+            audioSource.volume = 1;
+            audioSource.loop   = false;
+            audioSource.gameObject.Recycle();
+        }
     }
 }
