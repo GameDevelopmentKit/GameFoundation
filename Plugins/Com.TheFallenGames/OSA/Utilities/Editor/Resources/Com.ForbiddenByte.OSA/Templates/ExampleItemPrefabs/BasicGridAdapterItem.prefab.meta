@@ -2,3 +2,10 @@ fileFormatVersion: 2
 guid: 0fcae5defad2dcf4c8805a5d43f70d28
 NativeFormatImporter:
   userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Utilities/Editor/Resources/Com.ForbiddenByte.OSA/Templates/ExampleItemPrefabs/BasicGridAdapterItem.prefab
+  uploadId: 709508

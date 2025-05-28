@@ -4,7 +4,7 @@ namespace Com.ForbiddenByte.OSA.Core
 {
 	public class OSAConst
 	{
-		public const string OSA_VERSION_STRING = "7.0.0";
+		public const string OSA_VERSION_STRING = "7.2.1";
 
 		public const int MAX_ITEMS = int.MaxValue - 1;
 		public const int MAX_ITEMS_WHILE_LOOPING_TO_ALLOW_TWIN_PASS = 800 * 1000 * 1000;

@@ -103,14 +103,46 @@ namespace Com.ForbiddenByte.OSA.AdditionalComponents
 
 		void Awake()
 		{
+			gameObject.SetActive(false);
+
 			if (!_Initialized)
 				Init();
+		}
 
-			gameObject.SetActive(false);
+		void OnEnable()
+		{
+			if (_Initialized)
+			{
+				// Reason for unsubbing first: there's a combination of params and contexts where we're
+				// still subbed during being disabled, so the easiest is to just unsub first
+				_OSA.ScrollPositionChanged -= OSAScrollPositionChanged;
+				_OSA.ScrollPositionChanged += OSAScrollPositionChanged;
+			}
+		}
+
+		void OnDisable()
+		{
+			// Reason: if we're self-disabling this decorator based on whether it's inside the viewport
+			// or not, then, if someone else enables/disables it externally, we'll mix intents
+			// (information is destroyed), so we unsub from OSA's position changes when we know this
+			// OnDisable() can only come from outside. If so, it's assumed the caller intends to
+			// later manually enable the decorator
+			bool doesntRelyOnSelfDisabling = !_DisableWhenNotVisible;
+			if (_Initialized && doesntRelyOnSelfDisabling)
+				_OSA.ScrollPositionChanged -= OSAScrollPositionChanged;
+		}
+
+		void OnDestroy()
+		{
+			if (_Initialized)
+				_OSA.ScrollPositionChanged -= OSAScrollPositionChanged;
 		}
 
 		void Update()
 		{
+			if (!_Initialized)
+				return;
+
 			if (_ControlOSAPaddingAtInsetEdge == ControlOSAPaddingMode.ADAPTIVE)
 				AdaptToPadding();
 		}
@@ -122,11 +154,6 @@ namespace Com.ForbiddenByte.OSA.AdditionalComponents
 			if (_OSA != null && _Initialized)
 				OSAScrollPositionChanged(0d);
 		}
-
-        private void OnRectTransformDimensionsChange()
-        {
-            
-        }
 
         public void AdaptToPadding()
 		{

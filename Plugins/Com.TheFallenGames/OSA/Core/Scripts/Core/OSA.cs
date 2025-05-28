@@ -908,7 +908,9 @@ namespace Com.ForbiddenByte.OSA.Core
 					vsa,
 					itemIndex,
 					normalizedOffsetFromViewportStart,
-					normalizedPositionOfItemPivotToUse
+					normalizedPositionOfItemPivotToUse,
+					// Fixes occasional misalignment
+					shortestPathWhenLooping: false
 				);
 			var p = new ContentSizeOrPositionChangeParams
 			{
@@ -922,11 +924,15 @@ namespace Com.ForbiddenByte.OSA.Core
 			//// The shift wasn't possible
 			//if (double.IsNaN(deltaInset))
 			//	return;
-
-			//// This is a semi-hack-lazy hot-fix because when the scroll is immediate, sometimes the visibility isn't computed well
-			//// Same thing is done in SmoothScrollTo if duration is 0 or close to 0
-			//ComputeVisibilityForCurrentPosition(false, -.1);
-			//ComputeVisibilityForCurrentPosition(true, +.1);
+			
+			// Update: this now also fixes occasional misalignment in looping (even when it desn't loop in the current frame)
+			if (_Params.effects.LoopItems)
+			{
+				// When the scroll is immediate, sometimes the visibility isn't computed well
+				// Same thing is done in SmoothScrollTo if duration is 0 or close to 0
+				ComputeVisibilityForCurrentPositionRawParams(false, false, -.1f);
+				ComputeVisibilityForCurrentPositionRawParams(true, false, +.1f);
+			}
 		}
 
 		/// <summary> Utility to smooth scroll. Identical to <see cref="ScrollTo(int, float, float)"/> in functionality, but the scroll is animated (scroll is done gradually, throughout multiple frames) </summary>
@@ -1613,9 +1619,13 @@ namespace Com.ForbiddenByte.OSA.Core
 			}
 		}
 
+		SimpleViewportSnapshot _OnScrollViewSizeChanged_ViewportSnapshot;
+
 		/// <summary>This is called automatically when the size of this ScrollView changes</summary>
 		protected virtual void OnScrollViewSizeChanged()
 		{
+			_OnScrollViewSizeChanged_ViewportSnapshot = new SimpleViewportSnapshot(this);
+
 			// Commented: refresh already does that
 			//CancelAnimationsIfAny();
 
@@ -1659,7 +1669,11 @@ namespace Com.ForbiddenByte.OSA.Core
 		/// </summary>
 		protected virtual void PostRebuildLayoutDueToScrollViewSizeChange()
 		{
-
+			if (_OnScrollViewSizeChanged_ViewportSnapshot != null && Parameters.optimization.ResponsiveOnScrollViewSizeChange)
+			{
+				_OnScrollViewSizeChanged_ViewportSnapshot.Restore();
+				_OnScrollViewSizeChanged_ViewportSnapshot = null;
+			}
 		}
 
 		/// <summary> 

@@ -725,6 +725,20 @@ namespace Com.ForbiddenByte.OSA.Core
 			bool _KeepItemsSizesOnLayoutRebuild = false;
 			/// <summary>When the ScrollView is rebuilt (as when its size changes), should the currently cached item sizes views be kept (True)? False by default</summary>
 			public bool KeepItemsSizesOnLayoutRebuild { get { return _KeepItemsSizesOnLayoutRebuild; } set { _KeepItemsSizesOnLayoutRebuild = value; } }
+
+			[SerializeField]
+			[Tooltip(
+				"When the ScrollView changes its size (as when the orientation changes), should we try (best-effort) to preserve the exact position of all visible items and OSA's velocity?\n" +
+				"Of course you usually want this, and at least the position of all items is already preserved by default, but in some cases, such as when you're changing items' sizes on the " +
+				"fly or applying CSF patterns, the scroll position jumps a few times to accommodate those dynamic changes\n" +
+				"This property handles that. And it's off by default for backwards-compatibility, but also because of a small performance hit")]
+			bool _ResponsiveOnScrollViewSizeChange = false;
+			/// <summary>
+			/// <para>When the ScrollView changes its size (as when the orientation changes), should we try (best-effort) to preserve the exact position of all visible items and OSA's velocity?</para>
+			/// <para>Of course you usually want this, and at least the position of all items is already preserved by default, but in some cases, such as when you're changing items' sizes on the fly or applying CSF patterns, the scroll position jumps a few times to accommodate those dynamic changes</para>
+			/// <para>This property handles that. And it's off by default for backwards-compatibility, but also because of a small performance hit</para>
+			/// </summary>
+			public bool ResponsiveOnScrollViewSizeChange { get { return _ResponsiveOnScrollViewSizeChange; } set { _ResponsiveOnScrollViewSizeChange = value; } }
 		}
 	}
 }

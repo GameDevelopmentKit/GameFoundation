@@ -1,7 +1,16 @@
 fileFormatVersion: 2
-guid: 82e621f881ed0284ea6cac5b4642ede8
-PrefabImporter:
-  externalObjects: {}
+guid: dd5a3bb3fc585b440a7f24ceaacde9e8
+timeCreated: 1563654349
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Utilities/Editor/Resources/Com.ForbiddenByte.OSA/Templates/ScrollViews/TableView/ItemPrefabs/ColumnsTupleValuePrefab.prefab
+  uploadId: 709508

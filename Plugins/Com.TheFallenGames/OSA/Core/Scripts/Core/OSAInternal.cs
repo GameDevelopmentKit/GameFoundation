@@ -262,7 +262,8 @@ namespace Com.ForbiddenByte.OSA.Core
 							vsa, 
 							itemIndex, 
 							normalizedOffsetFromViewportStart, 
-							normalizedPositionOfItemPivotToUse
+							normalizedPositionOfItemPivotToUse,
+							shortestPathWhenLooping: true
 						);
 			};
 
@@ -433,11 +434,15 @@ namespace Com.ForbiddenByte.OSA.Core
 				//	needToCalculateTargetInset = true;
 				//}
 
-				//// This is a semi-hack-lazy hot-fix because when the duration is 0 (or near 0), sometimes the visibility isn't computed well
-				//// Same thing is done in ScrollTo method above
-				//ComputeVisibilityForCurrentPosition(false, -.1);
-				//ComputeVisibilityForCurrentPosition(true, +.1);
-				////ScrollTo(itemIndex, normalizedOffsetFromViewportStart, normalizedPositionOfItemPivotToUse);
+				// Update: this now also fixes occasional misalignment in looping (even when it desn't loop in the current frame)
+				if (_Params.effects.LoopItems)
+				{
+					// When the duration is 0 (or near 0), sometimes the visibility isn't computed well
+					// Same thing is done in ScrollTo method above
+					ComputeVisibilityForCurrentPositionRawParams(false, false, -.1);
+					ComputeVisibilityForCurrentPositionRawParams(true, false, +.1);
+					//ScrollTo(itemIndex, normalizedOffsetFromViewportStart, normalizedPositionOfItemPivotToUse);
+				}
 
 				_SmoothScrollCoroutine = null;
 				_SmoothScrollOnDone = null;
@@ -475,18 +480,17 @@ namespace Com.ForbiddenByte.OSA.Core
 		}
 
 		/// <summary> It assumes that the content is bigger than the viewport </summary>
-		double ScrollToHelper_GetContentStartVirtualInsetFromViewportStart(double vsa, int itemIndex, double normalizedItemOffsetFromStart, double normalizedPositionOfItemPivotToUse)
+		double ScrollToHelper_GetContentStartVirtualInsetFromViewportStart(double vsa, int itemIndex, double normalizedItemOffsetFromStart, double normalizedPositionOfItemPivotToUse, bool shortestPathWhenLooping)
 		{
 			int itemViewIndex = _ItemsDesc.GetItemViewIndexFromRealIndexChecked(itemIndex);
 			double itemVrtInsetFromStart = _InternalState.GetItemVirtualInsetFromParentStartUsingItemIndexInView(itemViewIndex);
 			double itemSize = _ItemsDesc[itemViewIndex];
 			double insetToAddFromFineTunedOffsets = _InternalState.vpSize * normalizedItemOffsetFromStart - itemSize * normalizedPositionOfItemPivotToUse;
-			var looping = _Params.effects.LoopItems;
 
 			// The standard ct inset calculation, i.e. go towards start if target real index is smaller, else towards end
 			double ctInsetFromStart_NonLooping = -itemVrtInsetFromStart + insetToAddFromFineTunedOffsets;
 
-			if (looping)
+			if (shortestPathWhenLooping && _Params.effects.LoopItems)
 			{
 				// When looping, we try to loop to the closer item
 				double? ctInsetFromStart_ShorterPathIfExists = _ScrollToHelper_GetContentStartVirtualInsetFromViewportStart_Looping_ShorterPathIfExists(

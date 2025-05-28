@@ -114,7 +114,7 @@ namespace Com.ForbiddenByte.OSA.Core.SubComponents
 			if (layoutElement)
 			{
 				GameObject.Destroy(layoutElement);
-				Debug.Log("LayoutElement on GameObject " + contentSizeFitter.name + " has beed DESTROYED in order to use OSA");
+				Debug.Log("LayoutElement on GameObject " + sourceParams.Content.name + " has beed DESTROYED in order to use OSA");
 			}
 
 			//if (sourceParams.IsHorizontal)
