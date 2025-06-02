@@ -2,7 +2,6 @@
 #nullable enable
 namespace GameFoundation.Utilities.GameQueueAction
 {
-    using GameFoundation.DI;
     using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
     using VContainer;
 
@@ -10,7 +9,7 @@ namespace GameFoundation.Utilities.GameQueueAction
     {
         public static void RegisterGameQueueActionService(this IContainerBuilder builder)
         {
-            builder.Register<GameQueueActionServices>(Lifetime.Singleton).AsInterfacesAndSelf();
+            builder.Register<GameQueueActionServices>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<GameQueueActionContext>(Lifetime.Singleton);
         }
     }

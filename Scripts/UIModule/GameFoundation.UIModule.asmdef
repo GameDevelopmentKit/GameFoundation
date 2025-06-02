@@ -17,7 +17,8 @@
     "Zenject",
     "VContainer",
     "Unity.RenderPipelines.Universal.Runtime",
-    "LeTai.TranslucentImage.Scripts"
+    "LeTai.TranslucentImage.Scripts",
+    "TheOne.Extensions"
   ],
   "versionDefines": [
     {

@@ -2,6 +2,7 @@
 namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System.Linq;
+    using TheOne.Extensions;
     using VContainer;
 
     public static class VContainerUtils

@@ -5,11 +5,11 @@
     "GameFoundation.UIModule",
     "GameFoundation.Models",
     "GameFoundation.Network.Config",
-    "GameFoundation.Utilities",
     "Unity.Addressables",
     "Unity.ResourceManager",
     "UniTask.Addressables",
-    "UniTask"
+    "UniTask",
+    "TheOne.Extensions"
   ],
   "includePlatforms": [
     "Editor"

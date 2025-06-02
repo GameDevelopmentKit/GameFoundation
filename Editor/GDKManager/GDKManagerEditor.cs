@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using GameFoundation.Scripts.Utilities.Extension;
 using Models;
+using TheOne.Extensions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -55,7 +55,7 @@ public class GDKManagerEditor : EditorWindow
 
     private void LoadSDKConfig(GDKConfig gdkConfig)
     {
-        foreach (var gameConfigEditorType in ReflectionUtils.GetAllDerivedTypes<IGameConfigEditor>())
+        foreach (var gameConfigEditorType in typeof(IGameConfigEditor).GetDerivedTypes())
         {
             var gameConfigEditor = (IGameConfigEditor)Activator.CreateInstance(gameConfigEditorType);
             gameConfigEditor.InitConfig(gdkConfig);

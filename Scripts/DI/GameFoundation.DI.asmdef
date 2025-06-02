@@ -3,7 +3,8 @@
   "rootNamespace": "GameFoundation.DI",
   "references": [
     "Zenject",
-    "VContainer"
+    "VContainer",
+    "TheOne.Extensions"
   ],
   "versionDefines": [
     {

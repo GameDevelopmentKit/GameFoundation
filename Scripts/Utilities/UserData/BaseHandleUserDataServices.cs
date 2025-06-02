@@ -5,9 +5,9 @@ namespace GameFoundation.Scripts.Utilities.UserData
     using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Interfaces;
-    using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using Newtonsoft.Json;
+    using TheOne.Extensions;
     using UnityEngine;
 
     public abstract class BaseHandleUserDataServices : IHandleUserDataServices

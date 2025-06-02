@@ -5,6 +5,7 @@ namespace BlueprintFlow.BlueprintControlFlow
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
+    using System.Reflection;
     using BlueprintFlow.APIHandler;
     using BlueprintFlow.BlueprintReader;
     using BlueprintFlow.Signals;
@@ -162,7 +163,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         private async UniTask OpenReadBlueprint(IGenericBlueprintReader blueprintReader, Dictionary<string, string> listRawBlueprints)
         {
-            var bpAttribute = blueprintReader.GetCustomAttribute<BlueprintReaderAttribute>();
+            var bpAttribute = blueprintReader.GetType().GetCustomAttribute<BlueprintReaderAttribute>();
             if (bpAttribute != null)
             {
                 if (bpAttribute.BlueprintScope == BlueprintScope.Server) return;

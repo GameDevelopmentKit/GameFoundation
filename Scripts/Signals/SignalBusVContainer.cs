@@ -2,7 +2,6 @@
 #nullable enable
 namespace GameFoundation.Signals
 {
-    using GameFoundation.DI;
     using MessagePipe;
     using VContainer;
 
@@ -12,7 +11,7 @@ namespace GameFoundation.Signals
 
         public static void RegisterSignalBus(this IContainerBuilder builder)
         {
-            builder.Register<SignalBus>(Lifetime.Scoped).AsInterfacesAndSelf();
+            builder.Register<SignalBus>(Lifetime.Scoped).AsImplementedInterfaces().AsSelf();
             builder.RegisterMessagePipe();
         }
 

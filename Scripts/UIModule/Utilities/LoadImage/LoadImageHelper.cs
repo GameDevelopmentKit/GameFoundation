@@ -5,9 +5,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
     using Cysharp.Threading.Tasks;
     using DG.Tweening;
     using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
+    using TheOne.Extensions;
     using UnityEngine;
     using UnityEngine.Networking;
     using UnityEngine.Scripting;
@@ -57,7 +57,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
             return await this.gameAssets.LoadAssetAsync<Sprite>(key);
         }
-        
+
         public async UniTaskVoid LoadLocalSpriteToUIImage(Image image, object key)
         {
             //TODO Implement loading icon here if needed
@@ -81,7 +81,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
             // set placeholder while download image from cdn
             imageComponent.preserveAspect = true;
-            imageComponent.color          = imageComponent.color.CloneAndSetAlpha(0f);
+            imageComponent.color          = imageComponent.color.WithAlpha(0f);
             var loadingIconObj = await this.objectPoolManager.Spawn(this.iconLoadingAssetPath, imageComponent.transform);
             onLoadingIconLoaded?.Invoke(loadingIconObj.GetComponent<Image>());
             sprite = await loadTextureFromUrlTask;

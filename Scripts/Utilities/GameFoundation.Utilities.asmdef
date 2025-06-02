@@ -17,7 +17,8 @@
     "Zenject",
     "VContainer",
     "BuildScript.Runtime",
-    "DOTween.Modules"
+    "DOTween.Modules",
+    "TheOne.Extensions"
   ],
   "versionDefines": [
     {

@@ -25,7 +25,5 @@ namespace Utilities.Extension
                                                     : x.ToString()))
                          .ToLower();
         }
-
-        public static string ToJson(this object obj) { return JsonConvert.SerializeObject(obj); }
     }
 }

@@ -55,7 +55,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                     if (index >= 0 && index != curIndex)
                     {
                         listAction.RemoveAt(curIndex);
-                        listAction.TryInsert(action, index);
+                        if (index < listAction.Count)
+                            listAction.Insert(index, action);
+                        else
+                            listAction.Add(action);
                     }
                     else
                     {
@@ -65,7 +68,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
                 else
                 {
                     // add new
-                    listAction.TryInsert(action, index);
+                    if (index >= 0 && index < listAction.Count)
+                        listAction.Insert(index, action);
+                    else
+                        listAction.Add(action);
                     isAdded = true;
                 }
             }
