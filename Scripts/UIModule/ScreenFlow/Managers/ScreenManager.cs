@@ -12,13 +12,14 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Signals;
     using R3;
+    using TheOne.Logging;
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.Scripting;
     using IInitializable = GameFoundation.DI.IInitializable;
+    using ILogger = TheOne.Logging.ILogger;
     using ITickable = GameFoundation.DI.ITickable;
     using Object = UnityEngine.Object;
 
@@ -96,19 +97,19 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         #region Constructors
 
         private readonly SignalBus   signalBus;
-        private readonly ILogService logger;
         private readonly IGameAssets gameAssets;
+        private readonly ILogger     logger;
 
         private readonly List<IScreenPresenter>                   activeScreens               = new();
         private readonly Dictionary<Type, IScreenPresenter>       typeToLoadedScreenPresenter = new();
         private readonly Dictionary<Type, Task<IScreenPresenter>> typeToPendingScreen         = new();
 
         [Preserve]
-        public ScreenManager(SignalBus signalBus, ILogService logger, IGameAssets gameAssets)
+        public ScreenManager(SignalBus signalBus, IGameAssets gameAssets, ILoggerManager loggerManager)
         {
             this.signalBus  = signalBus;
-            this.logger     = logger;
             this.gameAssets = gameAssets;
+            this.logger     = loggerManager.GetLogger(this);
 
             this.signalBus.Subscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
             this.signalBus.Subscribe<ScreenShowSignal>(this.OnShowScreen);

@@ -6,8 +6,6 @@ namespace BlueprintFlow.APIHandler
     using UnityEngine.Scripting;
     #if !GDK_NETWORK_ENABLE
     using System.Net;
-    using GameFoundation.Scripts.Utilities.LogService;
-
     #else
     using Network.WebService;
     #endif
@@ -18,29 +16,18 @@ namespace BlueprintFlow.APIHandler
     public class BlueprintDownloader
     {
         #if !GDK_NETWORK_ENABLE
-        private readonly ILogService logService;
-
         [Preserve]
-        public BlueprintDownloader(ILogService logService)
+        public BlueprintDownloader()
         {
-            this.logService = logService;
         }
 
         public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long, long> onDownloadProgress)
         {
-            try
-            {
-                using var client = new WebClient();
-                var       uri    = new Uri(blueprintDownloadUrl);
-                var       task   = client.DownloadFileTaskAsync(uri, filePath);
-                client.DownloadProgressChanged += (sender, args) => onDownloadProgress.Invoke(args.BytesReceived, args.TotalBytesToReceive);
-                return task.AsUniTask();
-            }
-            catch (Exception e)
-            {
-                this.logService.Exception(e);
-                throw;
-            }
+            using var client = new WebClient();
+            var       uri    = new Uri(blueprintDownloadUrl);
+            var       task   = client.DownloadFileTaskAsync(uri, filePath);
+            client.DownloadProgressChanged += (sender, args) => onDownloadProgress.Invoke(args.BytesReceived, args.TotalBytesToReceive);
+            return task.AsUniTask();
         }
         #else
         private readonly IHttpService httpService;

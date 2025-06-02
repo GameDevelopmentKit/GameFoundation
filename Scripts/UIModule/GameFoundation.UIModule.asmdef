@@ -18,7 +18,8 @@
     "VContainer",
     "Unity.RenderPipelines.Universal.Runtime",
     "LeTai.TranslucentImage.Scripts",
-    "TheOne.Extensions"
+    "TheOne.Extensions",
+    "TheOne.Logging"
   ],
   "versionDefines": [
     {

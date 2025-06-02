@@ -11,11 +11,12 @@ namespace BlueprintFlow.BlueprintControlFlow
     using BlueprintFlow.Signals;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
+    using TheOne.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
+    using ILogger = TheOne.Logging.ILogger;
 
     /// <summary>
     ///  The main manager for reading blueprints pipeline/>.
@@ -25,31 +26,31 @@ namespace BlueprintFlow.BlueprintControlFlow
         #region Constructor
 
         private readonly SignalBus                                    signalBus;
-        private readonly ILogService                                  logService;
         private readonly IHandleUserDataServices                      handleUserDataServices;
         private readonly BlueprintConfig                              blueprintConfig;
         private readonly FetchBlueprintInfo                           fetchBlueprintInfo;
         private readonly BlueprintDownloader                          blueprintDownloader;
         private readonly IReadOnlyCollection<IGenericBlueprintReader> blueprints;
+        private readonly ILogger                                      logger;
 
         [Preserve]
         public BlueprintReaderManager(
             SignalBus                            signalBus,
-            ILogService                          logService,
             IHandleUserDataServices              handleUserDataServices,
             BlueprintConfig                      blueprintConfig,
             FetchBlueprintInfo                   fetchBlueprintInfo,
             BlueprintDownloader                  blueprintDownloader,
-            IEnumerable<IGenericBlueprintReader> blueprints
+            IEnumerable<IGenericBlueprintReader> blueprints,
+            ILoggerManager                       loggerManager
         )
         {
             this.signalBus              = signalBus;
-            this.logService             = logService;
             this.handleUserDataServices = handleUserDataServices;
             this.blueprintConfig        = blueprintConfig;
             this.fetchBlueprintInfo     = fetchBlueprintInfo;
             this.blueprintDownloader    = blueprintDownloader;
             this.blueprints             = blueprints.ToArray();
+            this.logger                 = loggerManager.GetLogger(this);
         }
 
         #endregion
@@ -58,7 +59,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         public virtual async UniTask LoadBlueprint()
         {
-            this.logService.Log("[BlueprintReader] Start loading");
+            this.logger.Info("Start loading");
             Dictionary<string, string> listRawBlueprints = null;
             if (this.blueprintConfig.IsResourceMode)
             {
@@ -74,7 +75,7 @@ namespace BlueprintFlow.BlueprintControlFlow
                 if (File.Exists(this.blueprintConfig.BlueprintZipFilepath))
                 {
                     // Save blueprint info to local
-                    this.handleUserDataServices.Save(newBlueprintInfo, true);
+                    this.handleUserDataServices.Save(newBlueprintInfo, true).Forget();
 
                     // Unzip file to memory
                     #if !UNITY_WEBGL
@@ -96,10 +97,10 @@ namespace BlueprintFlow.BlueprintControlFlow
             }
             catch (Exception e)
             {
-                this.logService.Exception(e);
+                this.logger.Exception(e);
             }
 
-            this.logService.Log("[BlueprintReader] All blueprint are loaded");
+            this.logger.Info("All blueprint are loaded");
 
             this.signalBus.Fire<LoadBlueprintDataSucceedSignal>();
         }
@@ -144,8 +145,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         private UniTask ReadAllBlueprint(Dictionary<string, string> listRawBlueprints)
         {
             if (!File.Exists(this.blueprintConfig.BlueprintZipFilepath))
-                this.logService.Warning(
-                    $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
+                this.logger.Warning($"{this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
 
             this.readBlueprintProgressSignal.MaxBlueprint    = this.blueprints.Count;
             this.readBlueprintProgressSignal.CurrentProgress = 0;
@@ -178,7 +178,7 @@ namespace BlueprintFlow.BlueprintControlFlow
                 {
                     if (!listRawBlueprints.TryGetValue(bpAttribute.DataPath + this.blueprintConfig.BlueprintFileType, out rawCsv))
                     {
-                        this.logService.Warning($"[BlueprintReader] Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
+                        this.logger.Warning($"Blueprint {bpAttribute.DataPath} is not exists at the local folder, try to load from resource folder");
                         rawCsv = await LoadRawCsvFromResourceFolder();
                     }
                 }
@@ -193,8 +193,8 @@ namespace BlueprintFlow.BlueprintControlFlow
                     }
                     catch (Exception e)
                     {
-                        this.logService.Error($"Load {bpAttribute.DataPath} blueprint error!!!");
-                        this.logService.Exception(e);
+                        this.logger.Error($"Load {bpAttribute.DataPath} blueprint error!!!");
+                        this.logger.Exception(e);
                     }
 
                     #if !UNITY_WEBGL
@@ -216,12 +216,12 @@ namespace BlueprintFlow.BlueprintControlFlow
                 }
                 else
                 {
-                    this.logService.Warning($"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");
+                    this.logger.Warning($"Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");
                 }
             }
             else
             {
-                this.logService.Warning($"[BlueprintReader] Class {blueprintReader} does not have BlueprintReaderAttribute yet");
+                this.logger.Warning($"Class {blueprintReader} does not have BlueprintReaderAttribute yet");
             }
         }
     }

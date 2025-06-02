@@ -1,6 +1,8 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 {
     using Cysharp.Threading.Tasks;
+    using GameFoundation.DI;
+    using TheOne.Logging;
     using UnityEngine;
     using UnityEngine.EventSystems;
     using UnityEngine.Playables;
@@ -22,12 +24,13 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void Awake()
         {
+            var logger = this.GetCurrentContainer().Resolve<ILoggerManager>().GetLogger(this);
             this.eventSystem                   = EventSystem.current;
             this.introAnimation.timeUpdateMode = this.DirectorUpdateMode;
             this.outroAnimation.timeUpdateMode = this.DirectorUpdateMode;
             if (!this.introAnimation.playableAsset)
             {
-                Debug.LogWarning($"Intro Animation for {this.gameObject.name} is not available", this);
+                logger.Warning($"Intro Animation for {this.gameObject.name} is not available");
             }
             else
             {
@@ -37,7 +40,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
             if (!this.outroAnimation.playableAsset)
             {
-                Debug.LogWarning($"Outro animation for {this.gameObject.name} is not available", this);
+                logger.Warning($"Outro animation for {this.gameObject.name} is not available");
             }
             else
             {

@@ -4,19 +4,20 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     using GameFoundation.Scripts.UIModule.MVP;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Signals;
+    using TheOne.Logging;
     using UnityEngine;
+    using ILogger = TheOne.Logging.ILogger;
 
     public abstract class BaseScreenPresenter<TView> : IScreenPresenter where TView : IScreenView
     {
-        protected SignalBus   SignalBus { get; }
-        protected ILogService Logger    { get; }
+        protected SignalBus SignalBus { get; }
+        protected ILogger   Logger    { get; }
 
-        protected BaseScreenPresenter(SignalBus signalBus, ILogService logger)
+        protected BaseScreenPresenter(SignalBus signalBus, ILoggerManager loggerManager)
         {
             this.SignalBus = signalBus;
-            this.Logger    = logger;
+            this.Logger    = loggerManager.GetLogger(this);
         }
 
         public         TView        View            { get; private set; }
@@ -38,7 +39,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         {
             if (parent == null)
             {
-                this.Logger.LogWithColor(parent.name + "is null", Color.green);
+                this.Logger.Error(parent.name + "is null");
                 return;
             }
 
@@ -97,10 +98,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             this.Dispose();
             this.View.DestroySelf();
         }
-        
+
         public virtual void OnOverlap(bool isOverlap)
         {
-            this.Logger.Log($"OnOverLap: {isOverlap} - {this.ScreenId}");
+            this.Logger.Info($"OnOverLap: {isOverlap} - {this.ScreenId}");
         }
 
         public int ViewSiblingIndex { get => this.View.RectTransform.GetSiblingIndex(); set => this.View.RectTransform.SetSiblingIndex(value); }
@@ -126,7 +127,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     {
         protected TModel Model { get; private set; }
 
-        protected BaseScreenPresenter(SignalBus signalBus, ILogService logger) : base(signalBus, logger)
+        protected BaseScreenPresenter(SignalBus signalBus, ILoggerManager loggerManager) : base(signalBus, loggerManager)
         {
         }
 

@@ -9,7 +9,8 @@
     "UniTask",
     "Zenject",
     "VContainer",
-    "TheOne.Extensions"
+    "TheOne.Extensions",
+    "TheOne.Logging"
   ],
   "versionDefines": [
     {

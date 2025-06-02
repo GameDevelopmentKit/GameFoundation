@@ -5,10 +5,11 @@ namespace GameFoundation.Scripts.Utilities.UserData
     using System.Linq;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Interfaces;
-    using GameFoundation.Scripts.Utilities.LogService;
     using Newtonsoft.Json;
     using TheOne.Extensions;
+    using TheOne.Logging;
     using UnityEngine;
+    using ILogger = TheOne.Logging.ILogger;
 
     public abstract class BaseHandleUserDataServices : IHandleUserDataServices
     {
@@ -25,24 +26,24 @@ namespace GameFoundation.Scripts.Utilities.UserData
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         };
 
-        private readonly ILogService                    logService;
+        private readonly ILogger                        logger;
         private readonly Dictionary<string, ILocalData> userDataCache = new();
 
-        protected BaseHandleUserDataServices(ILogService logService)
+        protected BaseHandleUserDataServices(ILoggerManager loggerManager)
         {
-            this.logService = logService;
+            this.logger = loggerManager.GetLogger(this);
         }
 
         public async UniTask Save<T>(T data, bool force = false) where T : class, ILocalData
         {
             var key = KeyOf(typeof(T));
 
-            if (!this.userDataCache.ContainsKey(key)) this.userDataCache.Add(key, data);
+            this.userDataCache.TryAdd(key, data);
 
             if (!force) return;
 
             await this.SaveJsons((key, JsonConvert.SerializeObject(data, JsonSetting)));
-            this.logService.LogWithColor($"Saved {key}", Color.green);
+            this.logger.Info($"Saved {key}".WithColor(Color.green));
         }
 
         public async UniTask<T> Load<T>() where T : class, ILocalData
@@ -66,15 +67,15 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
                             if (result is not ILocalData data)
                             {
-                                this.logService.Error($"Failed to load data {key}");
+                                this.logger.Error($"Failed to load data {key}");
                                 return null;
                             }
 
                             if (string.IsNullOrEmpty(json)) data.Init();
 
                             data.OnDataLoaded();
-                            this.logService.LogWithColor($"Level Data Loaded: {json}", Color.green);
-                            this.logService.LogWithColor($"Loaded {key}", Color.green);
+                            this.logger.Info($"Level Data Loaded: {json}".WithColor(Color.green));
+                            this.logger.Info($"Loaded {key}".WithColor(Color.green));
                             return data;
                         });
                 }).ToArray();
@@ -84,10 +85,10 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
             await this.SaveJsons(this.userDataCache.Select(value =>
             {
-                this.logService.LogWithColor($"Saved {value.Key}", Color.green);
+                this.logger.Info($"Saved {value.Key}".WithColor(Color.green));
                 return (value.Key, JsonConvert.SerializeObject(value.Value, JsonSetting));
             }).ToArray());
-            this.logService.LogWithColor("Saved all data", Color.green);
+            this.logger.Info("Saved all data".WithColor(Color.green));
         }
 
         protected abstract UniTask SaveJsons(params (string key, string json)[] values);

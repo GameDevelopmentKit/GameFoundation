@@ -5,8 +5,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.Utilities;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Signals;
+    using TheOne.Logging;
     using TMPro;
     using UnityEngine;
     using UnityEngine.Scripting;
@@ -43,7 +43,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         private readonly IAudioService audioManager;
 
         [Preserve]
-        public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioService audioManager) : base(signalBus, logService)
+        public NotificationPopupPresenter(SignalBus signalBus, ILoggerManager loggerManager, IAudioService audioManager) : base(signalBus, loggerManager)
         {
             this.audioManager = audioManager;
         }

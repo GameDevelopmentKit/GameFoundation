@@ -3,12 +3,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Signals;
+    using TheOne.Logging;
 
     public abstract class BasePopupPresenter<TView> : BaseScreenPresenter<TView> where TView : IScreenView
     {
-        protected BasePopupPresenter(SignalBus signalBus, ILogService logger) : base(signalBus, logger)
+        protected BasePopupPresenter(SignalBus signalBus, ILoggerManager loggerManager) : base(signalBus, loggerManager)
         {
         }
 
@@ -49,7 +49,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     {
         protected TModel Model { get; private set; }
 
-        protected BasePopupPresenter(SignalBus signalBus, ILogService logger) : base(signalBus, logger)
+        protected BasePopupPresenter(SignalBus signalBus, ILoggerManager loggerManager) : base(signalBus, loggerManager)
         {
         }
 

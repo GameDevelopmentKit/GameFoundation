@@ -18,7 +18,8 @@
     "VContainer",
     "BuildScript.Runtime",
     "DOTween.Modules",
-    "TheOne.Extensions"
+    "TheOne.Extensions",
+    "TheOne.Logging"
   ],
   "versionDefines": [
     {

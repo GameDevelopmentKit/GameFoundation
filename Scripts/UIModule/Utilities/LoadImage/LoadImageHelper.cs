@@ -5,13 +5,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
     using Cysharp.Threading.Tasks;
     using DG.Tweening;
     using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using TheOne.Extensions;
+    using TheOne.Logging;
     using UnityEngine;
     using UnityEngine.Networking;
     using UnityEngine.Scripting;
     using UnityEngine.UI;
+    using ILogger = TheOne.Logging.ILogger;
 
     public class LoadImageHelper
     {
@@ -23,19 +24,19 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         #region ZenJect
 
         private          IGameAssets       gameAssets;
-        private          ILogService       logger;
         private readonly ObjectPoolManager objectPoolManager;
+        private          ILogger           logger;
 
         #endregion
 
         private string iconLoadingAssetPath = "LoadingIcon";
 
         [Preserve]
-        private LoadImageHelper(IGameAssets gameAssets, ILogService logger, ObjectPoolManager objectPoolManager)
+        private LoadImageHelper(IGameAssets gameAssets, ObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
         {
             this.gameAssets        = gameAssets;
-            this.logger            = logger;
             this.objectPoolManager = objectPoolManager;
+            this.logger            = loggerManager.GetLogger(this);
         }
 
         private bool inValidKey;

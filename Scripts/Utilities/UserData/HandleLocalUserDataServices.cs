@@ -2,15 +2,15 @@ namespace GameFoundation.Scripts.Utilities.UserData
 {
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.Utilities.LogService;
     using TheOne.Extensions;
+    using TheOne.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
 
     public class HandleLocalUserDataServices : BaseHandleUserDataServices
     {
         [Preserve]
-        public HandleLocalUserDataServices(ILogService logService) : base(logService)
+        public HandleLocalUserDataServices(ILoggerManager loggerManager) : base(loggerManager)
         {
         }
 

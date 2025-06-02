@@ -2,20 +2,20 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using Cysharp.Threading.Tasks;
     using DG.Tweening;
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
     using R3;
+    using TheOne.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
+    using ILogger = TheOne.Logging.ILogger;
 
     public interface IAudioService
     {
@@ -49,7 +49,7 @@
         private readonly SoundSetting      soundSetting;
         private readonly IGameAssets       gameAssets;
         private readonly ObjectPoolManager objectPoolManager;
-        private readonly ILogService       logService;
+        private readonly ILogger           logger;
 
         private CompositeDisposable             compositeDisposable;
         private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
@@ -58,17 +58,17 @@
         [Preserve]
         public AudioService(
             SignalBus         signalBus,
-            SoundSetting      SoundSetting,
+            SoundSetting      soundSetting,
             IGameAssets       gameAssets,
             ObjectPoolManager objectPoolManager,
-            ILogService       logService
+            ILoggerManager    loggerManager
         )
         {
             this.signalBus         = signalBus;
-            this.soundSetting      = SoundSetting;
+            this.soundSetting      = soundSetting;
             this.gameAssets        = gameAssets;
             this.objectPoolManager = objectPoolManager;
-            this.logService        = logService;
+            this.logger            = loggerManager.GetLogger(this);
             Instance               = this;
         }
 
@@ -110,7 +110,7 @@
             {
                 if (this.loopingSoundNameToSources.ContainsKey(name))
                 {
-                    this.logService.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
+                    this.logger.Warning($"You already played  looping - {name}!!!!, do you want to play it again?");
                     return;
                 }
 
@@ -132,7 +132,7 @@
         {
             var audioSource = this.GetLoopingSound(name);
             if (!audioSource) return;
-            
+
             audioSource.StopLoopingSoundManaged();
             audioSource.gameObject.Recycle();
             this.loopingSoundNameToSources.Remove(name);
@@ -163,19 +163,19 @@
         /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
         /// <param name="fadeProgressThreshold">The percent to fade in and out</param>
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
-        
         public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, float fadeProgressThreshold = 0f, bool persist = false)
         {
             this.StopPlayList(fadeSeconds);
-            
+
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
-            
+
             var delayTime = fadeSeconds * Mathf.Clamp01(fadeProgressThreshold / 100f);
             if (delayTime > 0f) await UniTask.Delay(TimeSpan.FromSeconds(delayTime));
 
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
+
         public virtual async void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, float fadeProgressThreshold = 0f, bool persist = false)
         {
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
@@ -191,11 +191,11 @@
             var audioSource = this.MusicAudioSource;
             if (audioSource == null) return;
             audioSource.DOFade(0f, fadeSeconds).OnComplete(() =>
-                {
-                    audioSource.StopLoopingMusicManaged();
-                    audioSource.clip = null;
-                    audioSource.Recycle();
-                });
+            {
+                audioSource.StopLoopingMusicManaged();
+                audioSource.clip = null;
+                audioSource.Recycle();
+            });
         }
 
         public void SetPlayListTime(float time)

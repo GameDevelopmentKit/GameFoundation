@@ -9,17 +9,15 @@ namespace GameFoundation.Scripts
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
     using GameFoundation.Scripts.Utilities;
-    using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
     using GameFoundation.Scripts.Utilities.UserData;
     using GameFoundation.Signals;
     using GameFoundation.UIModule.UIModule;
     using GameFoundation.Utilities.ApplicationServices;
     using GameFoundation.Utilities.GameQueueAction;
+    using TheOne.Logging.DI;
     using UnityEngine;
     using VContainer;
-    using VContainer.Unity;
 
     public static class GameFoundationVContainer
     {
@@ -36,10 +34,11 @@ namespace GameFoundation.Scripts
 
             builder.RegisterInstance(Resources.Load<GDKConfig>("GameConfigs/GDKConfig"));
 
+            builder.RegisterLoggerManager();
+
             builder.Register<GameAssets>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ObjectPoolManager>(Lifetime.Singleton);
             builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<LogService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<HandleLocalUserDataServices>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LoadImageHelper>(Lifetime.Singleton);
 
