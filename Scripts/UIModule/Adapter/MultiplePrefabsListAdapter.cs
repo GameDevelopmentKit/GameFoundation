@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.Adapter
+namespace UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
@@ -7,6 +7,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
+    using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
     using Zenject;
 
@@ -29,7 +30,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override void Awake()
         {
             base.Awake();
-            this.Models = new(this);
+            this.container = this.GetCurrentContainer();
+            this.Models    = new SimpleDataHelper<TModel>(this);
         }
 
         // This is called initially, as many times as needed to fill the viewport,
@@ -80,16 +82,23 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async UniTask InitItemAdapter(List<TModel> models, DiContainer diContainer)
+        public async UniTask InitItemAdapter(List<TModel> models)
         {
-            this.container = diContainer;
             if (!this.IsInitialized)
             {
                 await UniTask.WaitUntil(() => this.IsInitialized);
             }
+
             this.ResetItems(0);
             this.Models.ResetItems(models);
-            for (var i = 0; i < models.Count; ++i) this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
+
+            if (this.Parameters.PrefabControlsDefaultItemSize)
+            {
+                for (var i = 0; i < models.Count; ++i)
+                {
+                    this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
+                }
+            }
         }
 
         public TPresenter GetPresenterAtIndex(int index) { return this.indexToPresenter[index]; }
@@ -103,8 +112,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         [SerializeField] private List<RectTransform> itemPrefabs;
         [SerializeField] private bool                prefabControlsDefaultItemSize = true;
 
-        public readonly Dictionary<string, RectTransform> ItemPrefabs = new();
-        public readonly Dictionary<string, float>         ItemSizes   = new();
+        public Dictionary<string, RectTransform> ItemPrefabs { get; } = new();
+        public Dictionary<string, float>         ItemSizes   { get; } = new();
+
+        public bool PrefabControlsDefaultItemSize => this.prefabControlsDefaultItemSize;
 
         public override void InitIfNeeded(IOSA iAdapter)
         {
@@ -114,7 +125,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             {
                 this.AssertValidWidthHeight(itemPrefab);
                 this.ItemPrefabs[itemPrefab.name] = itemPrefab;
-                this.ItemSizes[itemPrefab.name]   = this.prefabControlsDefaultItemSize ? itemPrefab.rect.height : this.DefaultItemSize;
+
+                if (this.prefabControlsDefaultItemSize)
+                {
+                    this.ItemSizes[itemPrefab.name] = itemPrefab.rect.height;
+                    this.DefaultItemSize            = Mathf.Max(this.DefaultItemSize, itemPrefab.rect.height);
+                }
             }
         }
     }
