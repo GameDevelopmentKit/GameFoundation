@@ -342,8 +342,16 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     }
                     else
                     {
-                        // if the previous screen is screen, it will be overlap
-                        this.previousActiveScreen.OnOverlap(true);
+                        if(this.CheckScreenIsPopup(this.previousActiveScreen))
+                        {
+                            // if the previous screen is popup, it will be hide
+                            this.previousActiveScreen.HideView();
+                        }
+                        else
+                        {
+                            // if the previous screen is not popup, it will be overlap
+                            this.previousActiveScreen.OnOverlap(true);
+                        }
                     }
                 }
             }
