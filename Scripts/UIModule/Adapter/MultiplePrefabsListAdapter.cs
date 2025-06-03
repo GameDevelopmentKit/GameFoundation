@@ -30,7 +30,6 @@ namespace UIModule.Adapter
         protected override void Awake()
         {
             base.Awake();
-            this.container = this.GetCurrentContainer();
             this.Models    = new SimpleDataHelper<TModel>(this);
         }
 
@@ -82,8 +81,9 @@ namespace UIModule.Adapter
         // The adapter needs to be notified of any change that occurs in the data list. Methods for each
         // case are provided: Refresh, ResetItems, InsertItems, RemoveItems
 
-        public async UniTask InitItemAdapter(List<TModel> models)
+        public async UniTask InitItemAdapter(List<TModel> models,DiContainer diContainer)
         {
+            this.container = diContainer;
             if (!this.IsInitialized)
             {
                 await UniTask.WaitUntil(() => this.IsInitialized);
