@@ -31,7 +31,8 @@
         {
             if (!this.tweenSequences.TryGetValue(animationType, out TweenData data) || data == null)
                 return UniTask.CompletedTask;
-
+            
+            data.CreateTweens();
             this.animationTask = new UniTaskCompletionSource();
             data.GetSequence().Play().OnComplete(this.OnCompleteAnim);
 
@@ -60,6 +61,14 @@
             this.tweens.Sort((a, b) => (a.delay + a.duration).CompareTo(b.delay + b.duration));
         }
 
+        public void CreateTweens()
+        {
+            foreach (var tween in this.tweens)
+            {
+                tween.CreateTween(false, false);
+            }
+
+        }
 
         public void SetupTweens(GameObject self)
         {
@@ -74,7 +83,7 @@
             {
                 if (targetObject != null)
                 {
-                    var allTweenFounded = new List<DOTweenAnimation>(targetObject.GetComponentsInChildren<DOTweenAnimation>());
+                    var allTweenFounded = new List<DOTweenAnimation>(targetObject.GetComponentsInChildren<DOTweenAnimation>(true));
 
                     foreach (var tween in allTweenFounded)
                     {
@@ -89,6 +98,7 @@
             {
                 tweenInfo.autoKill = false;
                 tweenInfo.autoPlay = false;
+                tweenInfo.autoGenerate = false;
             }
 
             this.tweens = new List<DOTweenAnimation>(result);
