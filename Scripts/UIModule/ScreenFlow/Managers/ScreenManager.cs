@@ -80,6 +80,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
     public class ScreenManager : MonoBehaviour, IScreenManager, IDisposable
     {
+        [SerializeField] private string currenScreenActiveName;
+
         #region Properties
 
         /// <summary>
@@ -232,6 +234,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
+            this.currenScreenActiveName    = "";
         }
 
         public async UniTask CloseAllScreenAsync()
@@ -247,7 +250,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
-
+            this.currenScreenActiveName    = "";
             await UniTask.WhenAll(tasks);
         }
 
@@ -256,6 +259,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.activeScreens.Clear();
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
+            this.currenScreenActiveName    = "";
 
             foreach (var screen in this.typeToLoadedScreenPresenter)
             {
@@ -282,7 +286,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         {
             this.previousActiveScreen      = this.CurrentActiveScreen.Value;
             this.CurrentActiveScreen.Value = signal.ScreenPresenter;
-
+            this.currenScreenActiveName    = this.CurrentActiveScreen.Value.ToString();
             this.CurrentActiveScreen.Value.SetViewParent(this.CheckPopupIsOverlay(this.CurrentActiveScreen.Value) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
 
             // if show the screen that already in the active screens list, remove current one in list and add it to the last of list
@@ -317,6 +321,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             {
                 // If close the screen on the top, will be open again the behind screen if available
                 this.CurrentActiveScreen.Value = null;
+                this.currenScreenActiveName    = "";
                 this.activeScreens.Remove(closeScreenPresenter);
 
                 if (this.activeScreens.Count > 0)
