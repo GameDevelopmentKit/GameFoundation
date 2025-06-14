@@ -45,6 +45,7 @@ namespace DataManager.Blueprint.BlueprintController
         None,
         Resource,
         Addressable,
-        Cloud
+        Cloud,
+        GoogleDrive,
     }
 }
