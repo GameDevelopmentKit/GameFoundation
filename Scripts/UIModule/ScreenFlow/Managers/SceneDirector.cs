@@ -34,8 +34,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 ActiveScreenName  = sceneName
             });
 
-            await this.GameAssets.UnloadSceneAsync(sceneName);
-
+            await this.UnloadSceneAsync(sceneName);
             CurrentSceneName = sceneName;
             var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName);
 
@@ -163,7 +162,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             }
 
             allTask.Add(Resources.UnloadUnusedAssets().ToUniTask());
-            this.GameAssets.UnloadUnusedAssets(lastScene);
+            await  this.GameAssets.UnloadUnusedAssets(lastScene);
             await UniTask.WhenAll(allTask);
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(activesScene));
@@ -180,7 +179,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public virtual async UniTask UnloadSceneAsync(string sceneName)
         {
             await this.GameAssets.UnloadSceneAsync(sceneName);
-            this.GameAssets.UnloadUnusedAssets(sceneName);
+            await this.GameAssets.UnloadUnusedAssets(sceneName);
         }
     }
 }
