@@ -1,131 +1,137 @@
-﻿
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using UnityEditor;
-    using UnityEditor.SceneManagement;
-    using UnityEngine;
-    using UnityEngine.UIElements;
-    using Object = UnityEngine.Object;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
-    [Serializable]
-    public enum ToolbarZone
+[Serializable]
+public enum ToolbarZone
+{
+    ToolbarZoneRightAlign,
+    ToolbarZoneLeftAlign
+}
+
+[InitializeOnLoad]
+public static class ToolbarUtilities
+{
+    private static ScriptableObject _toolbar;
+    private static string[]         _scenePaths;
+    private static string[]         _sceneNames;
+
+    static ToolbarUtilities()
     {
-        ToolbarZoneRightAlign,
-        ToolbarZoneLeftAlign
+        EditorApplication.delayCall += () =>
+        {
+            EditorApplication.update -= Update;
+            EditorApplication.update += Update;
+        };
     }
 
-    [InitializeOnLoad]
-    public static class ToolbarUtilities
+    private static void Update()
     {
-        private static ScriptableObject _toolbar;
-        private static string[]         _scenePaths;
-        private static string[]         _sceneNames;
-
-        static ToolbarUtilities()
+        if (_toolbar == null)
         {
-            EditorApplication.delayCall += () =>
+            Assembly editorAssembly = typeof(Editor).Assembly;
+
+            Object[] toolbars = Resources.FindObjectsOfTypeAll(editorAssembly.GetType("UnityEditor.Toolbar"));
+            _toolbar = toolbars.Length > 0 ? (ScriptableObject)toolbars[0] : null;
+
+            if (_toolbar != null)
             {
-                EditorApplication.update -= Update;
-                EditorApplication.update += Update;
-            };
-        }
+                var root    = _toolbar.GetType().GetField("m_Root", BindingFlags.NonPublic | BindingFlags.Instance);
+                var rawRoot = root.GetValue(_toolbar);
+                var mRoot   = rawRoot as VisualElement;
+                RegisterCallback(ToolbarZone.ToolbarZoneRightAlign.ToString(), OnGUI);
 
-        private static void Update()
-        {
-            if (_toolbar == null)
-            {
-                Assembly editorAssembly = typeof(Editor).Assembly;
-
-                Object[] toolbars = Resources.FindObjectsOfTypeAll(editorAssembly.GetType("UnityEditor.Toolbar"));
-                _toolbar = toolbars.Length > 0 ? (ScriptableObject)toolbars[0] : null;
-
-                if (_toolbar != null)
+                void RegisterCallback(string root, Action cb)
                 {
-                    var root    = _toolbar.GetType().GetField("m_Root", BindingFlags.NonPublic | BindingFlags.Instance);
-                    var rawRoot = root.GetValue(_toolbar);
-                    var mRoot   = rawRoot as VisualElement;
-                    RegisterCallback(ToolbarZone.ToolbarZoneRightAlign.ToString(), OnGUI);
+                    var toolbarZone = mRoot.Q(root);
 
-                    void RegisterCallback(string root, Action cb)
+                    if (toolbarZone != null)
                     {
-                        var toolbarZone = mRoot.Q(root);
-
-                        if (toolbarZone != null)
+                        var parent = new VisualElement()
                         {
-                            var parent = new VisualElement()
+                            style =
                             {
-                                style =
-                                {
-                                    flexGrow      = 1,
-                                    flexDirection = FlexDirection.Row,
-                                }
-                            };
+                                flexGrow      = 1,
+                                flexDirection = FlexDirection.Row,
+                            }
+                        };
 
-                            var container = new IMGUIContainer();
-                            container.onGUIHandler += () => { cb?.Invoke(); };
-                            parent.Add(container);
-                            toolbarZone.Add(parent);
-                        }
+                        var container = new IMGUIContainer();
+                        container.onGUIHandler += () => { cb?.Invoke(); };
+                        parent.Add(container);
+                        toolbarZone.Add(parent);
                     }
                 }
-            }
-
-            if (_scenePaths == null)
-            {
-                List<string> scenePaths = new List<string>();
-                List<string> sceneNames = new List<string>();
-
-                string folderName   = Application.dataPath + "/Scenes";
-                var    dirInfo      = new DirectoryInfo(folderName);
-                var    allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
-
-                foreach (var fileInfo in allFileInfos)
-                {
-                    var fullPath  = fileInfo.FullName.Replace(@"\", "/");
-                    var scenePath = "Assets" + fullPath.Replace(Application.dataPath, "");
-
-                    scenePaths.Add(scenePath);
-                    sceneNames.Add(Path.GetFileNameWithoutExtension(scenePath));
-                }
-
-                //Add more SceneExtend Folder
-                SceneToolBarExtend.Instance.AddMoreSceneExtend(scenePaths, sceneNames);
-
-                _scenePaths = scenePaths.ToArray();
-                _sceneNames = sceneNames.ToArray();
             }
         }
 
-        private static void OnGUI()
+        if (_scenePaths == null)
         {
-            using (new EditorGUI.DisabledScope(Application.isPlaying))
+            List<string> scenePaths = new List<string>();
+            List<string> sceneNames = new List<string>();
+
+            string folderName   = Application.dataPath + "/Scenes";
+            var    dirInfo      = new DirectoryInfo(folderName);
+            var    allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
+
+            foreach (var fileInfo in allFileInfos)
             {
+                var fullPath  = fileInfo.FullName.Replace(@"\", "/");
+                var scenePath = "Assets" + fullPath.Replace(Application.dataPath, "");
+
+                scenePaths.Add(scenePath);
+                sceneNames.Add(Path.GetFileNameWithoutExtension(scenePath));
+            }
+
+            //Add more SceneExtend Folder
+            SceneToolBarExtend.Instance.AddMoreSceneExtend(scenePaths, sceneNames);
+
+            _scenePaths = scenePaths.ToArray();
+            _sceneNames = sceneNames.ToArray();
+        }
+    }
+
+    private static void OnGUI()
+    {
+        using (new EditorGUI.DisabledScope(Application.isPlaying))
+        {
+            {
+                string sceneName  = EditorSceneManager.GetActiveScene().name;
+                int    sceneIndex = -1;
+
+                for (int i = 0; i < _sceneNames.Length; ++i)
                 {
-                    string sceneName  = EditorSceneManager.GetActiveScene().name;
-                    int    sceneIndex = -1;
-
-                    for (int i = 0; i < _sceneNames.Length; ++i)
+                    if (sceneName == _sceneNames[i])
                     {
-                        if (sceneName == _sceneNames[i])
-                        {
-                            sceneIndex = i;
+                        sceneIndex = i;
 
-                            break;
-                        }
+                        break;
                     }
+                }
 
-                    int newSceneIndex = EditorGUILayout.Popup(sceneIndex, _sceneNames, GUILayout.Width(200.0f));
+                int newSceneIndex = EditorGUILayout.Popup(sceneIndex, _sceneNames, GUILayout.Width(200.0f));
 
-                    if (newSceneIndex != sceneIndex)
+                if (newSceneIndex != sceneIndex)
+                {
+                    if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                     {
-                        if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                        EditorSceneManager.OpenScene(_scenePaths[newSceneIndex], OpenSceneMode.Single);
+                        //Ping scene
+                        var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(_scenePaths[newSceneIndex]);
+
+                        if (sceneAsset != null)
                         {
-                            EditorSceneManager.OpenScene(_scenePaths[newSceneIndex], OpenSceneMode.Single);
+                            EditorGUIUtility.PingObject(sceneAsset);
                         }
                     }
                 }
             }
         }
     }
+}
