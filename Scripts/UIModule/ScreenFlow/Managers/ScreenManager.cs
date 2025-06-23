@@ -245,7 +245,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             foreach (var screen in cacheActiveScreens)
             {
-                tasks.Add(screen.CloseViewAsync());
+                if (screen.ScreenStatus == ScreenStatus.Opened)
+                {
+                    tasks.Add(screen.CloseViewAsync());
+                }
             }
 
             this.CurrentActiveScreen.Value = null;

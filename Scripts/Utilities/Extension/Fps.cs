@@ -13,6 +13,9 @@
 #if !DEVELOPMENT_BUILD && !UNITY_EDITOR && !SHOW_FPS
             this.gameObject.SetActive(false);
 #endif
+#if PRODUCTION
+            this.gameObject.SetActive(false);
+#endif
         }
 
         // Update is called once per frame
