@@ -1,7 +1,6 @@
 namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 {
     using Cysharp.Threading.Tasks;
-    using GameFoundation.DI;
     using UnityEngine;
     using UnityEngine.EventSystems;
     using UnityEngine.Playables;
@@ -23,8 +22,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void Awake()
         {
-            var container = this.GetCurrentContainer();
-            this.eventSystem                   = container.Resolve<EventSystem>();
+            this.eventSystem                   = EventSystem.current;
             this.introAnimation.timeUpdateMode = this.DirectorUpdateMode;
             this.outroAnimation.timeUpdateMode = this.DirectorUpdateMode;
             if (this.introAnimation.playableAsset)
