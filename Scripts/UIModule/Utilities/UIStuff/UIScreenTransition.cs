@@ -54,7 +54,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
             this.animationTask = new();
             this.SetActiveInput(false);
-
+            
+            anim.time = 0;
+            anim.Evaluate();
             anim.Play();
             return this.animationTask.Task;
         }
