@@ -100,6 +100,8 @@ namespace GameFoundation.Scripts.AssetLibrary
         public bool DestroyGameObject(GameObject gameObject);
 
         Dictionary<object, AsyncOperationHandle> GetLoadingAssets();
+
+        void SoftUnloadAssets(string sceneName, int capacity, List<string> listKeep = null);
     }
 
     /// <summary>
@@ -307,8 +309,10 @@ namespace GameFoundation.Scripts.AssetLibrary
 
             if (!this.assetsAutoUnloadByScene.TryGetValue(sceneName, out var listAsset)) return;
 
-            foreach (var asset in listAsset)
+            for (var index = 0; index < listAsset.Count; index++)
             {
+                var asset = listAsset[index];
+
                 if (listKeep != null && listKeep.Contains(asset.ToString()))
                 {
                     continue;
@@ -318,9 +322,18 @@ namespace GameFoundation.Scripts.AssetLibrary
                     await this.UnloadSceneAsync(asset);
                 else
                     this.ReleaseAsset(asset);
+
+                listAsset.Remove(asset);
             }
 
-            this.assetsAutoUnloadByScene.Remove(sceneName);
+            if (listAsset.Count == 0)
+            {
+                this.assetsAutoUnloadByScene.Remove(sceneName);
+            }
+            else
+            {
+                this.assetsAutoUnloadByScene[sceneName] = listAsset;
+            }
         }
 
         #endregion
@@ -328,6 +341,45 @@ namespace GameFoundation.Scripts.AssetLibrary
         #region Asset Handler
 
         public Dictionary<object, AsyncOperationHandle> GetLoadingAssets() => this.loadingAssets;
+
+        public async void SoftUnloadAssets(string sceneName, int capacity, List<string> listKeep = null)
+        {
+            if (string.IsNullOrEmpty(sceneName)) return;
+
+            listKeep ??= new List<string>();
+
+            if (!this.assetsAutoUnloadByScene.TryGetValue(sceneName, out var listAsset)) return;
+            var countUnload = listAsset.Count - capacity;
+
+            var k = 0;
+
+            for (var index = 0; index < listAsset.Count; index++)
+            {
+                var asset = listAsset[index];
+
+                if (listKeep.Contains(asset.ToString()) || k >= countUnload && countUnload > 0)
+                {
+                    continue;
+                }
+
+                if (this.loadedScenes.ContainsKey(asset))
+                    await this.UnloadSceneAsync(asset);
+                else
+                    this.ReleaseAsset(asset);
+
+                listAsset.Remove(asset);
+                k++;
+            }
+
+            if (listAsset.Count == 0)
+            {
+                this.assetsAutoUnloadByScene.Remove(sceneName);
+            }
+            else
+            {
+                this.assetsAutoUnloadByScene[sceneName] = listAsset;
+            }
+        }
 
         /// <summary>
         ///     Preload assets.

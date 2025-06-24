@@ -350,8 +350,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var screenPresenter = signal.ScreenPresenter;
             var screenType      = screenPresenter.GetType();
 
-            if (this.typeToLoadedScreenPresenter.ContainsKey(screenType)) return;
-            this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
+            if (!this.typeToLoadedScreenPresenter.ContainsKey(screenType))
+            {
+                this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
+            }
+
             var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
 
             var viewObj = this.CurrentRootScreen.Find(screenInfo.AddressableScreenPath);
