@@ -19,8 +19,9 @@
 
     public interface IAudioService
     {
-        void        PlaySound(string        name, AudioSource sender);
-        void        PlaySound(string        name, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void        PlaySound(string        name,      AudioSource sender);
+        void        PlaySound(string        name,      bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void        PlaySound(AudioClip     audioClip, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
         AudioSource GetLoopingSound(string  name);
         void        StopLoopingSound(string name);
         void        StopAllSound();
@@ -104,7 +105,17 @@
 
         public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
-            var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            this.PlaySound(audioClip, isLoop, volumeScale, fadeSeconds, isAverage, name);
+        }
+
+        public virtual void PlaySound(AudioClip audioClip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
+        {
+            this.PlaySound(audioClip, isLoop, volumeScale, fadeSeconds, isAverage, audioClip.name);
+        }
+
+        private async void PlaySound(AudioClip audioClip, bool isLoop, float volumeScale, float fadeSeconds, bool isAverage, string name)
+        {
             var audioSource = await this.GetAudioSource();
             if (isLoop)
             {
@@ -120,7 +131,7 @@
             }
             else
             {
-                audioSource.PlayOneShotSoundManaged(audioClip);
+                audioSource.PlayOneShotSoundManaged(audioClip, volumeScale, isAverage);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
             }
