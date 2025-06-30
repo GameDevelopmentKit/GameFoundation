@@ -337,7 +337,8 @@ namespace DigitalRuby.SoundManagerNamespace
             {
                 if (!s.AudioSource.isPlaying)
                 {
-                    GameObject.Destroy(s.AudioSource.gameObject);
+                    // GameObject.Destroy(s.AudioSource.gameObject);
+                    s.AudioSource.Stop();
                 }
             }
 
@@ -390,7 +391,8 @@ namespace DigitalRuby.SoundManagerNamespace
                         Debug.LogWarning("Destroying persisted audio from previous scene: " + music[i].AudioSource.gameObject.name);
 
                         // cleanup persisted audio from previous scenes
-                        GameObject.Destroy(music[i].AudioSource.gameObject);
+                        // GameObject.Destroy(music[i].AudioSource.gameObject);
+                        music[i].AudioSource.Stop();
                     }
 
                     music.RemoveAt(i);
