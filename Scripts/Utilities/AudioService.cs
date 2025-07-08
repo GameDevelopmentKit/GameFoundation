@@ -20,8 +20,8 @@
     public interface IAudioService
     {
         void        PlaySound(string        name,      AudioSource sender);
-        void        PlaySound(string        name,      bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
-        void        PlaySound(AudioClip     audioClip, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void        PlaySound(string        name,      bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool isPausePlaylist = false);
+        void        PlaySound(AudioClip     audioClip, bool        isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool isPausePlaylist = false);
         AudioSource GetLoopingSound(string  name);
         void        StopLoopingSound(string name);
         void        StopAllSound();
@@ -103,18 +103,18 @@
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
+        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool isPausePlaylist = false)
         {
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
-            this.PlaySound(audioClip, isLoop, volumeScale, fadeSeconds, isAverage, name);
+            this.PlaySound(audioClip, isLoop, volumeScale, fadeSeconds, isAverage, name, isPausePlaylist);
         }
 
-        public virtual void PlaySound(AudioClip audioClip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
+        public virtual void PlaySound(AudioClip audioClip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool isPausePlaylist = false)
         {
-            this.PlaySound(audioClip, isLoop, volumeScale, fadeSeconds, isAverage, audioClip.name);
+            this.PlaySound(audioClip, isLoop, volumeScale, fadeSeconds, isAverage, audioClip.name, isPausePlaylist);
         }
 
-        private async void PlaySound(AudioClip audioClip, bool isLoop, float volumeScale, float fadeSeconds, bool isAverage, string name)
+        private async void PlaySound(AudioClip audioClip, bool isLoop, float volumeScale, float fadeSeconds, bool isAverage, string name, bool isPausePlaylist = false)
         {
             var audioSource = await this.GetAudioSource();
             if (isLoop)
@@ -131,9 +131,11 @@
             }
             else
             {
+                if (isPausePlaylist) this.PausePlayList();
                 audioSource.PlayOneShotSoundManaged(audioClip, volumeScale, isAverage);
                 await UniTask.Delay(TimeSpan.FromSeconds(audioClip.length));
                 audioSource.Recycle();
+                if (isPausePlaylist) this.ResumePlayList();
             }
         }
 
