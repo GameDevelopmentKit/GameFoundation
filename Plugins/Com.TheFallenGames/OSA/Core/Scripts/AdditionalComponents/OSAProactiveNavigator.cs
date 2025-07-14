@@ -1,17 +1,17 @@
 //#define DEBUG_OSA_PROACTIVE_NAVIGATOR
 
 using UnityEngine;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 using frame8.Logic.Misc.Other.Extensions;
 using frame8.Logic.Misc.Visual.UI;
 using UnityEngine.UI;
 using System;
 using UnityEngine.EventSystems;
-using Com.TheFallenGames.OSA.Core.SubComponents;
+using Com.ForbiddenByte.OSA.Core.SubComponents;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Com.TheFallenGames.OSA.AdditionalComponents
+namespace Com.ForbiddenByte.OSA.AdditionalComponents
 {
 	/// <summary>
 	/// <para>OSA can work with Unity's built-in navigation, at least in simple scenarios, but if you want full control over the navigation, this component provides it.</para>

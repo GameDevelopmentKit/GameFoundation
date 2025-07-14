@@ -1,4 +1,4 @@
-﻿// This allows faster debugging when need to simualte other platforms by commenting the custom define directive
+// This allows faster debugging when need to simualte other platforms by commenting the custom define directive
 #if UNITY_EDITOR_WIN
 #define OSA_UNITY_EDITOR_WIN
 #endif
@@ -12,13 +12,13 @@ using UnityEngine.UI;
 using UnityEditor;
 using frame8.Logic.Misc.Other;
 using frame8.Logic.Misc.Visual.UI.MonoBehaviours;
-using Com.TheFallenGames.OSA.Core;
-using Com.TheFallenGames.OSA.CustomParams;
-using Com.TheFallenGames.OSA.CustomAdapters.GridView;
-using Com.TheFallenGames.OSA.Editor.OSAWizard.CustomAdapterConfigurators;
+using Com.ForbiddenByte.OSA.Core;
+using Com.ForbiddenByte.OSA.CustomParams;
+using Com.ForbiddenByte.OSA.CustomAdapters.GridView;
+using Com.ForbiddenByte.OSA.Editor.OSAWizard.CustomAdapterConfigurators;
 using System.Reflection;
 
-namespace Com.TheFallenGames.OSA.Editor.OSAWizard
+namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
 {
 	public class InitOSAWindow : BaseOSAWindow<InitOSAWindow.Parameters>
 	{
@@ -1301,7 +1301,7 @@ namespace Com.TheFallenGames.OSA.Editor.OSAWizard
 			EditorGUILayout.Space();
 
 			// Create button
-			DrawSubmitButon(_WindowParams.ExistingImplementationToUse == null ? "Generate script" : "Initialize");
+			DrawSubmitButon(_WindowParams.ExistingImplementationToUse == null ? "Step 1/2: Generate script" : "Step 2/2: Initialize");
 		}
 
 #if OSA_PLAYMAKER
@@ -1561,12 +1561,12 @@ namespace Com.TheFallenGames.OSA.Editor.OSAWizard
 		// Updated to use reflection, as we can't directly reference code that's outside the Plugins folder
 		void PostAttachConfigurePlaymakerSetup()
 		{
-			string playmakerOSAProxyTypeFullName = "Com.TheFallenGames.OSA.Playmaker.PlaymakerOSAProxy";
+			string playmakerOSAProxyTypeFullName = "Com.ForbiddenByte.OSA.Playmaker.PlaymakerOSAProxy";
 			var type = CWiz.GetTypeFromAllAssemblies(playmakerOSAProxyTypeFullName);
 			if (type == null)
 				throw new OSAException(playmakerOSAProxyTypeFullName + " not found");
 
-			//var osaProxy = _WindowParams.ScrollRectRT.gameObject.AddComponent<Com.TheFallenGames.OSA.Playmaker.PlaymakerOSAProxy>();
+			//var osaProxy = _WindowParams.ScrollRectRT.gameObject.AddComponent<Com.ForbiddenByte.OSA.Playmaker.PlaymakerOSAProxy>();
 			var osaProxy = _WindowParams.ScrollRectRT.gameObject.AddComponent(type);
 			var controllerFSM = _WindowParams.playmakerController.GetComponent<PlayMakerFSM>();
 			var itemPrefabFSM = _WindowParams.itemPrefab.GetComponent<PlayMakerFSM>();
@@ -1579,12 +1579,12 @@ namespace Com.TheFallenGames.OSA.Editor.OSAWizard
 			if (controllerFSMVar__config_osa != null)
 				controllerFSMVar__config_osa.Value = osaProxy;
 
-			string playmakerOSALazyDataHelperProxyTypeFullName = "Com.TheFallenGames.OSA.Playmaker.PlaymakerOSALazyDataHelperProxy";
+			string playmakerOSALazyDataHelperProxyTypeFullName = "Com.ForbiddenByte.OSA.Playmaker.PlaymakerOSALazyDataHelperProxy";
 			type = CWiz.GetTypeFromAllAssemblies(playmakerOSALazyDataHelperProxyTypeFullName);
 			if (type == null)
 				throw new OSAException(playmakerOSALazyDataHelperProxyTypeFullName + " not found");
 
-			//var lazyDataHelper = controllerFSM.GetComponent<Com.TheFallenGames.OSA.Playmaker.PlaymakerOSALazyDataHelperProxy>();
+			//var lazyDataHelper = controllerFSM.GetComponent<Com.ForbiddenByte.OSA.Playmaker.PlaymakerOSALazyDataHelperProxy>();
 			var lazyDataHelper = controllerFSM.GetComponent(type);
 			if (lazyDataHelper)
 			{

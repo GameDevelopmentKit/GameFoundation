@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 6cd1979504c51a44abb45d3367e45ae6
+timeCreated: 1563190545
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Utilities/Scripts/CustomAdapters/TableView/Input/TableViewTextInputController.cs
+  uploadId: 709508

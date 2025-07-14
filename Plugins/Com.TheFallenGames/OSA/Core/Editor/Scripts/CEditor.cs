@@ -1,4 +1,4 @@
-﻿using frame8.Logic.Misc.Other.Extensions;
+using frame8.Logic.Misc.Other.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace Com.TheFallenGames.OSA.Editor
+namespace Com.ForbiddenByte.OSA.Editor
 {
 	public static class CEditor
 	{

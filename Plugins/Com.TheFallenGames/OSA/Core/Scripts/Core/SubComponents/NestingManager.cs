@@ -1,9 +1,9 @@
-﻿//#define DEBUG_COMPUTE_VISIBILITY
+//#define DEBUG_COMPUTE_VISIBILITY
 
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	internal class NestingManager<TParams, TItemViewsHolder> : IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
 		where TParams : BaseParams

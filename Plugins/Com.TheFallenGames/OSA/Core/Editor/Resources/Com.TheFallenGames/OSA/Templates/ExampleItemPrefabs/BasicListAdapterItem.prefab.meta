@@ -2,3 +2,10 @@ fileFormatVersion: 2
 guid: ef9d112c3d8fccd4a8acad4338a5a979
 NativeFormatImporter:
   userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Core/Editor/Resources/Com.TheFallenGames/OSA/Templates/ExampleItemPrefabs/BasicListAdapterItem.prefab
+  uploadId: 709508

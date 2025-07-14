@@ -1,9 +1,9 @@
-﻿//#define DEBUG_COMPUTE_VISIBILITY
+//#define DEBUG_COMPUTE_VISIBILITY
 
 using frame8.Logic.Misc.Other.Extensions;
 using UnityEngine;
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	internal class ReleaseFromPullManager<TParams, TItemViewsHolder>
 		where TParams : BaseParams

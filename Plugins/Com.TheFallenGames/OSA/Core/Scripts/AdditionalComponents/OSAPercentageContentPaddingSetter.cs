@@ -1,9 +1,9 @@
 using System.Collections;
 using UnityEngine;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 using UnityEngine.UI;
 
-namespace Com.TheFallenGames.OSA.AdditionalComponents
+namespace Com.ForbiddenByte.OSA.AdditionalComponents
 {
 	/// <summary>
 	/// Use this when the content padding should be a function of the viewport size, rather than a constant decided at edit-time. 

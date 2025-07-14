@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 486ee90ba4b16014ebe95094ecde8c98
+timeCreated: 1606210561
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Utilities/Scripts/CustomAdapters/GridView/Specialized/GridWithCategories/ICategoryModel.cs
+  uploadId: 709508

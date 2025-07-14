@@ -1,4 +1,4 @@
-﻿#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4_OR_NEWER
+#if UNITY_5_2 || UNITY_5_3 || UNITY_5_4_OR_NEWER
 #define SCROLLRECT_HAS_VIEWPORT
 #endif
 
@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEditor;
 
-namespace Com.TheFallenGames.OSA.Editor.OSAWizard
+namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
 {
 	public class CreateOSAWindow : BaseOSAWindow<CreateOSAWindow.Parameters>
 	{

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 405d849c2add9a845a24b0a4962c572b
+timeCreated: 1563189913
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Utilities/Scripts/CustomAdapters/TableView/IColumnState.cs
+  uploadId: 709508

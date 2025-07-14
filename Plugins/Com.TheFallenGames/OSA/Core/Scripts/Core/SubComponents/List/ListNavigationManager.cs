@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents.List
+namespace Com.ForbiddenByte.OSA.Core.SubComponents.List
 {
 	public class ListNavigationManager<TParams, TItemViewsHolder> : NavigationManager<TParams, TItemViewsHolder>
 		where TParams : BaseParams

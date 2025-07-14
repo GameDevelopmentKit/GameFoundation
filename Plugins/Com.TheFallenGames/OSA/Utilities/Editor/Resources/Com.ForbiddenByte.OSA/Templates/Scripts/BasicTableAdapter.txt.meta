@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 724e74dc594f8a746bb3ed22c3f8ec9c
+timeCreated: 1563714990
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Utilities/Editor/Resources/Com.ForbiddenByte.OSA/Templates/Scripts/BasicTableAdapter.txt
+  uploadId: 709508

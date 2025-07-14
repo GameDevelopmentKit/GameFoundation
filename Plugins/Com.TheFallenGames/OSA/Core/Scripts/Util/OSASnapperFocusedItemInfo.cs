@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using frame8.Logic.Misc.Visual.UI;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 using System;
 using UnityEngine.Events;
 
-namespace Com.TheFallenGames.OSA.Util
+namespace Com.ForbiddenByte.OSA.Util
 {
     /// <summary>
     /// Utility providing a way of getting the currently focused item by a <see cref="Snapper8"/> on OSA. 

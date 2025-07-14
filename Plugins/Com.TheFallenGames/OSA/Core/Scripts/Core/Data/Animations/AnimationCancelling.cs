@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Com.TheFallenGames.OSA.Core.Data.Animations
+namespace Com.ForbiddenByte.OSA.Core.Data.Animations
 {
 	/// <summary>
 	/// Parameters for cancelling certain animations on certain events

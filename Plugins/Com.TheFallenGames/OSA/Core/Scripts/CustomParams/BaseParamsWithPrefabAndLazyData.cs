@@ -1,8 +1,8 @@
-﻿using System;
-using Com.TheFallenGames.OSA.Core;
-using Com.TheFallenGames.OSA.DataHelpers;
+using System;
+using Com.ForbiddenByte.OSA.Core;
+using Com.ForbiddenByte.OSA.DataHelpers;
 
-namespace Com.TheFallenGames.OSA.CustomParams
+namespace Com.ForbiddenByte.OSA.CustomParams
 {
 	/// <summary>
 	/// This will soon become a legacy feature. Using a DataHelper is preferred instead. 

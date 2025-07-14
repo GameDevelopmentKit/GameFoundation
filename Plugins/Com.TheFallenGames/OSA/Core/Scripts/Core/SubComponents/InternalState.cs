@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -6,7 +6,7 @@ using frame8.Logic.Misc.Other;
 using frame8.Logic.Misc.Other.Extensions;
 using System;
 
-namespace Com.TheFallenGames.OSA.Core.SubComponents
+namespace Com.ForbiddenByte.OSA.Core.SubComponents
 {
 	/// <summary>
 	/// Contains cached variables, helper methods and generally things that are not exposed to inheritors. Note: the LayoutGroup component on content, if any, will be disabled.
@@ -114,7 +114,7 @@ namespace Com.TheFallenGames.OSA.Core.SubComponents
 			if (layoutElement)
 			{
 				GameObject.Destroy(layoutElement);
-				Debug.Log("LayoutElement on GameObject " + contentSizeFitter.name + " has beed DESTROYED in order to use OSA");
+				Debug.Log("LayoutElement on GameObject " + sourceParams.Content.name + " has beed DESTROYED in order to use OSA");
 			}
 
 			//if (sourceParams.IsHorizontal)
