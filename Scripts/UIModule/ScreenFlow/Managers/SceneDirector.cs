@@ -6,6 +6,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using UnityEngine;
+    using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
     using Zenject;
@@ -34,7 +35,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 ActiveScreenName  = sceneName
             });
 
-            await this.UnloadSceneAsync(sceneName,listNotClear);
+            await this.UnloadSceneAsync(sceneName, listNotClear);
             CurrentSceneName = sceneName;
             var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName);
 
@@ -46,6 +47,13 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             });
 
             return screenInstance;
+        }
+
+        public virtual async UniTask<SceneInstance> SoftReloadCurrentScene(List<string> listNotClear = null)
+        {
+            this.UnloadSceneAsync(CurrentSceneName, listNotClear).Forget();
+
+            return await Addressables.LoadSceneAsync(CurrentSceneName);
         }
 
         //to backup for old version
@@ -162,7 +170,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             }
 
             allTask.Add(Resources.UnloadUnusedAssets().ToUniTask());
-            await  this.GameAssets.UnloadUnusedAssets(lastScene);
+            await this.GameAssets.UnloadUnusedAssets(lastScene);
             await UniTask.WhenAll(allTask);
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(activesScene));
@@ -176,10 +184,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         }
 
         /// <summary>Unload scene async by name </summary>
-        public virtual async UniTask UnloadSceneAsync(string sceneName,List<string> listNotClear=null)
+        public virtual async UniTask UnloadSceneAsync(string sceneName, List<string> listNotClear = null)
         {
-            await this.GameAssets.UnloadSceneAsync(sceneName);
-            await this.GameAssets.UnloadUnusedAssets(sceneName,listNotClear);
+            this.GameAssets.UnloadSceneAsync(sceneName);
+            await this.GameAssets.UnloadUnusedAssets(sceneName, listNotClear);
         }
     }
 }

@@ -45,6 +45,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// </summary>
         public void CloseAllScreen();
 
+        void CloseAllScreen(params Type[] except);
+
         /// <summary>
         /// Close all screen on current scene async
         /// </summary>
@@ -237,6 +239,31 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.currenScreenActiveName    = "";
         }
 
+        public void CloseAllScreen(params Type[] except)
+        {
+            var cacheActiveScreens = this.activeScreens.ToList();
+
+            foreach (var screen in cacheActiveScreens)
+            {
+                if (!except.Contains(screen.GetType()))
+                {
+                    screen.CloseViewAsync();
+                    this.activeScreens.Remove(screen);
+                }
+            }
+
+            if (this.activeScreens.Count > 0)
+            {
+                this.CurrentActiveScreen.Value = this.activeScreens.Last();
+                this.previousActiveScreen      = this.activeScreens.Count > 1 ? this.activeScreens[^2] : null;
+            }
+            else
+            {
+                this.CurrentActiveScreen.Value = null;
+                this.previousActiveScreen      = null;
+            }
+        }
+
         public async UniTask CloseAllScreenAsync()
         {
             var tasks              = new List<UniTask>();
@@ -332,7 +359,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     var nextScreen = this.activeScreens.Last();
 
                     if (nextScreen.ScreenStatus == ScreenStatus.Opened)
+                    {
                         this.OnShowScreen(new ScreenShowSignal() { ScreenPresenter = nextScreen });
+                        if (this.CheckScreenIsPopup(nextScreen)) this.signalBus.Fire(new PopupShowedSignal() { ScreenPresenter = nextScreen });
+                    }
                     else
                         nextScreen.OpenViewAsync();
                 }
