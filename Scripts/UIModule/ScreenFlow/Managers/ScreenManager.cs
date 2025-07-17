@@ -273,6 +273,30 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
         }
+        
+        public void CloseAllScreen(params Type[] except) 
+        {
+            var cacheActiveScreens = this.activeScreens.ToList();
+            foreach (var screen in cacheActiveScreens)
+            {
+                if(!except.Contains(screen.GetType()))
+                {
+                    screen.CloseViewAsync();
+                    this.activeScreens.Remove(screen);
+                }
+            }
+            
+            if(activeScreens.Count > 0)
+            {
+                this.CurrentActiveScreen.Value = this.activeScreens.Last();
+                this.previousActiveScreen      = this.activeScreens.Count > 1 ? this.activeScreens[^2] : null;
+            }
+            else
+            {
+                this.CurrentActiveScreen.Value = null;
+                this.previousActiveScreen      = null;
+            }
+        }
 
         public async UniTask CloseAllScreenAsync()
         {
@@ -364,7 +388,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     var nextScreen = this.activeScreens.Last();
 
                     if (nextScreen.ScreenStatus == ScreenStatus.Opened)
+                    {
                         this.OnShowScreen(new ScreenShowSignal() { ScreenPresenter = nextScreen });
+                        if (this.CheckScreenIsPopup(nextScreen)) signalBus.Fire(new PopupShowedSignal() { ScreenPresenter = nextScreen });
+                    }
                     else
                         nextScreen.OpenViewAsync();
                 }
