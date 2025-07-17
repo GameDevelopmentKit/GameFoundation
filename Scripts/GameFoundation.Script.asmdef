@@ -13,8 +13,7 @@
     "MasterAAASound.Scripts",
     "I2Localization.Scripts",
     "Zenject",
-    "VContainer",
-    "TheOne.Extensions"
+    "VContainer"
   ],
   "versionDefines": [
     {

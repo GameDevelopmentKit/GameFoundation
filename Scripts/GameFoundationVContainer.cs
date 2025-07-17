@@ -4,7 +4,6 @@
 #nullable enable
 namespace GameFoundation.Scripts
 {
-    using System;
     using GameFoundation.BlueprintFlow;
     using GameFoundation.DI;
     using GameFoundation.Scripts.AssetLibrary;
@@ -16,7 +15,6 @@ namespace GameFoundation.Scripts
     using GameFoundation.UIModule.UIModule;
     using GameFoundation.Utilities.ApplicationServices;
     using GameFoundation.Utilities.GameQueueAction;
-    using TheOne.Extensions;
     using TheOne.Logging.DI;
     using UnityEngine;
     using VContainer;
@@ -43,7 +41,6 @@ namespace GameFoundation.Scripts
             builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<HandleLocalUserDataServices>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<LoadImageHelper>(Lifetime.Singleton);
-            builder.Register(typeof(ICloudUserDataService).GetSingleDerivedType(), Lifetime.Singleton).As<ICloudUserDataService>();
 
             builder.DeclareSignal<UserDataLoadedSignal>();
         }
