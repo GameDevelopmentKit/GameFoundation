@@ -1,4 +1,6 @@
-﻿namespace UIModule.Utilities
+﻿using UnityEngine;
+
+namespace UIModule.Utilities
 {
     using System;
     using TMPro;
@@ -118,6 +120,18 @@
                 return useSemiColon ? timeSpan.ToString(@"mm") : timeSpan.ToString(@"mm\m");
 
             return useSemiColon ? timeSpan.ToString(@"ss") : timeSpan.ToString(@"ss\s");
+        }
+        
+        public static string FloatToString(this float value, int decimalPlaces = 2)
+        {
+            var tempValue = Mathf.Ceil(value * Mathf.Pow(10, decimalPlaces)) / Mathf.Pow(10, decimalPlaces);
+            return $"{tempValue}";
+        }
+        
+        public static float RoundToDecimal(this float value, int decimalPlaces = 2)
+        {
+            var tempValue = Mathf.Ceil(value * Mathf.Pow(10, decimalPlaces)) / Mathf.Pow(10, decimalPlaces);
+            return tempValue;
         }
     }
 
