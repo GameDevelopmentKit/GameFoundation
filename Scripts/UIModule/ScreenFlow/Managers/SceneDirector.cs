@@ -2,6 +2,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
@@ -22,6 +23,55 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         {
             this.signalBus  = signalBus;
             this.GameAssets = gameAssets;
+        }
+
+        public virtual async UniTask PreloadAssetBundleKey(string key) { await Addressables.DownloadDependenciesAsync(key).ToUniTask(); }
+
+        public virtual async UniTask<SceneInstance> LoadSingleSceneAsyncByAddictiveMode(string sceneName, List<string> keptAssets = null)
+        {
+            this.signalBus.Fire(new StartLoadingNewSceneSignal
+            {
+                CurrentScreenName = new List<string>() { CurrentSceneName },
+                TargetScreenName  = new List<string>() { sceneName },
+                ActiveScreenName  = sceneName
+            });
+
+            var oldScene = SceneManager.GetActiveScene();
+
+            var loadHandle = Addressables.LoadSceneAsync(
+                sceneName,
+                LoadSceneMode.Additive,
+                false
+            );
+
+            await loadHandle.Task;
+
+            await UniTask.DelayFrame(1);
+
+            await loadHandle.Result.ActivateAsync();
+
+            SceneManager.SetActiveScene(loadHandle.Result.Scene);
+
+            if (oldScene.IsValid())
+            {
+                var unloadOp = SceneManager.UnloadSceneAsync(oldScene);
+
+                while (unloadOp is { isDone: false })
+                    await UniTask.DelayFrame(1);
+            }
+
+            CurrentSceneName = sceneName;
+
+            this.signalBus.Fire(new FinishLoadingNewSceneSignal
+            {
+                CurrentScreenName = new List<string>() { CurrentSceneName },
+                TargetScreenName  = new List<string>() { sceneName },
+                ActiveScreenName  = sceneName
+            });
+
+            this.UnloadSceneAsync(oldScene.name, keptAssets).Forget();
+
+            return loadHandle.Result;
         }
 
         public virtual async UniTask<SceneInstance> ReloadCurrentScene(List<string> listNotClear = null)
