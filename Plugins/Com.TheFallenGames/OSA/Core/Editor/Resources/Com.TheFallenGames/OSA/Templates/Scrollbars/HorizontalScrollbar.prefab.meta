@@ -2,3 +2,10 @@ fileFormatVersion: 2
 guid: 7d85e94d622847e448adf52587789df2
 NativeFormatImporter:
   userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Core/Editor/Resources/Com.TheFallenGames/OSA/Templates/Scrollbars/HorizontalScrollbar.prefab
+  uploadId: 709508

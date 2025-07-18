@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
     /// Comments format: value if vertical scrolling/value if horizontal scrolling
     public class ItemsDescriptor
@@ -471,7 +471,7 @@ namespace Com.TheFallenGames.OSA.Core
 			return GetItemViewIndexFromRealIndexWithoutChecks(realIndex);
 		}
 
-		// Make sure this does the same thing as "this[int itemIndexInView]" property, whenever it's modified
+		// Note to OSA devs: Make sure this does the same thing as "this[int itemIndexInView]" property, whenever it's modified
 		public double GetItemSizeOrDefault(int itemIndexInView)
 		{
 			//double val;

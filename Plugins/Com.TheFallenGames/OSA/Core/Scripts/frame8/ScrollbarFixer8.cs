@@ -1,6 +1,5 @@
 ﻿//#define DEBUG_EVENTS
 
-//using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,7 +39,7 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 
 		[Range(0.01f, 1f)]
 		[Tooltip("When using elasticity in the ScrollView and pulling the content outside bounds, this value determines how small can the scrollbar get")]
-		public float minCompressedSize = .1f;
+		public float minCompressedSize = .01f;
 
 		[Range(0.01f, 1f)]
 		public float maxSize = 1f;
@@ -51,7 +50,18 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 		[Tooltip("Used to prevent updates to be processed too often, in case this is a concern")]
 		public int skippedFramesBetweenPositionChanges;
 
-        [Tooltip("If not assigned, will try to find a ScrollRect or an IScrollRectProxy in the parent")]
+		[Tooltip(
+			"Enable this if the Scrollbar has any interractable children objects (Button, Image etc.), \n" +
+			"because they'll 'consume' some of the events that this script needs to function properly. \n" +
+			"\n" +
+			"However, sometimes you might want to keep this disabled even in the above case, but be \n" +
+			"warned that we'll be in a slightly invalid state: 'pre-dragging' will start, but will \n" +
+			"not end on 'pointer up' because the Scrollbar won't ever receive 'on pointer up' in the \n" +
+			"first place, it'll be 'consumed' by the respective child. Do your testing as this will \n" +
+			"can be a problem in some cases")]
+		public bool ignoreDragWithoutPointerDown = false;
+
+        [Tooltip("If not assigned, will try to find a ScrollRect or an IScrollRectProxy in the parent. If viewport is assigned, the search starts from there")]
         public ScrollRect scrollRect;
 
         [Tooltip("If not assigned, will use the resolved scrollRect")]
@@ -93,14 +103,25 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 		double IScrollRectProxy.ContentInsetFromViewportEnd { get { return Content.GetInsetFromParentEdge(Viewport, ScrollRectProxy.GetEndEdge()); } }
 		#endregion
 
-		public bool IsPreDragging { get { return _State == StateEnum.PRE_DRAGGING; } }
-		public bool IsDragging { get { return _State == StateEnum.DRAGGING; } }
+		public bool IsPreDragging { get { return State == StateEnum.PRE_DRAGGING; } }
+		public bool IsDragging { get { return State == StateEnum.DRAGGING; } }
 		public bool IsDraggingOrPreDragging { get { return IsDragging || IsPreDragging; } }
 
 		/// <summary> Using Scaled time for a scrollbar's animation doesn't make too much sense, so we're always using unscaledTime</summary>
 		float Time { get { return UnityEngine.Time.unscaledTime; } }
 
 		IScrollRectProxy ScrollRectProxy { get { return externalScrollRectProxy == null ? this : externalScrollRectProxy; } }
+		StateEnum State
+		{
+			get { return _State; }
+			set
+			{
+#if DEBUG_EVENTS
+				Debug.Log("State: " + State + " -> " + value);
+#endif
+				_State = value;
+			}
+		}
 
 		const float HIDE_EFFECT_START_DELAY_01 = .4f; // relative to this.autoHideTime
 
@@ -113,12 +134,14 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 		double _LastValue;
         float _TimeOnLastValueChange;
 		StateEnum _State = StateEnum.NONE;
-        IEnumerator _SlowUpdateCoroutine;
+		IEnumerator _SlowUpdateCoroutine;
 		float _TransversalScaleOnLastDrag, _AlphaOnLastDrag;
 		bool _FullyInitialized;
 		int _FrameCountOnLastPositionUpdate;
 		bool _TriedToCallOnScrollbarSizeChangedAtLeastOnce;
 		int? _PrimaryEventID;
+		// We might only receive OnInitializePotentialDrag() directly if a child 'consumed' our OnPointerDown (and thus will also comsume the OnPointerUp)
+		bool? _PointerDownReceivedForCurrentDrag;
 
 
 		void Awake()
@@ -132,13 +155,27 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
             _TimeOnLastValueChange = Time;
             _HorizontalScrollBar = _Scrollbar.direction == Scrollbar.Direction.LeftToRight || _Scrollbar.direction == Scrollbar.Direction.RightToLeft;
 
-			if (externalScrollRectProxy == null)
+			// Fix/Improvement 24.08.2022: If viewport is specified, then there's a 99% chance the target ScrollRect/OSA is on the nearest GameObject up the hierarchy starting from it
+			var parentSearchOrigin = viewport == null ? transform.parent : viewport;
+			if (externalScrollRectProxy == null && scrollRect == null)
 			{
-				if (!scrollRect)
+				var curTr = parentSearchOrigin;
+				while (curTr != null)
 				{
-					scrollRect = GetComponentInParent<ScrollRect>();
-					//if (!scrollRect)
-					//    throw new UnityException("Please provide a ScrollRect for ScrollbarFixer8 to work");
+					var esrp = curTr.GetComponent(typeof(IScrollRectProxy)) as IScrollRectProxy;
+					if (esrp != null)
+                    {
+						externalScrollRectProxy = esrp;
+						break;
+					}
+					var sr = curTr.GetComponent<ScrollRect>();
+					if (sr != null)
+					{
+						scrollRect = sr;
+						break;
+					}
+
+					curTr = curTr.parent;
 				}
 			}
 
@@ -177,7 +214,6 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
                         scrollRect.horizontalScrollbar = null;
                     }
                 }
-
             }
 			else
 			{
@@ -196,23 +232,27 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 				if (externalScrollRectProxy == null)
 				{
 					// Start with directly with the parent when searching for IScrollRectProxy, as the scrollbar itself is a IScrollRectProxy and needs to be avoided;
-					externalScrollRectProxy = transform.parent.GetComponentInParent(typeof(IScrollRectProxy)) as IScrollRectProxy;
+					externalScrollRectProxy = parentSearchOrigin.GetComponentInParent(typeof(IScrollRectProxy)) as IScrollRectProxy;
 					if (externalScrollRectProxy == null)
 					{
 						// Try starting from the viewport, as the scrollbar might not be a child of the target ScrollView
 						if (viewport)
-							externalScrollRectProxy = viewport.GetComponentInParent(typeof(IScrollRectProxy)) as IScrollRectProxy;
-
-						if (externalScrollRectProxy == null)
 						{
-							if (enabled)
-							{
-								Debug.Log(GetType().Name + ": no scrollRect provided and found no " + typeof(IScrollRectProxy).Name + " component among ancestors. Disabling...");
-								enabled = false;
-							}
-							return;
-						}
+							var alreadySearchedViewport = parentSearchOrigin == viewport;
+							if (!alreadySearchedViewport)
+								externalScrollRectProxy = viewport.GetComponentInParent(typeof(IScrollRectProxy)) as IScrollRectProxy;
+                        }
 					}
+				}
+
+				if (externalScrollRectProxy == null)
+				{
+					if (enabled)
+					{
+						Debug.Log(GetType().Name + ": no scrollRect provided and found no " + typeof(IScrollRectProxy).Name + " component among ancestors. Disabling...");
+						enabled = false;
+					}
+					return;
 				}
 
 				_ScrollViewRT = externalScrollRectProxy.gameObject.transform as RectTransform;
@@ -225,15 +265,9 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 				UpdateStartingValuesForAutoHideEffect();
 		}
 
-		//void Start()
-		//{
-		//	// In case useUnscaledTime has changed between Awake and Start, this needs to be updated
-		//	_TimeOnLastValueChange = Time;
-		//}
-
 		void OnEnable()
         {
-			ResetPointerEvent(); // in case _State was stuck in non-NONE and the object was disabled
+			ResetPointerEvent(); // in case State was stuck in non-NONE and the object was disabled
 			_SlowUpdateCoroutine = SlowUpdate();
 
 			StartCoroutine(_SlowUpdateCoroutine);
@@ -241,21 +275,16 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 
 		void Update()
 		{
-			//Application.targetFrameRate = 6;
 			if (!_FullyInitialized)
 				InitializeInFirstUpdate();
-
-			//Debug.Log("_Scrollbar.value " + _Scrollbar.value);
-			//Debug.Log("_Scrollbar.value " + _Scrollbar.value + ", _Scrollbar.size " + _Scrollbar.size);
-			//return;
 
 			if (scrollRect || externalScrollRectProxy != null && externalScrollRectProxy.IsInitialized)
 			{
 				// Don't override between pointer down event and OnPointerUp or OnBeginDrag
 				// Don't override when dragging
-				if (_State == StateEnum.NONE)
+				if (State == StateEnum.NONE)
 					UpdateOnNoDragging();
-				else if (_State == StateEnum.PRE_DRAGGING)
+				else if (State == StateEnum.PRE_DRAGGING)
 					UpdateOnPreDragging();
 			}
 		}
@@ -263,8 +292,15 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
         void UpdateOnNoDragging()
 		{
 			var value = ScrollRectProxy.GetNormalizedPosition();
-			//Debug.Log("_Scrollbar.value = " + (float)value);
+#if DEBUG_EVENTS
+			string didReceivePointerDown = _PointerDownReceivedForCurrentDrag == null ? "(null)" : _PointerDownReceivedForCurrentDrag.Value.ToString();
+			Debug.Log(
+				gameObject.name + gameObject.GetInstanceID() + ", didReceivePointerDown=" + didReceivePointerDown + 
+				", UpdateOnNoDragging _Scrollbar.value = " + (float)value, gameObject
+			);
+#endif
 			_Scrollbar.value = (float)value;
+
 			if (autoHide)
 			{
 				if (value == _LastValue)
@@ -313,7 +349,14 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 		}
 
 		void UpdateOnPreDragging()
-        {
+		{
+			bool didReceivePointerDown = _PointerDownReceivedForCurrentDrag.Value;
+#if DEBUG_EVENTS
+			Debug.Log(
+				gameObject.name + gameObject.GetInstanceID() + ", didReceivePointerDown=" + didReceivePointerDown +
+				", UpdateOnPreDragging _Scrollbar.value = " + (float)_Scrollbar.value, gameObject
+			);
+#endif
 			// During keeping the pointer down (and not moving), we're constantly updating ScrollRect's position,
 			// as in most cases the Scrollbar will move towards the pointer across multiple frames
 			OnScrollRectValueChanged(false);
@@ -350,27 +393,16 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 				inset += ctInsetFromEdge;
 
 			return inset;
-
-			//size -= size * inset / viewportSize; 
-
-			//if (inset > 0) 
-			//{ 
-			//	size -= size * inset / viewportSize; 
-			//	size = System.Math.Max(minCompressedSize, System.Math.Min(maxSize, size)); 
-			//} 
-			//else 
-			//{ 
-			//	size = System.Math.Max(minSize, System.Math.Min(maxSize, size)); 
-			//}
 		}
 
-		#region IScrollRectProxy methods implementation (used if external proxy is not manually assigned)
+#region IScrollRectProxy methods implementation (used if external proxy is not manually assigned)
 		/// <summary>Not used in this default interface implementation</summary>
 #pragma warning disable 0067
 		event System.Action<double> IScrollRectProxy.ScrollPositionChanged { add { } remove { } }
 #pragma warning restore 0067
 		public void SetNormalizedPosition(double normalizedPosition) 
-		{ 
+		{
+			Debug.Log("SetNormalizedPosition: " + normalizedPosition);
 			if (_HorizontalScrollBar) 
 				scrollRect.horizontalNormalizedPosition = (float)normalizedPosition; 
 			else 
@@ -380,40 +412,74 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 		public double GetContentSize() { return IsHorizontal ? Content.rect.width : Content.rect.height; }
 		public double GetViewportSize() { return IsHorizontal ? Viewport.rect.width : Viewport.rect.height; }
 		public void StopMovement() { scrollRect.StopMovement(); }
-		#endregion
+#endregion
 
-		#region Unity UI event callbacks
-		//        public override void OnMove(AxisEventData eventData)
-		//		{
-		//#if DEBUG_EVENTS
-		//			Debug.Log("ScrollbarF: OnMove: " + eventData.moveDir);
-		//#endif
-		//			base.OnMove(eventData);
-
-		//        }
-
+#region Unity UI event callbacks
 		public void OnPointerDown(PointerEventData eventData)
 		{
 #if DEBUG_EVENTS
 			Debug.Log("ScrollbarF: OnPointerDown: " + eventData.pointerId);
 #endif
+			_PointerDownReceivedForCurrentDrag = true;
 		}
+
 		public void OnInitializePotentialDrag(PointerEventData eventData)
 		{
 #if DEBUG_EVENTS
-			Debug.Log("ScrollbarF: OnInitializePotentialDrag: " + eventData.pointerId);
+			Debug.Log("ScrollbarF: OnInitializePotentialDrag: " + eventData.pointerId + ", State=" + State);
 #endif
+			if (State == StateEnum.PRE_DRAGGING)
+			{
+				if (_PointerDownReceivedForCurrentDrag.Value)
+				{
+#if DEBUG_EVENTS
+					Debug.Log("ScrollbarF: OnInitializePotentialDrag: not accepted, already in a valid event");
+#endif
+					return;
+				}
+
+				if (ignoreDragWithoutPointerDown)
+                {
+#if DEBUG_EVENTS
+					Debug.Log("ScrollbarF: OnInitializePotentialDrag: not accepted, ignoreDragWithoutPointerDown is set. Force resetting pointer event");
+#endif
+					ResetPointerEvent();
+					return;
+				}
+
+#if DEBUG_EVENTS
+				Debug.Log("ScrollbarF: OnInitializePotentialDrag: state was " + State + " and ignoreDragWithoutPointerDown=false. " +
+					"Force resetting pointer event");
+#endif
+				ResetPointerEvent();
+			}
+
 			if (_PrimaryEventID != null)
+			{
+#if DEBUG_EVENTS
+				Debug.Log("ScrollbarF: OnInitializePotentialDrag: not accepted, _PrimaryEventID != null (shouldn't really happen)");
+#endif
+				return;
+			}
+
+			if (_PointerDownReceivedForCurrentDrag == null)
+			{
+				_PointerDownReceivedForCurrentDrag = false;
+			}
+
+			if (!_PointerDownReceivedForCurrentDrag.Value && ignoreDragWithoutPointerDown)
 				return;
 
-			Assert.AreEqual(StateEnum.NONE, _State);
+#if DEBUG_EVENTS
+			Debug.Log("ScrollbarF: OnInitializePotentialDrag: about to be accepted");
+#endif
+
+			Assert.AreEqual(StateEnum.NONE, State);
 			_PrimaryEventID = eventData.pointerId;
 			if (externalScrollRectProxy != null && externalScrollRectProxy.IsInitialized)
 				externalScrollRectProxy.StopMovement();
-			//_Scrollbar.OnPointerDown(eventData);
-
-			//OnScrollRectValueChanged(false);
-			_State = StateEnum.PRE_DRAGGING;
+			
+			State = StateEnum.PRE_DRAGGING;
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
@@ -424,10 +490,10 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 			if (eventData.pointerId != _PrimaryEventID)
 				return;
 
-			Assert.AreEqual(StateEnum.PRE_DRAGGING, _State);
-			//_Scrollbar.OnBeginDrag(eventData);
-			_State = StateEnum.DRAGGING;
+			Assert.AreEqual(StateEnum.PRE_DRAGGING, State);
+			State = StateEnum.DRAGGING;
 		}
+
 		public void OnDrag(PointerEventData eventData)
 		{
 #if DEBUG_EVENTS
@@ -436,10 +502,10 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 			if (eventData.pointerId != _PrimaryEventID)
 				return;
 
-			Assert.AreEqual(StateEnum.DRAGGING, _State);
-			//_Scrollbar.OnDrag(eventData);
+			Assert.AreEqual(StateEnum.DRAGGING, State);
 			OnScrollRectValueChanged(false);
 		}
+
 		public void OnPointerUp(PointerEventData eventData)
 		{
 #if DEBUG_EVENTS
@@ -463,26 +529,29 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 			// OnPointerUp won't get called if the scrollbar has a child that captured that event, so we need do FinishDrag here as well
 			FinishDrag();
 		}
-		#endregion
+#endregion
 
 		void FinishDrag()
 		{
-			Assert.IsTrue(_State == StateEnum.PRE_DRAGGING || _State == StateEnum.DRAGGING);
+#if DEBUG_EVENTS
+			Debug.Log("ScrollbarF: FinishDrag: State=" + State);
+#endif
+			Assert.IsTrue(State == StateEnum.PRE_DRAGGING || State == StateEnum.DRAGGING);
 
 			if (externalScrollRectProxy != null && externalScrollRectProxy.IsInitialized)
 				externalScrollRectProxy.StopMovement();
-			//var bef = _Scrollbar.value;
-			//_Scrollbar.OnPointerUp(eventData);
-			//var aft = _Scrollbar.value;
-			//Debug.Log("ScrollbarF: OnPointerUp: bef " + bef + ", aft " + aft);
-			//OnScrollRectValueChanged(false);
+
 			ResetPointerEvent();
 		}
 
 		void ResetPointerEvent()
 		{
+#if DEBUG_EVENTS
+			Debug.Log("ScrollbarF: ResetPointerEvent: State=" + State);
+#endif
+			_PointerDownReceivedForCurrentDrag = null;
 			_PrimaryEventID = null;
-			_State = StateEnum.NONE;
+			State = StateEnum.NONE;
 		}
 
 		void InitializeInFirstUpdate()
@@ -535,16 +604,10 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 							size = LerpDouble(sizeClamped, minCompressedSize, outside01);
 						}
 					}
-
-					//Debug.Log(viewportSize + ", ct=" + contentSize);
-
+					
 					float oldSizeFloat = _Scrollbar.size;
                     _Scrollbar.size = (float)size;
 					float currentSizeFloat = _Scrollbar.size;
-     //               Debug.Log(
-					//	"oldSize " + oldSizeFloat + ", curSize " + currentSizeFloat + " (requested " + 
-					//	size + ", unclamped "+ sizeUnclamped + ", contentSize "+ contentSize + "), from " + proxy.Content.parent.parent.gameObject.name
-					//);
 
                     if (hideWhenNotNeeded)
                     {
@@ -558,9 +621,9 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
                         }
                         else
                         {
-                            if (_Hidden && !_AutoHidden) // if autohidden, we don't interfere with the process
+                        	// If autohidden, we don't interfere with the process
+                            if (_Hidden && !_AutoHidden)
                             {
-
                                 Show();
                             }
                         }
@@ -634,27 +697,14 @@ namespace frame8.Logic.Misc.Visual.UI.MonoBehaviours
 		{
 			if (!fromScrollRect)
 			{
-				//Debug.Log("OnScrollRectValueChanged " + fromScrollRect + ", val " + _Scrollbar.value);
 				ScrollRectProxy.StopMovement();
 
 				if (_FrameCountOnLastPositionUpdate + skippedFramesBetweenPositionChanges < UnityEngine.Time.frameCount)
 				{
 					ScrollRectProxy.SetNormalizedPosition(_Scrollbar.value);
-					//var newNormPos = (float)ScrollRectProxy.GetNormalizedPosition();
-					//Debug.Log("  OnScrollRectValueChanged newNormPos " + newNormPos);
-					//_Scrollbar.value = newNormPos;
 					_FrameCountOnLastPositionUpdate = UnityEngine.Time.frameCount;
 				}
 			}
-
-			//var normPos = ScrollRectProxy.GetNormalizedPosition();
-			//if (_HorizontalScrollBar)
-			//	normPos.x = _Scrollbar.value;
-			//else
-			//	normPos.y = _Scrollbar.value;
-
-			//if (!fromScrollRect)
-			//	ScrollRectProxy.SetNormalizedPosition(_Scrollbar.value);
 
 			_TimeOnLastValueChange = Time;
 			if (autoHide)

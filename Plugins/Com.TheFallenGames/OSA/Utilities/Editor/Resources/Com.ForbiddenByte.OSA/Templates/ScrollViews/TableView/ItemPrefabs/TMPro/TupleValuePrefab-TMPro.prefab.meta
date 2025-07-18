@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 99e4241b5f267434d83f12bc7fe023db
+timeCreated: 1563652185
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68436
+  packageName: Optimized ScrollView Adapter
+  packageVersion: 7.2.1
+  assetPath: Packages/com.gdk.core/Plugins/Com.TheFallenGames/OSA/Utilities/Editor/Resources/Com.ForbiddenByte.OSA/Templates/ScrollViews/TableView/ItemPrefabs/TMPro/TupleValuePrefab-TMPro.prefab
+  uploadId: 709508

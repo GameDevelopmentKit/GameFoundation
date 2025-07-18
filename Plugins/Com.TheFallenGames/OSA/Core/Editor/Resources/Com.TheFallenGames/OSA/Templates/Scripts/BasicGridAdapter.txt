@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using frame8.Logic.Misc.Other.Extensions;
-using Com.TheFallenGames.OSA.CustomAdapters.GridView;
-using Com.TheFallenGames.OSA.DataHelpers;
+using Com.ForbiddenByte.OSA.CustomAdapters.GridView;
+using Com.ForbiddenByte.OSA.DataHelpers;
 
 // You should modify the namespace to your own or - if you're sure there won't ever be conflicts - remove it altogether
 namespace Your.Namespace.Here.Grids

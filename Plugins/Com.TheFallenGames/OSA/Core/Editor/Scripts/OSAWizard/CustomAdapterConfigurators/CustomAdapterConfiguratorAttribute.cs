@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace Com.TheFallenGames.OSA.Editor.OSAWizard.CustomAdapterConfigurators
+namespace Com.ForbiddenByte.OSA.Editor.OSAWizard.CustomAdapterConfigurators
 {
 	public class CustomAdapterConfiguratorAttribute : Attribute
 	{

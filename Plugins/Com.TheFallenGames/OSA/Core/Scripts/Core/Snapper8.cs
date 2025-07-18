@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using frame8.Logic.Misc.Visual.UI;
 using frame8.Logic.Misc.Visual.UI.MonoBehaviours;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	/// <summary>
 	/// Script that enables snapping on a <see cref="OSA{TParams, TItemViewsHolder}"/>. Attach it to the ScrollView's game object.
@@ -52,10 +52,10 @@ namespace Com.TheFallenGames.OSA.Core
 		}
 		public bool SnappingInProgress { get; private set; }
 
-		//bool IsPointerDraggingOnScrollRect { get { return _ScrollRect != null && Utils.GetPointerEventDataWithPointerDragGO(_ScrollRect.gameObject, false) != null; } }
-		bool IsPointerDraggingOnScrollRect { get { return _Adapter != null && _Adapter.IsDragging; } }
-		//bool IsPointerDraggingOnScrollbar { get { return scrollbar != null && Utils.GetPointerEventDataWithPointerDragGO(scrollbar.gameObject, false) != null; } }
-		bool IsPointerDraggingOnScrollbar { get { return _ScrollbarFixer != null && _ScrollbarFixer.IsDraggingOrPreDragging; } }
+		//bool IsAdapterDragInProgress { get { return _ScrollRect != null && Utils.GetPointerEventDataWithPointerDragGO(_ScrollRect.gameObject, false) != null; } }
+		bool IsAdapterDragInProgress { get { return _Adapter != null && _Adapter.IsDragging; } }
+		//bool IsScrollbarDragInProgress { get { return scrollbar != null && Utils.GetPointerEventDataWithPointerDragGO(scrollbar.gameObject, false) != null; } }
+		bool IsScrollbarDragInProgress { get { return _ScrollbarFixer != null && _ScrollbarFixer.IsDraggingOrPreDragging; } }
 		
 		IOSA _Adapter;
 		ScrollbarFixer8 _ScrollbarFixer;
@@ -162,17 +162,7 @@ namespace Com.TheFallenGames.OSA.Core
 			float signedSpeed = _GetSignedAbstractSpeed();
 			float speed = Mathf.Abs(signedSpeed);
 
-			//Debug.Log(
-			//	"StartSnappingIfNeeded:\n" +
-			//	"SnappingInProgress=" + SnappingInProgress +
-			//	", _SnapNeeded=" + _SnapNeeded +
-			//	", magnitude=" + _Adapter.Velocity.magnitude +
-			//	", IsPointerDraggingOnScrollRect=" + IsPointerDraggingOnScrollRect +
-			//	", IsPointerDraggingOnScrollbar=" + IsPointerDraggingOnScrollbar +
-			//	", signedSpeed " + signedSpeed + 
-			//	", snapWhenSpeedFallsBelow " + snapWhenSpeedFallsBelow
-			//	);
-			if (SnappingInProgress || !_SnapNeeded || speed >= snapWhenSpeedFallsBelow || IsPointerDraggingOnScrollRect || IsPointerDraggingOnScrollbar)
+			if (SnappingInProgress || !_SnapNeeded || speed >= snapWhenSpeedFallsBelow || IsAdapterDragInProgress || IsScrollbarDragInProgress)
 				return;
 
 			if (skipIfReachedExtremity)
@@ -202,10 +192,12 @@ namespace Com.TheFallenGames.OSA.Core
 					// Update: Allowing skipping neighbors if no snapping occurred yet
 					|| _LastSnappedItemIndex == -1
 					// Update: Allowing skipping neighbors if the previous snap didn't finish naturally (most probably, the user swapped again fast, with the sole intent of skipping an item )
-					|| _LastItemIndexUnFinishedSnap != -1
-				); 
-			if (snapToNextOnly)				
+					|| _LastItemIndexUnFinishedSnap == indexToSnapTo
+				);
+
+			if (snapToNextOnly)
 			{
+
 				bool loopingEnabled = _Adapter.BaseParameters.effects.LoopItems && _Adapter.GetContentSizeToViewportRatio() > 1d;
 				int count = _Adapter.GetItemsCount();
 				if (signedSpeed < 0) // going towards end => snap to bigger indexInView
@@ -224,6 +216,22 @@ namespace Com.TheFallenGames.OSA.Core
 			else
 				indexToSnapTo = middle.ItemIndex;
 
+			//Debug.Log(
+			//	"StartSnappingIfNeeded:\n" +
+			//	"SnappingInProgress=" + SnappingInProgress +
+			//	", _SnapNeeded=" + _SnapNeeded +
+			//	", magnitude=" + _Adapter.Velocity.magnitude +
+			//	", IsPointerDraggingOnScrollRect=" + IsAdapterDragInProgress +
+			//	", IsPointerDraggingOnScrollbar=" + IsScrollbarDragInProgress +
+			//	", signedSpeed " + signedSpeed +
+			//	", snapWhenSpeedFallsBelow " + snapWhenSpeedFallsBelow +
+			//	", indexToSnapTo Bef (middle.ItemIndex) " + middle.ItemIndex +
+			//	", indexToSnapTo Aft (middle.ItemIndex) " + indexToSnapTo +
+			//	", _LastSnappedItemIndex " + _LastSnappedItemIndex +
+			//	", _LastItemIndexUnFinishedSnap " + _LastItemIndexUnFinishedSnap,
+			//	middle.root.gameObject
+			//);
+
 			//Debug.Log("start: " + s);
 			_SnappingCancelled = false;
 			bool continuteAnimation;
@@ -239,7 +247,7 @@ namespace Com.TheFallenGames.OSA.Core
 				{
 					continuteAnimation = true;
 					doneNaturally = progress == 1f;
-					if (doneNaturally || _SnappingCancelled || IsPointerDraggingOnScrollRect || IsPointerDraggingOnScrollbar) // done. last iteration
+					if (doneNaturally || _SnappingCancelled || IsAdapterDragInProgress || IsScrollbarDragInProgress) // done. last iteration
 					{
 						cancelledOrEnded = true;
 						continuteAnimation = false;
@@ -318,12 +326,12 @@ namespace Com.TheFallenGames.OSA.Core
 			{
 				_SnapNeeded = true;
 
-				if (_SnapToNextOnlyEnabled && !IsPointerDraggingOnScrollbar && !IsPointerDraggingOnScrollRect)
+				if (_SnapToNextOnlyEnabled && !IsScrollbarDragInProgress && !IsAdapterDragInProgress)
 					UpdateLastSnappedIndexFromMiddleVH();
 			}
 		} // from adapter
 
-		void OnScrollbarValueChanged(float _) { if (IsPointerDraggingOnScrollbar) CancelSnappingIfInProgress(); } // from scrollbar
+		void OnScrollbarValueChanged(float _) { if (IsScrollbarDragInProgress) CancelSnappingIfInProgress(); } // from scrollbar
 
 		void OnItemsRefreshed(int newCount, int prevCount)
 		{

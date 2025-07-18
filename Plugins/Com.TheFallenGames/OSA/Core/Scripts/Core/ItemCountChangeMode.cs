@@ -1,6 +1,6 @@
-﻿
 
-namespace Com.TheFallenGames.OSA.Core
+
+namespace Com.ForbiddenByte.OSA.Core
 {
 	public enum ItemCountChangeMode
 	{

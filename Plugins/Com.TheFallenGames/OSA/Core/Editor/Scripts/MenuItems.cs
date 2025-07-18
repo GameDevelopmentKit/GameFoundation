@@ -1,47 +1,46 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
-using Com.TheFallenGames.OSA.Core;
-using Com.TheFallenGames.OSA.Editor.OSAWizard;
+using Com.ForbiddenByte.OSA.Core;
+using Com.ForbiddenByte.OSA.Editor.OSAWizard;
 
-namespace Com.TheFallenGames.OSA.Editor
+namespace Com.ForbiddenByte.OSA.Editor
 {
     static class MenuItems
 	{
-		[MenuItem("Tools/Com.TheFallenGames/OSA/Code reference")]
+		[MenuItem("Tools/Com.ForbiddenByte/OSA/Code reference")]
 		public static void OpenOnlineCodeReference()
-		{ Application.OpenURL("http://thefallengames.com/unityassetstore/optimizedscrollviewadapter/doc"); }
+		{ Application.OpenURL("http://forbiddenbyte.com/unityassetstore/optimizedscrollviewadapter/doc"); }
 
-		[MenuItem("Tools/Com.TheFallenGames/OSA/Manual and FAQ")]
+		[MenuItem("Tools/Com.ForbiddenByte/OSA/Manual and FAQ")]
 		public static void OpenOnlineManual()
 		{ Application.OpenURL("https://docs.google.com/document/d/1tlMIzRX1OFEusVAoHm14_wloXukOt9llohCQzmnNbts"); }
 
-		[MenuItem("Tools/Com.TheFallenGames/OSA/OSA wizard video")]
+		[MenuItem("Tools/Com.ForbiddenByte/OSA/OSA wizard video")]
 		public static void OpenWizardVideo()
 		{ Application.OpenURL("https://youtu.be/BnA32GV13ws"); }
 
-		[MenuItem("Tools/Com.TheFallenGames/OSA/Changelog")]
+		[MenuItem("Tools/Com.ForbiddenByte/OSA/Changelog")]
 		public static void OpenOnlineChangelog()
-		{ Application.OpenURL("http://thefallengames.com/unityassetstore/optimizedscrollviewadapter/Changelog.txt"); }
+		{ Application.OpenURL("http://forbiddenbyte.com/unityassetstore/optimizedscrollviewadapter/Changelog.txt"); }
 
-		[MenuItem("Tools/Com.TheFallenGames/OSA/Ask something (discord)")]
+		[MenuItem("Tools/Com.ForbiddenByte/OSA/Ask something (discord)")]
 		public static void AskQuestionDiscord()
 		{ Application.OpenURL("https://discord.gg/qjwjBYy"); }
 
-		[MenuItem("Tools/Com.TheFallenGames/OSA/Ask something (forum)")]
+		[MenuItem("Tools/Com.ForbiddenByte/OSA/Ask something (forum)")]
 		public static void AskQuestionForum()
 		{ Application.OpenURL("https://forum.unity.com/threads/30-off-optimized-scrollview-adapter-listview-gridview.395224"); }
 
-		[MenuItem("Tools/Com.TheFallenGames/OSA/About")]
+		[MenuItem("Tools/Com.ForbiddenByte/OSA/About")]
 		public static void OpenAbout()
 		{
 			EditorUtility.DisplayDialog(
 				"OSA " + OSAConst.OSA_VERSION_STRING,
-				"May the result of our hard work aid you along your journey in creating something marvellous!" +
-				"\r\n\r\nOptimized ScrollView Adapter by The Fallen Games" +
-				"\r\nlucian@thefallengames.com" +
-				"\r\ngeorge@thefallengames.com",
+				"May the fruits of our hard work enhance your creative journey!" +
+				"\r\n\r\nOptimized ScrollView Adapter by Forbidden Byte" +
+				"\r\nyum@forbiddenbyte.com",
 				"Close"
 			);
 		}

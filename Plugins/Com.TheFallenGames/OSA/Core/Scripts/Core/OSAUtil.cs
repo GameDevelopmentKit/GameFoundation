@@ -1,9 +1,9 @@
-﻿
+
 
 using frame8.Logic.Misc.Visual.UI.MonoBehaviours;
 using UnityEngine;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	public class OSAUtil
 	{

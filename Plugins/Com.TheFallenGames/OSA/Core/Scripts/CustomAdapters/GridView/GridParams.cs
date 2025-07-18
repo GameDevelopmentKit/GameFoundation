@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Serialization;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 
-namespace Com.TheFallenGames.OSA.CustomAdapters.GridView
+namespace Com.ForbiddenByte.OSA.CustomAdapters.GridView
 {
 	/// <summary>
 	/// Base class for params to be used with a <see cref="GridAdapter{TParams, TCellVH}"/>.

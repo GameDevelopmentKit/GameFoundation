@@ -1,9 +1,9 @@
 namespace GameFoundation.Scripts.UIModule.Adapter
 {
     using System.Collections.Generic;
-    using Com.TheFallenGames.OSA.Core;
-    using Com.TheFallenGames.OSA.CustomAdapters.GridView;
-    using Com.TheFallenGames.OSA.DataHelpers;
+    using Com.ForbiddenByte.OSA.Core;
+    using Com.ForbiddenByte.OSA.CustomAdapters.GridView;
+    using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
     using UnityEngine;
@@ -42,10 +42,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // *For the method's full description check the base implementation
         protected override void UpdateCellViewsHolder(MyGridItemViewsHolder v)
         {
-            var index      = v.ItemIndex;
+            var index = v.ItemIndex;
+
             if (this.Models.Count <= index || index < 0) return;
             var model      = this.Models[index];
             var viewObject = v.root.GetComponentInChildren<TView>(true);
+
             if (this.presenters.Count <= index)
             {
                 var p = this.diContainer.Instantiate<TPresenter>();
@@ -72,21 +74,22 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
-            
+
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
                     baseUIItemPresenter.Dispose();
-                } 
+                }
             }
-            this.presenters  = new List<TPresenter>();
+
+            this.presenters = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
-        
+
         /// <summary>
         /// We need this because the original method only update to  this.VisibleItemsCount - 1
         /// </summary>
@@ -94,6 +97,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public void ForceUpdateFullVisibleItems()
         {
             var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
+
             if (twinPassScheduledBefore)
                 throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 
@@ -104,7 +108,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         }
 
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
-        
+
         public List<TPresenter> GetPresenters() => this.presenters;
     }
 

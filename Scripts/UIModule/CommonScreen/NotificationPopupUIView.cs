@@ -37,7 +37,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         public GameObject      CloseObj    => this.closeObj;
     }
 
-    [PopupInfo("UIPopupNotice", isEnableBlur: true, isCloseWhenTapOutside: false, isOverlay: true)]
+    [PopupInfo("UIPopupNotice", isEnableBlur: false, isCloseWhenTapOutside: false, isOverlay: true)]
     public class NotificationPopupPresenter : BasePopupPresenter<NotificationPopupUIView, NotificationPopupModel>
     {
         private readonly IAudioManager audioManager;
@@ -48,6 +48,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
             this.Init();
             this.SetNotificationContent();
             this.SwitchMode();
+
             return UniTask.CompletedTask;
         }
 
@@ -78,7 +79,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
             this.CloseView();
             this.Model.OkAction?.Invoke();
         }
-        
+
         private void OkNoticeAction()
         {
             this.audioManager.PlaySound("button_click");
@@ -88,8 +89,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void SetNotificationContent()
         {
-            this.View.TxtTitle.SetTextLocalization(this.Model.Title);
-            this.View.TxtContent.SetTextLocalization(this.Model.Content);
+            this.View.TxtTitle.text   = this.Model.Title;
+            this.View.TxtContent.text = this.Model.Content;
         }
 
         public override void Dispose()

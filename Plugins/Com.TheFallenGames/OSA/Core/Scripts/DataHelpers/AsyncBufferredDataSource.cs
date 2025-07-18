@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Com.TheFallenGames.OSA.DataHelpers
+namespace Com.ForbiddenByte.OSA.DataHelpers
 {
 	/// <summary>
 	/// Class for loading chunks of data asynchronously into a <see cref="BufferredDataSource{T}"/> and firing events on 

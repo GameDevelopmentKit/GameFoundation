@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Globalization;
 using UnityEngine;
 using UnityEditor;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 using System.Collections.Generic;
 
-namespace Com.TheFallenGames.OSA.Editor.OSAWizard
+namespace Com.ForbiddenByte.OSA.Editor.OSAWizard
 {
 	public static class CWiz
 	{
@@ -94,7 +94,7 @@ namespace Com.TheFallenGames.OSA.Editor.OSAWizard
 
 		public static class TV
 		{
-			public const string TABLE_ADAPTER_INTERFACE_FULL_NAME = "Com.TheFallenGames.OSA.CustomAdapters.TableView.ITableAdapter";
+			public const string TABLE_ADAPTER_INTERFACE_FULL_NAME = "Com.ForbiddenByte.OSA.CustomAdapters.TableView.ITableAdapter";
 			public const string IMPLEMENTATION_TEMPLATE_NAME = "BasicTableAdapter";
 			public const string IMPLEMENTATION_TEMPLATE_NAME_WITH_EXTENSION = IMPLEMENTATION_TEMPLATE_NAME + ".txt";
 			public const string TABLE_VIEW_NAME = "TableView";

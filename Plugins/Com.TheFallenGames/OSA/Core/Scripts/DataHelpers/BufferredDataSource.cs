@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using UnityEngine;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 
-namespace Com.TheFallenGames.OSA.DataHelpers
+namespace Com.ForbiddenByte.OSA.DataHelpers
 {
 	/// <summary>
 	/// Data source that reads items via a <see cref="LazyList{T}"/> in chunks in the following way:

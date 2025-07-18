@@ -1,15 +1,15 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using Com.TheFallenGames.OSA;
+using Com.ForbiddenByte.OSA;
 using System;
 using UnityEngine.Events;
 using frame8.Logic.Misc.Other.Extensions;
 using frame8.Logic.Misc.Visual.UI;
-using Com.TheFallenGames.OSA.Core;
+using Com.ForbiddenByte.OSA.Core;
 using System.Collections.Generic;
 
-namespace Com.TheFallenGames.OSA.DataHelpers
+namespace Com.ForbiddenByte.OSA.DataHelpers
 {
 	/// <summary>
 	/// <para>Contains shortcuts for common operations on a list. Most notably, it adds/removes items for you and notifies the adapter after.</para>

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using frame8.Logic.Misc.Visual.UI;
-using Com.TheFallenGames.OSA.Core.SubComponents;
+using Com.ForbiddenByte.OSA.Core.SubComponents;
 
-namespace Com.TheFallenGames.OSA.Core
+namespace Com.ForbiddenByte.OSA.Core
 {
 	/// <summary>
 	/// Contains commonly used members so that an <see cref="OSA{TParams, TItemViewsHolder}"/> instance 
