@@ -20,11 +20,9 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         public Dictionary<string, UnityWebRequestAsyncOperation> DownloadingOperation = new();
 
         #region ZenJect
-
         private          IGameAssets       gameAssets;
         private          ILogService       logger;
         private readonly ObjectPoolManager objectPoolManager;
-
         #endregion
 
         private string iconLoadingAssetPath = "LoadingIcon";
@@ -37,8 +35,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         }
 
         private bool inValidKey;
-        public async UniTask<Sprite> LoadLocalSprite(object key)
+       public async UniTask<Sprite> LoadLocalSprite(object key)
         {
+            if (key == null ||string.IsNullOrEmpty(key.ToString()))
+            {
+                this.logger.Error("[GameAssets] Unable to load sprite: key is empty or null");
+                return await LoadFallbackSprite();
+            }
+        
             try
             {
                 var sprite = await this.gameAssets.LoadAssetAsync<Sprite>(key);
@@ -46,16 +50,21 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
                 {
                     return sprite;
                 }
-
-                key = "None_Texture";
+                
+                this.logger.Error($"[GameAssets] Sprite loaded as null for key: {key}");
+                return await LoadFallbackSprite();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
-                key = "None_Texture";
+                this.logger.Error($"[GameAssets] Error loading sprite {key}: {ex.Message}");
+                return await LoadFallbackSprite();
             }
-
-            return await this.gameAssets.LoadAssetAsync<Sprite>(key);
+        
+            async UniTask<Sprite> LoadFallbackSprite()
+            {
+                const string fallbackKey = "None_Texture";
+                return await this.gameAssets.LoadAssetAsync<Sprite>(fallbackKey);
+            }
         }
 
 
