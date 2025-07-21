@@ -267,7 +267,7 @@ namespace GameFoundation.Scripts.AssetLibrary
             }
             catch (Exception)
             {
-                Debug.LogError($"[GameAssets] Unable to Unload Scene {key}");
+                Debug.LogWarning($"[GameAssets] Unable to Unload Scene {key}");
             }
 
             return default;

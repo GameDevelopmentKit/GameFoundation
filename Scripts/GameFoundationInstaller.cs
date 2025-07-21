@@ -24,7 +24,7 @@
             this.Container.Bind<GDKConfig>().FromResource("GameConfigs/GDKConfig").AsSingle().NonLazy();
 
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
-            this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<ObjectPoolManager>().AsCached().NonLazy();
 
             //Audio service
             this.Container.BindInterfacesTo<AudioService>().AsCached().NonLazy();

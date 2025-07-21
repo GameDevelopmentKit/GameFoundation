@@ -7,10 +7,11 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
     using Zenject;
     using Object = UnityEngine.Object;
 
-    public sealed class ObjectPoolManager
+    public sealed class ObjectPoolManager : IInitializable
     {
         #region inject
 
@@ -35,6 +36,17 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             this.gameAssets  = gameAssets;
             this.diContainer = diContainer;
             Instance         = this;
+        }
+
+        public void Initialize()
+        {
+           SceneManager.sceneLoaded += this.SceneManagerSceneLoaded;
+        }
+
+        private void SceneManagerSceneLoaded(Scene arg0, LoadSceneMode arg1)
+        {
+            
+            this.defaultRoot = null;
         }
 
         #region Pool
