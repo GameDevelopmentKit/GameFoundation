@@ -118,9 +118,24 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         public virtual async UniTask<SceneInstance> SoftReloadCurrentScene(List<string> listNotClear = null)
         {
+            this.signalBus.Fire(new StartLoadingNewSceneSignal
+            {
+                CurrentScreenName = new List<string>() { CurrentSceneName },
+                TargetScreenName  = new List<string>() { CurrentSceneName },
+                ActiveScreenName  = CurrentSceneName
+            });
             this.UnloadSceneAsync(CurrentSceneName, listNotClear).Forget();
 
-            return await Addressables.LoadSceneAsync(CurrentSceneName);
+            var result= await Addressables.LoadSceneAsync(CurrentSceneName);
+            
+            this.signalBus.Fire(new FinishLoadingNewSceneSignal
+            {
+                CurrentScreenName = new List<string>() { CurrentSceneName },
+                TargetScreenName  = new List<string>() { CurrentSceneName },
+                ActiveScreenName  = CurrentSceneName
+            });
+
+            return result;
         }
 
         //to backup for old version
