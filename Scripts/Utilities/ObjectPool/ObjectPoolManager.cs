@@ -285,6 +285,14 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         }
 
         public void RecycleAll<T>(T prefab) where T : Component { this.RecycleAll(prefab.gameObject); }
+
+        public void RecycleAll(string prefabName)
+        {
+            if (this.cachedLoadedPrefab.TryGetValue(prefabName, out var prefab))
+            {
+                this.RecycleAll(prefab);
+            }
+        }
         #endregion
 
         #region Destroy pool
