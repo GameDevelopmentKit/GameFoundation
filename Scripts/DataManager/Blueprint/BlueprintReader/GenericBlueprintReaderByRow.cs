@@ -281,13 +281,22 @@ namespace DataManager.Blueprint.BlueprintReader
                 {
                     var subBlueprintData    = (IBlueprintCollection)subBlueprintMemberInfo.GetValue(inputObject);
                     var subBlueprintRawData = subBlueprintData.ToRawData(containHeader);
-                    for (var index = 0; index < subBlueprintRawData.Count; index++)
+                    if (subBlueprintRawData.Count > 0)
                     {
-                        if (index > result.Count - 1)
-                            result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
+                        for (var index = 0; index < subBlueprintRawData.Count; index++)
+                        {
+                            if (index > result.Count - 1)
+                                result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
 
-                        result[index].AddRange(subBlueprintRawData[index]);
+                            result[index].AddRange(subBlueprintRawData[index]);
+                        }
                     }
+                    else
+                    {
+                        //if sub blueprint collection is empty, add empty row
+                        result[0].AddRange(Enumerable.Repeat(string.Empty, subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count));
+                    }
+                    notCollectionFieldCount += subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count;
                 }
 
             return result;

@@ -1,5 +1,6 @@
 namespace DataManager.Blueprint.BlueprintReader
 {
+    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
 
     /// <summary> Interface of database class </summary>
@@ -11,5 +12,7 @@ namespace DataManager.Blueprint.BlueprintReader
         /// <param name="rawCsv"></param>
         /// <returns></returns>
         public UniTask DeserializeFromCsv(string rawCsv);
+
+        public List<List<string>> SerializeToRawData();
     }
 }
