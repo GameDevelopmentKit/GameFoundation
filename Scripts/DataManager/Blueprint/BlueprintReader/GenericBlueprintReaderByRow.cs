@@ -20,7 +20,9 @@ namespace DataManager.Blueprint.BlueprintReader
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class NestedBlueprintAttribute : Attribute { }
+    public class NestedBlueprintAttribute : Attribute
+    {
+    }
 
 
     /// <summary>
@@ -38,7 +40,12 @@ namespace DataManager.Blueprint.BlueprintReader
             while (await csv.ReadAsync()) this.Add(csv);
         }
 
-        public virtual List<List<string>> SerializeToRawData() { return this.ToRawData(true); }
+        public virtual List<List<string>> SerializeToRawData()
+        {
+            var rawData = this.ToRawData();
+            rawData.Insert(0, this.GetHeader());
+            return rawData;
+        }
 
         public T2 GetDataById(T1 id)
         {
@@ -53,7 +60,9 @@ namespace DataManager.Blueprint.BlueprintReader
     {
         void Add(CsvDataReader inputCsv);
 
-        List<List<string>> ToRawData(bool containHeader = false);
+        List<List<string>> ToRawData();
+        
+        List<string> GetHeader();
 
         void CleanUp();
     }
@@ -70,14 +79,18 @@ namespace DataManager.Blueprint.BlueprintReader
             var (hasValue, record) = this.blueprintRecordReader.GetRecord(inputCsv);
             if (hasValue) this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
         }
-        public List<List<string>> ToRawData(bool containHeader = false)
+        public List<string> GetHeader()
+        {
+            return this.blueprintRecordReader.GetHeader();
+        }
+        
+        public List<List<string>> ToRawData()
         {
             var result    = new List<List<string>>();
-            var addHeader = containHeader;
+            
             foreach (var record in this)
             {
-                result.AddRange(this.blueprintRecordReader.ToRawData(record.Value, addHeader));
-                addHeader = false;
+                result.AddRange(this.blueprintRecordReader.ToRawData(record.Value));
             }
 
             return result;
@@ -102,17 +115,21 @@ namespace DataManager.Blueprint.BlueprintReader
             if (hasValue) this.Add(value);
         }
 
-        public List<List<string>> ToRawData(bool containHeader = false)
+        public List<List<string>> ToRawData()
         {
             var result    = new List<List<string>>();
-            var addHeader = containHeader;
+            
             foreach (var record in this)
             {
-                result.AddRange(this.blueprintRecordReader.ToRawData(record, addHeader));
-                addHeader = false;
+                result.AddRange(this.blueprintRecordReader.ToRawData(record));
             }
 
             return result;
+        }
+        
+        public List<string> GetHeader()
+        {
+            return this.blueprintRecordReader.GetHeader();
         }
 
         public void CleanUp() { this.Clear(); }
@@ -247,11 +264,33 @@ namespace DataManager.Blueprint.BlueprintReader
             return record;
         }
 
-        public List<List<string>> ToRawData(object inputObject, bool containHeader = false)
+        public List<string> GetHeader()
+        {
+            var result = new List<string>(this.fieldAndProperties.Select(memberInfo => memberInfo.MemberName));
+            if( this.nestedMemberInfoToRecordReader != null)
+            {
+                foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
+                {
+                    result.AddRange(recordReader.GetHeader());
+                }
+            }
+            
+            if (this.blueprintCollectionMemberInfos != null)
+            {
+                foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
+                {
+                    var subCollection    = (IBlueprintCollection)Activator.CreateInstance(subBlueprintMemberInfo.MemberType);
+                    result.AddRange(subCollection.GetHeader());
+                }
+            }
+            
+            return result;
+        }
+        
+        public List<List<string>> ToRawData(object inputObject)
         {
             var result                  = new List<List<string>>();
             var notCollectionFieldCount = this.fieldAndProperties.Count;
-            if (containHeader) result.Add(this.fieldAndProperties.Select(memberInfo => memberInfo.MemberName).ToList());
 
             var newRow = new List<string>();
             result.Add(newRow);
@@ -267,7 +306,7 @@ namespace DataManager.Blueprint.BlueprintReader
                 {
                     notCollectionFieldCount += recordReader.fieldAndProperties.Count;
                     var nestedObj              = nestedMemberInfo.GetValue(inputObject);
-                    var nestedBlueprintRawData = recordReader.ToRawData(nestedObj, containHeader);
+                    var nestedBlueprintRawData = recordReader.ToRawData(nestedObj);
                     for (int i = 0; i < nestedBlueprintRawData.Count; i++)
                     {
                         result[i].AddRange(nestedBlueprintRawData[i]);
@@ -280,22 +319,21 @@ namespace DataManager.Blueprint.BlueprintReader
                 foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
                 {
                     var subBlueprintData    = (IBlueprintCollection)subBlueprintMemberInfo.GetValue(inputObject);
-                    var subBlueprintRawData = subBlueprintData.ToRawData(containHeader);
-                    if (subBlueprintRawData.Count > 0)
+                    var subBlueprintRawData = subBlueprintData.ToRawData();
+                    for (var index = 0; index < subBlueprintRawData.Count; index++)
                     {
-                        for (var index = 0; index < subBlueprintRawData.Count; index++)
+                        if (index > result.Count - 1)
                         {
-                            if (index > result.Count - 1)
-                                result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
-
-                            result[index].AddRange(subBlueprintRawData[index]);
+                            result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
                         }
+                        else if (result[index].Count < notCollectionFieldCount)
+                        {
+                            result[index].AddRange(Enumerable.Repeat(string.Empty, notCollectionFieldCount - result[index].Count));
+                        }
+
+                        result[index].AddRange(subBlueprintRawData[index]);
                     }
-                    else
-                    {
-                        //if sub blueprint collection is empty, add empty row
-                        result[0].AddRange(Enumerable.Repeat(string.Empty, subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count));
-                    }
+                    
                     notCollectionFieldCount += subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count;
                 }
 
