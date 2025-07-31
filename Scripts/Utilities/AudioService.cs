@@ -209,6 +209,7 @@
                 audioSource.clip = null;
                 audioSource.Recycle();
             });
+            this.MusicAudioSource = null;
         }
 
         public void SetPlayListTime(float time)
