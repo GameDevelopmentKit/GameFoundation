@@ -32,6 +32,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// Current screen shown on top.
         /// </summary>
         public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; }
+        public ReactiveProperty<IScreenPresenter> RootScreen { get; }
+        public ReactiveProperty<IScreenPresenter> RootPopup { get; }
 
         /// <summary>
         /// Get root canvas of all screen, use to disable UI for creative purpose
@@ -124,6 +126,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         #region Implement IScreenManager
 
         public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; } = new();
+        public ReactiveProperty<IScreenPresenter> RootScreen          { get; } = new();
+        public ReactiveProperty<IScreenPresenter> RootPopup           { get; } = new();
 
         private RootUICanvas rootUICanvas;
 
@@ -250,6 +254,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             foreach (var screen in cacheActiveScreens) screen.CloseViewAsync().Forget();
 
             this.CurrentActiveScreen.Value = null;
+            this.RootScreen.Value          = null;
+            this.RootPopup.Value           = null;
             this.previousActiveScreen      = null;
         }
 
@@ -262,6 +268,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             foreach (var screen in cacheActiveScreens) tasks.Add(screen.CloseViewAsync());
 
             this.CurrentActiveScreen.Value = null;
+            this.RootScreen.Value          = null;
+            this.RootPopup.Value           = null;
             this.previousActiveScreen      = null;
 
             await UniTask.WhenAll(tasks);
@@ -271,6 +279,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         {
             this.activeScreens.Clear();
             this.CurrentActiveScreen.Value = null;
+            this.RootScreen.Value          = null;
+            this.RootPopup.Value           = null;
             this.previousActiveScreen      = null;
 
             foreach (var screen in this.typeToLoadedScreenPresenter)
@@ -326,6 +336,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             this.activeScreens.Add(signal.ScreenPresenter);
 
+            if (!this.CheckScreenIsPopup(signal.ScreenPresenter))
+            {
+                this.RootScreen.Value = signal.ScreenPresenter;
+            }
+
             if (this.previousActiveScreen != null && this.previousActiveScreen != this.CurrentActiveScreen.Value)
             {
                 if (this.CurrentActiveScreen.Value.IsClosePrevious)
@@ -342,6 +357,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     }
                     else
                     {
+                        this.RootPopup.Value ??= this.CurrentActiveScreen.Value;
                         if(!this.CheckScreenIsPopup(this.previousActiveScreen))
                         {
                             // If the previous screen is a screen, it will be overlap
@@ -351,6 +367,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                         {
                             if (!this.CheckPopupIsOverlay(this.CurrentActiveScreen.Value))
                             {
+                                this.RootPopup.Value = this.CurrentActiveScreen.Value;
                                 this.previousActiveScreen.HideView();
                             }
                             else
@@ -365,8 +382,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private void OnCloseScreen(ScreenCloseSignal signal)
         {
-            var closeScreenPresenter = signal.ScreenPresenter;
-
+            var closeScreenPresenter                                                 = signal.ScreenPresenter;
+            if (closeScreenPresenter == this.RootPopup.Value) this.RootPopup.Value   = null;
+            if (closeScreenPresenter == this.RootScreen.Value) this.RootScreen.Value = null;
             if (this.activeScreens.LastOrDefault() == closeScreenPresenter)
             {
                 // If close the screen on the top, will be open again the behind screen if available
