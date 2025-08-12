@@ -206,6 +206,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
             this.AddConverter(typeof(char), new CharConverter());
             this.AddConverter(typeof(DateTime), new DateConverter("o"));
             this.AddConverter(typeof(DateTimeOffset), new DateTimeOffsetConverter());
+            this.AddConverter(typeof(TimeSpan), new TimeSpanConverter());
             this.AddConverter(typeof(decimal), new DecimalConverter());
             this.AddConverter(typeof(double), new DoubleConverter());
             this.AddConverter(typeof(float), new SingleConverter());
