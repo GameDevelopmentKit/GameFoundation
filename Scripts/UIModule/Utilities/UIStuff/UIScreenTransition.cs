@@ -22,9 +22,10 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void Awake()
         {
-            this.eventSystem                   = EventSystem.current;
-            this.introAnimation.timeUpdateMode = this.DirectorUpdateMode;
-            this.outroAnimation.timeUpdateMode = this.DirectorUpdateMode;
+            this.eventSystem                   =   EventSystem.current;
+            this.eventSystem                   ??= FindAnyObjectByType<EventSystem>(FindObjectsInactive.Include);
+            this.introAnimation.timeUpdateMode =   this.DirectorUpdateMode;
+            this.outroAnimation.timeUpdateMode =   this.DirectorUpdateMode;
             if (this.introAnimation.playableAsset)
             {
                 this.introAnimation.playOnAwake =  false;
@@ -54,7 +55,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
             this.animationTask = new();
             this.SetActiveInput(false);
-            
+
             anim.time = 0;
             anim.Evaluate();
             anim.Play();
