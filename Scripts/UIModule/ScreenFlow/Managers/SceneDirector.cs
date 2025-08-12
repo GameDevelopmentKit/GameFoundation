@@ -35,7 +35,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 ActiveScreenName  = sceneName
             });
 
-            var oldScene = SceneManager.GetActiveScene();
+            var oldScene     = SceneManager.GetActiveScene();
+            var oldSceneName = oldScene.name;
 
             if (!isSingle)
             {
@@ -86,7 +87,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 ActiveScreenName  = sceneName
             });
 
-            this.UnloadSceneAsync(oldScene.name, keptAssets).Forget();
+            this.UnloadSceneAsync(oldSceneName, keptAssets).Forget();
 
             return screenInstance;
         }
@@ -124,10 +125,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 TargetScreenName  = new List<string>() { CurrentSceneName },
                 ActiveScreenName  = CurrentSceneName
             });
+
             this.UnloadSceneAsync(CurrentSceneName, listNotClear).Forget();
 
-            var result= await Addressables.LoadSceneAsync(CurrentSceneName);
-            
+            var result = await Addressables.LoadSceneAsync(CurrentSceneName);
+
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {
                 CurrentScreenName = new List<string>() { CurrentSceneName },
