@@ -212,8 +212,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 screenPresenter = (this.GetCurrentContainer().Instantiate(screenType) as IScreenPresenter)!;
                 var screenInfo = screenPresenter.GetType().GetCustomAttribute<ScreenInfoAttribute>();
 
-                var viewObject = Object.Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
-                    this.CheckPopupIsOverlay(screenPresenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
+                var viewObject = (await this.gameAssets.InstantiateAsync(screenInfo.AddressableScreenPath, this.CheckPopupIsOverlay(screenPresenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen)).GetComponent<IScreenView>();
 
                 screenPresenter.SetView(viewObject);
                 this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);

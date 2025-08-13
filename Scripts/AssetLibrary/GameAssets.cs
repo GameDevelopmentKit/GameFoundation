@@ -87,6 +87,7 @@ namespace GameFoundation.Scripts.AssetLibrary
         /// </summary>
         void ReleaseAsset(AssetReference assetReference);
 
+        UniTask<GameObject> InstantiateAsync(object key, Transform parent = null, bool instantiateInWorldSpace = false);
         /// <summary>
         /// Instantiate async a GameObject by key
         /// </summary>
@@ -400,6 +401,11 @@ namespace GameFoundation.Scripts.AssetLibrary
         #endregion
 
         #region GameObject Handler
+
+        public async UniTask<GameObject> InstantiateAsync(object key, Transform parent = null, bool instantiateInWorldSpace = false)
+        {
+            return await Addressables.InstantiateAsync(key, parent, instantiateInWorldSpace);
+        }
 
         /// <summary>
         /// Instantiate async a GameObject by AssetReference

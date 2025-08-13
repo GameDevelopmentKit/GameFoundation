@@ -2,6 +2,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 {
     using System;
     using Cysharp.Threading.Tasks;
+    using GameFoundation.DI;
+    using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
     using UnityEngine;
 
@@ -97,7 +99,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         public void DestroySelf()
         {
-            Destroy(this.gameObject);
+            this.GetCurrentContainer().Resolve<IGameAssets>().DestroyGameObject(this.gameObject);
         }
 
         protected void UpdateAlpha(float value)
