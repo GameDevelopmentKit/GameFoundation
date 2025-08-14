@@ -27,5 +27,23 @@ namespace DataManager.Blueprint.BlueprintReader.Converter.TypeConversion
 
             return null;
         }
+        
+        public override string ConvertToString(object value, Type typeInfo)
+        {
+            if (value != null)
+            {
+                var type      = typeInfo.GetElementType();
+                var converter = CsvHelper.TypeConverterCache.GetConverter(type);
+                var array     = (Array)value;
+                var list      = new string[array.Length];
+
+                for (var i = 0; i < array.Length; i++)
+                    list[i] = converter.ConvertToString(array.GetValue(i), type);
+
+                return string.Join(this.delimiter, list);
+            }
+
+            return null;
+        }
     }
 }

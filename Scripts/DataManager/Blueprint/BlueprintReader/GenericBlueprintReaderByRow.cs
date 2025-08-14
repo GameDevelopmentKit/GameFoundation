@@ -306,10 +306,20 @@ namespace DataManager.Blueprint.BlueprintReader
                 {
                     notCollectionFieldCount += recordReader.fieldAndProperties.Count;
                     var nestedObj              = nestedMemberInfo.GetValue(inputObject);
-                    var nestedBlueprintRawData = recordReader.ToRawData(nestedObj);
-                    for (int i = 0; i < nestedBlueprintRawData.Count; i++)
+                    if(nestedObj == null)
                     {
-                        result[i].AddRange(nestedBlueprintRawData[i]);
+                        for (int i = 0; i < result.Count; i++)
+                        {
+                            result[i].AddRange(Enumerable.Repeat(string.Empty, recordReader.fieldAndProperties.Count));
+                        }
+                    }
+                    else
+                    {
+                        var nestedBlueprintRawData = recordReader.ToRawData(nestedObj);
+                        for (int i = 0; i < nestedBlueprintRawData.Count; i++)
+                        {
+                            result[i].AddRange(nestedBlueprintRawData[i]);
+                        }
                     }
                 }
             }
@@ -333,8 +343,8 @@ namespace DataManager.Blueprint.BlueprintReader
 
                         result[index].AddRange(subBlueprintRawData[index]);
                     }
-                    
-                    notCollectionFieldCount += subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count;
+
+                    notCollectionFieldCount += subBlueprintData.GetHeader().Count;
                 }
 
             return result;
