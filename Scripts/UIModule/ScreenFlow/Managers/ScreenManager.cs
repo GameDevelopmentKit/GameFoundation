@@ -28,12 +28,30 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public UniTask<T> GetScreen<T>() where T : IScreenPresenter;
 
         /// <summary>
+        /// Get instance of a screen
+        /// </summary>
+        /// <param name="screenType"></param>
+        /// <returns></returns>
+        public UniTask<IScreenPresenter> GetScreen(Type screenType);
+
+        /// <summary>
         /// Open a screen by type
         /// </summary>
         /// <typeparam name="T">Type of screen presenter</typeparam>
         public UniTask<T> OpenScreen<T>() where T : IScreenPresenter;
 
+        public UniTask<IScreenPresenter> OpenScreen(Type screenType);
+
         public UniTask<TPresenter> OpenScreen<TPresenter, TModel>(TModel model) where TPresenter : IScreenPresenter<TModel>;
+
+        /// <summary>
+        ///  Open a screen by type with model
+        /// </summary>
+        /// <param name="screenType"></param>
+        /// <param name="model"></param>
+        /// <typeparam name="TModel"></typeparam>
+        /// <returns></returns>
+        public UniTask<IScreenPresenter<TModel>> OpenScreen<TModel>(Type screenType, TModel model);
 
         /// <summary>
         /// Close a screen on top
@@ -44,8 +62,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// Close all screen on current scene
         /// </summary>
         public void CloseAllScreen();
-
-        void CloseAllScreen(params Type[] except);
 
         /// <summary>
         /// Close all screen on current scene async
@@ -89,12 +105,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <summary>
         /// List of active screens
         /// </summary>
-        [SerializeField] private List<IScreenPresenter> activeScreens;
+        private List<IScreenPresenter> activeScreens;
 
         /// <summary>
         /// Current screen shown on top.
         /// </summary>
-        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; private set; } = new ReactiveProperty<IScreenPresenter>();
+        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; } = new();
 
         private IScreenPresenter previousActiveScreen;
 
@@ -105,7 +121,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         private RootUICanvas rootUICanvas;
         private ILogService  logService;
         private IGameAssets  gameAssets;
-        private bool         enableBackToClose = false;
+        private bool         enableBackToClose;
 
         #endregion
 
@@ -177,20 +193,70 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
                 return nextScreen;
             }
-            else
-            {
-                Debug.LogError($"The {typeof(TPresenter).Name} screen does not exist");
 
-                // Need to implement lazy initialization by Load from resource
-                return default;
-            }
+            Debug.LogError($"The {typeof(TPresenter).Name} screen does not exist");
+
+            return default;
         }
 
-        public async UniTask<T> GetScreen<T>() where T : IScreenPresenter
+        public async UniTask<IScreenPresenter> OpenScreen(Type screenType)
         {
-            var screenType = typeof(T);
+            var nextScreen = await this.GetScreen(screenType);
 
-            if (this.typeToLoadedScreenPresenter.TryGetValue(screenType, out var screenPresenter)) return (T)screenPresenter;
+            if (nextScreen != null)
+            {
+                try
+                {
+                    await nextScreen.OpenViewAsync();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                return nextScreen;
+            }
+
+            Debug.LogError($"The {screenType.Name} screen does not exist");
+
+            return null;
+        }
+
+        public async UniTask<IScreenPresenter<TModel>> OpenScreen<TModel>(Type screenType, TModel model)
+        {
+            var nextScreen = (IScreenPresenter<TModel>)await this.GetScreen(screenType);
+
+            if (nextScreen != null)
+            {
+                nextScreen.SetViewParent(this.CheckPopupIsOverlay(nextScreen) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
+
+                try
+                {
+                    await nextScreen.OpenViewAsync(model);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                return nextScreen;
+            }
+
+            Debug.LogError($"The {screenType.Name} screen does not exist");
+
+            return null;
+        }
+
+        public async UniTask<T> GetScreen<T>() where T : IScreenPresenter { return (T)await this.GetScreen(typeof(T)); }
+
+        public async UniTask<IScreenPresenter> GetScreen(Type screenType)
+        {
+            if (!typeof(IScreenPresenter).IsAssignableFrom(screenType))
+            {
+                throw new ArgumentException($"The provided type {screenType.Name} does not implement IScreenPresenter.");
+            }
+
+            if (this.typeToLoadedScreenPresenter.TryGetValue(screenType, out var screenPresenter)) return screenPresenter;
 
             if (!this.typeToPendingScreen.TryGetValue(screenType, out var loadingTask))
             {
@@ -201,20 +267,20 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var result = await loadingTask;
             this.typeToPendingScreen.Remove(screenType);
 
-            return (T)result;
+            return result;
 
             async UniTask<IScreenPresenter> InstantiateScreen()
             {
-                screenPresenter = this.GetCurrentContainer().Instantiate<T>();
+                screenPresenter = this.GetCurrentContainer().Instantiate(screenType) as IScreenPresenter;
                 var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
 
                 var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
                     this.CheckPopupIsOverlay(screenPresenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
 
-                screenPresenter.SetView(viewObject);
+                screenPresenter!.SetView(viewObject);
                 this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
 
-                return (T)screenPresenter;
+                return screenPresenter;
             }
         }
 
@@ -231,7 +297,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             foreach (var screen in cacheActiveScreens)
             {
-                screen.CloseViewAsync();
+                screen.CloseViewAsync();   
             }
 
             this.CurrentActiveScreen.Value = null;
@@ -404,12 +470,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     }
                     else
                     {
-                        screenPresenter.OpenViewAsync();
+                        await screenPresenter.OpenViewAsync();
                     }
                 }
             }
             else
-                this.logService.Error($"The {screenInfo.AddressableScreenPath} object may be not instantiated in the RootUICanvas!!!");
+                this.logService.Error($"OnManualInit need {screenInfo.AddressableScreenPath} in child RootUICanvas/Main !!!");
         }
 
         private async UniTask CallOpenView(IScreenPresenter presenter, object modelInstance)

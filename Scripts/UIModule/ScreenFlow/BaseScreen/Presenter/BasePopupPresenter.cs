@@ -73,6 +73,16 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
             await base.OpenViewAsync();
         }
+        
+        public async UniTask OpenViewAsync(TModel model)
+        {
+            if (model != null)
+            {
+                this.Model = model;
+            }
+
+            await this.OpenViewAsync();
+        }
 
         public sealed override UniTask BindData() { return UniTask.CompletedTask; }
 

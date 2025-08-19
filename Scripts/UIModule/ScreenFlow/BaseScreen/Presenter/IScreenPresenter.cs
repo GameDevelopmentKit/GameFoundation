@@ -20,12 +20,13 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public ScreenStatus ScreenStatus    { get; }
 
         public void      SetViewParent(Transform parent);
-        public Transform GetViewParent();
+        public Transform GetViewParent { get; }
 
         public Transform CurrentTransform { get;  }
         public UniTask      BindData();
 
         public UniTask OpenViewAsync();
+        
         public UniTask CloseViewAsync();
         public void    CloseView();
         public void    HideView();
@@ -42,6 +43,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     public interface IScreenPresenter<in TModel> : IScreenPresenter
     {
         public UniTask OpenView(TModel model);
+        UniTask        OpenViewAsync(TModel model);
     }
 
     public enum ScreenStatus
