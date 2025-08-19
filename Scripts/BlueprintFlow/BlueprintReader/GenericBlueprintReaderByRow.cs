@@ -8,7 +8,6 @@ namespace BlueprintFlow.BlueprintReader
     using BlueprintFlow.BlueprintReader.Converter;
     using Cysharp.Threading.Tasks;
     using Sylvan.Data.Csv;
-    using UnityEngine;
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
 
     /// <summary> Attribute used to mark the Header Key for GenericDatabaseByRow </summary>
@@ -31,8 +30,6 @@ namespace BlueprintFlow.BlueprintReader
     /// <typeparam name="T2">Type of value</typeparam>
     public abstract class GenericBlueprintReaderByRow<T1, T2> : BlueprintByRow<T1, T2>, IGenericBlueprintReader
     {
-        public new T2 this[T1 key] => this.GetDataById(key);
-        
         public virtual async UniTask DeserializeFromCsv(string rawCsv)
         {
             this.CleanUp();
@@ -41,9 +38,14 @@ namespace BlueprintFlow.BlueprintReader
             while (await csv.ReadAsync()) this.Add(csv);
         }
 
-        public virtual List<List<string>> SerializeToRawData() { return this.ToRawData(true); }
+        public virtual List<List<string>> SerializeToRawData()
+        {
+            var rawData = this.ToRawData();
+            rawData.Insert(0, this.GetHeader());
+            return rawData;
+        }
 
-        public virtual T2 GetDataById(T1 id)
+        public T2 GetDataById(T1 id)
         {
             if (this.TryGetValue(id, out var result))
                 return result;
@@ -56,7 +58,9 @@ namespace BlueprintFlow.BlueprintReader
     {
         void Add(CsvDataReader inputCsv);
 
-        List<List<string>> ToRawData(bool containHeader = false);
+        List<List<string>> ToRawData();
+
+        List<string> GetHeader();
 
         void CleanUp();
     }
@@ -73,14 +77,16 @@ namespace BlueprintFlow.BlueprintReader
             var (hasValue, record) = this.blueprintRecordReader.GetRecord(inputCsv);
             if (hasValue) this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
         }
-        public List<List<string>> ToRawData(bool containHeader = false)
+
+        public List<string> GetHeader() { return this.blueprintRecordReader.GetHeader(); }
+
+        public List<List<string>> ToRawData()
         {
-            var result    = new List<List<string>>();
-            var addHeader = containHeader;
+            var result = new List<List<string>>();
+
             foreach (var record in this)
             {
-                result.AddRange(this.blueprintRecordReader.ToRawData(record.Value, addHeader));
-                addHeader = false;
+                result.AddRange(this.blueprintRecordReader.ToRawData(record.Value));
             }
 
             return result;
@@ -88,7 +94,6 @@ namespace BlueprintFlow.BlueprintReader
 
         public void CleanUp() { this.Clear(); }
     }
-
 
     // Need to be public due to reflection construction
     [Serializable]
@@ -105,18 +110,19 @@ namespace BlueprintFlow.BlueprintReader
             if (hasValue) this.Add(value);
         }
 
-        public List<List<string>> ToRawData(bool containHeader = false)
+        public List<List<string>> ToRawData()
         {
-            var result    = new List<List<string>>();
-            var addHeader = containHeader;
+            var result = new List<List<string>>();
+
             foreach (var record in this)
             {
-                result.AddRange(this.blueprintRecordReader.ToRawData(record, addHeader));
-                addHeader = false;
+                result.AddRange(this.blueprintRecordReader.ToRawData(record));
             }
 
             return result;
         }
+
+        public List<string> GetHeader() { return this.blueprintRecordReader.GetHeader(); }
 
         public void CleanUp() { this.Clear(); }
     }
@@ -126,11 +132,11 @@ namespace BlueprintFlow.BlueprintReader
         private readonly Type blueprintType;
         private readonly Type recordType;
 
-        private readonly List<MemberInfo> fieldAndProperties;
-        private          List<MemberInfo> blueprintCollectionMemberInfos;
+        private readonly List<MemberInfo>                              fieldAndProperties;
+        private          List<MemberInfo>                              blueprintCollectionMemberInfos;
+        private          Dictionary<MemberInfo, BlueprintRecordReader> nestedMemberInfoToRecordReader;
 
-        private List<IBlueprintCollection>                    listBlueprintCollections;
-        private Dictionary<MemberInfo, BlueprintRecordReader> nestedMemberInfoToRecordReader;
+        private List<IBlueprintCollection> listBlueprintCollections;
 
         public string RequireKey;
 
@@ -154,11 +160,12 @@ namespace BlueprintFlow.BlueprintReader
             {
                 csvHeaderKeyAttribute = (CsvHeaderKeyAttribute)Attribute.GetCustomAttribute(this.blueprintType, typeof(CsvHeaderKeyAttribute));
             }
-            
+
             if (csvHeaderKeyAttribute != null)
                 this.RequireKey = csvHeaderKeyAttribute.HeaderKey;
 
             var memberInfos = this.recordType.GetAllFieldAndProperties();
+
             foreach (var memberInfo in memberInfos)
                 if (this.IsBlueprintCollection(memberInfo.MemberType))
                 {
@@ -188,7 +195,7 @@ namespace BlueprintFlow.BlueprintReader
 
             object record = null;
 
-            if (!string.IsNullOrEmpty(inputCsv.GetField(this.RequireKey,this.recordType)))
+            if (!string.IsNullOrEmpty(inputCsv.GetField(this.RequireKey)))
             {
                 record = Activator.CreateInstance(this.recordType);
 
@@ -201,13 +208,12 @@ namespace BlueprintFlow.BlueprintReader
                     catch (IndexOutOfRangeException e)
                     {
                         throw new FieldDontExistInBlueprint(
-                            $"{this.blueprintType.FullName} - {memberInfo.MemberName}- {e}");
+                            $"{this.blueprintType.FullName} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"{this.blueprintType.FullName} - {memberInfo.MemberName}- {e}");
+                        throw new Exception($"{this.blueprintType.FullName} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
                     }
-
 
                 if (this.blueprintCollectionMemberInfos != null)
                 {
@@ -219,6 +225,7 @@ namespace BlueprintFlow.BlueprintReader
                     {
                         var subCollection =
                             (IBlueprintCollection)Activator.CreateInstance(subBlueprintMemberInfo.MemberType);
+
                         subBlueprintMemberInfo.SetValue(record, subCollection);
                         this.listBlueprintCollections.Add(subCollection);
                     }
@@ -232,6 +239,16 @@ namespace BlueprintFlow.BlueprintReader
                     }
                 }
             }
+            else
+            {
+                if (this.nestedMemberInfoToRecordReader != null)
+                {
+                    foreach (var (_, recordReader) in this.nestedMemberInfoToRecordReader)
+                    {
+                        recordReader.GetRecord(inputCsv);
+                    }
+                }
+            }
 
             if (this.listBlueprintCollections != null)
                 foreach (var subCollection in this.listBlueprintCollections)
@@ -240,14 +257,38 @@ namespace BlueprintFlow.BlueprintReader
             return record;
         }
 
-        public List<List<string>> ToRawData(object inputObject, bool containHeader = false)
+        public List<string> GetHeader()
+        {
+            var result = new List<string>(this.fieldAndProperties.Select(memberInfo => memberInfo.MemberName));
+
+            if (this.nestedMemberInfoToRecordReader != null)
+            {
+                foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
+                {
+                    result.AddRange(recordReader.GetHeader());
+                }
+            }
+
+            if (this.blueprintCollectionMemberInfos != null)
+            {
+                foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
+                {
+                    var subCollection = (IBlueprintCollection)Activator.CreateInstance(subBlueprintMemberInfo.MemberType);
+                    result.AddRange(subCollection.GetHeader());
+                }
+            }
+
+            return result;
+        }
+
+        public List<List<string>> ToRawData(object inputObject)
         {
             var result                  = new List<List<string>>();
             var notCollectionFieldCount = this.fieldAndProperties.Count;
-            if (containHeader) result.Add(this.fieldAndProperties.Select(memberInfo => memberInfo.MemberName).ToList());
 
             var newRow = new List<string>();
             result.Add(newRow);
+
             foreach (var memberInfo in this.fieldAndProperties)
             {
                 var converter = CsvHelper.TypeConverterCache.GetConverter(memberInfo.MemberType);
@@ -260,7 +301,8 @@ namespace BlueprintFlow.BlueprintReader
                 {
                     notCollectionFieldCount += recordReader.fieldAndProperties.Count;
                     var nestedObj              = nestedMemberInfo.GetValue(inputObject);
-                    var nestedBlueprintRawData = recordReader.ToRawData(nestedObj, containHeader);
+                    var nestedBlueprintRawData = recordReader.ToRawData(nestedObj);
+
                     for (int i = 0; i < nestedBlueprintRawData.Count; i++)
                     {
                         result[i].AddRange(nestedBlueprintRawData[i]);
@@ -268,33 +310,31 @@ namespace BlueprintFlow.BlueprintReader
                 }
             }
 
-
             if (this.blueprintCollectionMemberInfos != null)
                 foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
                 {
                     var subBlueprintData    = (IBlueprintCollection)subBlueprintMemberInfo.GetValue(inputObject);
-                    var subBlueprintRawData = subBlueprintData.ToRawData(containHeader);
-                    if (subBlueprintRawData.Count > 0)
-                    {
-                        for (var index = 0; index < subBlueprintRawData.Count; index++)
-                        {
-                            if (index > result.Count - 1)
-                                result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
+                    var subBlueprintRawData = subBlueprintData.ToRawData();
 
-                            result[index].AddRange(subBlueprintRawData[index]);
-                        }
-                    }
-                    else
+                    for (var index = 0; index < subBlueprintRawData.Count; index++)
                     {
-                        //if sub blueprint collection is empty, add empty row
-                        result[0].AddRange(Enumerable.Repeat(string.Empty, subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count));
+                        if (index > result.Count - 1)
+                        {
+                            result.Add(Enumerable.Repeat(string.Empty, notCollectionFieldCount).ToList());
+                        }
+                        else if (result[index].Count < notCollectionFieldCount)
+                        {
+                            result[index].AddRange(Enumerable.Repeat(string.Empty, notCollectionFieldCount - result[index].Count));
+                        }
+
+                        result[index].AddRange(subBlueprintRawData[index]);
                     }
+
                     notCollectionFieldCount += subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count;
                 }
 
             return result;
         }
-
 
         private bool IsBlueprintCollection(Type type) =>
             (type.IsGenericType || type.BaseType is { IsGenericType: true }) &&
@@ -310,6 +350,7 @@ namespace BlueprintFlow.BlueprintReader
         public new (bool, TRecord) GetRecord(CsvDataReader inputCsv)
         {
             var record = base.GetRecord(inputCsv);
+
             return record != null ? (true, (TRecord)record) : (false, default);
         }
     }
