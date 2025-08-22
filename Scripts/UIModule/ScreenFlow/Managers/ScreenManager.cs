@@ -181,6 +181,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             else
             {
                 Debug.LogError($"The {screenType.Name} screen does not exist");
+
                 return default;
             }
         }
@@ -212,6 +213,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             else
             {
                 Debug.LogError($"The {screenType.Name} screen does not exist");
+
                 return default;
             }
         }
@@ -273,20 +275,21 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.CurrentActiveScreen.Value = null;
             this.previousActiveScreen      = null;
         }
-        
-        public void CloseAllScreen(params Type[] except) 
+
+        public void CloseAllScreen(params Type[] except)
         {
             var cacheActiveScreens = this.activeScreens.ToList();
+
             foreach (var screen in cacheActiveScreens)
             {
-                if(!except.Contains(screen.GetType()))
+                if (!except.Contains(screen.GetType()))
                 {
                     screen.CloseViewAsync();
                     this.activeScreens.Remove(screen);
                 }
             }
-            
-            if(activeScreens.Count > 0)
+
+            if (activeScreens.Count > 0)
             {
                 this.CurrentActiveScreen.Value = this.activeScreens.Last();
                 this.previousActiveScreen      = this.activeScreens.Count > 1 ? this.activeScreens[^2] : null;
@@ -306,7 +309,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             foreach (var screen in cacheActiveScreens)
             {
-                tasks.Add(screen.CloseViewAsync());
+                if (screen.ScreenStatus == ScreenStatus.Opened)
+                {
+                    tasks.Add(screen.CloseViewAsync());
+                }
             }
 
             this.CurrentActiveScreen.Value = null;
