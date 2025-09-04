@@ -1,5 +1,5 @@
 {
-  "name": "GameFoundation.Utilities",
+  "name": "caojweldjflwendl.Utilities",
   "rootNamespace": "",
   "references": [
     "I2Localization.Scripts",
@@ -7,10 +7,10 @@
     "Unity.TextMeshPro",
     "UniTask",
     "Unity.Timeline",
-    "GameFoundation.AssetLibrary",
-    "GameFoundation.DI",
-    "GameFoundation.Models",
-    "GameFoundation.Signals",
+    "caojweldjflwendl.AssetLibrary",
+    "caojweldjflwendl.DI",
+    "caojweldjflwendl.Models",
+    "caojweldjflwendl.Signals",
     "UniTask.Addressables",
     "Unity.ResourceManager",
     "Unity.Addressables",

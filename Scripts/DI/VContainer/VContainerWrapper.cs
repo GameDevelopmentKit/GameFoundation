@@ -1,7 +1,7 @@
 ﻿#if GDK_VCONTAINER
 #nullable enable
 #nullable enable
-namespace GameFoundation.DI
+namespace caojweldjflwendl.DI
 {
     using System;
     using System.Collections;

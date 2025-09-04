@@ -1,4 +1,4 @@
-﻿namespace GameFoundation.DI
+﻿namespace caojweldjflwendl.DI
 {
     public interface ILateDisposable
     {

@@ -1,5 +1,5 @@
 #if GDK_ZENJECT
-namespace GameFoundation.Signals
+namespace caojweldjflwendl.Signals
 {
     using MessagePipe;
     using Zenject;

@@ -1,8 +1,8 @@
 ﻿#if GDK_ZENJECT
-namespace GameFoundation.Scripts.Utilities.ApplicationServices
+namespace caojweldjflwendl.Scripts.Utilities.ApplicationServices
 {
-    using GameFoundation.Scripts.Utilities.UserData;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.Scripts.Utilities.UserData;
+    using caojweldjflwendl.Signals;
     using Zenject;
 
     public class ApplicationServiceInstaller : Installer<ApplicationServiceInstaller>

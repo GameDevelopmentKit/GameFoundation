@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAnimation
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAnimation
 {
     using System;
     using UnityEngine;

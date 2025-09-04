@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.LogService
+namespace caojweldjflwendl.Scripts.Utilities.LogService
 {
     using System;
     using UnityEngine;

@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.ApplicationServices
+namespace caojweldjflwendl.Scripts.Utilities.ApplicationServices
 {
     using System.Collections;
     using R3;

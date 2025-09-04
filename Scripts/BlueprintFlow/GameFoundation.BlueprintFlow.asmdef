@@ -1,11 +1,11 @@
 {
-  "name": "GameFoundation.BlueprintFlow",
-  "rootNamespace": "GameFoundation.BlueprintFlow",
+  "name": "caojweldjflwendl.BlueprintFlow",
+  "rootNamespace": "caojweldjflwendl.BlueprintFlow",
   "references": [
-    "GameFoundation.DI",
-    "GameFoundation.Signals",
-    "GameFoundation.Models",
-    "GameFoundation.Utilities",
+    "caojweldjflwendl.DI",
+    "caojweldjflwendl.Signals",
+    "caojweldjflwendl.Models",
+    "caojweldjflwendl.Utilities",
     "UniTask",
     "Zenject",
     "VContainer"

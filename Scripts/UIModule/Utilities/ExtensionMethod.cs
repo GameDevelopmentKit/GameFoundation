@@ -1,13 +1,13 @@
-namespace GameFoundation.Scripts.UIModule.Utilities
+namespace caojweldjflwendl.Scripts.UIModule.Utilities
 {
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.UIModule.MVP;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.UIModule.MVP;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Signals;
+    using caojweldjflwendl.Signals;
     using UnityEngine;
     using UnityEngine.UI;
     #if GDK_ZENJECT

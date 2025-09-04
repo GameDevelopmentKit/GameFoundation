@@ -1,12 +1,12 @@
-namespace GameFoundation.Scripts.UIModule.CommonScreen
+namespace caojweldjflwendl.Scripts.UIModule.CommonScreen
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.Utilities;
-    using GameFoundation.Scripts.Utilities.LogService;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.Utilities;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Signals;
     using TMPro;
     using UnityEngine;
     using UnityEngine.Scripting;

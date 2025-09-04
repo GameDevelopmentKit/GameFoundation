@@ -1,8 +1,8 @@
-namespace GameFoundation.Scripts.Utilities.UserData
+namespace caojweldjflwendl.Scripts.Utilities.UserData
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.Interfaces;
+    using caojweldjflwendl.Scripts.Interfaces;
 
     public interface IHandleUserDataServices
     {

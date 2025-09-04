@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimelineEvents
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.TimelineEvents
 {
     using System;
     using System.Linq;
@@ -10,7 +10,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
     public class TimelineEventBehaviour : PlayableBehaviour
     {
         /// <summary>
-        /// Key for the current event handler - used to track changes 
+        /// Key for the current event handler - used to track changes
         /// </summary>
         public string HandlerKey;
 

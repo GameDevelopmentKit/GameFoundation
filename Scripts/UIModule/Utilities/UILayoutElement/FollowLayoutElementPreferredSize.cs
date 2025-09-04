@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.UILayoutElement
 {
     [ExecuteAlways]
     public class FollowLayoutElementPreferredSize : UIBehaviour, ILayoutSelfController, ILayoutController

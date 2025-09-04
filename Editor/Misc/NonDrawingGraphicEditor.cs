@@ -1,13 +1,13 @@
-﻿/// Credit Slipp Douglas Thompson 
+﻿/// Credit Slipp Douglas Thompson
 /// Sourced from - https://gist.github.com/capnslipp/349c18283f2fea316369
-/// 
+///
 
 using UnityEditor;
 using UnityEditor.UI;
 
 namespace UnityEngine.UI.Extensions
 {
-    using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
+    using caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff;
 
     [CanEditMultipleObjects]
     [CustomEditor(typeof(NonDrawingGraphic), false)]

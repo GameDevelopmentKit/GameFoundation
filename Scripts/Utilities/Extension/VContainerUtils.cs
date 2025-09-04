@@ -1,5 +1,5 @@
 #if GDK_VCONTAINER
-namespace GameFoundation.Scripts.Utilities.Extension
+namespace caojweldjflwendl.Scripts.Utilities.Extension
 {
     using System.Linq;
     using VContainer;

@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker.Editor
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker.Editor
 {
     using UnityEditor;
     using UnityEngine;

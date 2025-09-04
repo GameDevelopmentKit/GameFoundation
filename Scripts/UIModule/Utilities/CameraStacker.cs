@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.Utilities
+namespace caojweldjflwendl.Scripts.UIModule.Utilities
 {
     using System;
     using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
         private static           CameraStacker       baseCamera; // Universal Render Pipeline base camera. This camera will manage the camera stack.
         private static           List<CameraStacker> cameraStackers;
-        private static           List<CameraStacker> CameraStackers => cameraStackers ??= new(); // Store list of CameraStacker for management. 
+        private static           List<CameraStacker> CameraStackers => cameraStackers ??= new(); // Store list of CameraStacker for management.
         [SerializeField] private bool                isBaseCameraStack;                          // Tick to this if this is a base camera that manages camera stack.
         [SerializeField] private int                 orderInCameraStack;
 

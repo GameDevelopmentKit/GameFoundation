@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeMachine
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeMachine
 {
     using System;
     using UnityEngine;

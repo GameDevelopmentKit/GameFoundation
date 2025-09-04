@@ -1,4 +1,4 @@
-﻿namespace GameFoundation.Scripts.Utilities.ApplicationServices
+﻿namespace caojweldjflwendl.Scripts.Utilities.ApplicationServices
 {
     /// <summary>Model signal application event pause, focus...</summary>
     public class ApplicationPauseSignal

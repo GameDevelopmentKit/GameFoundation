@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.MVP
+namespace caojweldjflwendl.Scripts.UIModule.MVP
 {
     /// <summary>
     /// represent view, contains render logic

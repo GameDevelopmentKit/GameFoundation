@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff
 {
     using System.Collections.Generic;
     using UnityEngine;

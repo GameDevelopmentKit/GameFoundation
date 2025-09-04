@@ -1,4 +1,4 @@
-namespace GameFoundation.Editor.Tools.ViewCreatorWizard
+namespace caojweldjflwendl.Editor.Tools.ViewCreatorWizard
 {
     using System;
     using System.Collections.Generic;

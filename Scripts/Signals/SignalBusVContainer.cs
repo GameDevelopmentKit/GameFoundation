@@ -1,8 +1,8 @@
 ﻿#if GDK_VCONTAINER
 #nullable enable
-namespace GameFoundation.Signals
+namespace caojweldjflwendl.Signals
 {
-    using GameFoundation.DI;
+    using caojweldjflwendl.DI;
     using MessagePipe;
     using VContainer;
 

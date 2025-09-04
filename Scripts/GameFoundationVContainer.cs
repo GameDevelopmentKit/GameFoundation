@@ -2,21 +2,21 @@
 
 #if GDK_VCONTAINER
 #nullable enable
-namespace GameFoundation.Scripts
+namespace caojweldjflwendl.Scripts
 {
-    using GameFoundation.BlueprintFlow;
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
-    using GameFoundation.Scripts.Utilities;
-    using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Scripts.Utilities.LogService;
-    using GameFoundation.Scripts.Utilities.ObjectPool;
-    using GameFoundation.Scripts.Utilities.UserData;
-    using GameFoundation.Signals;
-    using GameFoundation.UIModule.UIModule;
-    using GameFoundation.Utilities.ApplicationServices;
-    using GameFoundation.Utilities.GameQueueAction;
+    using caojweldjflwendl.BlueprintFlow;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.AssetLibrary;
+    using caojweldjflwendl.Scripts.UIModule.Utilities.LoadImage;
+    using caojweldjflwendl.Scripts.Utilities;
+    using caojweldjflwendl.Scripts.Utilities.Extension;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.Utilities.ObjectPool;
+    using caojweldjflwendl.Scripts.Utilities.UserData;
+    using caojweldjflwendl.Signals;
+    using caojweldjflwendl.UIModule.UIModule;
+    using caojweldjflwendl.Utilities.ApplicationServices;
+    using caojweldjflwendl.Utilities.GameQueueAction;
     using UnityEngine;
     using VContainer;
     using VContainer.Unity;

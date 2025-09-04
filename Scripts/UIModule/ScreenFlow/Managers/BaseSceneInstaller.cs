@@ -1,5 +1,5 @@
 #if GDK_ZENJECT
-namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
+namespace caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers
 {
     using System;
     using UnityEngine;

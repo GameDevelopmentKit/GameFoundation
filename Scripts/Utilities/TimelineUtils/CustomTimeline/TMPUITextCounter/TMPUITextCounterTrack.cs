@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITextCounter
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITextCounter
 {
     using TMPro;
     using UnityEngine;

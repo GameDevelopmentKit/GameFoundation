@@ -1,8 +1,8 @@
-namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.GameQueueAction
 {
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers;
 
     public class ShowPopupQueueAction<T> : BaseQueueAction where T : IScreenPresenter
     {

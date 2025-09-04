@@ -1,7 +1,7 @@
-﻿namespace GameFoundation.Scripts.UIModule.ScreenFlow
+﻿namespace caojweldjflwendl.Scripts.UIModule.ScreenFlow
 {
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers;
 
     public static class ScreenHelper
     {

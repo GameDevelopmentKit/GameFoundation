@@ -1,10 +1,10 @@
 {
-  "name": "GameFoundation.BlueprintFlow.Editor",
+  "name": "caojweldjflwendl.BlueprintFlow.Editor",
   "rootNamespace": "",
   "references": [
-    "GameFoundation.Editor",
-    "GameFoundation.Models",
-    "GameFoundation.BlueprintFlow"
+    "caojweldjflwendl.Editor",
+    "caojweldjflwendl.Models",
+    "caojweldjflwendl.BlueprintFlow"
   ],
   "includePlatforms": [
     "Editor"

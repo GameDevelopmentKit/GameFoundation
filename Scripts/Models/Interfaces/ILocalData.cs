@@ -1,4 +1,4 @@
-﻿namespace GameFoundation.Scripts.Interfaces
+﻿namespace caojweldjflwendl.Scripts.Interfaces
 {
     public interface ILocalData
     {

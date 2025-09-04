@@ -1,6 +1,6 @@
-﻿namespace GameFoundation.Scripts.Utilities
+﻿namespace caojweldjflwendl.Scripts.Utilities
 {
-    using GameFoundation.BuildScripts.Runtime;
+    using caojweldjflwendl.BuildScripts.Runtime;
     using TMPro;
     using UnityEngine;
 

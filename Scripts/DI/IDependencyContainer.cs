@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace GameFoundation.DI
+namespace caojweldjflwendl.DI
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

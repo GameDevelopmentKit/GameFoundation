@@ -1,6 +1,6 @@
-namespace GameFoundation.Scripts.Models
+namespace caojweldjflwendl.Scripts.Models
 {
-    using GameFoundation.Scripts.Interfaces;
+    using caojweldjflwendl.Scripts.Interfaces;
     using R3;
     using UnityEngine.Scripting;
 

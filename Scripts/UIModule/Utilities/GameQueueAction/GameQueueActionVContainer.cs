@@ -1,9 +1,9 @@
 ﻿#if GDK_VCONTAINER
 #nullable enable
-namespace GameFoundation.Utilities.GameQueueAction
+namespace caojweldjflwendl.Utilities.GameQueueAction
 {
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.UIModule.Utilities.GameQueueAction;
     using VContainer;
 
     public static class GameQueueActionVContainer

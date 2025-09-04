@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.Extension
+namespace caojweldjflwendl.Scripts.Utilities.Extension
 {
     using System;
     using System.Buffers;
@@ -6,7 +6,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.Utilities.Utils;
+    using caojweldjflwendl.Scripts.Utilities.Utils;
 
     public static class ListExtensions
     {

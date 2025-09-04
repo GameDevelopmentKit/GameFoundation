@@ -2,21 +2,21 @@
 using BlueprintServicesInstaller = BlueprintFlow.BlueprintControlFlow.BlueprintServicesInstaller;
 using GDKConfig = Models.GDKConfig;
 
-namespace GameFoundation.Scripts
+namespace caojweldjflwendl.Scripts
 {
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.Models;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
-    using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
-    using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
-    using GameFoundation.Scripts.Utilities;
-    using GameFoundation.Scripts.Utilities.ApplicationServices;
-    using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Scripts.Utilities.LogService;
-    using GameFoundation.Scripts.Utilities.ObjectPool;
-    using GameFoundation.Scripts.Utilities.UserData;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.AssetLibrary;
+    using caojweldjflwendl.Scripts.Models;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers;
+    using caojweldjflwendl.Scripts.UIModule.Utilities.GameQueueAction;
+    using caojweldjflwendl.Scripts.UIModule.Utilities.LoadImage;
+    using caojweldjflwendl.Scripts.Utilities;
+    using caojweldjflwendl.Scripts.Utilities.ApplicationServices;
+    using caojweldjflwendl.Scripts.Utilities.Extension;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.Utilities.ObjectPool;
+    using caojweldjflwendl.Scripts.Utilities.UserData;
+    using caojweldjflwendl.Signals;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>

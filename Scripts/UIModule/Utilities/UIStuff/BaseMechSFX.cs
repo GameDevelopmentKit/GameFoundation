@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff
 {
-    using GameFoundation.Scripts.Utilities;
+    using caojweldjflwendl.Scripts.Utilities;
 
     [DisallowMultipleComponent]
     public class BaseMechSFX : MonoBehaviour

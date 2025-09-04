@@ -1,12 +1,12 @@
-namespace GameFoundation.Scripts.Utilities.UserData
+namespace caojweldjflwendl.Scripts.Utilities.UserData
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.Interfaces;
-    using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.Interfaces;
+    using caojweldjflwendl.Scripts.Utilities.Extension;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
     using Newtonsoft.Json;
     using UnityEngine;
 

@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.GameQueueAction
 {
     public class GameQueueActionParam
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.UILayoutElement
 {
     [ExecuteInEditMode]
     public class TextLayoutElement : UIBehaviour, ILayoutSelfController, ILayoutController

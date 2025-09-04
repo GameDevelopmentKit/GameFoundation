@@ -1,10 +1,10 @@
 ﻿#if GDK_VCONTAINER
 #nullable enable
-namespace GameFoundation.Utilities.ApplicationServices
+namespace caojweldjflwendl.Utilities.ApplicationServices
 {
-    using GameFoundation.Scripts.Utilities.ApplicationServices;
-    using GameFoundation.Scripts.Utilities.UserData;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.Scripts.Utilities.ApplicationServices;
+    using caojweldjflwendl.Scripts.Utilities.UserData;
+    using caojweldjflwendl.Signals;
     using UnityEngine;
     using VContainer;
     using VContainer.Unity;

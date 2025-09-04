@@ -1,8 +1,8 @@
-namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff
 {
     using System.Collections.Generic;
     using DG.Tweening;
-    using GameFoundation.Scripts.Utilities.ApplicationServices;
+    using caojweldjflwendl.Scripts.Utilities.ApplicationServices;
     using R3;
     using Sirenix.OdinInspector;
     using UnityEngine;

@@ -1,6 +1,6 @@
 {
-  "name": "GameFoundation.DI",
-  "rootNamespace": "GameFoundation.DI",
+  "name": "caojweldjflwendl.DI",
+  "rootNamespace": "caojweldjflwendl.DI",
   "references": [
     "Zenject",
     "VContainer"

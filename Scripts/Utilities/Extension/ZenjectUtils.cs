@@ -1,5 +1,5 @@
 #if GDK_ZENJECT
-namespace GameFoundation.Scripts.Utilities.Extension
+namespace caojweldjflwendl.Scripts.Utilities.Extension
 {
     using System;
     using System.Linq;

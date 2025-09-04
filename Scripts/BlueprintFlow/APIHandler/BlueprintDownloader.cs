@@ -6,7 +6,7 @@ namespace BlueprintFlow.APIHandler
     using UnityEngine.Scripting;
     #if !GDK_NETWORK_ENABLE
     using System.Net;
-    using GameFoundation.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
 
     #else
     using Network.WebService;

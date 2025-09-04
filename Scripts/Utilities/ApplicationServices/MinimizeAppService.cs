@@ -1,8 +1,8 @@
-namespace GameFoundation.Scripts.Utilities.ApplicationServices
+namespace caojweldjflwendl.Scripts.Utilities.ApplicationServices
 {
     using System;
-    using GameFoundation.Scripts.Utilities.UserData;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.Scripts.Utilities.UserData;
+    using caojweldjflwendl.Signals;
     using UnityEngine;
 
     /// <summary>Catch application event ex pause, focus and more.... </summary>

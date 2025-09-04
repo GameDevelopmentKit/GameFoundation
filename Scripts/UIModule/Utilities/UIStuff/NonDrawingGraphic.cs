@@ -1,7 +1,7 @@
-﻿/// Credit Slipp Douglas Thompson 
+﻿/// Credit Slipp Douglas Thompson
 /// Sourced from - https://gist.github.com/capnslipp/349c18283f2fea316369
 
-namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff
 {
     using UnityEngine;
     using UnityEngine.UI;

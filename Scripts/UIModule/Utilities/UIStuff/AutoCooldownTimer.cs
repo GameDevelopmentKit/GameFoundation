@@ -1,8 +1,8 @@
-﻿namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+﻿namespace caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff
 {
     using System;
-    using GameFoundation.Scripts.Utilities.ApplicationServices;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.Scripts.Utilities.ApplicationServices;
+    using caojweldjflwendl.Signals;
     using R3;
     using UnityEngine.Scripting;
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameFoundation.Scripts.Utilities
+namespace caojweldjflwendl.Scripts.Utilities
 {
     using UnityEditor;
 

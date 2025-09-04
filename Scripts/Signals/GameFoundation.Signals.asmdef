@@ -1,8 +1,8 @@
 {
-  "name": "GameFoundation.Signals",
-  "rootNamespace": "GameFoundation.Signals",
+  "name": "caojweldjflwendl.Signals",
+  "rootNamespace": "caojweldjflwendl.Signals",
   "references": [
-    "GameFoundation.DI",
+    "caojweldjflwendl.DI",
     "MessagePipe",
     "UniTask",
     "Zenject",

@@ -1,6 +1,6 @@
 ﻿#if GDK_VCONTAINER
 #nullable enable
-namespace GameFoundation.DI
+namespace caojweldjflwendl.DI
 {
     using VContainer.Unity;
 

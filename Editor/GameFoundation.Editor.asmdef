@@ -1,11 +1,11 @@
 {
-  "name": "GameFoundation.Editor",
+  "name": "caojweldjflwendl.Editor",
   "rootNamespace": "",
   "references": [
-    "GameFoundation.UIModule",
-    "GameFoundation.Models",
-    "GameFoundation.Network.Config",
-    "GameFoundation.Utilities",
+    "caojweldjflwendl.UIModule",
+    "caojweldjflwendl.Models",
+    "caojweldjflwendl.Network.Config",
+    "caojweldjflwendl.Utilities",
     "Unity.Addressables",
     "Unity.ResourceManager",
     "UniTask.Addressables",

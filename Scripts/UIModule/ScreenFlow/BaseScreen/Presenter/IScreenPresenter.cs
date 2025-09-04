@@ -1,8 +1,8 @@
-namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
+namespace caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.UIModule.MVP;
+    using caojweldjflwendl.Scripts.UIModule.MVP;
     using UnityEngine;
 
     /// <summary>

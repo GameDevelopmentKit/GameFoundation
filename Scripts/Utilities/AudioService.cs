@@ -1,16 +1,16 @@
-﻿namespace GameFoundation.Scripts.Utilities
+﻿namespace caojweldjflwendl.Scripts.Utilities
 {
     using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using DigitalRuby.SoundManagerNamespace;
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.Models;
-    using GameFoundation.Scripts.Utilities.LogService;
-    using GameFoundation.Scripts.Utilities.ObjectPool;
-    using GameFoundation.Scripts.Utilities.UserData;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.AssetLibrary;
+    using caojweldjflwendl.Scripts.Models;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.Utilities.ObjectPool;
+    using caojweldjflwendl.Scripts.Utilities.UserData;
+    using caojweldjflwendl.Signals;
     using R3;
     using UnityEngine;
     using UnityEngine.Scripting;

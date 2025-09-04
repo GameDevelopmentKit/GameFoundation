@@ -1,7 +1,7 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextCounter
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextCounter
 {
     using System;
-    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider;
+    using caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider;
     using TMPro;
     using UnityEngine;
     using UnityEngine.Playables;

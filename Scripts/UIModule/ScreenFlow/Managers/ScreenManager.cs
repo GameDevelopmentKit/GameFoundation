@@ -1,25 +1,25 @@
-namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
+namespace caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.UIModule.CommonScreen;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Scripts.Utilities.LogService;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.AssetLibrary;
+    using caojweldjflwendl.Scripts.UIModule.CommonScreen;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Signals;
+    using caojweldjflwendl.Scripts.Utilities.Extension;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Signals;
     using R3;
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.Scripting;
-    using IInitializable = GameFoundation.DI.IInitializable;
-    using ITickable = GameFoundation.DI.ITickable;
+    using IInitializable = caojweldjflwendl.DI.IInitializable;
+    using ITickable = caojweldjflwendl.DI.ITickable;
     using Object = UnityEngine.Object;
 
     /// <summary>

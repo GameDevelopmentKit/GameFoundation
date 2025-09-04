@@ -1,4 +1,4 @@
-﻿namespace GameFoundation.Scripts.Utilities.Extension
+﻿namespace caojweldjflwendl.Scripts.Utilities.Extension
 {
     using System.Collections.Generic;
     using System.Linq;

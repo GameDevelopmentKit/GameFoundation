@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.Adapter
+namespace caojweldjflwendl.Scripts.UIModule.Adapter
 {
     using System;
     using System.Collections.Generic;
@@ -7,8 +7,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     using Com.ForbiddenByte.OSA.CustomParams;
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.UIModule.MVP;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.UIModule.MVP;
     using UnityEngine;
 
     // There are 2 important callbacks you need to implement, apart from Start(): CreateViewsHolder() and UpdateViewsHolder()

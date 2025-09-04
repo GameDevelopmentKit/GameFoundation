@@ -1,11 +1,11 @@
-﻿namespace GameFoundation.Scripts.Utilities.TimelineUtils.Extensions
+﻿namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.Extensions
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker;
-    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider;
-    using GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITextCounter;
+    using caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker;
+    using caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider;
+    using caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITextCounter;
     using UnityEngine;
     using UnityEngine.Playables;
     using UnityEngine.Timeline;

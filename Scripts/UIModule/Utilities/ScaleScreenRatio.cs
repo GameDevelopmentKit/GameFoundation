@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.Utilities
+namespace caojweldjflwendl.Scripts.UIModule.Utilities
 {
     using UnityEngine;
     using UnityEngine.UI;
@@ -20,7 +20,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
         private void SetCanvasScaler()
         {
-            // if current screen ratio > WideScreenRatio, it will be the long screen the need keep height and scale width, and vice versa 
+            // if current screen ratio > WideScreenRatio, it will be the long screen the need keep height and scale width, and vice versa
             #if UNITY_EDITOR
             var standardScreenRatio = Screen.width > Screen.height ? LandscapeStandardScreenRatio : PortraitStandardScreenRatio;
             this.GetComponent<CanvasScaler>().matchWidthOrHeight = Screen.width * 1.0f / Screen.height >= standardScreenRatio ? 1 : 0;

@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Models
+namespace caojweldjflwendl.Scripts.Models
 {
     //TODO refactor this to interface
     public class PlayerState

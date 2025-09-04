@@ -1,6 +1,6 @@
 ﻿#if GDK_ZENJECT
 #nullable enable
-namespace GameFoundation.DI
+namespace caojweldjflwendl.DI
 {
     using System.Collections.Generic;
     using System.Linq;

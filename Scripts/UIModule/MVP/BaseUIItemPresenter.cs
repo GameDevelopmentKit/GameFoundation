@@ -1,8 +1,8 @@
-﻿namespace GameFoundation.Scripts.UIModule.MVP
+﻿namespace caojweldjflwendl.Scripts.UIModule.MVP
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.Scripts.AssetLibrary;
+    using caojweldjflwendl.Scripts.AssetLibrary;
     using UnityEngine;
     using Object = UnityEngine.Object;
 

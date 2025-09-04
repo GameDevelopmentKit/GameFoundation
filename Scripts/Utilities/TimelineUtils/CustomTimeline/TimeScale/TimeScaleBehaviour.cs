@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeScale
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeScale
 {
     using System;
     using UnityEngine;

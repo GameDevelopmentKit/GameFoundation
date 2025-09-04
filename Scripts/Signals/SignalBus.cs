@@ -1,8 +1,8 @@
-namespace GameFoundation.Signals
+namespace caojweldjflwendl.Signals
 {
     using System;
     using System.Collections.Generic;
-    using GameFoundation.DI;
+    using caojweldjflwendl.DI;
     using MessagePipe;
     using UnityEngine.Scripting;
 

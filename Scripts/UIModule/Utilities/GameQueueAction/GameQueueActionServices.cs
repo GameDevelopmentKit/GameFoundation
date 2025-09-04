@@ -1,10 +1,10 @@
-namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System.Collections.Generic;
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
-    using GameFoundation.Scripts.Utilities.Extension;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers;
+    using caojweldjflwendl.Scripts.Utilities.Extension;
     using R3;
     using UnityEngine.Scripting;
 

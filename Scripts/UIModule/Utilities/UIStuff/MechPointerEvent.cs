@@ -1,6 +1,6 @@
 using UnityEngine.EventSystems;
 
-namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff
 {
     public class MechPointerEvent : BaseMechSFX, IPointerEnterHandler
     {

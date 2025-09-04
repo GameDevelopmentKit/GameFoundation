@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAnimation.Editor
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAnimation.Editor
 {
     using UnityEditor;
     using UnityEngine;

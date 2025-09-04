@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeScale.Editor
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeScale.Editor
 {
     using UnityEditor;
     using UnityEngine;

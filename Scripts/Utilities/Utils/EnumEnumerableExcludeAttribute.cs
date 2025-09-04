@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft.All Rights Reserved.Licensed under the MIT license.See License.txt in the project root for license information.
 
-namespace GameFoundation.Scripts.Utilities.Utils
+namespace caojweldjflwendl.Scripts.Utilities.Utils
 {
     using System;
     using System.Collections.Generic;

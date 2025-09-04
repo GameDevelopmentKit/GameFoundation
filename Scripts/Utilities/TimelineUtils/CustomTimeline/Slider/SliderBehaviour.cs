@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider
 {
     using System;
     using UnityEngine;

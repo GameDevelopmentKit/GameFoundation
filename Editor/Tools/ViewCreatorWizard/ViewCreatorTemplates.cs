@@ -1,12 +1,12 @@
-namespace GameFoundation.Editor.Tools.ViewCreatorWizard
+namespace caojweldjflwendl.Editor.Tools.ViewCreatorWizard
 {
     public partial class ViewCreatorWizard
     {
         private const string ITEM_VIEW_TEMPLATE =
             @"namespace X_NAME_SPACE
 {
-    using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.UIModule.MVP;
+    using caojweldjflwendl.Scripts.AssetLibrary;
+    using caojweldjflwendl.Scripts.UIModule.MVP;
     
     public class X_MODEL_NAME
     {
@@ -26,9 +26,9 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         private const string POPUP_VIEW_TEMPLATE =
             @"namespace X_NAME_SPACE
 {
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
     using Zenject;
 
     public class X_MODEL_NAME
@@ -50,8 +50,8 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         private const string POPUP_VIEW_NON_MODEL_TEMPLATE =
             @"namespace X_NAME_SPACE
 {
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
     using Zenject;
 
     public class X_VIEW_NAME : BaseView
@@ -69,9 +69,9 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         private const string SCREEN_VIEW_TEMPLATE =
             @"namespace X_NAME_SPACE
 {
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
     using Zenject;
 
     public class X_MODEL_NAME
@@ -93,8 +93,8 @@ namespace GameFoundation.Editor.Tools.ViewCreatorWizard
         private const string SCREEN_VIEW_NON_MODEL_TEMPLATE =
             @"namespace X_NAME_SPACE
 {
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
     using Zenject;
 
     public class X_VIEW_NAME : BaseView

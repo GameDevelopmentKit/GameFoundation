@@ -1,6 +1,6 @@
 #if CLIENT
 // fake require Attribute
-namespace GameFoundation.Scripts.Utilities.Utils
+namespace caojweldjflwendl.Scripts.Utilities.Utils
 {
     using System;
 

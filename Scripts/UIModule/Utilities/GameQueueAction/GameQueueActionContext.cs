@@ -1,11 +1,11 @@
-namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.GameQueueAction
 {
     using System;
     using DG.Tweening;
-    using GameFoundation.Scripts.UIModule.ScreenFlow;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View;
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.View;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers;
     using UnityEngine.Playables;
     using UnityEngine.Scripting;
 

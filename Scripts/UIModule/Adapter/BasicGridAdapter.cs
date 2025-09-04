@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.UIModule.Adapter
+namespace caojweldjflwendl.Scripts.UIModule.Adapter
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -6,8 +6,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     using Com.ForbiddenByte.OSA.CustomAdapters.GridView;
     using Com.ForbiddenByte.OSA.DataHelpers;
     using Cysharp.Threading.Tasks;
-    using GameFoundation.DI;
-    using GameFoundation.Scripts.UIModule.MVP;
+    using caojweldjflwendl.DI;
+    using caojweldjflwendl.Scripts.UIModule.MVP;
     using UnityEngine;
 
     // There is 1 important callback you need to implement, apart from Start(): UpdateCellViewsHolder()

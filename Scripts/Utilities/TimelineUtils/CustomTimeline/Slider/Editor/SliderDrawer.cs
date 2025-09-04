@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider.Editor
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider.Editor
 {
     using UnityEditor;
     using UnityEngine;

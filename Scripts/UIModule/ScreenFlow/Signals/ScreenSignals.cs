@@ -1,6 +1,6 @@
-namespace GameFoundation.Scripts.UIModule.ScreenFlow.Signals
+namespace caojweldjflwendl.Scripts.UIModule.ScreenFlow.Signals
 {
-    using GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter;
 
     public class ScreenCloseSignal
     {

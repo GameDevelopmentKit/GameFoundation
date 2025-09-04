@@ -1,6 +1,6 @@
 ﻿// ReSharper disable DelegateSubtraction
 
-namespace GameFoundation.Scripts.Utilities.TimelineUtils.Extensions
+namespace caojweldjflwendl.Scripts.Utilities.TimelineUtils.Extensions
 {
     using System;
     using System.Collections.Generic;

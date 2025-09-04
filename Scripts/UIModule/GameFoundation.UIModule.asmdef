@@ -1,11 +1,11 @@
 {
-  "name": "GameFoundation.UIModule",
-  "rootNamespace": "GameFoundation.UIModule",
+  "name": "caojweldjflwendl.UIModule",
+  "rootNamespace": "caojweldjflwendl.UIModule",
   "references": [
-    "GameFoundation.AssetLibrary",
-    "GameFoundation.Signals",
-    "GameFoundation.Utilities",
-    "GameFoundation.DI",
+    "caojweldjflwendl.AssetLibrary",
+    "caojweldjflwendl.Signals",
+    "caojweldjflwendl.Utilities",
+    "caojweldjflwendl.DI",
     "Unity.TextMeshPro",
     "Unity.Addressables",
     "Unity.ResourceManager",

@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace GameFoundation.DI
+namespace caojweldjflwendl.DI
 {
     #if GDK_ZENJECT
     using UnityEngine;

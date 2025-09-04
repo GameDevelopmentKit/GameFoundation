@@ -1,9 +1,9 @@
 #if GDK_ZENJECT
-namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
+namespace caojweldjflwendl.Scripts.UIModule.ScreenFlow.Managers
 {
-    using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
-    using GameFoundation.Scripts.UIModule.Utilities.UIStuff;
-    using GameFoundation.Signals;
+    using caojweldjflwendl.Scripts.UIModule.ScreenFlow.Signals;
+    using caojweldjflwendl.Scripts.UIModule.Utilities.UIStuff;
+    using caojweldjflwendl.Signals;
     using Zenject;
 
     public class ScreenFlowInstaller : Installer<ScreenFlowInstaller>

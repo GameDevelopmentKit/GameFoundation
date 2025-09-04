@@ -1,13 +1,13 @@
-namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
+namespace caojweldjflwendl.Scripts.UIModule.Utilities.LoadImage
 {
     using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using DG.Tweening;
-    using GameFoundation.Scripts.AssetLibrary;
-    using GameFoundation.Scripts.Utilities.Extension;
-    using GameFoundation.Scripts.Utilities.LogService;
-    using GameFoundation.Scripts.Utilities.ObjectPool;
+    using caojweldjflwendl.Scripts.AssetLibrary;
+    using caojweldjflwendl.Scripts.Utilities.Extension;
+    using caojweldjflwendl.Scripts.Utilities.LogService;
+    using caojweldjflwendl.Scripts.Utilities.ObjectPool;
     using UnityEngine;
     using UnityEngine.Networking;
     using UnityEngine.Scripting;

@@ -1,4 +1,4 @@
-namespace GameFoundation.Scripts.Utilities.UserData
+namespace caojweldjflwendl.Scripts.Utilities.UserData
 {
     public class UserDataLoadedSignal
     {
