@@ -15,24 +15,26 @@
 
     public interface IAudioService
     {
-        void  PlaySound(string name, AudioSource sender);
-        void  PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
-        void  StopSound(string name);
-        void  StopAllSound();
-        void  StopAll();
-        void  PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void  PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void  StopPlayList();
-        void  SetPlayListTime(float time);
-        float GetPlayListTime();
-        void  SetPlayListPitch(float pitch);
-        void  SetPlayListLoop(bool isLoop);
-        void  PausePlayList();
-        void  ResumePlayList();
-        bool  IsPlayingPlayList();
-        void  StopAllPlayList();
-        void  PauseEverything();
-        void  ResumeEverything();
+        UniTask PlaySound(string name, AudioSource sender);
+        UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void    StopSound(string name);
+        void    StopAllSound();
+        void    StopAll();
+        UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+        UniTask PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+        void    StopPlayList();
+        void    SetPlayListTime(float time);
+        float   GetPlayListTime();
+        void    SetPlayListPitch(float pitch);
+        void    SetPlayListLoop(bool isLoop);
+        void    PausePlayList();
+        void    ResumePlayList();
+        bool    IsPlayingPlayList();
+        void    StopAllPlayList();
+        void    PauseEverything();
+        void    ResumeEverything();
+        void    PauseSound(string s);
+        void    ResumeSound(string s);
     }
 
     public class AudioService : IAudioService, IInitializable, IDisposable
@@ -89,13 +91,13 @@
             return audioSource;
         }
 
-        public virtual async void PlaySound(string name, AudioSource sender)
+        public virtual async UniTask PlaySound(string name, AudioSource sender)
         {
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
+        public virtual async UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
             var audioSource = await this.GetAudioSource();
@@ -163,7 +165,7 @@
         /// <param name="volumeScale">Additional volume scale</param>
         /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
-        public virtual async void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        public virtual async UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
             this.StopPlayList();
 
@@ -173,7 +175,7 @@
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
-        public virtual async void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        public virtual async UniTask PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
             this.StopPlayList();
 
@@ -252,19 +254,40 @@
             SoundManager.ResumeAll();
         }
 
+        public void PauseSound(string s)
+        {
+            var audioSource = this.loopingSoundNameToSources.GetValueOrDefault(s);
+
+            if (audioSource == null) return;
+            audioSource.Pause();
+        }
+
+        public void ResumeSound(string s)
+        {
+            var audioSource = this.loopingSoundNameToSources.GetValueOrDefault(s);
+
+            if (audioSource == null) return;
+            audioSource.UnPause();
+        }
+
         protected virtual void SetSoundValue(float value) { SoundManager.SoundVolume = value; }
 
         protected virtual void SetMusicValue(float value) { SoundManager.MusicVolume = value; }
 
-        public void Dispose() { this.compositeDisposable?.Dispose(); }
+        public void Dispose()
+        {
+            this.compositeDisposable?.Dispose();
+            Instance = null;
+        }
 
-        private void RecycleAudioSource(AudioSource audioSource)
+        private async UniTask RecycleAudioSource(AudioSource audioSource)
         {
             if (!audioSource) return;
 
             audioSource.clip   = null;
             audioSource.volume = 1;
             audioSource.loop   = false;
+            await UniTask.Delay(100);
             audioSource.gameObject.Recycle();
         }
     }
