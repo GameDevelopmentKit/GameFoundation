@@ -16,11 +16,11 @@
     public interface IAudioService
     {
         UniTask PlaySound(string name, AudioSource sender);
-        UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false,bool autoUnload=true);
         void    StopSound(string name);
         void    StopAllSound();
         void    StopAll();
-        UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+        UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false,bool autoUnload=true);
         UniTask PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void    StopPlayList();
         void    SetPlayListTime(float time);
@@ -97,9 +97,9 @@
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
+        public virtual async UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false,bool autoUnload=true)
         {
-            var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name,isAutoUnload:autoUnload);
             var audioSource = await this.GetAudioSource();
 
             if (isLoop)
@@ -165,11 +165,11 @@
         /// <param name="volumeScale">Additional volume scale</param>
         /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
-        public virtual async UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
+        public virtual async UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false,bool autoUnload=true)
         {
             this.StopPlayList();
 
-            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName);
+            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName,isAutoUnload:autoUnload);
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
