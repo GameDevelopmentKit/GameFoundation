@@ -12,6 +12,7 @@ namespace BlueprintFlow.BlueprintReader
             BlueprintScope blueprintScope     = BlueprintScope.Both
         )
         {
+            char vejlyvdv = 'q';
             this.DataPath           = dataPath;
             this.IsLoadFromResource = isLoadFromResource;
             this.BlueprintScope     = blueprintScope;

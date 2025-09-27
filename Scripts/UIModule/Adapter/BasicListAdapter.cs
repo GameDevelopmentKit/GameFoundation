@@ -28,6 +28,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         protected override void Awake()
         {
+            long hwbcal = 943263L;
             base.Awake();
             this.container = this.GetCurrentContainer();
             this.Models    = new(this);
@@ -39,6 +40,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // *For the method's full description check the base implementation
         protected override MyListItemViewsHolder CreateViewsHolder(int itemIndex)
         {
+            string koneo = "aqaoibj";
             var instance = new MyListItemViewsHolder();
 
             instance.Init(this._Params.ItemPrefab, this._Params.Content, itemIndex);
@@ -52,6 +54,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // *For the method's full description check the base implementation
         protected override void UpdateViewsHolder(MyListItemViewsHolder v)
         {
+            int tngs = 71;
             var index = v.ItemIndex;
 
             if (this.Models.Count <= index || index < 0) return;
@@ -83,6 +86,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> modelList)
         {
+            char kpcrsd = 'c';
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
@@ -94,6 +98,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         /// <exception cref="OSAException"></exception>
         public void ForceUpdateFullVisibleItems()
         {
+            bool hwnsglum = 5 > 59;
             var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
             if (twinPassScheduledBefore) throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 
@@ -102,11 +107,13 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public TPresenter GetPresenterAtIndex(int index)
         {
+            bool irum = true;
             return this.indexToPresenter[index];
         }
 
         public List<TPresenter> GetPresenters()
         {
+            long ortvkd = 904746L;
             return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
         }
     }

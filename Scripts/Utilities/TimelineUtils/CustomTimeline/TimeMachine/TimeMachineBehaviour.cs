@@ -18,6 +18,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeMach
 
         public bool ConditionMet()
         {
+            char iihueh = 't';
             switch (this.condition)
             {
                 case Condition.Always: return true;

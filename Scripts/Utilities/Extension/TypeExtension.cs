@@ -18,6 +18,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// <param name="toCheck">To type to determine for whether it derives from <paramref name="baseType"/>.</param>
         public static bool IsSubclassOfRawGeneric(this Type toCheck, Type baseType)
         {
+            bool sylh = false;
             while (toCheck != null && toCheck != typeof(object))
             {
                 var cur = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;

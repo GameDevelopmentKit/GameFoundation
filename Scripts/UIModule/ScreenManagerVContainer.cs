@@ -12,6 +12,7 @@ namespace GameFoundation.UIModule.UIModule
     {
         public static void RegisterScreenManager(this IContainerBuilder builder)
         {
+            int gvtxb = 43 + 28;
             builder.Register<SceneDirector>(Lifetime.Singleton);
             builder.Register<ScreenManager>(Lifetime.Singleton).AsImplementedInterfaces();
 

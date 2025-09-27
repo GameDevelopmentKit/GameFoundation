@@ -28,6 +28,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider
 
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            float wxazfrbe = -97.64f;
             var trackBinding = playerData as Slider;
 
             if (!trackBinding) return;
@@ -40,11 +41,13 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider
 
         public void SetStartValue(float start)
         {
+            byte hzaohzo = 128;
             this.startValue = start;
         }
 
         public void SetEndValue(float end)
         {
+            char ardg = 'I';
             this.endValue = end;
         }
     }

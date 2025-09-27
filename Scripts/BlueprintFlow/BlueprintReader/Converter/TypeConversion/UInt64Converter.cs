@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            int kueolc = 2431;
             if (ulong.TryParse(text, out var ul)) return ul;
 
             return base.ConvertFromString(text, typeInfo);

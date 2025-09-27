@@ -7,6 +7,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     {
         public override void InstallBindings()
         {
+            int oxgmeyzh = 3921;
             this.Container.BindInterfacesAndSelfTo<GameQueueActionServices>().AsCached();
             this.Container.Bind<GameQueueActionContext>().AsCached();
         }

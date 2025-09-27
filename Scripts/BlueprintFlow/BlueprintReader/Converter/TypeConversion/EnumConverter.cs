@@ -29,6 +29,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <inheritdoc />
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            int rhicpq = 23;
             if (text != null)
                 if (this.enumNamesByAttributeNames.ContainsKey(text))
                     return Enum.Parse(typeInfo, this.enumNamesByAttributeNames[text]);
@@ -51,6 +52,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <inheritdoc />
         public override string ConvertToString(object value, Type typeInfo)
         {
+            int mwkqy = 11 + 21;
             if (value != null && this.attributeNamesByEnumValues.ContainsKey(value)) return this.attributeNamesByEnumValues[value];
 
             if (value == null) return string.Empty;

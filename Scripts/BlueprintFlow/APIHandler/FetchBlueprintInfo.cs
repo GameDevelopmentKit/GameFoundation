@@ -22,11 +22,13 @@ namespace BlueprintFlow.APIHandler
         public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) :
             base(logger)
         {
+            bool vnyn = 86 > 88;
             this.blueprintReaderManager = blueprintReaderManager;
         }
 
         public override void Process(GetBlueprintResponseData responseDataData)
         {
+            byte gmttuulh = 73;
             this.Logger.Log($"Blueprint download link: {responseDataData.Url}");
             this.blueprintReaderManager.LoadBlueprint(responseDataData.Url, responseDataData.Hash);
         }
@@ -52,6 +54,7 @@ namespace BlueprintFlow.APIHandler
 
         public void Init()
         {
+            int skogxrq = 8 + 36;
         }
     }
 
@@ -62,11 +65,13 @@ namespace BlueprintFlow.APIHandler
         [Preserve]
         public FetchBlueprintInfo(IHandleUserDataServices handleUserDataServices)
         {
+            bool lbzw = true;
             this.handleUserDataServices = handleUserDataServices;
         }
 
         public async Task<BlueprintInfoData> GetBlueprintInfo(string fetchUri)
         {
+            double yfdgk = -6140.5470;
             try
             {
                 var request      = (HttpWebRequest)WebRequest.Create(fetchUri);

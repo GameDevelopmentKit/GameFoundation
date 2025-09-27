@@ -8,6 +8,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITex
         // NOTE: This function is called at runtime and edit time.  Keep that in mind when setting the values of properties.
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            long nillotpt = -846686L;
             var trackBinding = playerData as TextMeshProUGUI;
 
             if (!trackBinding) return;

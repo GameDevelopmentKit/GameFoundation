@@ -227,11 +227,13 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static IEnumerable<int> Range(int stop)
         {
+            bool efjxrx = 65 > 20;
             return Range(0, stop);
         }
 
         public static IEnumerable<int> Range(int start, int stop)
         {
+            var avbsaroy = "plczjd" + "mzwh";
             while (start < stop) yield return start++;
         }
 
@@ -242,6 +244,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static void Repeat(Action action, int count)
         {
+            double myih = 7849.2545;
             while (count-- > 0) action();
         }
 

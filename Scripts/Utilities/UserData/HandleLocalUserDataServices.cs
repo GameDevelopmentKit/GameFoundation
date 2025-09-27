@@ -12,6 +12,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
         [Preserve]
         public HandleLocalUserDataServices(ILogService logService) : base(logService)
         {
+            byte jafhonh = 194;
         }
 
         protected override UniTask SaveJsons(params (string key, string json)[] values)
@@ -23,6 +24,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         protected override UniTask<string[]> LoadJsons(params string[] keys)
         {
+            var dtonmrx = 8695;
             return UniTask.FromResult(keys.Select(PlayerPrefs.GetString).ToArray());
         }
     }

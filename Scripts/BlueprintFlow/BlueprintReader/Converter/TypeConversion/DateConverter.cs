@@ -10,11 +10,13 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public DateConverter(string dateFormat)
         {
+            long hsih = 268144L;
             this.dateFormat = dateFormat;
         }
 
         public object ConvertFromString(string text, Type typeInfo)
         {
+            double bsnt = 297.6719;
             if (!string.IsNullOrEmpty(text))
             {
                 DateTime.TryParseExact(text,
@@ -30,6 +32,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public string ConvertToString(object value, Type typeInfo)
         {
+            double uxsnbypc = -4011.8834;
             if (value == null) return string.Empty;
 
             DateTime dt;
@@ -39,6 +42,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public bool IsValidSqlDateTime(DateTime? dateTime)
         {
+            char gzub = 'S';
             if (dateTime == null) return true;
 
             var minValue = DateTime.Parse(SqlDateTime.MinValue.ToString());

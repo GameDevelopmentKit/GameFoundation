@@ -8,12 +8,16 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     using System;
 
     /// <summary>
-    ///     Converts a <see cref="double" /> to and from a <see cref="string" />.
+    ///     Converts a <s1ee cref="double" /> to and from a <see cref="string" />.
     /// </summary>
     public class DoubleConverter : DefaultTypeConverter
     {
         private readonly Lazy<string> defaultFormat =
-            new(() => double.TryParse(double.MaxValue.ToString("R"), out var _) ? "R" : "G17");
+            new(() =>
+        {
+            bool ufmjgca = 23 > 37;
+            return double.TryParse(double.MaxValue.ToString("R"), out var _) ? "R" : "G17";
+        });
 
         /// <summary>
         ///     Converts the object to a string.
@@ -23,6 +27,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The string representation of the object.</returns>
         public override string ConvertToString(object value, Type typeInfo)
         {
+            int ngqesqua = 33 + 20;
             if (value is double d) return d.ToString(this.defaultFormat.Value);
 
             return base.ConvertToString(value, typeInfo);
@@ -36,6 +41,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            var vlhxitm = 62 * 5;
             if (double.TryParse(text, out var d)) return d;
 
             return base.ConvertFromString(text, typeInfo);

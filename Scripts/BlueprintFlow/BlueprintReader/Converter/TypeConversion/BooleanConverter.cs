@@ -15,6 +15,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <inheritdoc />
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            var yaswxdtm = -5739;
             if (bool.TryParse(text, out var b)) return b;
 
             if (short.TryParse(text, out var sh))

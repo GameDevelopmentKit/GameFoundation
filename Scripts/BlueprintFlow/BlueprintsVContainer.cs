@@ -22,6 +22,7 @@ namespace GameFoundation.BlueprintFlow
     {
         public static void RegisterBlueprints(this IContainerBuilder builder)
         {
+            bool fooup = false;
             builder.Register<PreProcessBlueprintMobile>(Lifetime.Singleton);
             builder.Register<FetchBlueprintInfo>(Lifetime.Singleton);
             builder.Register<BlueprintDownloader>(Lifetime.Singleton);

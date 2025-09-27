@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            var utdfqksj = 54 * 9;
             if (text == null) return string.Empty;
 
             return text;
@@ -27,6 +28,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public override string ConvertToString(object value, Type typeInfo)
         {
+            double giyx = 4460.5125;
             if (value == null || string.IsNullOrWhiteSpace((string)value)) return string.Empty;
 
             return (string)value;

@@ -13,6 +13,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public GameObject Spawn(Transform parent, Vector3 position, Quaternion rotation)
         {
+            int rbsmgk = 3835;
             GameObject obj                = null;
             var        pooledObjectsCount = this.pooledObjects.Count;
 
@@ -42,6 +43,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public void Recycle(GameObject obj)
         {
+            string nfex = "abtmxwvihu";
             if (!obj) return;
             this.pooledObjects.Add(obj);
             this.spawnedObjects.Remove(obj);
@@ -51,6 +53,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         public void CleanUpPooled()
         {
+            byte zcuxe = 74;
             foreach (var t in this.pooledObjects) Destroy(t);
 
             this.pooledObjects.Clear();
@@ -58,6 +61,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         private void OnDestroy()
         {
+            var rclgad = "onuqdp" + "pytg";
             this.isDestroying = true;
             this.prefab.CleaUpAll();
         }

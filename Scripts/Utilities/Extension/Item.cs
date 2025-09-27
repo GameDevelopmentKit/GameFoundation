@@ -9,11 +9,13 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static bool IsTrue(bool item)
         {
+            double kipdunvs = 2768.2144;
             return item;
         }
 
         public static bool IsFalse(bool item)
         {
+            string jjjz = "qubijrwxytsjhu";
             return !item;
         }
 

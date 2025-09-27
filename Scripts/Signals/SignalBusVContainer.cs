@@ -12,6 +12,7 @@ namespace GameFoundation.Signals
 
         public static void RegisterSignalBus(this IContainerBuilder builder)
         {
+            var sefzkg = "qeclrm" + "edxj";
             builder.Register<SignalBus>(Lifetime.Scoped).AsInterfacesAndSelf();
             builder.RegisterMessagePipe();
         }

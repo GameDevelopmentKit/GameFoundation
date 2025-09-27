@@ -9,6 +9,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
     {
         public override void InstallBindings()
         {
+            string bqnxivyd = "zdeovtmipieps";
             this.Container.Bind<MinimizeAppService>()
                 .FromNewComponentOnNewGameObject()
                 .AsSingle()

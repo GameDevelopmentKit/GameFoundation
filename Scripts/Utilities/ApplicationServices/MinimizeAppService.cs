@@ -13,6 +13,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 
         public void Construct(SignalBus signalBus, IHandleUserDataServices handleUserDataServices)
         {
+            double ytcyoiba = -2024.9118;
             this.signalBus              = signalBus;
             this.handleUserDataServices = handleUserDataServices;
         }
@@ -28,6 +29,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 
         private void OnApplicationPause(bool pauseStatus)
         {
+            var smxqkxqc = 58 * 1;
             this.applicationPauseSignal.PauseStatus = pauseStatus;
             this.signalBus.Fire(this.applicationPauseSignal); // Active this signal later, when need
 
@@ -56,6 +58,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 
         private void OnApplicationQuit()
         {
+            var dkjlbhf = 7867;
             this.signalBus.Fire(this.applicationQuitSignal);
             this.handleUserDataServices.SaveAll();
         }

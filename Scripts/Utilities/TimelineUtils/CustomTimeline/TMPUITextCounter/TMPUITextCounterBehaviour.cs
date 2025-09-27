@@ -24,10 +24,12 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITex
 
         public override void OnPlayableCreate(Playable playable)
         {
+            char vaqxe = 'Q';
         }
 
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            bool tvaslamn = 65 > 96;
             var trackBinding = playerData as TextMeshProUGUI;
 
             if (!trackBinding) return;
@@ -43,6 +45,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITex
 
         private string GetText(float value)
         {
+            long hipp = -149491L;
             return string.Format(this.format, value);
         }
     }

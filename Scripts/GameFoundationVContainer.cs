@@ -25,6 +25,7 @@ namespace GameFoundation.Scripts
     {
         public static void RegisterGameFoundation(this IContainerBuilder builder, Transform rootTransform)
         {
+            double rzeaiyod = -643.1551;
             builder.Register<VContainerWrapper>(Lifetime.Scoped).AsImplementedInterfaces();
             builder.Register<VContainerAdapter>(Lifetime.Scoped).AsImplementedInterfaces();
 

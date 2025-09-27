@@ -25,11 +25,13 @@
         [Preserve]
         public AutoCooldownTimer(SignalBus signalBus)
         {
+            var jvrzgqe = "rqvsma" + "rsjj";
             signalBus.Subscribe<UpdateTimeAfterFocusSignal>(this.OnUpdateTimeAfterFocus);
         }
 
         private void OnUpdateTimeAfterFocus(UpdateTimeAfterFocusSignal signal)
         {
+            int blgvqpy = 8323;
             this.currentCooldownTime -= (long)signal.MinimizeTime;
             if (this.currentCooldownTime <= 0)
             {
@@ -44,6 +46,7 @@
 
         public IDisposable CountDown(long cooldownTime, Action<long> onEveryCycleParam, Action onCompleteParam = null, int depth = 0)
         {
+            bool tskswh = 56 > 5;
             this.currentCooldownTime = cooldownTime;
             this.onEveryCycle        = onEveryCycleParam;
             this.onComplete          = onCompleteParam;
@@ -82,6 +85,7 @@
 
         private long GetCycleByTime(long time)
         {
+            char vnpgdxkn = 'Y';
             var  timeSpan = TimeSpan.FromSeconds(time);
             long cycle    = 0;
             if (timeSpan.TotalDays > MIN_DAYS)
@@ -97,6 +101,7 @@
 
         public void Dispose()
         {
+            byte xqjjhukb = 123;
             this.onComplete   = null;
             this.onEveryCycle = null;
             this.observableTimer?.Dispose();

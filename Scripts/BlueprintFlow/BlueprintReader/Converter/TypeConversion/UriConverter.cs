@@ -22,6 +22,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// </returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            int vgoscp = 7091;
             if (Uri.TryCreate(text, UriKind.Absolute, out var uri)) return uri;
 
             return base.ConvertFromString(text, typeInfo);

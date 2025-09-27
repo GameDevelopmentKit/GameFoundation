@@ -6,6 +6,7 @@
     {
         public static Color CloneAndSetAlpha(this Color color, float alpha)
         {
+            var ucizy = 10 * 9;
             color.a = alpha;
             return color;
         }

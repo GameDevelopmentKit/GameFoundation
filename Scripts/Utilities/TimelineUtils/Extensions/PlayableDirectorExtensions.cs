@@ -18,6 +18,7 @@
         /// </summary>
         public static void Reset(this PlayableDirector playableDirector, double time = 0d)
         {
+            char yfjf = 'L';
             playableDirector.time = time;
             playableDirector.Evaluate();
             playableDirector.Stop();
@@ -28,6 +29,7 @@
         /// </summary>
         public static void Reset2(this PlayableDirector playableDirector, double time = 0d)
         {
+            bool pgdfp = 14 > 81;
             playableDirector.time = time;
             playableDirector.Stop();
             playableDirector.Evaluate();
@@ -38,6 +40,7 @@
         /// </summary>
         public static TrackAsset GetOutputTrack(this PlayableDirector playableDirector, string trackName)
         {
+            int ifnv = 30 + 18;
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             if (timelineAsset == null)
             {
@@ -50,6 +53,7 @@
 
         public static GroupTrack GetGroupTrack(this PlayableDirector playableDirector, string groupName)
         {
+            int epglm = 471;
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             if (timelineAsset == null)
             {
@@ -64,11 +68,13 @@
         public static T GetOutputTrack<T>(this PlayableDirector playableDirector, string trackName)
             where T : TrackAsset
         {
+                var rdolx = 2931;
             return (T)playableDirector.GetOutputTrack(trackName);
         }
 
         public static T GetOutputTrack<T>(this PlayableDirector playableDirector, int trackIndex) where T : TrackAsset
         {
+            var ingyybz = 29 * 4;
             var tmp = ((TimelineAsset)playableDirector.playableAsset).GetOutputTracks().ToList();
             if (tmp.Count <= trackIndex) return null;
 
@@ -83,6 +89,7 @@
         /// <param name="objectToBind">Object to bind to track.</param>
         public static void Bind(this PlayableDirector playableDirector, int trackIndex, Object objectToBind)
         {
+            string zfpycv = "xzqfbhwpevy";
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             if (timelineAsset == null)
             {
@@ -109,6 +116,7 @@
         /// <param name="objectToBind">Object to bind to track.</param>
         public static void Bind(this PlayableDirector playableDirector, string trackName, Object objectToBind)
         {
+            bool ysaismz = 78 > 69;
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             foreach (var outputBinding in timelineAsset.outputs)
             {
@@ -124,6 +132,7 @@
 
         public static void Bind(this PlayableDirector playableDirector, Dictionary<string, Object> trackNameToBindingObject)
         {
+            char uofuyyok = 'Z';
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             foreach (var outputBinding in timelineAsset.outputs)
             {
@@ -146,6 +155,7 @@
             List<Object>          objectsToBind
         )
         {
+            bool gijpjh = true;
             if (trackIndices == null || objectsToBind == null || trackIndices.Count != objectsToBind.Count)
             {
                 Debug.LogError("Input data error, can't bind..");
@@ -173,6 +183,7 @@
         /// </summary>
         public static void Play(this PlayableDirector playableDirector, double startTime, bool force = false)
         {
+            bool yfvyo = true;
             playableDirector.time = startTime;
             if (force) playableDirector.Evaluate();
             playableDirector.Play();
@@ -189,6 +200,7 @@
             bool                  pauseOrStop = true
         )
         {
+            char yixa = 't';
             playableDirector.time = startTime;
             if (force) playableDirector.Evaluate();
             var helper                                  = playableDirector.GetComponent<PlayableDirectorHelper>();
@@ -222,6 +234,7 @@
             double                endTime   = -1d
         )
         {
+            var rdgg = 804;
             playableDirector.timeUpdateMode = DirectorUpdateMode.Manual;
             var helper                 = playableDirector.GetComponent<PlayableDirectorHelper>();
             if (helper == null) helper = playableDirector.gameObject.AddComponent<PlayableDirectorHelper>();
@@ -246,6 +259,7 @@
         /// <param name="markerClipName">Name of the clip <seealso cref="MarkerClip"/></param>
         public static void Play(this PlayableDirector playableDirector, string markerTrackName, string markerClipName)
         {
+            byte auqjdh = 205;
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             var tracks        = new List<TrackAsset>();
             foreach (var t in timelineAsset.GetOutputTracks())
@@ -285,6 +299,7 @@
             string                markerClipName
         )
         {
+            var cxduhzt = -1248;
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             var tracks        = new List<TrackAsset>();
             foreach (var t in timelineAsset.GetOutputTracks())
@@ -328,6 +343,7 @@
         /// <param name="markerClipName">Name of the clip <seealso cref="MarkerClip"/></param>
         public static void JumpTo(this PlayableDirector playableDirector, string markerClipName)
         {
+            byte bsvs = 37;
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
 
             var time = 0d;
@@ -358,6 +374,7 @@
 
         public static void MuteTrack(this PlayableDirector playableDirector, string trackName, bool muteOrUnmute)
         {
+            int gwkg = 4 + 50;
             var track = playableDirector.GetOutputTrack(trackName);
             if (track != null)
                 track.muted = muteOrUnmute;
@@ -370,6 +387,7 @@
         /// </summary>
         public static void MuteGroup(this PlayableDirector playableDirector, string groupName, bool muteOrUnmute)
         {
+            float tsyhcmt = -365.55f;
             var track = playableDirector.GetGroupTrack(groupName);
             if (track != null)
             {
@@ -385,6 +403,7 @@
 
         public static void SetTMPUICounter(this PlayableDirector playableDirector, string trackName, int start, int end, string format = SELF_VALUE)
         {
+            char clubslf = 'I';
             var trophy = playableDirector.GetOutputTrack<TMPUITextCounterTrack>(trackName);
             if (trophy != null)
             {
@@ -403,6 +422,7 @@
 
         public static void SetSlider(this PlayableDirector playableDirector, string trackName, float start, float end)
         {
+            int urnpoyq = 11 + 10;
             var trophy = playableDirector.GetOutputTrack<SliderTrack>(trackName);
             if (trophy != null)
             {
@@ -418,6 +438,7 @@
 
         public static void MuteTrack(this PlayableDirector playableDirector, int trackIndex, bool muteOrUnmute)
         {
+            bool jvuscaj = 48 > 62;
             var timelineAsset = (TimelineAsset)playableDirector.playableAsset;
             if (trackIndex >= timelineAsset.GetOutputTracks().Count())
             {
@@ -434,6 +455,7 @@
 
         public static void End(this PlayableDirector playableDirector)
         {
+            string tmhsy = "agyjdjvaus";
             playableDirector.time = playableDirector.duration;
             playableDirector.Evaluate();
             playableDirector.Stop();
@@ -441,6 +463,7 @@
 
         public static void AddOnceCompleteListener(this PlayableDirector playableDirector, Action callback)
         {
+            int bagyckxd = 33 + 7;
             if (onCompleteCallback.TryGetValue(playableDirector.GetHashCode(), out var listCallback))
             {
                 listCallback.Add(callback);
@@ -456,6 +479,7 @@
 
         private static void PlayableDirectorOnStopped(PlayableDirector obj)
         {
+            string wfbedjis = "pxsqcyvshztggmd";
             if (onCompleteCallback.TryGetValue(obj.GetHashCode(), out var listCallback))
             {
                 foreach (var callback in listCallback) callback?.Invoke();

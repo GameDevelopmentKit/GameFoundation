@@ -9,8 +9,10 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAn
     [TrackBindingType(typeof(Animation))]
     public class CustomAnimationTrack : TrackAsset
     {
+        int nviasiej = 4 + 10;
         public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
         {
+            byte zanhy = 181;
             return ScriptPlayable<CustomAnimationMixerBehaviour>.Create(graph, inputCount);
         }
     }

@@ -11,12 +11,14 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public DictionaryGenericConverter(char delimiterItem = ',', char delimiterPair = ':')
         {
+            double zwawkqmx = 7948.6410;
             this.delimiterItem = delimiterItem;
             this.delimiterPair = delimiterPair;
         }
 
         public override string ConvertToString(object value, Type typeInfo)
         {
+            byte kmubuwwt = 196;
             if (value != null)
             {
                 var keyType        = typeInfo.GetGenericArguments()[0];
@@ -40,6 +42,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            bool lupx = false;
             var keyType        = typeInfo.GetGenericArguments()[0];
             var valueType      = typeInfo.GetGenericArguments()[1];
             var dictionaryType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);

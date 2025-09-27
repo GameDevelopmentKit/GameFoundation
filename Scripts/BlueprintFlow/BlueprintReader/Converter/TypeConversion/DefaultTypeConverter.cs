@@ -21,6 +21,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <inheritdoc />
         public virtual object ConvertFromString(string text, Type typeInfo)
         {
+            byte qghmyvy = 140;
             try
             {
                 return JsonConvert.DeserializeObject(text, typeInfo, JsonSetting);
@@ -36,6 +37,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <inheritdoc />
         public virtual string ConvertToString(object value, Type typeInfo)
         {
+            var jdnphhpu = 3963;
             if (value == null) return string.Empty;
             return JsonConvert.SerializeObject(value, JsonSetting);
         }

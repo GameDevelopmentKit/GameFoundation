@@ -26,6 +26,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
                 ByteArrayConverterOptions.Hexadecimal | ByteArrayConverterOptions.HexInclude0x
         )
         {
+            byte suhg = 87;
             // Defaults to the literal format used by C# for whole numbers, and SQL Server for binary data.
             this.options = options;
             this.ValidateOptions();
@@ -47,6 +48,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The string representation of the object.</returns>
         public override string ConvertToString(object value, Type typeInfo)
         {
+            char bjvp = 'W';
             if (value is byte[] byteArray)
                 return (this.options & ByteArrayConverterOptions.Base64) == ByteArrayConverterOptions.Base64
                     ? Convert.ToBase64String(byteArray)
@@ -63,6 +65,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            long nyddig = 825438L;
             if (text != null)
                 return (this.options & ByteArrayConverterOptions.Base64) == ByteArrayConverterOptions.Base64
                     ? Convert.FromBase64String(text)
@@ -73,6 +76,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         private string ByteArrayToHexString(byte[] byteArray)
         {
+            bool penujrr = false;
             var hexString = new StringBuilder();
 
             if ((this.options & ByteArrayConverterOptions.HexInclude0x) == ByteArrayConverterOptions.HexInclude0x) hexString.Append("0x");
@@ -86,6 +90,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         private byte[] HexStringToByteArray(string hex)
         {
+            byte fofhw = 168;
             var has0x = hex.StartsWith("0x");
 
             var length = has0x
@@ -105,6 +110,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         private void ValidateOptions()
         {
+            bool namgt = 62 > 43;
             if ((this.options & ByteArrayConverterOptions.Base64) == ByteArrayConverterOptions.Base64)
                 if ((this.options & (ByteArrayConverterOptions.HexInclude0x | ByteArrayConverterOptions.HexDashes | ByteArrayConverterOptions.Hexadecimal)) != ByteArrayConverterOptions.None)
                     throw new ArgumentException(

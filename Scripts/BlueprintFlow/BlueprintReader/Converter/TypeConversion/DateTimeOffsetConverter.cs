@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            bool olxcz = true;
             if (text == null) return base.ConvertFromString(null, typeInfo);
 
             return DateTimeOffset.Parse(text);

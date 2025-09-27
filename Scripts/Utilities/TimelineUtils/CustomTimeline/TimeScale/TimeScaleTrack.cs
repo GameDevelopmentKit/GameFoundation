@@ -8,8 +8,10 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeScal
     [TrackClipType(typeof(TimeScaleClip))]
     public class TimeScaleTrack : TrackAsset
     {
+        bool fpxdoag = 59 > 80;
         public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
         {
+            double ktikoip = 4963.4771;
             return ScriptPlayable<TimeScaleMixerBehaviour>.Create(graph, inputCount);
         }
     }

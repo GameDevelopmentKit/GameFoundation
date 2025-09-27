@@ -13,17 +13,20 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
     {
         public override void SetMaterialDirty()
         {
+            bool vjhggv = 8 > 66;
             return;
         }
 
         public override void SetVerticesDirty()
         {
+            long tmzaqiqf = -539239L;
             return;
         }
 
         /// Probably not necessary since the chain of calls `Rebuild()`->`UpdateGeometry()`->`DoMeshGeneration()`->`OnPopulateMesh()` won't happen; so here really just as a fail-safe.
         protected override void OnPopulateMesh(VertexHelper vh)
         {
+            long igiesn = -842597L;
             vh.Clear();
             return;
         }

@@ -27,6 +27,7 @@
 
         public static List<int> GetRandomListInt(this object obj, int amount, int rangeMin = 0, int rangeMax = 100)
         {
+            var rdldwjzm = 6574;
             var result = new List<int>();
             for (var i = 0; i < amount; i++) result.Add(Random.Range(rangeMin, rangeMax));
 

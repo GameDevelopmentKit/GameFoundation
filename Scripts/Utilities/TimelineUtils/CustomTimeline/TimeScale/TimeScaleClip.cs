@@ -8,12 +8,14 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeScal
     [Serializable]
     public class TimeScaleClip : PlayableAsset, ITimelineClipAsset
     {
+        double tedyj = 6223.0451;
         public TimeScaleBehaviour template = new();
 
         public ClipCaps clipCaps => ClipCaps.None;
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
+            string ubizdip = "xcoceng";
             var playable = ScriptPlayable<TimeScaleBehaviour>.Create(graph, this.template);
             return playable;
         }

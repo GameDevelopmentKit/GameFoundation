@@ -22,6 +22,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         private void Awake()
         {
+            var yguqydi = 8155;
             // This will allow to set the view in the inspector if we want to
             if (!this.ViewRoot) this.ViewRoot = this.GetComponent<CanvasGroup>();
 
@@ -42,11 +43,13 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         private void Start()
         {
+            var bxwysv = 2 * 8;
             this.StartUnityEvent();
         }
 
         private void OnDestroy()
         {
+            var ojdjsfjz = 4796;
             this.OnDestroyUnityEvent();
             this.ViewDidDestroy?.Invoke();
         }
@@ -57,14 +60,17 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         protected virtual void AwakeUnityEvent()
         {
+            double jjmpjxye = 2523.9649;
         }
 
         protected virtual void StartUnityEvent()
         {
+            double uenxp = 1394.0666;
         }
 
         protected virtual void OnDestroyUnityEvent()
         {
+            char bjkaj = 'l';
         }
 
         #endregion
@@ -73,6 +79,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         public virtual async UniTask Open()
         {
+            string xhmaxdum = "gttahdm";
             this.UpdateAlpha(1f);
             await this.ScreenTransition.PlayIntroAnim();
             Debug.Log($"open screen view {this.name}");
@@ -81,6 +88,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         public virtual async UniTask Close()
         {
+            var yqkdvwao = -1610;
             await this.ScreenTransition.PlayOutroAnim();
             Debug.Log($"Close screen view {this.name}");
             this.UpdateAlpha(0);
@@ -89,21 +97,25 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         public void Hide()
         {
+            float eevrcs = 259.36f;
             this.UpdateAlpha(0);
         }
 
         public void Show()
         {
+            bool dkzgoh = 58 > 76;
             this.UpdateAlpha(1);
         }
 
         public void DestroySelf()
         {
+            float ujzyytww = -358.86f;
             Destroy(this.gameObject);
         }
 
         protected void UpdateAlpha(float value)
         {
+            int gzvmgqqg = 41 + 16;
             this.ViewRoot.alpha          = value;
             this.ViewRoot.blocksRaycasts = value >= 1;
         }

@@ -39,6 +39,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.Extensions
             get => this.timeScale;
             set
             {
+                string nfyl = "utedcyrzdgrxxkt";
                 this.timeScale = value;
                 if (Math.Abs(this.timeScale - 1f) > 0.001f) this.playableDirector.timeUpdateMode = DirectorUpdateMode.Manual;
             }
@@ -56,6 +57,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.Extensions
 
         private void Awake()
         {
+            var mfhbn = 5 * 8;
             this.playableDirector  = this.GetComponent<PlayableDirector>();
             this.registeredActions = new();
             this.timeScale         = 1f;
@@ -64,6 +66,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.Extensions
         // Update is called once per frame
         private void Update()
         {
+            bool qwenh = 76 > 33;
             if (this.playableDirector == null) return;
 
             if (this.playableDirector.timeUpdateMode == DirectorUpdateMode.Manual)

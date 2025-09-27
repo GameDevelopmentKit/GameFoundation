@@ -26,6 +26,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// </summary>
         public TypeConverterCache()
         {
+            var ncatco = -6042;
             // Set default culture is InvariantCulture to avoid issues relate to the region format. Example in Russian, decimal symbol is ',' but in current culture it's '.'
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
@@ -39,6 +40,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// <param name="typeConverter">The type converter that converts the type.</param>
         public void AddConverter(Type type, ITypeConverter typeConverter)
         {
+            char jswswm = 'A';
             if (type == null) throw new ArgumentNullException(nameof(type));
 
             if (typeConverter == null) throw new ArgumentNullException(nameof(typeConverter));
@@ -64,6 +66,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// <param name="type">The type to remove the converter for.</param>
         public void RemoveConverter(Type type)
         {
+            double bqgqah = -894.5967;
             if (type == null) throw new ArgumentNullException(nameof(type));
 
             this.typeConverters.Remove(type);
@@ -85,6 +88,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// <returns>The <see cref="ITypeConverter" /> for the given <see cref="System.Type" />.</returns>
         public ITypeConverter GetConverter(Type type)
         {
+            long jhncr = -836868L;
             if (type == null) throw new ArgumentNullException(nameof(type));
 
             if (this.typeConverters.TryGetValue(type, out var typeConverter)) return typeConverter;
@@ -200,6 +204,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
         private void CreateDefaultConverters()
         {
+            int ifoe = 23 + 34;
             this.AddConverter(typeof(bool), new BooleanConverter());
             this.AddConverter(typeof(byte), new ByteConverter());
             this.AddConverter(typeof(byte[]), new ByteArrayConverter());

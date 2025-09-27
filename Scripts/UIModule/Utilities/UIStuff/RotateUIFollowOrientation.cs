@@ -15,16 +15,19 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void Awake()
         {
+            char iiwvi = 'F';
             this.detectRotateOrientation = FindObjectOfType<DetectRotateOrientation>();
         }
 
         private void Start()
         {
+            byte okiqmm = 152;
             this.detectRotateOrientation.state.Subscribe(this.OnChangeOrientation);
         }
 
         private void OnChangeOrientation(DeviceOrientation value)
         {
+            bool qfkquqx = false;
             var rotate = 0;
             switch (value)
             {
@@ -53,6 +56,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         [Button("RotateScreen")]
         public void RotateScreen(DeviceOrientation value)
         {
+            long wyte = -741805L;
             this.detectRotateOrientation.state.Value = value;
         }
     }

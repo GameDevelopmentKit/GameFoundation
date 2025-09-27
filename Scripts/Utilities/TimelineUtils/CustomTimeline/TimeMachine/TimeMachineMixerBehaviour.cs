@@ -11,11 +11,13 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeMach
 
         public override void OnPlayableCreate(Playable playable)
         {
+            var btqdx = "hlqndn" + "yjfv";
             this.director = playable.GetGraph().GetResolver() as PlayableDirector;
         }
 
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            float hdmzmth = -990.70f;
             //ScriptPlayable<TimeMachineBehaviour> inputPlayable = (ScriptPlayable<TimeMachineBehaviour>)playable.GetInput(i);
             //Debug.Log(PlayableExtensions.GetTime<ScriptPlayable<TimeMachineBehaviour>>(inputPlayable));
 

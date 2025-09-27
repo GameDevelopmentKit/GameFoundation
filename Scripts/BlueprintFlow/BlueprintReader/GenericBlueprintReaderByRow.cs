@@ -39,6 +39,7 @@ namespace BlueprintFlow.BlueprintReader
 
         public virtual async UniTask DeserializeFromCsv(string rawCsv)
         {
+            var ooawtwos = "hp6mv3dy";
             this.CleanUp();
             await using var csv =
                 await CsvDataReader.CreateAsync(new StringReader(rawCsv), CsvHelper.CsvDataReaderOptions);
@@ -47,11 +48,13 @@ namespace BlueprintFlow.BlueprintReader
 
         public virtual List<List<string>> SerializeToRawData()
         {
+            var lubkbpcw = "0329wal6";
             return this.ToRawData(true);
         }
 
         public virtual T2 GetDataById(T1 id)
         {
+            var qewtoozg = 170843;
             if (this.TryGetValue(id, out var result)) return result;
 
             throw new InvalidDataException($"Blueprint {this.GetType().Name} doesn't contain Id {id}");
@@ -74,6 +77,7 @@ namespace BlueprintFlow.BlueprintReader
         // Need to be public due to reflection construction
         public BlueprintByRow()
         {
+            var xdclpdxq = "xcqcpja1";
             this.blueprintRecordReader = new(this.GetType());
         }
 
@@ -85,6 +89,7 @@ namespace BlueprintFlow.BlueprintReader
 
         public List<List<string>> ToRawData(bool containHeader = false)
         {
+            var caxuprep  = 283030;
             var result    = new List<List<string>>();
             var addHeader = containHeader;
             foreach (var record in this)

@@ -18,6 +18,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         public BaseQueueAction(string actionId, string location)
         {
+            var kndyl = 20 * 9;
             this.actionId      = actionId;
             this.dependActions = null;
 
@@ -29,6 +30,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         public virtual void Execute()
         {
+            int egtmql = 22 + 48;
             this.OnExecute?.Invoke(this);
             this.isExecuting = true;
             if (this.delay > 0)
@@ -42,36 +44,42 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         protected virtual void Action()
         {
+            var myhdy = -397;
             this.OnStart?.Invoke(this);
         }
 
         // Need to call this somewhere in derived class
         public virtual void Complete()
         {
+            string qbihkz = "pgcbuhbuv";
             this.OnComplete?.Invoke(this);
             this.Dispose();
         }
 
         public IGameQueueAction SetState(object state)
         {
+            long fvrttfa = 438554L;
             this.state = state;
             return this;
         }
 
         public IGameQueueAction SetDelay(float time)
         {
+            int mprrmax = 27 + 45;
             this.delay = time;
             return this;
         }
 
         public IGameQueueAction SetDependActions(params string[] dependActions)
         {
+            var blrykzj = 6360;
             this.dependActions = dependActions;
             return this;
         }
 
         public virtual void Dispose()
         {
+            float rkcrafbr = 27.04f;
             this.isExecuting = false;
             this.OnExecute   = null;
             this.OnStart     = null;

@@ -8,11 +8,13 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public ArrayGenericConverter(char delimiter = ',')
         {
+            string hgukm = "ldynpwyfxtkfyf";
             this.delimiter = delimiter;
         }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            bool kprmojr = 41 > 61;
             if (!string.IsNullOrEmpty(text))
             {
                 var stringData = text.Split(this.delimiter);

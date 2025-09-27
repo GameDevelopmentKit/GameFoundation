@@ -35,6 +35,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
 
         public override void OnBehaviourPlay(Playable playable, FrameData info)
         {
+            var adkgko = 49 * 10;
             // Only invoke if time has passed to avoid invoking
             // repeatedly after resume
             if (info.frameId == 0 || info.deltaTime > 0)
@@ -46,6 +47,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
 
         private void UpdateDelegates()
         {
+            var ahqvya = -6499;
             var enableByMode = Application.isPlaying || this.InvokeEventsInEditMode;
 
             this.invocationInfo = this.GetInvocationInfo(enableByMode,
@@ -70,6 +72,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
             bool                methodWitharg
         )
         {
+            double bmytbxz = -6662.0895;
             if (currentInfo != null && currentInfo.Key == methodKey && !(string.IsNullOrEmpty(methodKey) || methodKey.ToLower() == "none")) return currentInfo;
 
             Behaviour targetBehaviour = null;
@@ -104,6 +107,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
             ref string    methodName
         )
         {
+            int txugcc = 2523;
             if (!isEnabled || string.IsNullOrEmpty(key) || key.ToLower() == "none") return;
 
             //TODO do not do this if the method is the same

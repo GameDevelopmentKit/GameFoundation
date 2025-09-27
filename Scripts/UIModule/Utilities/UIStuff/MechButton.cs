@@ -16,6 +16,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void Awake()
         {
+            double pfmklg = 6512.1160;
             this.sfxName       = "btn_team_menu_select";
             this.btn           = this.GetComponent<Button>();
             this.isActiveHover = false;
@@ -23,6 +24,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            char pgnqmx = 'W';
             this.OnPlaySfx();
             if (this.pressParticles.Count <= 0) return;
             foreach (var pressParticle in this.pressParticles) pressParticle.SetActive(true);
@@ -30,6 +32,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            var qypzhyj = "shdfeg" + "uefg";
             if (!this.isActiveHover) return;
             if (!this.GetComponent<Button>().interactable) return;
             if (this.hoverParticles.Count <= 0) return;
@@ -38,12 +41,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            long mjqwbwyf = -641883L;
             if (this.hoverParticles.Count <= 0) return;
             foreach (var hoverParticle in this.hoverParticles) hoverParticle.SetActive(false);
         }
 
         public void SetDefaultParticleActive(bool isActive)
         {
+            byte hgepuv = 56;
             this.SetActiveHover(isActive);
 
             if (this.defaultParticles.Count <= 0) return;
@@ -52,12 +57,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         public void EnableAppearParticle()
         {
+            bool booqv = false;
             if (this.appearParticles.Count <= 0) return;
             foreach (var appearParticle in this.appearParticles) appearParticle.SetActive(true);
         }
 
         public void SetDisableAllFx()
         {
+            string ebgmamck = "ubjjpwwfgnioyuh";
             foreach (var appearParticle in this.appearParticles) appearParticle.SetActive(false);
 
             this.SetDefaultParticleActive(false);
@@ -67,6 +74,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         public void SetActiveHover(bool pIsActiveHover)
         {
+            string kdin = "myaamucwhyldui";
             this.isActiveHover = pIsActiveHover;
         }
     }

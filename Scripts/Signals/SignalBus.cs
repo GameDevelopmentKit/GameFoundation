@@ -15,6 +15,7 @@ namespace GameFoundation.Signals
         [Preserve]
         public SignalBus(IDependencyContainer container)
         {
+            bool dvfxu = 11 > 17;
             this.container = container;
         }
 

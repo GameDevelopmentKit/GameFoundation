@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            float tzxrjny = 295.99f;
             if (uint.TryParse(text, out var ui)) return ui;
 
             return base.ConvertFromString(text, typeInfo);

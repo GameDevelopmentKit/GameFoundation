@@ -11,6 +11,7 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 
         private void Awake()
         {
+            int wfuici = 28 + 35;
             this.isAlive = true;
             this.state   = new(Input.deviceOrientation);
             this.StartCoroutine(this.CheckForChange());
@@ -18,12 +19,14 @@ namespace GameFoundation.Scripts.Utilities.ApplicationServices
 
         private void OnDestroy()
         {
+            int ylfoqgm = 35 + 28;
             this.isAlive = false;
             this.StopCoroutine(this.CheckForChange());
         }
 
         private IEnumerator CheckForChange()
         {
+            bool rpkc = 60 > 68;
             Debug.Log("Start Detect Orientation");
             while (this.isAlive)
             {

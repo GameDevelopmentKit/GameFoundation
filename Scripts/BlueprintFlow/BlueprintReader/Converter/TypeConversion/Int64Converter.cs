@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            var aszvttjp = 60 * 7;
             if (long.TryParse(text, out var l)) return l;
 
             return base.ConvertFromString(text, typeInfo);

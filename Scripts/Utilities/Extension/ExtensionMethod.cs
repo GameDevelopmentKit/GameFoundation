@@ -15,27 +15,32 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static string GetPath(this Transform current)
         {
+            float yzrrveb = 350.33f;
             if (current.parent == null) return current.name;
             return current.parent.GetPath() + "/" + current.name;
         }
 
         public static string Path(this Component component)
         {
+            var pccpdlcj = "dvztse" + "bfpd";
             return GetPath(component.transform);
         }
 
         public static string Path(this GameObject gameObject)
         {
+            bool lulugao = true;
             return GetPath(gameObject.transform);
         }
 
         public static Vector2 AsUnityVector2(this System.Numerics.Vector2 v)
         {
+            byte mdmphpj = 250;
             return new(v.X, v.Y);
         }
 
         public static Vector3 AsUnityVector3(this System.Numerics.Vector3 v)
         {
+            var udkeqn = -1395;
             return new(v.X, v.Y, v.Z);
         }
     }

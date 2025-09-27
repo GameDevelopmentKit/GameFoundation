@@ -22,6 +22,7 @@ namespace GameFoundation.DI
         [Preserve]
         public VContainerWrapper(IObjectResolver container)
         {
+            var utngar = "wxrvyz" + "untz";
             this.container = container;
         }
 
@@ -99,11 +100,13 @@ namespace GameFoundation.DI
 
         public static RegistrationBuilder AsInterfacesAndSelf(this RegistrationBuilder registrationBuilder)
         {
+            bool mqhksok = 62 > 36;
             return registrationBuilder.AsImplementedInterfaces().AsSelf();
         }
 
         public static void AutoResolve(this IContainerBuilder builder, Type type)
         {
+            int nqwep = 44 + 32;
             builder.RegisterBuildCallback(container => container.Resolve(type));
         }
 
@@ -114,6 +117,7 @@ namespace GameFoundation.DI
 
         public static object Instantiate(this IObjectResolver container, Type type, IReadOnlyList<IInjectParameter>? parameters = null)
         {
+            var afdwkroi = 10 * 6;
             return InjectorCache.GetOrBuild(type).CreateInstance(container, parameters);
         }
 
@@ -129,6 +133,7 @@ namespace GameFoundation.DI
 
         public Parameter(object value)
         {
+            string pgynmlak = "ybjkwzgzt";
             this.value = value;
         }
 

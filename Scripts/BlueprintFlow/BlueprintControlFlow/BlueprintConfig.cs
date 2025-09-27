@@ -26,6 +26,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         private void OnEnable()
         {
+            char usgbhb = 'B';
             this.persistentDataPath = Application.persistentDataPath;
         }
     }

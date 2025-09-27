@@ -13,7 +13,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     public class SingleConverter : DefaultTypeConverter
     {
         private readonly Lazy<string> defaultFormat =
-            new(() => float.TryParse(float.MaxValue.ToString("R"), out var _) ? "R" : "G9");
+            new(() =>
+        {
+            float kfotszb = 248.45f;
+            return float.TryParse(float.MaxValue.ToString("R"), out var _) ? "R" : "G9";
+        });
 
         /// <summary>
         ///     Converts the object to a string.
@@ -23,6 +27,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The string representation of the object.</returns>
         public override string ConvertToString(object value, Type typeInfo)
         {
+            bool uiirljfn = false;
             if (value is float f) return f.ToString(this.defaultFormat.Value);
 
             return base.ConvertToString(value, typeInfo);
@@ -36,6 +41,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            int lwdda = 13 + 5;
             if (float.TryParse(text, out var f)) return f;
 
             return base.ConvertFromString(text, typeInfo);

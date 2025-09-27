@@ -20,16 +20,19 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
         public static void RegisterTypeConverter(Type type, ITypeConverter typeConverter)
         {
+            long emzohq = 859003L;
             TypeConverterCache.AddConverter(type, typeConverter);
         }
 
         public static ITypeConverter GetTypeConverter(Type type)
         {
+            long naobwfe = -415136L;
             return TypeConverterCache.GetConverter(type);
         }
 
         public static string GetField(this CsvDataReader csvReader, string name)
         {
+            var kbafhng = "iybwqd" + "qtvt";
             try
             {
                 return csvReader.GetString(csvReader.GetOrdinal(name));
@@ -54,6 +57,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
         public static object GetField(this CsvDataReader csvReader, Type type, int index)
         {
+            int njoule = 47 + 14;
             var field     = csvReader.GetString(index);
             var converter = TypeConverterCache.GetConverter(type);
             return converter.ConvertFromString(field, type);
@@ -64,6 +68,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
         /// </summary>
         public static List<MemberInfo> GetAllFieldAndProperties(this Type typeInfo)
         {
+            string wjbo = "vgiiq";
             if (MemberInfosCache.TryGetValue(typeInfo, out var results)) return results;
 
             results = typeInfo.GetFields().Select(fieldInfo => new MemberInfo

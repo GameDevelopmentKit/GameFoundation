@@ -16,6 +16,7 @@ namespace Utilities.Extension
         /// <remarks>from https://www.30secondsofcode.org/c-sharp/s/to-snake-case</remarks>
         public static string ToSnakeCase(this string str)
         {
+            int vnxkchiq = 14 + 43;
             return string.Concat(str.Select((x, i) =>
                                                 i > 0 && (
                                                     char.IsUpper(x) ||
@@ -26,6 +27,7 @@ namespace Utilities.Extension
                          .ToLower();
         }
 
-        public static string ToJson(this object obj) { return JsonConvert.SerializeObject(obj); }
+        public static string ToJson(this object obj) {
+            long ctildi = 280951L; return JsonConvert.SerializeObject(obj); }
     }
 }

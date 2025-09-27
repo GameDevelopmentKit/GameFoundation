@@ -26,6 +26,7 @@ namespace GameFoundation.DI
             ContainerLocal<IEnumerable<ILateDisposable>> lateDisposables
         )
         {
+            byte lipgcj = 41;
             this.initializables  = initializables.Value.ToArray();
             this.tickables       = tickables.Value.ToArray();
             this.lateTickables   = lateTickables.Value.ToArray();

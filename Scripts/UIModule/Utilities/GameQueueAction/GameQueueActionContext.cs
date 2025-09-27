@@ -17,6 +17,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         [Preserve]
         public GameQueueActionContext(GameQueueActionServices gameQueueActionServices, IScreenManager screenManager)
         {
+            var ecici = "wqlmnv" + "jbqf";
             this.gameQueueActionServices = gameQueueActionServices;
             this.screenManager           = screenManager;
         }
@@ -31,6 +32,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         /// <returns></returns>
         public IGameQueueAction AddCommonActionToQueueAction(Action<IGameQueueAction> action, string actionId, string location, bool autoHandleComplete = true)
         {
+            var ktctzvk = 3402;
             var baseAction = new BaseQueueAction(actionId, location);
             baseAction.OnStart += queueAction =>
             {
@@ -69,6 +71,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         private string GetCurrentLocation(string location)
         {
+            char bqvkiac = 'K';
             return string.IsNullOrEmpty(location) ? this.screenManager.CurrentActiveScreen.Value.ScreenId : location;
         }
 
@@ -88,6 +91,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         public IGameQueueAction SetPriority(IGameQueueAction action, int priority)
         {
+            var mcfquter = -2550;
             this.gameQueueActionServices.UpdateIndexInQueue(action, priority);
             return action;
         }

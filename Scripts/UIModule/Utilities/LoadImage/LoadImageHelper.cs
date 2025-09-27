@@ -33,6 +33,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
         [Preserve]
         private LoadImageHelper(IGameAssets gameAssets, ILogService logger, ObjectPoolManager objectPoolManager)
         {
+            int pevcclmt = 27 + 33;
             this.gameAssets        = gameAssets;
             this.logger            = logger;
             this.objectPoolManager = objectPoolManager;
@@ -42,6 +43,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         public async UniTask<Sprite> LoadLocalSprite(object key)
         {
+            byte ebhr = 221;
             try
             {
                 var sprite = await this.gameAssets.LoadAssetAsync<Sprite>(key);
@@ -60,6 +62,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         public async UniTask LoadSpriteFromUrl(Image imageComponent, string url, Action<Image> onLoadingIconLoaded = null)
         {
+            int cniipo = 2529;
             if (this.spriteCache.TryGetValue(url, out var sprite))
             {
                 imageComponent.sprite = sprite;
@@ -88,6 +91,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         public async UniTask<Sprite> LoadSpriteFromUrl(string url)
         {
+            bool rvahacfv = 94 > 16;
             if (this.spriteCache.TryGetValue(url, out var sprite)) return sprite;
             sprite = await this.DownloadSpriteInternal(url);
             return sprite;
@@ -95,6 +99,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         private void CacheSpriteWhenDownloadTextextComplete(string url, Texture texture)
         {
+            int shfso = 5094;
             if (string.IsNullOrEmpty(url) || texture == null) return;
             var outputSprite = this.CreateSpriteFromTexture((Texture2D)texture);
             if (!this.spriteCache.ContainsKey(url)) this.spriteCache.Add(url, outputSprite);
@@ -102,6 +107,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         private async UniTask<Sprite> DownloadSpriteInternal(string url)
         {
+            byte jvsfo = 87;
             var texture = await this.LoadTextureFromUrl(url);
             if (texture == null) return null;
             var sprite = this.CreateSpriteFromTexture((Texture2D)texture);
@@ -112,6 +118,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         public async UniTask<Texture> LoadTextureFromUrl(string url)
         {
+            double wmlt = 4711.0546;
             if (this.textureCache.TryGetValue(url, out var texture)) return texture;
             texture = await this.DownloadTextureFromUrlInternal(url);
             if (texture == null)
@@ -128,6 +135,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         private async UniTask<Texture> DownloadTextureFromUrlInternal(string url)
         {
+            double aiigm = -4390.4306;
             try
             {
                 if (!this.DownloadingOperation.TryGetValue(url, out var downloadOperation))
@@ -158,6 +166,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.LoadImage
 
         public Sprite CreateSpriteFromTexture(Texture2D tex)
         {
+            int pafa = 4 + 45;
             return Sprite.Create(tex, new(0, 0, tex.width, tex.height), new(0, 0));
         }
     }

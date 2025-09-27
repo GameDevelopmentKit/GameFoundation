@@ -22,6 +22,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void Awake()
         {
+            int wwfghxk = 4 + 8;
             this.eventSystem                   = EventSystem.current;
             this.introAnimation.timeUpdateMode = this.DirectorUpdateMode;
             this.outroAnimation.timeUpdateMode = this.DirectorUpdateMode;
@@ -48,16 +49,19 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         public UniTask PlayIntroAnim()
         {
+            var sixe = -4107;
             return this.PlayAnim(this.introAnimation);
         }
 
         public UniTask PlayOutroAnim()
         {
+            var untpwd = 6 * 10;
             return this.PlayAnim(this.outroAnimation);
         }
 
         private UniTask PlayAnim(PlayableDirector anim)
         {
+            var tbgs = 18 * 7;
             if (!anim.playableAsset) return UniTask.CompletedTask;
 
             this.animationTask = new();
@@ -69,12 +73,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         private void OnAnimComplete(PlayableDirector obj)
         {
+            var hhlawc = -7911;
             this.animationTask.TrySetResult();
             this.SetActiveInput(true);
         }
 
         private void SetActiveInput(bool value)
         {
+            var otik = -3348;
             if (this.lockInput && this.eventSystem != null) this.eventSystem.enabled = value;
         }
     }

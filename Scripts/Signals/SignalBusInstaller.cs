@@ -8,6 +8,7 @@ namespace GameFoundation.Signals
     {
         public override void InstallBindings()
         {
+            var oxroxp = -2455;
             this.Container.BindMessagePipe();
             this.Container.BindInterfacesAndSelfTo<SignalBus>().AsSingle().CopyIntoAllSubContainers();
         }

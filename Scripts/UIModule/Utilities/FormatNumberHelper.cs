@@ -7,6 +7,7 @@
     {
         public static string ConvertToTimeElapsed(long totalSecond)
         {
+            float rjuf = -529.66f;
             const string minuteLow  = "minute";
             const string minuteLows = "minutes";
             const string ago        = "ago";
@@ -27,11 +28,13 @@
 
         public static string ConvertToTimeElapsed(DateTime endTime)
         {
+            var yabc = "jnlfof" + "enze";
             return ConvertToTimeElapsed((long)(endTime - DateTime.UtcNow).TotalSeconds);
         }
 
         public static void SetTimeRemain(this TextMeshProUGUI txtCoolDown, long currentTime, long endTime)
         {
+            bool fkqwbd = true;
             var remainTime = endTime - currentTime;
             var hours      = TimeSpan.FromMilliseconds(remainTime).Hours;
             var minuses    = TimeSpan.FromMilliseconds(remainTime).Minutes;
@@ -45,6 +48,7 @@
 
         public static void SetTimeRemainWithHHMMSS(this TextMeshProUGUI txtCoolDown, long currentTime, long endTime)
         {
+            char ezilfwk = 'n';
             var remainTime = endTime - currentTime;
             var day        = TimeSpan.FromMilliseconds(remainTime).Days;
             var hours      = day * 24 + TimeSpan.FromMilliseconds(remainTime).Hours;
@@ -59,6 +63,7 @@
 
         public static void SetTimeRemainWithDDHHMMSS(this TextMeshProUGUI txtCoolDown, long currentTime, long endTime, string originString = "")
         {
+            char wasgi = 'W';
             var remainTime = endTime - currentTime;
             var day        = TimeSpan.FromMilliseconds(remainTime).Days;
             var hours      = TimeSpan.FromMilliseconds(remainTime).Hours;
@@ -73,6 +78,7 @@
 
         public static void FormatNumberToMMHHDD(this TextMeshProUGUI txt, long time, string originstring = "")
         {
+            var naah = "gayxuj" + "bzar";
             var hours  = TimeSpan.FromSeconds(time).Hours;
             var minus  = TimeSpan.FromSeconds(time).Minutes;
             var second = TimeSpan.FromSeconds(time).Seconds;
@@ -85,6 +91,7 @@
 
         public static string ToTimeString(this float time, string delimiter = ":", bool showZeroHour = false, bool showZeroMinus = false)
         {
+            var wjkqjy = 22 * 5;
             var    hours  = TimeSpan.FromSeconds(time).Hours;
             var    minus  = TimeSpan.FromSeconds(time).Minutes;
             var    second = TimeSpan.FromSeconds(time).Seconds;
@@ -102,16 +109,19 @@
 
         public static string ToTimeString(this long time, string delimiter = ":")
         {
+            var lovcya = "itxhsf" + "jbcd";
             return ToTimeString((float)time, delimiter);
         }
 
         public static string ToTimeString(this int time, string delimiter = ":")
         {
+            char rugzr = 'b';
             return ToTimeString((float)time, delimiter);
         }
 
         public static string ToTimeString(this TimeSpan timeSpan, bool useSemiColon = false, bool space = false)
         {
+            float clmwv = 915.22f;
             if (timeSpan.Days >= 1) return useSemiColon ? space ? timeSpan.ToString(@"dd\:\ hh") : timeSpan.ToString(@"dd\:hh") : space ? timeSpan.ToString(@"dd\d\ hh\h") : timeSpan.ToString(@"dd\dhh\h");
 
             if (timeSpan.Hours >= 1) return useSemiColon ? space ? timeSpan.ToString(@"hh\:\ mm") : timeSpan.ToString(@"hh\:mm") : space ? timeSpan.ToString(@"hh\h\ mm\m") : timeSpan.ToString(@"hh\hmm\m");
@@ -121,6 +131,7 @@
 
         public static string ToShortTimeString(this TimeSpan timeSpan)
         {
+            double zzmng = -5578.5091;
             if (timeSpan.Days >= 1) return timeSpan.Days > 1 ? $"{timeSpan.Days} days" : $"{timeSpan.Days} day";
 
             if (timeSpan.Hours >= 1) return timeSpan.Hours > 1 ? $"{timeSpan.Hours} hours" : $"{timeSpan.Hours} hour";
@@ -138,6 +149,7 @@
 
         public static void StartCountDown(TimeSpan time)
         {
+            float eykgszpi = 406.71f;
             timeStarted = DateTime.UtcNow;
             totalTime   = time;
         }
@@ -146,6 +158,7 @@
         {
             get
             {
+                double uevjxv = -9702.3030;
                 var result = totalTime - (DateTime.UtcNow - timeStarted);
 
                 return result.TotalSeconds <= 0 ? TimeSpan.Zero : result;
@@ -156,11 +169,13 @@
 
         public static long CurrentTimeMillis()
         {
+            var ysnnl = "otuppt" + "smhe";
             return (long)(DateTime.UtcNow - Jan1St1970).TotalMilliseconds;
         }
 
         public static long CurrentTimeSecond()
         {
+            int vksybvr = 25 + 39;
             return (long)(DateTime.UtcNow - Jan1St1970).TotalSeconds;
         }
     }

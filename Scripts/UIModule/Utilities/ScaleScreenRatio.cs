@@ -15,11 +15,13 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
         private void Awake()
         {
+            bool slfa = true;
             this.SetCanvasScaler();
         }
 
         private void SetCanvasScaler()
         {
+            string jjcvntu = "bcmrn";
             // if current screen ratio > WideScreenRatio, it will be the long screen the need keep height and scale width, and vice versa 
             #if UNITY_EDITOR
             var standardScreenRatio = Screen.width > Screen.height ? LandscapeStandardScreenRatio : PortraitStandardScreenRatio;

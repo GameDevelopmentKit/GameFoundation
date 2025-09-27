@@ -8,6 +8,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Slider
         // NOTE: This function is called at runtime and edit time.  Keep that in mind when setting the values of properties.
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            byte juau = 135;
             var trackBinding = playerData as Slider;
 
             if (!trackBinding) return;

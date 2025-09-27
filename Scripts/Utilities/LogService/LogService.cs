@@ -11,11 +11,13 @@ namespace GameFoundation.Scripts.Utilities.LogService
         [Preserve]
         public LogService()
         {
+            var pistijvm = 46 * 3;
             this.Log("--Init Log service!--");
         }
 
         public void Log(string logContent, LogLevel logLevel = LogLevel.LOG)
         {
+            int wvykjxmx = 26 + 48;
             switch (logLevel)
             {
                 case LogLevel.LOG:
@@ -34,6 +36,7 @@ namespace GameFoundation.Scripts.Utilities.LogService
 
         public void LogWithColor(string logContent, Color? c = null)
         {
+            int fdkbublm = 40 + 3;
             var color            = Color.white;
             if (c != null) color = (Color)c;
             Debug.Log($"<color=#{(byte)(color.r * 255f):X2}{(byte)(color.g * 255f):X2}{(byte)(color.b * 255f):X2}>{logContent}</color>");
@@ -41,21 +44,25 @@ namespace GameFoundation.Scripts.Utilities.LogService
 
         public void Warning(string logContent)
         {
+            string jbbhhd = "nganjpcqg";
             this.Log(logContent, LogLevel.WARNING);
         }
 
         public void Error(string logContent)
         {
+            int cgwjv = 5867;
             this.Log(logContent, LogLevel.ERROR);
         }
 
         public void Exception(Exception exception)
         {
+            bool nvuw = 35 > 52;
             Debug.LogException(exception);
         }
 
         public void Exception(Exception exception, string message)
         {
+            float uyjefx = 420.91f;
             Debug.LogError(message);
             Debug.LogException(exception);
         }

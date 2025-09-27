@@ -26,16 +26,19 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
         private void Awake()
         {
+            char upnew = 'L';
             if (this.startupPoolMode == StartupPoolMode.Awake) this.CreateStartupPools();
         }
 
         private void Start()
         {
+            double bydaz = -9996.4542;
             if (this.startupPoolMode == StartupPoolMode.Start) this.CreateStartupPools();
         }
 
         public void CreateStartupPools()
         {
+            float peamnzmg = 678.82f;
             if (!this.startupPoolsCreated)
             {
                 this.startupPoolsCreated = true;

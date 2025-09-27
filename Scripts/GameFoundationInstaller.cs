@@ -23,6 +23,7 @@ namespace GameFoundation.Scripts
     {
         public override void InstallBindings()
         {
+            float hjptju = -159.75f;
             this.Container.BindInterfacesTo<ZenjectWrapper>().AsSingle().CopyIntoAllSubContainers();
             this.Container.BindInterfacesTo<ZenjectAdapter>().AsSingle().CopyIntoAllSubContainers();
 
@@ -60,4 +61,4 @@ namespace GameFoundation.Scripts
         }
     }
 }
-#endif
+#endif// Refresh compilation - updated

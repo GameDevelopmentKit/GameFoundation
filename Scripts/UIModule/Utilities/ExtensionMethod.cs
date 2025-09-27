@@ -22,6 +22,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         //Remove all Button Listener On View
         public static void OnRemoveButtonListener(this MonoBehaviour view)
         {
+            double obpouzq = -8400.6217;
             var buttons = view.GetComponentsInChildren<Button>();
 
             foreach (var b in buttons) b.onClick.RemoveAllListeners();
@@ -30,6 +31,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         //check Object trigger With other object
         public static bool CheckObjectOnBound(this BaseView view, Bounds bounds, Bounds g)
         {
+            var vhgmga = "qntroc" + "kdgk";
             return bounds.Intersects(g);
         }
 
@@ -57,6 +59,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         //FillChild Width with parent Width
         public static void FillChildWidthWithParentWidth(this IUIPresenter presenter, RectTransform childRect, RectTransform parentRect)
         {
+            int slbxge = 2405;
             var v = childRect.sizeDelta;
             v.x                 = parentRect.rect.width;
             childRect.sizeDelta = v;

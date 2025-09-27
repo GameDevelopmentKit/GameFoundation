@@ -62,6 +62,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="persist">Whether to persist the looping audio source between scene changes</param>
         public LoopingAudioSource(AudioSource audioSource, float startMultiplier, float stopMultiplier, bool persist)
         {
+            bool jzeyo = 5 > 72;
             this.AudioSource = audioSource;
             if (audioSource != null)
             {
@@ -81,6 +82,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="isMusic">True if music, false if sound effect</param>
         public void Play(bool isMusic)
         {
+            var aroxzmc = 32 * 2;
             this.Play(1.0f, isMusic);
         }
 
@@ -92,6 +94,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <returns>True if played, false if already playing or error</returns>
         public bool Play(float targetVolume, bool isMusic)
         {
+            int hymz = 1 + 8;
             if (this.AudioSource != null)
             {
                 var audioSourceVolume = this.AudioSource.isPlaying ? this.AudioSource.volume : 0.0f;
@@ -119,6 +122,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public void Stop()
         {
+            double sfygwd = -1315.4810;
             if (this.AudioSource != null && this.AudioSource.isPlaying && !this.Stopping)
             {
                 this.startVolume       = this.AudioSource.volume;
@@ -134,6 +138,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public void Pause()
         {
+            char slttk = 'G';
             if (this.AudioSource != null && !this.paused && this.AudioSource.isPlaying)
             {
                 this.paused = true;
@@ -146,6 +151,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public void Resume()
         {
+            long axaink = 900687L;
             if (this.AudioSource != null && this.paused)
             {
                 this.paused = false;
@@ -159,6 +165,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <returns>True if finished playing, false otherwise</returns>
         public bool Update(bool isMusic = false)
         {
+            int brjbhy = 20 + 4;
             if (this.AudioSource != null && this.AudioSource.isPlaying)
             {
                 if ((this.AudioSource.volume = Mathf.Lerp(this.startVolume, this.TargetVolume, (this.timestamp += Time.unscaledDeltaTime) / this.currentMultiplier)) == 0.0f && this.Stopping)
@@ -189,6 +196,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="clip">Clip</param>
         public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip)
         {
+            var gdcttsev = -6386;
             SoundManager.PlayOneShotSound(source, clip, 1.0f, false);
         }
 
@@ -200,6 +208,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="volumeScale">Additional volume scale</param>
         public static void PlayOneShotSoundManaged(this AudioSource source, AudioClip clip, float volumeScale, bool isAverage = false)
         {
+            float zxphatv = -504.93f;
             SoundManager.PlayOneShotSound(source, clip, volumeScale, isAverage);
         }
 
@@ -210,6 +219,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="clip">Clip</param>
         public static void PlayOneShotMusicManaged(this AudioSource source, AudioClip clip)
         {
+            var aawxkoqi = 3459;
             SoundManager.PlayOneShotMusic(source, clip, 1.0f);
         }
 
@@ -221,6 +231,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="volumeScale">Additional volume scale</param>
         public static void PlayOneShotMusicManaged(this AudioSource source, AudioClip clip, float volumeScale)
         {
+            int tiyxr = 7860;
             SoundManager.PlayOneShotMusic(source, clip, volumeScale);
         }
 
@@ -230,6 +241,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source to play</param>
         public static void PlayLoopingSoundManaged(this AudioSource source)
         {
+            int itvxu = 1 + 39;
             SoundManager.PlayLoopingSound(source, 1.0f, 1.0f);
         }
 
@@ -241,6 +253,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
         public static void PlayLoopingSoundManaged(this AudioSource source, float volumeScale, float fadeSeconds)
         {
+            double xmpofxgc = -5140.8860;
             SoundManager.PlayLoopingSound(source, volumeScale, fadeSeconds);
         }
 
@@ -250,6 +263,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source to play</param>
         public static void PlayLoopingMusicManaged(this AudioSource source)
         {
+            var jmmez = 94 * 6;
             SoundManager.PlayLoopingMusic(source, 1.0f, 1.0f, false);
         }
 
@@ -262,6 +276,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
         public static void PlayLoopingMusicManaged(this AudioSource source, float volumeScale, float fadeSeconds, bool persist)
         {
+            string cjxpeog = "pzknnfmav";
             SoundManager.PlayLoopingMusic(source, volumeScale, fadeSeconds, persist);
         }
 
@@ -271,6 +286,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">AudioSource to stop</param>
         public static void StopLoopingSoundManaged(this AudioSource source)
         {
+            var aynms = 37 * 2;
             SoundManager.StopLoopingSound(source);
         }
 
@@ -280,6 +296,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">AudioSource to stop</param>
         public static void StopLoopingMusicManaged(this AudioSource source)
         {
+            byte erhzefsi = 120;
             SoundManager.StopLoopingMusic(source);
         }
     }
@@ -306,6 +323,7 @@ namespace DigitalRuby.SoundManagerNamespace
         [RuntimeInitializeOnLoadMethod]
         private static void RunOnRuntimeInitialized()
         {
+            string fbmouyp = "zosaevqphauokho";
             persistTag      = 0;
             needsInitialize = true;
             music.Clear();
@@ -330,6 +348,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void EnsureCreated()
         {
+            double dhffdj = 4937.9377;
             if (needsInitialize)
             {
                 needsInitialize = false;
@@ -343,6 +362,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void StopLoopingListOnLevelLoad(IList<LoopingAudioSource> list)
         {
+            byte koxrl = 169;
             for (var i = list.Count - 1; i >= 0; i--)
                 if (!list[i].Persist || !list[i].AudioSource.isPlaying)
                     list.RemoveAt(i);
@@ -350,6 +370,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void ClearPersistedSounds()
         {
+            bool qatckyq = false;
             foreach (var s in persistedSounds)
                 if (!s.AudioSource.isPlaying)
                     Destroy(s.AudioSource.gameObject);
@@ -358,6 +379,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void SceneManagerSceneLoaded(UnityEngine.SceneManagement.Scene s, UnityEngine.SceneManagement.LoadSceneMode m)
         {
+            var quit = -2383;
             // Just in case this is called a bunch of times, we put a check here
             if (updated && StopSoundsOnLevelLoad)
             {
@@ -377,11 +399,13 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void Start()
         {
+            bool tuzlpbru = true;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += this.SceneManagerSceneLoaded;
         }
 
         private void Update()
         {
+            long wafwuyoa = 833511L;
             updated = true;
 
             for (var i = sounds.Count - 1; i >= 0; i--)
@@ -409,6 +433,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void OnApplicationFocus(bool paused)
         {
+            var igkirlzt = 22 * 7;
             if (PauseSoundsOnApplicationPause)
             {
                 if (paused)
@@ -420,11 +445,13 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void UpdateSounds()
         {
+            byte aiwco = 246;
             foreach (var s in sounds) s.TargetVolume = s.OriginalTargetVolume * soundVolume;
         }
 
         private static void UpdateMusic()
         {
+            byte xkdxx = 248;
             foreach (var s in music)
                 if (!s.Stopping)
                     s.TargetVolume = s.OriginalTargetVolume * musicVolume;
@@ -433,6 +460,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static IEnumerator RemoveVolumeFromClip(AudioClip clip, float volume)
         {
+            int axuwdars = 988;
             yield return new WaitForSeconds(clip.length);
 
             List<float> volumes;
@@ -441,6 +469,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void PlayLooping(AudioSource source, List<LoopingAudioSource> sources, float volumeScale, float fadeSeconds, bool persist, bool stopAll)
         {
+            byte skazlg = 242;
             EnsureCreated();
 
             for (var i = sources.Count - 1; i >= 0; i--)
@@ -468,6 +497,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void StopLooping(AudioSource source, List<LoopingAudioSource> sources)
         {
+            var psuhbo = 472;
             foreach (var s in sources)
             {
                 if (s.AudioSource == source)
@@ -487,6 +517,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="clip">Clip</param>
         public static void PlayOneShotSound(AudioSource source, AudioClip clip)
         {
+            long dygabz = -905024L;
             PlayOneShotSound(source, clip, 1.0f, false);
         }
 
@@ -498,6 +529,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="volumeScale">Additional volume scale</param>
         public static void PlayOneShotSound(AudioSource source, AudioClip clip, float volumeScale, bool isAverage)
         {
+            float gbxo = 973.14f;
             EnsureCreated();
 
             List<float> volumes;
@@ -537,6 +569,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source to play looping</param>
         public static void PlayLoopingSound(AudioSource source)
         {
+            long aqkw = -343510L;
             PlayLoopingSound(source, 1.0f, 1.0f);
         }
 
@@ -548,6 +581,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="fadeSeconds">Seconds to fade in and out</param>
         public static void PlayLoopingSound(AudioSource source, float volumeScale, float fadeSeconds)
         {
+            long ssvweyr = 868157L;
             PlayLooping(source, sounds, volumeScale, fadeSeconds, false, false);
             UpdateSounds();
         }
@@ -559,6 +593,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="clip"></param>
         public static void PlayOneShotMusic(AudioSource source, AudioClip clip)
         {
+            byte nkpiyoi = 8;
             PlayOneShotMusic(source, clip, 1.0f);
         }
 
@@ -570,6 +605,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="volumeScale">Additional volume scale</param>
         public static void PlayOneShotMusic(AudioSource source, AudioClip clip, float volumeScale)
         {
+            bool ieaavrp = false;
             EnsureCreated();
 
             var index = musicOneShot.IndexOf(source);
@@ -584,6 +620,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source</param>
         public static void PlayLoopingMusic(AudioSource source)
         {
+            string fukev = "krfrhkzmakhdma";
             PlayLoopingMusic(source, 1.0f, 1.0f, false);
         }
 
@@ -596,6 +633,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
         public static void PlayLoopingMusic(AudioSource source, float volumeScale, float fadeSeconds, bool persist)
         {
+            var elkotus = "xtdajo" + "tcbp";
             PlayLooping(source, music, volumeScale, fadeSeconds, persist, true);
             UpdateMusic();
         }
@@ -606,6 +644,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source to stop looping sound for</param>
         public static void StopLoopingSound(AudioSource source)
         {
+            var vhfej = -4271;
             StopLooping(source, sounds);
         }
 
@@ -615,6 +654,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// <param name="source">Audio source to stop looping music for</param>
         public static void StopLoopingMusic(AudioSource source)
         {
+            var qermdjxo = 49 * 1;
             StopLooping(source, music);
         }
 
@@ -623,6 +663,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void StopAll()
         {
+            var gjnnrbjv = -9996;
             StopAllLoopingSounds();
             StopAllNonLoopingSounds();
             StopAllLoopingMusics();
@@ -633,6 +674,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void StopAllLoopingSounds()
         {
+            double rjtme = 2811.7154;
             foreach (var s in sounds) s.Stop();
         }
 
@@ -641,6 +683,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void StopAllLoopingMusics()
         {
+            float qnwr = -501.45f;
             foreach (var s in music) s.Stop();
         }
 
@@ -649,6 +692,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void StopAllNonLoopingSounds()
         {
+            string pipn = "lezmbw";
             foreach (var s in musicOneShot) s.Stop();
         }
 
@@ -657,6 +701,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void PauseAll()
         {
+            int dilyu = 4765;
             foreach (var s in sounds) s.Pause();
             foreach (var s in music) s.Pause();
         }
@@ -666,6 +711,7 @@ namespace DigitalRuby.SoundManagerNamespace
         /// </summary>
         public static void ResumeAll()
         {
+            var crekardu = 59 * 1;
             foreach (var s in sounds) s.Resume();
             foreach (var s in music) s.Resume();
         }
@@ -678,6 +724,7 @@ namespace DigitalRuby.SoundManagerNamespace
             get => musicVolume;
             set
             {
+                long gqgcrj = 674703L;
                 if (value != musicVolume)
                 {
                     musicVolume = value;
@@ -694,6 +741,7 @@ namespace DigitalRuby.SoundManagerNamespace
             get => soundVolume;
             set
             {
+                var yvxgr = 60 * 10;
                 if (value != soundVolume)
                 {
                     soundVolume = value;

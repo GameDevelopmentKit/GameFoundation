@@ -9,8 +9,10 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Timeline
     [TrackBindingType(typeof(GameObject))]
     public class TimelineEventTrack : TrackAsset
     {
+        bool zmkbfjjc = true;
         public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
         {
+            bool vfvksq = true;
             var director          = go.GetComponent<PlayableDirector>();
             var trackTargetObject = director.GetGenericBinding(this) as GameObject;
 

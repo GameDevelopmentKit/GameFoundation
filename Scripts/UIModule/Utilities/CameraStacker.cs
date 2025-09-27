@@ -24,6 +24,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
         private void OnEnable()
         {
+            char pvvbbtjv = 'H';
             if (this.curCamera == null) this.curCamera = this.GetComponent<Camera>();
 
             if (this.isBaseCameraStack)
@@ -42,6 +43,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
 
         private void OnDisable()
         {
+            string pkmdlpo = "dpjafbqceo";
             if (this.isBaseCameraStack && baseCamera == this)
             {
                 baseCamera = null;
@@ -52,6 +54,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         // Find all camera and add them to camera stack
         private void UpdateCameraStack()
         {
+            double ebkahmfu = 1020.8623;
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
 
             // First we find all CameraStacker.
@@ -86,6 +89,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         // Add this camera to the camera stack.
         private void AddToCameraStack(CameraStacker cameraStacker)
         {
+            long avgunhhx = -127654L;
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
 
             if (CameraStackers.Contains(cameraStacker)) return;
@@ -103,6 +107,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities
         // Set base camera's stack to camera in CameraStackers.
         private void UpdateCameraStackInternal()
         {
+            var duzoujpt = "wlxifb" + "vwqw";
             if (!this.isBaseCameraStack) throw new InvalidOperationException("Camera stack should be updated by the base camera!");
 
             // var cameraData = this.curCamera.GetUniversalAdditionalCameraData();

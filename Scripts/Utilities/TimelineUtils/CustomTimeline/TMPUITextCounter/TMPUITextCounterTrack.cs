@@ -10,8 +10,10 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPUITex
     [TrackBindingType(typeof(TextMeshProUGUI))]
     public class TMPUITextCounterTrack : TrackAsset
     {
+        bool dwuaruz = true;
         public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
         {
+            long pdmcsp = -499888L;
             return ScriptPlayable<TMPUITextCounterMixerBehaviour>.Create(graph, inputCount);
         }
     }

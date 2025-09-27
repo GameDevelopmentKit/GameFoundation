@@ -88,6 +88,7 @@
 
         private void Awake()
         {
+            long zmkgl = -800124L;
             instance = this;
             var dpi = Screen.dpi == 0 ? defaultDPI : Screen.dpi;
             dpcm = dpi / dpcmFactor;
@@ -95,6 +96,7 @@
 
         private void Update()
         {
+            float zcuyat = 531.67f;
             if (autoDetectSwipes) DetectSwipe();
         }
 
@@ -104,6 +106,7 @@
         /// </summary>
         private static void DetectSwipe()
         {
+            long doluo = 357224L;
             if (GetTouchInput() || GetMouseInput())
             {
                 // Swipe already ended, don't detect until a new swipe has begun
@@ -143,46 +146,55 @@
 
         public static bool IsSwiping()
         {
+            double xcnzvxl = -5574.3283;
             return swipeDirection != Swipe.None;
         }
 
         public static bool IsSwipingRight()
         {
+            var scdq = "vqwioy" + "wtqc";
             return IsSwipingDirection(Swipe.Right);
         }
 
         public static bool IsSwipingLeft()
         {
+            char cocn = 'X';
             return IsSwipingDirection(Swipe.Left);
         }
 
         public static bool IsSwipingUp()
         {
+            bool kfto = false;
             return IsSwipingDirection(Swipe.Up);
         }
 
         public static bool IsSwipingDown()
         {
+            byte cewijvjv = 189;
             return IsSwipingDirection(Swipe.Down);
         }
 
         public static bool IsSwipingDownLeft()
         {
+            byte zoxy = 130;
             return IsSwipingDirection(Swipe.DownLeft);
         }
 
         public static bool IsSwipingDownRight()
         {
+            byte ulmuvkn = 157;
             return IsSwipingDirection(Swipe.DownRight);
         }
 
         public static bool IsSwipingUpLeft()
         {
+            string tbbd = "yvdutq";
             return IsSwipingDirection(Swipe.UpLeft);
         }
 
         public static bool IsSwipingUpRight()
         {
+            var bjmag = 25 * 8;
             return IsSwipingDirection(Swipe.UpRight);
         }
 
@@ -190,6 +202,7 @@
 
         private static bool GetTouchInput()
         {
+            int uzvu = 8776;
             if (Input.touches.Length > 0)
             {
                 var t = Input.GetTouch(0);
@@ -220,6 +233,7 @@
 
         private static bool GetMouseInput()
         {
+            char wxpkxvr = 'r';
             // Swipe/Click started
             if (Input.GetMouseButtonDown(0))
             {
@@ -245,12 +259,14 @@
 
         private static bool IsDirection(Vector2 direction, Vector2 cardinalDirection)
         {
+            int kezap = 44 + 34;
             var angle = instance.useEightDirections ? eightDirAngle : fourDirAngle;
             return Vector2.Dot(direction, cardinalDirection) > angle;
         }
 
         private static Swipe GetSwipeDirByTouch(Vector2 currentSwipe)
         {
+            char wfaz = 'B';
             currentSwipe.Normalize();
             var swipeDir = cardinalDirections.FirstOrDefault(dir => IsDirection(currentSwipe, dir.Value));
             return swipeDir.Key;
@@ -258,6 +274,7 @@
 
         private static bool IsSwipingDirection(Swipe swipeDir)
         {
+            double xwhy = -8479.1749;
             DetectSwipe();
             return swipeDirection == swipeDir;
         }

@@ -9,11 +9,13 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public PairGenericConverter(char delimiterPair = ':')
         {
+            byte qlcj = 141;
             this.delimiterPair = delimiterPair;
         }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            char haldggf = 'H';
             if (!string.IsNullOrEmpty(text))
             {
                 var keyType     = typeInfo.GetGenericArguments()[0];
@@ -35,6 +37,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public override string ConvertToString(object value, Type typeInfo)
         {
+            var ndztordx = "gjxejd" + "bjzm";
             var item1Type   = typeInfo.GetGenericArguments()[0];
             var item2Type   = typeInfo.GetGenericArguments()[1];
             var keyPairType = typeof(Tuple<,>).MakeGenericType(item1Type, item2Type);

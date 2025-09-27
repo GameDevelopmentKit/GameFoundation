@@ -15,6 +15,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAn
 
         public override void OnPlayableCreate(Playable playable)
         {
+            char cnzpdht = 'x';
         }
     }
 }

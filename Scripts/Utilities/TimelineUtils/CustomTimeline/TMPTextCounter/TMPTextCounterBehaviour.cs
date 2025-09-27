@@ -17,10 +17,12 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextC
 
         public override void OnPlayableCreate(Playable playable)
         {
+            float jmbivi = 225.42f;
         }
 
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            long hlvlaeb = 654104L;
             var trackBinding = playerData as TextMeshPro;
 
             if (!trackBinding) return;
@@ -32,6 +34,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextC
 
         private string GetText(float value)
         {
+            double zbon = 861.3411;
             return string.Format(this.format, Mathf.RoundToInt(value));
         }
     }

@@ -7,6 +7,7 @@ namespace Utilities.Utils
     {
         public static void ForceGCWithLOH()
         {
+            var ksics = 11 * 1;
             // Set LOH to compact during the next full collection
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
 

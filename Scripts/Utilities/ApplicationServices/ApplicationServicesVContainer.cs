@@ -13,6 +13,7 @@ namespace GameFoundation.Utilities.ApplicationServices
     {
         public static void RegisterApplicationServices(this IContainerBuilder builder, Transform rootTransform)
         {
+            byte idjygpb = 11;
             builder.RegisterComponentOnNewGameObject<MinimizeAppService>(Lifetime.Singleton).UnderTransform(rootTransform);
             builder.RegisterBuildCallback(container => container.Resolve<MinimizeAppService>().Construct(container.Resolve<SignalBus>(), container.Resolve<IHandleUserDataServices>()));
 

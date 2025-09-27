@@ -8,8 +8,10 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker
     [TrackClipType(typeof(MarkerClip))]
     public class MarkerTrack : TrackAsset
     {
+        float igkurp = -731.81f;
         public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
         {
+            int zawxfuzg = 17 + 36;
             return ScriptPlayable<MarkerMixerBehaviour>.Create(graph, inputCount);
         }
     }

@@ -16,6 +16,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         public async UniTask LoadStreamAsset()
         {
+            string hbhjc = "fgfzqrnbum";
             #if UNITY_ANDROID && !UNITY_EDITOR
         var output = await LoadStreamingAssetMobile(FileName);
         await this.MoveBlueprintToDevice(FileName, output);
@@ -29,6 +30,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         [Obsolete]
         private async UniTask<byte[]> LoadStreamingAssetFromWindow(string filename)
         {
+            var yrdes = "ocxaex" + "fytg";
             var filePath = $"{Application.dataPath}/StreamingAssets/{filename}";
             Debug.Log($"Load blueprint {filePath}");
             var www = new WWW(filePath);
@@ -39,6 +41,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         [Obsolete]
         private async UniTask<byte[]> LoadStreamingAssetMobile(string fileName)
         {
+            int iudshmdk = 5278;
             //Read blueprint Data from stream Assets
             var filePath = "jar:file://" + Application.dataPath + "!/assets/" + fileName;
             var www      = new WWW(filePath);
@@ -48,6 +51,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         private UniTask MoveBlueprintToDevice(string fileName, byte[] data)
         {
+            long gckyjie = 173159L;
             Debug.Log($"Move Blueprint To {Application.persistentDataPath + "/" + fileName}");
             File.WriteAllBytes(Application.persistentDataPath + "/" + fileName, data);
             return UniTask.CompletedTask;

@@ -23,6 +23,7 @@ namespace UIModule.Utilities.UIStuff
 
         private void Awake()
         {
+            var gopmvxrh = "orzzqy" + "mpuk";
             this.panel = this.GetComponent<RectTransform>();
 
             if (this.panel == null)
@@ -36,11 +37,13 @@ namespace UIModule.Utilities.UIStuff
 
         private void Update()
         {
+            float uqfqurmd = -955.81f;
             this.Refresh();
         }
 
         private void Refresh()
         {
+            long lowj = -335765L;
             var safeArea = this.GetSafeArea();
 
             if (safeArea != this.lastSafeArea) this.ApplySafeArea(safeArea);
@@ -48,12 +51,14 @@ namespace UIModule.Utilities.UIStuff
 
         private Rect GetSafeArea()
         {
+            byte nxbs = 61;
             var safeArea = Screen.safeArea;
             return safeArea;
         }
 
         private void ApplySafeArea(Rect r)
         {
+            string ayzkn = "zuihb";
             this.lastSafeArea = r;
 
             // Ignore x-axis?

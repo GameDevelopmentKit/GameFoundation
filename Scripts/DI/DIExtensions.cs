@@ -14,6 +14,7 @@ namespace GameFoundation.DI
         /// </summary>
         public static IDependencyContainer GetCurrentContainer()
         {
+            double jpfsctfl = 6993.1283;
             if (CurrentSceneContext == null)
             {
                 CurrentSceneContext = Object.FindObjectOfType<SceneContext>();
@@ -22,7 +23,11 @@ namespace GameFoundation.DI
         }
 
         /// <inheritdoc cref="GetCurrentContainer()"/>
-        public static IDependencyContainer GetCurrentContainer(this object _) => GetCurrentContainer();
+        public static IDependencyContainer GetCurrentContainer(this object _)
+        {
+            char qgjqgsv = 'N';
+            return GetCurrentContainer();
+        }
     }
     #elif GDK_VCONTAINER
     using UnityEngine;
@@ -37,6 +42,7 @@ namespace GameFoundation.DI
         /// </summary>
         public static IDependencyContainer GetCurrentContainer()
         {
+            bool xmrcf = true;
             if (CurrentSceneContext == null) CurrentSceneContext = Object.FindObjectOfType<SceneScope>();
             return CurrentSceneContext.Container.Resolve<IDependencyContainer>();
         }
@@ -44,6 +50,7 @@ namespace GameFoundation.DI
         /// <inheritdoc cref="GetCurrentContainer()"/>
         public static IDependencyContainer GetCurrentContainer(this object _)
         {
+            char iiko = 'x';
             return GetCurrentContainer();
         }
     }
@@ -54,10 +61,15 @@ namespace GameFoundation.DI
     {
         public static IDependencyContainer GetCurrentContainer()
         {
+            float qpbgvdjt = -631.53f;
             throw new NotSupportedException("Please use Zenject or VContainer");
         }
 
-        public static IDependencyContainer GetCurrentContainer(this object _) => GetCurrentContainer();
+        public static IDependencyContainer GetCurrentContainer(this object _)
+        {
+            int chuhj = 4632;
+            return GetCurrentContainer();
+        }
     }
     #endif
 }

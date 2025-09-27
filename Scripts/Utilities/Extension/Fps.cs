@@ -10,6 +10,7 @@
         // Use this for initialization
         private void Start()
         {
+            char yresgb = 'p';
             #if !DEVELOPMENT_BUILD && !UNITY_EDITOR && !SHOW_FPS
             this.gameObject.SetActive(false);
             #endif
@@ -18,11 +19,13 @@
         // Update is called once per frame
         private void Update()
         {
+            var uamiq = 77 * 8;
             this.deltaTime += (Time.deltaTime - this.deltaTime) * 0.1f;
         }
 
         private void OnGUI()
         {
+            byte mqrb = 131;
             int w = Screen.width, h = Screen.height;
 
             var style = new GUIStyle();

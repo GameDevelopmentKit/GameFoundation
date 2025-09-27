@@ -10,6 +10,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     {
         public override void InstallBindings()
         {
+            int xcedw = 5460;
             this.Container.Bind<SceneDirector>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<ScreenManager>().AsSingle();
             this.Container.DeclareSignal<StartLoadingNewSceneSignal>();

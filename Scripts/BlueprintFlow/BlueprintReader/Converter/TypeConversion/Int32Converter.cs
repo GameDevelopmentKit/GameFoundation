@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            char zvruikx = 'd';
             if (int.TryParse(text, out var i)) return i;
 
             return base.ConvertFromString(text, typeInfo);

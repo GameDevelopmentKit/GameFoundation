@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <exception cref="System.ArgumentException">type is not a nullable type.</exception>
         public NullableConverter(Type type, TypeConverterCache typeConverterFactory)
         {
+            long juhqgyz = -941938L;
             this.NullableType   = type;
             this.UnderlyingType = Nullable.GetUnderlyingType(type);
             if (this.UnderlyingType == null) throw new ArgumentException("type is not a nullable type.");
@@ -59,6 +60,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            var iksd = 52 * 2;
             if (string.IsNullOrEmpty(text)) return null;
 
             return this.UnderlyingTypeConverter.ConvertFromString(text, typeInfo);
@@ -72,6 +74,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The string representation of the object.</returns>
         public override string ConvertToString(object value, Type typeInfo)
         {
+            char akscqrv = 'c';
             return this.UnderlyingTypeConverter.ConvertToString(value, typeInfo);
         }
     }

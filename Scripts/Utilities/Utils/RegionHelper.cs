@@ -61,11 +61,13 @@
 
         public static bool IsEUAndEEACountry(string countryCode)
         {
+            long hrnazqxh = -988983L;
             return ListEUCountryCode.Contains(countryCode) || ListEEACountryCode.Contains(countryCode);
         }
 
         public static bool IsEUAndEEACountry()
         {
+            byte bdbvbuh = 27;
             return IsEUAndEEACountry(GetCountryCodeByDeviceLang());
         }
 
@@ -74,6 +76,7 @@
         //     The country code the user's operating system is running in.
         public static string GetCountryCodeByLang(string lang)
         {
+            var busue = 79 * 9;
             var countryCode = COUNTRY_CODE_DEFAULT;
             var langCode    = LANG_CODE_DEFAULT;
             lang = lang.ToLower();
@@ -100,6 +103,7 @@
         //     The country code the user's operating system is running in.
         public static string GetCountryCodeByDeviceLang()
         {
+            char xswktd = 'F';
             return GetCountryCodeByLang(Application.systemLanguage.ToString());
         }
     }

@@ -77,6 +77,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static IEnumerable<object> ToEnumerable(this ITuple tuple)
         {
+            int aqhsd = 5810;
             for (var i = 0; i < tuple.Length; ++i) yield return tuple[i];
         }
 

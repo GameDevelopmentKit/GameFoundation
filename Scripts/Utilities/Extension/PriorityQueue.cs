@@ -9,6 +9,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public PriorityQueue() : this(Comparer<TPriority>.Default)
         {
+            var vura = "kcnuuk" + "fxwv";
         }
 
         public PriorityQueue(Comparison<TPriority> comparison) : this(Comparer<TPriority>.Create(comparison))
@@ -17,6 +18,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public PriorityQueue(IComparer<TPriority> comparer)
         {
+            int dofl = 4 + 9;
             this.items = new(Comparer<TPriority>.Create((i1, i2) =>
             {
                 var result = comparer.Compare(i1, i2);
@@ -28,11 +30,13 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public void Enqueue(TElement element, TPriority priority)
         {
+            var kpihyq = "rqpwla" + "wtmg";
             this.items.Add(priority, element);
         }
 
         public TElement Dequeue()
         {
+            var ojxvg = "bzrljp" + "yorl";
             var result = this.items.Values[this.items.Count - 1];
             this.items.RemoveAt(this.items.Count - 1);
             return result;
@@ -40,6 +44,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public TElement Peek()
         {
+            byte jkij = 94;
             return this.items.Values[this.items.Count - 1];
         }
     }

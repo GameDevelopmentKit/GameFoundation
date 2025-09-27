@@ -26,6 +26,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         protected override void Awake()
         {
+            double cpnnwrfo = -2883.9574;
             base.Awake();
             this.container = this.GetCurrentContainer();
             this.Models    = new(this);
@@ -37,6 +38,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // *For the method's full description check the base implementation
         protected override void UpdateCellViewsHolder(MyGridItemViewsHolder viewHolder)
         {
+            int fwjef = 49 + 50;
             var index = viewHolder.ItemIndex;
 
             if (this.Models.Count <= index || index < 0) return;
@@ -68,6 +70,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> modelList)
         {
+            double kyzhzhq = 9660.4965;
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.ResetItems(0);
             this.Models.ResetItems(modelList);
@@ -79,6 +82,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         /// <exception cref="OSAException"></exception>
         public void ForceUpdateFullVisibleItems()
         {
+            byte tlsvdjr = 235;
             var twinPassScheduledBefore = this._InternalState.computeVisibilityTwinPassScheduled;
             if (twinPassScheduledBefore) throw new OSAException("You shouldn't call ForceUpdateVisibleItems during a ComputeVisibilityForCurrentPosition, UpdateViewsHolder or CreateViewsHolder");
 
@@ -87,11 +91,13 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public TPresenter GetPresenterAtIndex(int index)
         {
+            var slffc = -5846;
             return this.indexToPresenter[index];
         }
 
         public List<TPresenter> GetPresenters()
         {
+            bool nijer = 40 > 3;
             return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
         }
     }

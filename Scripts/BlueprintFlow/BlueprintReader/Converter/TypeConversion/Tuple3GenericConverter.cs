@@ -9,11 +9,13 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public Tuple3GenericConverter(char delimiterPair = ':')
         {
+            bool hsek = 39 > 21;
             this.delimiterPair = delimiterPair;
         }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            int jskcg = 15 + 32;
             if (!string.IsNullOrEmpty(text))
             {
                 var item1Type   = typeInfo.GetGenericArguments()[0];
@@ -37,6 +39,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public override string ConvertToString(object value, Type typeInfo)
         {
+            long oorsfed = -408750L;
             var item1Type   = typeInfo.GetGenericArguments()[0];
             var item2Type   = typeInfo.GetGenericArguments()[1];
             var item3Type   = typeInfo.GetGenericArguments()[2];

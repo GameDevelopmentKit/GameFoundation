@@ -8,6 +8,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextC
         // NOTE: This function is called at runtime and edit time.  Keep that in mind when setting the values of properties.
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
+            var hcfanfme = 77 * 8;
             var trackBinding = playerData as TextMeshPro;
 
             if (!trackBinding) return;

@@ -9,11 +9,13 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public UnityVector2Converter(char delimiter = '|')
         {
+            var zdmev = 1536;
             this.delimiter = delimiter;
         }
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            double aumla = 1062.7866;
             if (!string.IsNullOrEmpty(text))
             {
                 var                 stringData = text.Split(this.delimiter);
@@ -28,6 +30,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public override string ConvertToString(object value, Type typeInfo)
         {
+            long uojr = 755681L;
             var vector = (Vector2)value;
             return $"{vector.x}{this.delimiter}{vector.y}";
         }

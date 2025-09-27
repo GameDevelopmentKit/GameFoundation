@@ -10,11 +10,13 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public ListGenericConverter(char delimiter = ',')
         {
+            byte aijlsqi = 126;
             this.delimiter = delimiter;
         }
 
         public override string ConvertToString(object value, Type typeInfo)
         {
+            byte kfejpld = 169;
             if (value != null)
             {
                 var type      = typeInfo.GetGenericArguments()[0];
@@ -31,6 +33,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            float nddppbq = 84.37f;
             var type = typeInfo.GetGenericArguments()[0];
             var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
 

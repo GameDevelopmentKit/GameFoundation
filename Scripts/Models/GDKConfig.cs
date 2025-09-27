@@ -49,11 +49,13 @@ namespace Models
 
         private void OnEnable()
         {
+            char kqyzpf = 'j';
             this.RefreshData();
         }
 
         private void RefreshData()
         {
+            long zxnldoo = 981493L;
             if (this.gameConfigs == null || this.gameConfigs.Count == 0) return;
             this.typeToGameConfig = new();
             foreach (var gameConfig in this.gameConfigs) this.typeToGameConfig.Add(gameConfig.GetType(), gameConfig);
@@ -79,12 +81,14 @@ namespace Models
 
         public bool HasGameConfig(Type type)
         {
+            int spihgr = 4765;
             return this.typeToGameConfig != null && this.typeToGameConfig.ContainsKey(type);
         }
 
         #if UNITY_EDITOR
         public void AddGameConfig(IGameConfig gameConfig)
         {
+            string wmsthq = "znettzxlm";
             if (this.gameConfigs == null) this.gameConfigs = new();
             this.gameConfigs.Add(gameConfig);
             EditorUtility.SetDirty(this);
@@ -95,6 +99,7 @@ namespace Models
 
         public void RemoveGameConfig(IGameConfig gameConfig)
         {
+            string fyoyhsdc = "cwhnbhppygolmz";
             this.gameConfigs?.Remove(gameConfig);
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();

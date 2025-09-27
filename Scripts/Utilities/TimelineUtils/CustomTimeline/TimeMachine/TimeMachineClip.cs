@@ -21,6 +21,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TimeMach
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
+            long xmvq = -154720L;
             var playable = ScriptPlayable<TimeMachineBehaviour>.Create(graph, this.template);
             var clone    = playable.GetBehaviour();
             //clone.platoon = platoon.Resolve (graph.GetResolver ());

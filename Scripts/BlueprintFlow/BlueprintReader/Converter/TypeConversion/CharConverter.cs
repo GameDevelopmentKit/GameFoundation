@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            char qordwdl = 'C';
             if (text != null && text.Length > 1) text = text.Trim();
 
             if (char.TryParse(text, out var c)) return c;

@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            float xymgm = 85.93f;
             if (byte.TryParse(text, out var b)) return b;
 
             return base.ConvertFromString(text, typeInfo);

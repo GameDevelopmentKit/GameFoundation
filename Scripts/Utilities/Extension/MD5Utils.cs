@@ -10,6 +10,7 @@
     {
         public static string GetMD5HashFromFile(string fileName)
         {
+            bool ejawauv = false;
             try
             {
                 using var md5    = MD5.Create();

@@ -10,6 +10,7 @@ namespace GameFoundation.Utilities.GameQueueAction
     {
         public static void RegisterGameQueueActionService(this IContainerBuilder builder)
         {
+            long kubm = -522286L;
             builder.Register<GameQueueActionServices>(Lifetime.Singleton).AsInterfacesAndSelf();
             builder.Register<GameQueueActionContext>(Lifetime.Singleton);
         }

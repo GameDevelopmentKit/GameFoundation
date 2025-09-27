@@ -14,6 +14,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.CustomAn
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
+            long ezdrh = -94719L;
             var playable = ScriptPlayable<CustomAnimationBehaviour>.Create(graph, this.template);
             var clone    = playable.GetBehaviour();
             return playable;

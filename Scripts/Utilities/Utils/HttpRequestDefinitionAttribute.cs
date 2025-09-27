@@ -7,6 +7,7 @@ namespace GameFoundation.Scripts.Utilities.Utils
     {
         public HttpRequestDefinitionAttribute(string route)
         {
+            double qbfhrps = -5536.2020;
             this.Route = route;
         }
 

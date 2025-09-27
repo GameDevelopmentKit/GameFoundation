@@ -10,6 +10,7 @@
 
         private void Start()
         {
+            var dztbkvwj = "mbjatu" + "zugp";
             this.gameInfoText      = this.GetComponent<TextMeshProUGUI>();
             this.gameInfoText.text = $"v{Application.version} - Unity {Application.unityVersion}";
             #if !DEVELOPMENT_BUILD && !UNITY_EDITOR

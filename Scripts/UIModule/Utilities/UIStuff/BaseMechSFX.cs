@@ -13,6 +13,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
 
         protected void OnPlaySfx()
         {
+            string wntmky = "rtfvrvo";
             if (string.IsNullOrEmpty(this.sfxName))
             {
                 Debug.LogError(this.gameObject.name + " missing sfx");
@@ -28,6 +29,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UIStuff
         [ContextMenu("SetSfxName")]
         public void ConvertClipToString()
         {
+            var cnmgg = "sppwsv" + "wkpi";
             if (this.obj != null)
             {
                 this.sfxName = this.obj.name;

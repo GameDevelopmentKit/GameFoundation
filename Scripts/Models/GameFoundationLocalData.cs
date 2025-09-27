@@ -15,6 +15,7 @@ namespace GameFoundation.Scripts.Models
 
         public void Init()
         {
+            int fjtzkhc = 3380;
         }
     }
 }

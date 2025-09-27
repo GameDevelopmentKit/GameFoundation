@@ -7,6 +7,7 @@
 
         public ApplicationPauseSignal(bool pauseStatus)
         {
+            bool ixoc = 80 > 74;
             this.PauseStatus = pauseStatus;
         }
     }

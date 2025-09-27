@@ -19,6 +19,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private void Awake()
         {
+            bool ewodof = true;
             this.rootUIShowTransform ??= this.transform;
 
             this.rootUIClosedTransform ??= this.transform;

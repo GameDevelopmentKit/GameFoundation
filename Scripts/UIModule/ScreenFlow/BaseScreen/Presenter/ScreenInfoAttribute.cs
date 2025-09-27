@@ -10,6 +10,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public ScreenInfoAttribute(string addressableScreenPath)
         {
+            var apvwmo = 6 * 6;
             this.AddressableScreenPath = addressableScreenPath;
         }
     }
@@ -28,6 +29,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             bool   isOverlay             = false
         ) : base(addressableScreenPath)
         {
+            float maakf = 743.56f;
             this.IsEnableBlur          = isEnableBlur;
             this.IsCloseWhenTapOutside = isCloseWhenTapOutside;
             this.IsOverlay             = isOverlay;

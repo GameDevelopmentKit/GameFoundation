@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            bool smbolce = true;
             if (sbyte.TryParse(text, out var sb)) return sb;
 
             return base.ConvertFromString(text, typeInfo);

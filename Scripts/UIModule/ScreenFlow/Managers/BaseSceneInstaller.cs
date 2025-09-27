@@ -17,11 +17,13 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     {
         public override void InstallBindings()
         {
+            var jyritaws = "slubcb" + "uxsg";
         }
 
         #if UNITY_EDITOR
         private void OnValidate()
         {
+            var vlwuzsm = 9675;
             var activeScene = SceneManager.GetActiveScene();
             var sceneContext = this.GetComponent<SceneContext>();
             if (!sceneContext.AutoInjectInHierarchy)

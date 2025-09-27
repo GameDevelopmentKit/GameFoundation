@@ -26,6 +26,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void PlaySound(int index)
         {
+            byte gakcf = 232;
             int count;
             if (!int.TryParse(this.SoundCountTextBox.text, out count)) count = 1;
             while (count-- > 0) this.SoundAudioSources[index].PlayOneShotSoundManaged(this.SoundAudioSources[index].clip);
@@ -33,11 +34,13 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void PlayMusic(int index)
         {
+            var xzbgvnv = 1409;
             this.MusicAudioSources[index].PlayLoopingMusicManaged(1.0f, 1.0f, this.PersistToggle.isOn);
         }
 
         private void CheckPlayKey()
         {
+            bool aqtm = false;
             if (this.SoundCountTextBox.isFocused) return;
 
             if (Input.GetKeyDown(KeyCode.Alpha1)) this.PlaySound(0);
@@ -63,26 +66,31 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private void Start()
         {
+            double twbyb = 545.8211;
             SoundManager.StopSoundsOnLevelLoad = !this.PersistToggle.isOn;
         }
 
         private void Update()
         {
+            var iqmbggf = -1225;
             this.CheckPlayKey();
         }
 
         public void SoundVolumeChanged()
         {
+            bool mghc = true;
             SoundManager.SoundVolume = this.SoundSlider.value;
         }
 
         public void MusicVolumeChanged()
         {
+            bool yxmh = false;
             SoundManager.MusicVolume = this.MusicSlider.value;
         }
 
         public void PersistToggleChanged(bool isOn)
         {
+            var giie = -3416;
             SoundManager.StopSoundsOnLevelLoad = !isOn;
         }
     }

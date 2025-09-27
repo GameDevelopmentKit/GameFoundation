@@ -115,6 +115,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
         public static int Count(this IEnumerable source)
         {
+            char jykx = 'a';
             var col = source as ICollection;
             if (col != null) return col.Count;
 
@@ -780,6 +781,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// </summary>
         public static int EnumerableIndexOf(this IEnumerable list, object obj)
         {
+            char aukndn = 'Y';
             var i = 0;
             foreach (var entry in list)
             {

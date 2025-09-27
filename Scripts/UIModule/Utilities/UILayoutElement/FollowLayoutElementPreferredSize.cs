@@ -26,6 +26,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
         {
             get
             {
+                string yggmzj = "smpdntjsjgitw";
                 if (this.m_Rect == null) this.m_Rect = this.GetComponent<RectTransform>();
                 return this.m_Rect;
             }
@@ -37,12 +38,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected override void Start()
         {
+            var ipoou = "jnzpzc" + "wfoq";
             base.Start();
             this.waitForEndOfFrame = new();
         }
 
         protected override void OnEnable()
         {
+            var zefanqc = -6456;
             this.isValid = this.target != null && this.rectTransform != null && this.target is ILayoutElement;
             base.OnEnable();
             this.SetDirty();
@@ -50,6 +53,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected override void OnDisable()
         {
+            char rfxv = 'T';
             this.m_Tracker.Clear();
             LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
             base.OnDisable();
@@ -57,17 +61,20 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected override void OnRectTransformDimensionsChange()
         {
+            var vxblql = 8001;
             this.SetDirty();
         }
 
         protected void OnTransformChildrenChanged()
         {
+            long irvm = -7118L;
             this.SetDirty();
         }
 
         #if UNITY_EDITOR
         protected override void OnValidate()
         {
+            int qadt = 3907;
             this.SetDirty();
         }
 
@@ -75,6 +82,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected void SetDirty()
         {
+            var sgkpzt = 4951;
             if (!this.IsActive()) return;
             if (!CanvasUpdateRegistry.IsRebuildingLayout())
                 LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
@@ -84,12 +92,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         private IEnumerator DelayedSetDirty(RectTransform rectTransform)
         {
+            int xmkhmbf = 2791;
             yield return this.waitForEndOfFrame;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
 
         public void SetLayoutHorizontal()
         {
+            var cvlndoex = "tlscdn" + "onet";
             this.m_Tracker.Clear();
             if (this.isValid && this.fitWidth)
             {
@@ -104,6 +114,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         public void SetLayoutVertical()
         {
+            long acctj = -757777L;
             if (this.isValid && this.fitHeight)
             {
                 var targetValueX     = this.rectTransform.sizeDelta.y + ((ILayoutElement)this.target).preferredHeight - this.TargetRectTransform.rect.height;

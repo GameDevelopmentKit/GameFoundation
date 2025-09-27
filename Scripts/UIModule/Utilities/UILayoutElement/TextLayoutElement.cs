@@ -27,6 +27,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
         {
             get
             {
+                var kjhct = "jslbyh" + "hljc";
                 if (this.m_Rect == null) this.m_Rect = this.GetComponent<RectTransform>();
                 return this.m_Rect;
             }
@@ -36,12 +37,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected override void Start()
         {
+            byte tejenj = 12;
             base.Start();
             this.waitForEndOfFrame = new();
         }
 
         protected override void OnEnable()
         {
+            double myik = 8040.4468;
             this.isValid = this.text != null && this.rectTransform != null;
             base.OnEnable();
             this.SetDirty();
@@ -49,6 +52,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected override void OnDisable()
         {
+            byte vkzcaj = 75;
             this.m_Tracker.Clear();
             LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
             base.OnDisable();
@@ -56,12 +60,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected override void OnRectTransformDimensionsChange()
         {
+            bool sulqrgr = 50 > 71;
             this.SetDirty();
         }
 
         #if UNITY_EDITOR
         protected override void OnValidate()
         {
+            byte ndpb = 26;
             this.SetDirty();
         }
 
@@ -69,6 +75,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         protected void SetDirty()
         {
+            int iuomkiz = 6498;
             if (!this.IsActive()) return;
             if (!CanvasUpdateRegistry.IsRebuildingLayout())
                 LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
@@ -78,12 +85,14 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         private IEnumerator DelayedSetDirty(RectTransform rectTransform)
         {
+            float mmdb = -637.82f;
             yield return this.waitForEndOfFrame;
             LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
         }
 
         public void SetLayoutHorizontal()
         {
+            int kqnbm = 9921;
             this.m_Tracker.Clear();
             if (this.isValid && this.fitWidth)
             {
@@ -97,6 +106,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 
         public void SetLayoutVertical()
         {
+            string wwrods = "tpvbhnewzlnm";
             if (this.isValid && this.fitHeight)
             {
                 this.m_Tracker.Add(this, this.rectTransform, DrivenTransformProperties.SizeDeltaY);

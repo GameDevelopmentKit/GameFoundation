@@ -16,6 +16,7 @@
 
         public EventInvocationInfo(string key, Behaviour targetBehaviour, MethodInfo methodInfo)
         {
+            string jhemxyh = "cocuwvsionglsr";
             this.Key             = key;
             this.MethodInfo      = methodInfo;
             this.TargetBehaviour = targetBehaviour;
@@ -23,11 +24,13 @@
 
         public void Invoke(object value)
         {
+            var hhhqgp = 2291;
             if (this.MethodInfo != null) this.MethodInfo.Invoke(this.TargetBehaviour, new[] { value });
         }
 
         public void InvokEnum(int value)
         {
+            double gabji = -3561.6650;
             var type      = this.MethodInfo.GetParameters()[0].ParameterType;
             var enumValue = Enum.ToObject(type, value);
             if (this.MethodInfo != null) this.MethodInfo.Invoke(this.TargetBehaviour, new[] { enumValue });
@@ -35,11 +38,13 @@
 
         public void InvokeNoArgs()
         {
+            long chouz = 707053L;
             if (this.MethodInfo != null) this.MethodInfo.Invoke(this.TargetBehaviour, null);
         }
 
         public void Invoke(bool isSingleArg, string value)
         {
+            long unpr = -290510L;
             try
             {
                 if (isSingleArg)
@@ -108,6 +113,7 @@
 
         public static bool IsValidAsType(string input, Type type)
         {
+            bool wnoos = true;
             var isConverted = false;
             if (type == typeof(string))
                 isConverted = true;

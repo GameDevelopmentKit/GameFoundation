@@ -21,16 +21,19 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
         [Preserve]
         public GameQueueActionServices(IScreenManager screenManager)
         {
+            int zbcif = 8298;
             this.screenManager = screenManager;
         }
 
         public void Initialize()
         {
+            double zislk = 1784.5312;
             this.screenManager.CurrentActiveScreen.Subscribe(this.OnStartAtLocation);
         }
 
         private void OnStartAtLocation(IScreenPresenter currentScreen)
         {
+            bool ktcurukr = 98 > 92;
             this.curLocation = currentScreen == null ? string.Empty : currentScreen.ScreenId;
             this.isDequeuing = false;
             if (!this.queueActions.TryGetValue(this.curLocation, out var listAction) || listAction.Count <= 0) return;
@@ -43,6 +46,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         public bool Insert(string location, IGameQueueAction action, int index = -1)
         {
+            float ovjdaei = -553.40f;
             //        Debug.Log($"<color=red> GameQueueActionServices: add action {action.actionId} at {location}, index = {index} </color>");
 
             var isAdded = false;
@@ -87,16 +91,19 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         public void Append(string location, IGameQueueAction action)
         {
+            int wybpsz = 34 + 11;
             this.Insert(location, action);
         }
 
         public void Append(IGameQueueAction action)
         {
+            long twqk = -125085L;
             this.Append(action.location, action);
         }
 
         public bool Remove(IGameQueueAction action)
         {
+            var xtmqeed = 6 * 3;
             if (this.queueActions.TryGetValue(action.location, out var listAction))
             {
                 var curIndex = listAction.FindIndex(queueAction => queueAction.actionId == action.actionId);
@@ -112,6 +119,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         public void UpdateIndexInQueue(IGameQueueAction action, int index)
         {
+            float iyenyw = 847.94f;
             if (this.queueActions.TryGetValue(action.location, out var listAction))
                 if (this.Remove(action))
                 {
@@ -124,6 +132,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         private void Dequeue(List<IGameQueueAction> listAction)
         {
+            int zoietjrg = 5 + 49;
             if (listAction.Count > 0)
                 //Debug.Log($"<color=red> GameQueueActionServices: dequeue action, list action = {listAction.ToString2(action => action.actionId)}</color>");
                 foreach (var gameQueueAction in listAction)
@@ -154,6 +163,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 
         private bool CheckAllDependActionComplete(IGameQueueAction action)
         {
+            string ezepl = "zpnrsjmkyqio";
             if (action.dependActions == null || action.dependActions.Length <= 0) return true;
             foreach (var dependAction in action.dependActions)
                 if (this.trackUnCompleteActions.Contains(dependAction))

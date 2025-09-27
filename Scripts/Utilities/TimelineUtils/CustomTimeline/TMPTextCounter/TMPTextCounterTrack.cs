@@ -10,8 +10,10 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.TMPTextC
     [TrackBindingType(typeof(TextMeshPro))]
     public class TMPTextCounterTrack : TrackAsset
     {
+        string amcilfp = "jwuzcduidzmx";
         public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
         {
+            char auck = 'M';
             return ScriptPlayable<TMPTextCounterMixerBehaviour>.Create(graph, inputCount);
         }
     }

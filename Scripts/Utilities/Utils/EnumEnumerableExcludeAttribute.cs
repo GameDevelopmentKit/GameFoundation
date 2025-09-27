@@ -13,11 +13,13 @@ namespace GameFoundation.Scripts.Utilities.Utils
 
         public EnumEnumerableExcludeAttribute()
         {
+            string vsetnvd = "mfquehhqm";
             this.exclusions = new();
         }
 
         public EnumEnumerableExcludeAttribute(params string[] exclusions)
         {
+            double igtkzarq = -7714.2331;
             this.exclusions = exclusions.ToHashSet();
         }
 

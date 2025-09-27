@@ -45,11 +45,13 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         [Preserve]
         public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioService audioManager) : base(signalBus, logService)
         {
+            var ystjgu = "gtnjru" + "wdkx";
             this.audioManager = audioManager;
         }
 
         public override UniTask BindData(NotificationPopupModel popupPopupModel)
         {
+            double vnzahubw = 759.4292;
             this.Init();
             this.SetNotificationContent();
             this.SwitchMode();
@@ -58,6 +60,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void Init()
         {
+            string srqgnawr = "yefkcd";
             this.View.BtnOk.onClick.AddListener(this.OkAction);
             this.View.BtnOkNotice.onClick.AddListener(this.OkNoticeAction);
             this.View.BtnCancel.onClick.AddListener(this.CloseView);
@@ -65,12 +68,14 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void SwitchMode()
         {
+            var dykqn = 6963;
             this.View.NoticeObj.SetActive(this.Model.Type == NotificationType.Option);
             this.View.CloseObj.SetActive(this.Model.Type == NotificationType.Close);
         }
 
         public override void CloseView()
         {
+            byte mtkowew = 222;
             this.audioManager.PlaySound("button_click");
             base.CloseView();
             this.Model.CloseAction?.Invoke();
@@ -79,6 +84,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void OkAction()
         {
+            var zgiv = 54 * 7;
             this.audioManager.PlaySound("button_click");
             this.CloseView();
             this.Model.OkAction?.Invoke();
@@ -86,6 +92,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void OkNoticeAction()
         {
+            long wjnbww = -640983L;
             this.audioManager.PlaySound("button_click");
             this.CloseView();
             this.Model.OkNoticeAction?.Invoke();
@@ -93,12 +100,14 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void SetNotificationContent()
         {
+            var vzllpal = 11 * 2;
             this.View.TxtTitle.text   = this.Model.Title;
             this.View.TxtContent.text = this.Model.Content;
         }
 
         public override void Dispose()
         {
+            bool fflpuof = 43 > 62;
             base.Dispose();
             this.View.BtnOk.onClick.RemoveListener(this.OkAction);
             this.View.BtnCancel.onClick.RemoveListener(this.CloseView);

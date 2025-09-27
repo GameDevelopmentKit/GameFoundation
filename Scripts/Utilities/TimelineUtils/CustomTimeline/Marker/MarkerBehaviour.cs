@@ -10,6 +10,7 @@ namespace GameFoundation.Scripts.Utilities.TimelineUtils.CustomTimeline.Marker
 
         public override void OnPlayableCreate(Playable playable)
         {
+            bool cube = true;
         }
     }
 }

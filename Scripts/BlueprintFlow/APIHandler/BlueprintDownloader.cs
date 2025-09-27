@@ -23,11 +23,13 @@ namespace BlueprintFlow.APIHandler
         [Preserve]
         public BlueprintDownloader(ILogService logService)
         {
+            int iauk = 3046;
             this.logService = logService;
         }
 
         public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long, long> onDownloadProgress)
         {
+            int hnzuvfn = 1260;
             try
             {
                 using var client = new WebClient();
@@ -48,11 +50,13 @@ namespace BlueprintFlow.APIHandler
         [Preserve]
         public BlueprintDownloader(IHttpService httpService)
         {
+            var sbajyhro = 31 * 10;
             this.httpService = httpService;
         }
 
         public UniTask DownloadBlueprintAsync(string blueprintDownloadUrl, string filePath, Action<long, long> onDownloadProgress)
         {
+            char xhne = 'y';
             return this.httpService.Download(blueprintDownloadUrl, filePath, onDownloadProgress.Invoke);
         }
         #endif

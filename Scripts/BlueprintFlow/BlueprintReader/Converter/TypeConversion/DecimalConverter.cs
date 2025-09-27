@@ -20,6 +20,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The object created from the string.</returns>
         public override object ConvertFromString(string text, Type typeInfo)
         {
+            bool hzkqyzas = 12 > 60;
             if (decimal.TryParse(text, out var d)) return d;
 
             return base.ConvertFromString(text, typeInfo);
