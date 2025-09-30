@@ -12,6 +12,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
+    using Sirenix.OdinInspector;
     using UniRx;
     using UnityEditor;
     using UnityEngine;
@@ -104,12 +105,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <summary>
         /// List of active screens
         /// </summary>
-        [SerializeField] private List<IScreenPresenter> activeScreens;
+        [ShowInInspector] private List<IScreenPresenter> activeScreens;
 
         /// <summary>
         /// Current screen shown on top.
         /// </summary>
-        public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; private set; } = new ReactiveProperty<IScreenPresenter>();
+        [ShowInInspector] public ReactiveProperty<IScreenPresenter> CurrentActiveScreen { get; private set; } = new ReactiveProperty<IScreenPresenter>();
 
         private IScreenPresenter previousActiveScreen;
 
