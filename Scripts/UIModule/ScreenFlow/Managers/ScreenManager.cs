@@ -297,7 +297,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             foreach (var screen in cacheActiveScreens)
             {
-                screen.CloseViewAsync();   
+                screen.CloseViewAsync();
             }
 
             this.CurrentActiveScreen.Value = null;
@@ -427,10 +427,18 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                     if (nextScreen.ScreenStatus == ScreenStatus.Opened)
                     {
                         this.OnShowScreen(new ScreenShowSignal() { ScreenPresenter = nextScreen });
-                        if (this.CheckScreenIsPopup(nextScreen)) this.signalBus.Fire(new PopupShowedSignal() { ScreenPresenter = nextScreen });
+
+                        if (this.CheckScreenIsPopup(nextScreen))
+                        {
+                            this.signalBus.Fire(new PopupShowedSignal() { ScreenPresenter = nextScreen });
+                        }
+
+                        nextScreen.RefreshViewAsync();
                     }
                     else
+                    {
                         nextScreen.OpenViewAsync();
+                    }
                 }
             }
             else

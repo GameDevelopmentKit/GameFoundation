@@ -27,6 +27,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
 
         public UniTask OpenViewAsync();
         
+        public UniTask RefreshViewAsync();
+        
         public UniTask CloseViewAsync();
         public void    CloseView();
         public void    HideView();

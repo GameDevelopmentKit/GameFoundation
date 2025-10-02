@@ -31,6 +31,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         {
             this.View     = (TView)viewInstance;
             this.ScreenId = ScreenHelper.GetScreenId<TView>();
+
             if (this.View.IsReadyToUse)
             {
                 this.OnViewReady();
@@ -47,6 +48,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             if (parent == null)
             {
                 this.logger.LogWithColor(parent.name + "is null", Color.green);
+
                 return;
             }
 
@@ -70,6 +72,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             await this.View.Open();
         }
 
+        /// <summary>
+        /// Refresh when popup close and nothing to change
+        /// </summary>
+        /// <returns></returns>
+        public virtual UniTask RefreshViewAsync() { return UniTask.CompletedTask; }
+
         public virtual async UniTask CloseViewAsync()
         {
             if (this.ScreenStatus == ScreenStatus.Closed) return;
@@ -89,10 +97,12 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             // this.SignalBus.Fire(new ScreenHideSignal() { ScreenPresenter = this }); // Active this signal later, when need
             this.Dispose();
         }
+
         public virtual void DestroyView()
         {
             if (this.ScreenStatus == ScreenStatus.Destroyed) return;
             this.ScreenStatus = ScreenStatus.Destroyed;
+
             if (this.View.Equals(null)) return;
             this.Dispose();
             this.View.DestroySelf();
@@ -102,7 +112,6 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         public         int  ViewSiblingIndex { get => this.View.RectTransform.GetSiblingIndex(); set => this.View.RectTransform.SetSiblingIndex(value); }
 
         #endregion
-
 
         protected virtual void OnViewReady()     { this.View.ViewDidDestroy += this.OnViewDestroyed; }
         protected virtual void OnViewDestroyed() { this.SignalBus.Fire(new ScreenSelfDestroyedSignal() { ScreenPresenter = this }); }
@@ -126,9 +135,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
             {
                 this.Logger.Warning($"{this.GetType().Name} don't have Model!!!");
             }
+
             await base.OpenViewAsync();
         }
-        
+
         public virtual async UniTask OpenViewAsync(TModel model)
         {
             if (model != null)
