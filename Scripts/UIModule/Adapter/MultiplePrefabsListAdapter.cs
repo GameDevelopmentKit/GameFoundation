@@ -25,7 +25,6 @@ namespace UIModule.Adapter
         private readonly Dictionary<int, BaseUIItemPresenter<TView, TModel>>   indexToPresenter = new();
 
         #region OSA implementation
-
         protected override void Awake()
         {
             base.Awake();
@@ -72,7 +71,6 @@ namespace UIModule.Adapter
         }
 
         protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _) { return this.Models[vh.ItemIndex].PresenterType == this.Models[itemIndex].PresenterType; }
-
         #endregion
 
         // These are common data manipulation methods
@@ -88,7 +86,7 @@ namespace UIModule.Adapter
             {
                 await UniTask.WaitUntil(() => this.IsInitialized);
             }
-            
+
             // Try load all prefabs that are not already in the dictionary
             foreach (var model in models)
             {
@@ -133,11 +131,11 @@ namespace UIModule.Adapter
         {
             base.InitIfNeeded(iAdapter);
 
-             if(this.itemPrefabs != null)
-             {
-                 ItemPrefabs = this.itemPrefabs.ToDictionary(prefab => prefab.name, prefab => prefab);
-                 UpdateItemSizes();
-             }
+            if (this.itemPrefabs != null)
+            {
+                ItemPrefabs = this.itemPrefabs.ToDictionary(prefab => prefab.name, prefab => prefab);
+                UpdateItemSizes();
+            }
         }
 
         public void UpdateItemSizes()
@@ -147,8 +145,8 @@ namespace UIModule.Adapter
             foreach (var itemPrefab in ItemPrefabs.Values)
             {
                 this.AssertValidWidthHeight(itemPrefab);
-                this.ItemSizes[itemPrefab.name] = itemPrefab.rect.height;
-                this.DefaultItemSize            = Mathf.Max(this.DefaultItemSize, itemPrefab.rect.height);
+                this.ItemSizes[itemPrefab.name] = IsHorizontal ? Mathf.Max(this.DefaultItemSize, itemPrefab.rect.width) : Mathf.Max(this.DefaultItemSize, itemPrefab.rect.height);
+                this.DefaultItemSize            = Mathf.Max(this.DefaultItemSize, this.ItemSizes[itemPrefab.name]);
             }
         }
     }
