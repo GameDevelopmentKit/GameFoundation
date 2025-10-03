@@ -154,7 +154,13 @@ namespace GameFoundation.Scripts.AssetLibrary
             try
             {
                 if (cachedSource.TryGetValue(key, out var value))
-                    return value.Convert<T>();
+                {
+                    if (value.IsValid())
+                    {
+                      return value.Convert<T>();
+                    }
+                    cachedSource.Remove(key);
+                }
 
                 if (this.loadingAssets.TryGetValue(key, out var asset))
                     return asset.Convert<T>();
