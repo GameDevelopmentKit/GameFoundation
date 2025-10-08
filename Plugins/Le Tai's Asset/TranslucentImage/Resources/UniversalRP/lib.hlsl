@@ -36,5 +36,4 @@ float2 VertexToUV(float2 vertex)
     return texcoord;
 }
 
-SAMPLER(sampler_LinearClamp);
 #define SAMPLE_SCREEN_TEX(tex, uv) SAMPLE_TEXTURE2D_X(tex, sampler_LinearClamp, UnityStereoTransformScreenSpaceTex(uv))
