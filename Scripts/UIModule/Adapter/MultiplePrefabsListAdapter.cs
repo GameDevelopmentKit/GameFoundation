@@ -145,7 +145,7 @@ namespace UIModule.Adapter
             foreach (var itemPrefab in ItemPrefabs.Values)
             {
                 this.AssertValidWidthHeight(itemPrefab);
-                this.ItemSizes[itemPrefab.name] = IsHorizontal ? Mathf.Max(this.DefaultItemSize, itemPrefab.rect.width) : Mathf.Max(this.DefaultItemSize, itemPrefab.rect.height);
+                this.ItemSizes[itemPrefab.name] = IsHorizontal ? itemPrefab.rect.width : itemPrefab.rect.height;
                 this.DefaultItemSize            = Mathf.Max(this.DefaultItemSize, this.ItemSizes[itemPrefab.name]);
             }
         }
