@@ -128,7 +128,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 ActiveScreenName  = CurrentSceneName
             });
 
-            await this.UnloadSceneAsync(oldScene.name,listNotClear);
+            await this.UnloadSceneAsync(oldScene.name, listNotClear);
             var result = await Addressables.LoadSceneAsync(CurrentSceneName, LoadSceneMode.Additive);
             SceneManager.SetActiveScene(result.Scene);
 
@@ -208,8 +208,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             if (activeOnLoad)
             {
-                screenInstance.ActivateAsync();
+                await screenInstance.ActivateAsync();
             }
+
+            await UniTask.DelayFrame(1);
 
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {
