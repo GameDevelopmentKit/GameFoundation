@@ -3,10 +3,11 @@ namespace DataManager.LocalData
     using System;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
     using Zenject;
 
     /// <summary>Catch application event ex pause, focus and more.... </summary>
-    public class MinimizeAppService : MonoBehaviour
+    public class ApplicationService : MonoBehaviour
     {
         [Inject] private SignalBus               signalBus;
         [Inject] private IHandleLocalDataServices handleLocalDataServices;
@@ -18,6 +19,12 @@ namespace DataManager.LocalData
 
         //Todo need
         private const int MinimizeTimeToReload = 5;
+
+        private void Awake()
+        {
+            //listen load scene event to save data
+            SceneManager.sceneLoaded += (scene, mode) => { this.handleLocalDataServices.SaveAll(); };
+        }
 
         private void OnApplicationPause(bool pauseStatus)
         {
@@ -48,5 +55,14 @@ namespace DataManager.LocalData
         }
 
         private void OnApplicationQuit() { this.handleLocalDataServices.SaveAll(); }
+        
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if(!hasFocus)
+            {
+                // save local data to storage
+                this.handleLocalDataServices.SaveAll();
+            }
+        }
     }
 }
