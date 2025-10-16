@@ -14,7 +14,6 @@
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using GameFoundation.Scripts.Utilities.ObjectPool;
-    using I2.Loc;
     using Zenject;
 
     public class GameFoundationInstaller : Installer<GameFoundationInstaller>
@@ -30,16 +29,12 @@
 
             this.Container.BindInterfacesTo<AudioManager>().AsCached().NonLazy();
 
-            //Localization services
-            this.Container.Bind<SetLanguage>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
-            this.Container.Bind<LocalizationService>().AsCached().NonLazy();
-
             //Service
             this.Container.Bind<ILogService>().To<LogService>().AsSingle().NonLazy();
 
             //Data Manager
             BlueprintServicesInstaller.Install(this.Container);
-            this.Container.Bind<MinimizeAppService>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
+            this.Container.Bind<ApplicationService>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
             this.Container.Bind<IHandleLocalDataServices>().To<PlayerPrefsLocalDataServices>().AsCached();
             this.Container.DeclareSignal<MasterDataReadySignal>();
 
