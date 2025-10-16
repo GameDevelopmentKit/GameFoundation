@@ -106,7 +106,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             await this.UnloadSceneAsync(sceneName, listNotClear);
             CurrentSceneName = sceneName;
             var screenInstance = await this.GameAssets.LoadSceneAsync(sceneName);
-
+            await UniTask.DelayFrame(1);
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {
                 CurrentScreenName = new List<string>() { sceneName },
@@ -187,7 +187,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             await this.UnloadSceneAsync(lastScene);
             _ = Resources.UnloadUnusedAssets();
             await sceneInstance.ActivateAsync();
-
+            await UniTask.DelayFrame(1);
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {
                 CurrentScreenName = new List<string>() { lastScene },
@@ -237,7 +237,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             await SceneManager.LoadSceneAsync(sceneName);
             await this.GameAssets.UnloadUnusedAssets(lastScene);
             await Resources.UnloadUnusedAssets();
-
+            await UniTask.DelayFrame(1);
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {
                 CurrentScreenName = new List<string>() { lastScene },
@@ -270,7 +270,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             await UniTask.WhenAll(allTask);
 
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(activesScene));
-
+            await UniTask.DelayFrame(1);
             this.signalBus.Fire(new FinishLoadingNewSceneSignal
             {
                 CurrentScreenName = new List<string>() { lastScene },
