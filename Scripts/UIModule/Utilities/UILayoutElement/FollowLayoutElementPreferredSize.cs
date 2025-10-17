@@ -6,14 +6,15 @@ using UnityEngine.UI;
 namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
 {
     [ExecuteAlways]
-    public class FollowLayoutElementPreferredSize : UIBehaviour, ILayoutSelfController, ILayoutController {
+    public class FollowLayoutElementPreferredSize : UIBehaviour, ILayoutSelfController, ILayoutController
+    {
         [SerializeField] private bool isValid;
 
         [Tooltip("Target component must be inherited from ILayoutElement")]
         [SerializeField] private LayoutGroup target;
         [Tooltip("Can be null if Target Component and Target RectTransform is in the same object")]
         [SerializeField] private RectTransform targetRectTransform;
-    
+
         [SerializeField] private bool fitWidth;
         [SerializeField] private bool fitHeight;
 
@@ -31,7 +32,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
                 return this.m_Rect;
             }
         }
-    
+
         private RectTransform TargetRectTransform
         {
             get
@@ -41,13 +42,15 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
         }
 
         private WaitForEndOfFrame waitForEndOfFrame;
-    
-        protected override void Start() {
+
+        protected override void Start()
+        {
             base.Start();
             this.waitForEndOfFrame = new WaitForEndOfFrame();
         }
 
-        protected override void OnEnable() {
+        protected override void OnEnable()
+        {
             this.isValid = this.target != null && this.rectTransform != null && this.target is ILayoutElement;
             base.OnEnable();
             this.SetDirty();
@@ -64,7 +67,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
         {
             this.SetDirty();
         }
-    
+
         protected void OnTransformChildrenChanged()
         {
             this.SetDirty();
@@ -77,7 +80,7 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
         }
 
 #endif
-  
+
         protected void SetDirty()
         {
             if (!this.IsActive())
@@ -88,26 +91,37 @@ namespace GameFoundation.Scripts.UIModule.Utilities.UILayoutElement
                 this.StartCoroutine(this.DelayedSetDirty(this.rectTransform));
         }
 
-        private IEnumerator DelayedSetDirty(RectTransform rectTransform) {
-        
+        private IEnumerator DelayedSetDirty(RectTransform rectTransform)
+        {
+
             yield return this.waitForEndOfFrame;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
 
-        public void SetLayoutHorizontal() {
+        public void SetLayoutHorizontal()
+        {
             this.m_Tracker.Clear();
-            if (this.isValid && this.fitWidth) {
+            if (this.isValid && this.fitWidth)
+            {
+                this.target.CalculateLayoutInputHorizontal();
+                this.target.CalculateLayoutInputVertical();
+
                 var targetValueX     = this.rectTransform.sizeDelta.x + ((ILayoutElement)this.target).preferredWidth - this.TargetRectTransform.rect.width;
                 var maxX             = this.maxValue.x > 0 ? this.maxValue.x : targetValueX;
                 var preferredValuesX = Mathf.Clamp(targetValueX, this.minValue.x, maxX);
-                if(Mathf.Approximately(targetValueX,this.rectTransform.sizeDelta.x)) return;
+                if (Mathf.Approximately(targetValueX, this.rectTransform.sizeDelta.x)) return;
                 this.m_Tracker.Add(this, this.rectTransform, DrivenTransformProperties.SizeDeltaX);
-                this.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,preferredValuesX);
+                this.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, preferredValuesX);
             }
         }
 
-        public void SetLayoutVertical() {
-            if (this.isValid && this.fitHeight) {
+        public void SetLayoutVertical()
+        {
+            if (this.isValid && this.fitHeight)
+            {
+                this.target.CalculateLayoutInputHorizontal();
+                this.target.CalculateLayoutInputVertical();
+
                 var targetValueX = this.rectTransform.sizeDelta.y +
                     ((ILayoutElement)this.target).preferredHeight - this.TargetRectTransform.rect.height;
                 var maxY             = this.maxValue.y > 0 ? this.maxValue.y : targetValueX;

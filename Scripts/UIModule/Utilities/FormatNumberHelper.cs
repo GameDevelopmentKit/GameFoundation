@@ -93,8 +93,11 @@ namespace UIModule.Utilities
             txt.text = originstring + s;
         }
 
+
         public static string ConvertSecondToTime(this long second, bool useSemiColon = true, bool space = false) => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
         public static string ConvertSecondToTime(this float second, bool useSemiColon = true, bool space = false) => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
+        public static string ConvertSecondToTime(this double second, bool useSemiColon = true, bool space = false) => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
+
 
         public static string ConvertSecondToShortTime(this long second, bool useSemiColon = true) => TimeSpan.FromSeconds(second).ToShortTimeString(useSemiColon);
 

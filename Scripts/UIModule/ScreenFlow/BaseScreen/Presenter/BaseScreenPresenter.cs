@@ -7,14 +7,15 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Signals;
     using GameFoundation.Scripts.Utilities.LogService;
+    using Sirenix.OdinInspector;
     using UnityEngine;
     using Zenject;
 
     public abstract class BaseScreenPresenter<TView> : IScreenPresenter where TView : IScreenView
     {
-        public         string       ScreenId        { get; private set; }
-        public virtual bool         IsClosePrevious { get; protected set; } = false;
-        public         ScreenStatus ScreenStatus    { get; protected set; } = ScreenStatus.Closed;
+        [ShowInInspector] public string       ScreenId        { get; private set; }
+        public virtual           bool         IsClosePrevious { get; protected set; } = false;
+        [ShowInInspector] public ScreenStatus ScreenStatus    { get; protected set; } = ScreenStatus.Closed;
 
         public             TView     View;
         protected readonly SignalBus SignalBus;
