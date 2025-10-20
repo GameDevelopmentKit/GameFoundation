@@ -35,7 +35,7 @@
             //Data Manager
             BlueprintServicesInstaller.Install(this.Container);
             this.Container.Bind<ApplicationService>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
-            this.Container.Bind<IHandleLocalDataServices>().To<PlayerPrefsLocalDataServices>().AsCached();
+            this.Container.Bind<IHandleLocalDataServices>().To<PlayerPrefsLocalDataServices>().AsSingle();
             this.Container.DeclareSignal<MasterDataReadySignal>();
 
             //Genarate fps

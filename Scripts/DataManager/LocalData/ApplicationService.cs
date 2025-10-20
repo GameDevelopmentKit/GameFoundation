@@ -20,10 +20,14 @@ namespace DataManager.LocalData
         //Todo need
         private const int MinimizeTimeToReload = 5;
 
-        private void Awake()
+        private void Start()
         {
             //listen load scene event to save data
-            SceneManager.sceneLoaded += (scene, mode) => { this.handleLocalDataServices.SaveAll(); };
+            SceneManager.sceneLoaded +=  OnSceneLoaded;
+        }
+        private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+        {
+            this.handleLocalDataServices.SaveAll();
         }
 
         private void OnApplicationPause(bool pauseStatus)
@@ -63,6 +67,12 @@ namespace DataManager.LocalData
                 // save local data to storage
                 this.handleLocalDataServices.SaveAll();
             }
+        }
+
+        private void OnDestroy()
+        {
+            this.handleLocalDataServices.SaveAll();
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
     }
 }
