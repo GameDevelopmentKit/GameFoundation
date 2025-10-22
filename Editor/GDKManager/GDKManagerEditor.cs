@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using GameFoundation.Scripts.Utilities.Extension;
 using Models;
 using UnityEditor;
@@ -8,11 +9,8 @@ using UnityEngine.UIElements;
 
 public class GDKManagerEditor : EditorWindow
 {
-    private const string SDKToolsFolderPath = "Packages/com.gdk.core/Editor/GDKManager/";
-
     private VisualElement initPanel;
     private VisualElement configPanel;
-
 
     private List<IGameConfigEditor> listGameConfigEditors = new();
 
@@ -23,14 +21,53 @@ public class GDKManagerEditor : EditorWindow
         wnd.titleContent = new GUIContent("GDKManager");
     }
 
+    private string FindAssetPath(string fileName)
+    {
+        var guids = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(fileName));
+
+        foreach (var guid in guids)
+        {
+            var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+
+            if (Path.GetFileName(assetPath).Equals(fileName, StringComparison.OrdinalIgnoreCase))
+            {
+                return assetPath;
+            }
+        }
+
+        var packagesDirs = Directory.GetDirectories("Packages", "*", SearchOption.AllDirectories);
+
+        foreach (var dir in packagesDirs)
+        {
+            var files = Directory.GetFiles(dir, fileName, SearchOption.AllDirectories);
+
+            if (files.Length > 0)
+            {
+                var fullPath     = files[0].Replace("\\", "/");
+                var projectPath  = Path.GetFullPath(".").Replace("\\", "/");
+                var relativePath = fullPath.Replace(projectPath + "/", "");
+
+                return relativePath;
+            }
+        }
+
+        Debug.LogWarning($"❌ Không tìm thấy file: {fileName}");
+
+        return null;
+    }
+
     public void CreateGUI()
     {
+        var asset = this.FindAssetPath("GDKManager.uxml");
+
+        var instance = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(asset).Instantiate();
         // Import UXML
-        this.rootVisualElement.Add(AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(SDKToolsFolderPath + "GDKManager.uxml").Instantiate());
+        this.rootVisualElement.Add(instance);
 
         this.initPanel   = this.rootVisualElement.Q<VisualElement>("InitPanel");
         this.configPanel = this.rootVisualElement.Q<VisualElement>("ConfigPanel");
         var sdkConfig = Resources.Load<GDKConfig>("GameConfigs/GDKConfig");
+
         if (sdkConfig != null)
         {
             this.LoadSDKConfig(sdkConfig);

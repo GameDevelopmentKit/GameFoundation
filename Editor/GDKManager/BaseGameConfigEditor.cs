@@ -1,31 +1,69 @@
-﻿
-    using Models;
-    using UnityEngine;
-    using UnityEngine.UIElements;
+﻿using System;
+using System.IO;
+using Models;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
 
-    public interface IGameConfigEditor
+public interface IGameConfigEditor
+{
+    void          InitConfig(GDKConfig gdkConfig);
+    VisualElement LoadView();
+}
+
+public abstract class BaseGameConfigEditor<T> : VisualElement, IGameConfigEditor where T : ScriptableObject, IGameConfig
+{
+    protected          T      Config;
+    protected abstract string ConfigName { get; }
+    protected abstract string ConfigPath { get; }
+
+    public virtual void InitConfig(GDKConfig gdkConfig)
     {
-        void          InitConfig(GDKConfig gdkConfig);
-        VisualElement LoadView();
+        if (!gdkConfig.HasGameConfig<T>())
+        {
+            this.Config = this.CreateInstanceInResource<T>(this.ConfigName, this.ConfigPath);
+            gdkConfig.AddGameConfig(this.Config);
+        }
+        else
+        {
+            this.Config = gdkConfig.GetGameConfig<T>();
+        }
     }
 
-    public abstract class BaseGameConfigEditor<T> : VisualElement, IGameConfigEditor where T : ScriptableObject, IGameConfig
-    {
-        protected          T      Config;
-        protected abstract string ConfigName { get; }
-        protected abstract string ConfigPath { get; }
+    public abstract VisualElement LoadView();
 
-        public virtual void InitConfig(GDKConfig gdkConfig)
+    protected string FindAssetPath(string fileName)
+    {
+        var guids = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(fileName));
+
+        foreach (var guid in guids)
         {
-            if (!gdkConfig.HasGameConfig<T>())
+            var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+
+            if (Path.GetFileName(assetPath).Equals(fileName, StringComparison.OrdinalIgnoreCase))
             {
-                this.Config = this.CreateInstanceInResource<T>(this.ConfigName, this.ConfigPath);
-                gdkConfig.AddGameConfig(this.Config);
-            }
-            else
-            {
-                this.Config = gdkConfig.GetGameConfig<T>();
+                return assetPath;
             }
         }
-        public abstract VisualElement LoadView();
+
+        var packagesDirs = Directory.GetDirectories("Packages", "*", SearchOption.AllDirectories);
+
+        foreach (var dir in packagesDirs)
+        {
+            var files = Directory.GetFiles(dir, fileName, SearchOption.AllDirectories);
+
+            if (files.Length > 0)
+            {
+                var fullPath     = files[0].Replace("\\", "/");
+                var projectPath  = Path.GetFullPath(".").Replace("\\", "/");
+                var relativePath = fullPath.Replace(projectPath + "/", "");
+
+                return relativePath;
+            }
+        }
+
+        Debug.LogWarning($"❌ Không tìm thấy file: {fileName}");
+
+        return null;
     }
+}
