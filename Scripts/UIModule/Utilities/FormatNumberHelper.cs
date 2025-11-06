@@ -94,12 +94,23 @@ namespace UIModule.Utilities
         }
 
 
-        public static string ConvertSecondToTime(this long second, bool useSemiColon = true, bool space = false) => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
-        public static string ConvertSecondToTime(this float second, bool useSemiColon = true, bool space = false) => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
+        public static string ConvertSecondToTime(this long second, bool useSemiColon = true, bool space = false)   => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
+        public static string ConvertSecondToTime(this float second, bool useSemiColon = true, bool space = false)  => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
         public static string ConvertSecondToTime(this double second, bool useSemiColon = true, bool space = false) => TimeSpan.FromSeconds(second).ToTimeString(useSemiColon, space);
 
 
         public static string ConvertSecondToShortTime(this long second, bool useSemiColon = true) => TimeSpan.FromSeconds(second).ToShortTimeString(useSemiColon);
+
+        public static string ToLongTimeString(this TimeSpan timeSpan, bool useSemiColon = false, bool space = false)
+        {
+            if (timeSpan.Days >= 1)
+                return useSemiColon ? (space ? timeSpan.ToString(@"dd\:\ hh\:\ mm") : timeSpan.ToString(@"dd\:hh\:mm")) : (space ? timeSpan.ToString(@"dd\d\ hh\h\ mm\m") : timeSpan.ToString(@"dd\dhh\hmm\m"));
+
+            if (timeSpan.Hours >= 1)
+                return useSemiColon ? (space ? timeSpan.ToString(@"hh\:\ mm\:\ ss") : timeSpan.ToString(@"hh\:mm\:ss")) : (space ? timeSpan.ToString(@"hh\h\ mm\m\ ss\s") : timeSpan.ToString(@"hh\hmm\mss\s"));
+
+            return useSemiColon ? (space ? timeSpan.ToString(@"mm\:\ ss") : timeSpan.ToString(@"mm\:ss")) : (space ? timeSpan.ToString(@"mm\m\ ss\s") : timeSpan.ToString(@"mm\mss\s"));
+        }
 
         public static string ToTimeString(this TimeSpan timeSpan, bool useSemiColon = false, bool space = false)
         {
@@ -125,13 +136,13 @@ namespace UIModule.Utilities
 
             return useSemiColon ? timeSpan.ToString(@"ss") : timeSpan.ToString(@"ss\s");
         }
-        
+
         public static string FloatToString(this float value, int decimalPlaces = 2)
         {
             var tempValue = Mathf.Ceil(value * Mathf.Pow(10, decimalPlaces)) / Mathf.Pow(10, decimalPlaces);
             return $"{tempValue}";
         }
-        
+
         public static float RoundToDecimal(this float value, int decimalPlaces = 2)
         {
             var tempValue = Mathf.Ceil(value * Mathf.Pow(10, decimalPlaces)) / Mathf.Pow(10, decimalPlaces);
