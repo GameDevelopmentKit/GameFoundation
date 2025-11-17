@@ -10,7 +10,8 @@
         "UniTask",
         "UniTask.Addressables",
         "UniRx",
-        "Unity.Addressables"
+        "Unity.Addressables",
+        "Zenject-Source"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
