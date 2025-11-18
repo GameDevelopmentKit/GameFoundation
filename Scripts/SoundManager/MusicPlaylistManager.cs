@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.Extension;
@@ -471,7 +472,7 @@
                 activeSource.clip   = newClip;
                 activeSource.time   = 0f;
                 activeSource.volume = 0f;
-                activeSource.Play();
+                activeSource.PlayLoopingMusicManaged();
 
                 await FadeVolume(activeSource, 0f, volume, fade, ct);
 
@@ -482,7 +483,7 @@
             inactiveSource.clip   = newClip;
             inactiveSource.time   = 0f;
             inactiveSource.volume = 0f;
-            inactiveSource.Play();
+            inactiveSource.PlayLoopingMusicManaged();
 
             float t        = 0f;
             float startOld = activeSource.volume;
@@ -492,7 +493,7 @@
                 if (ct.IsCancellationRequested) return;
 
                 t += Time.deltaTime;
-                float k = t / fade;
+                float k            = t / fade;
 
                 inactiveSource.volume = k * volume;
                 activeSource.volume   = (1f - k) * startOld;
@@ -515,7 +516,8 @@
                 if (ct.IsCancellationRequested) return;
 
                 t          += Time.deltaTime;
-                src.volume =  Mathf.Lerp(from, to, t / duration);
+                var globalVolume = SoundManager.MusicVolume;
+                src.volume =  Mathf.Lerp(from, to, t / duration)* globalVolume;
 
                 await UniTask.Yield();
             }
@@ -534,7 +536,7 @@
                 if (!src.isPlaying || ct.IsCancellationRequested)
                     return;
 
-                t += Time.deltaTime;
+                t          += Time.deltaTime;
                 await UniTask.Yield();
             }
         }
