@@ -15,6 +15,7 @@
     {
         void  PlaySound(string name, AudioSource sender);
         void  PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
+        void  PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
         void  StopSound(string name);
         void  StopAllSound();
         void  StopAll();
@@ -35,7 +36,7 @@
         UniTask PushContextBGM(string name, int priority, float fade = 1f, float volume = 1f);
 
         //UniTask RestoreBGM();
-        UniTask SetBaseBGM(string name, int priority =0);
+        UniTask SetBaseBGM(string name, int priority = 0);
         UniTask AdjustContextPriority(string id, int newPriority);
     }
 
@@ -51,6 +52,8 @@
         private readonly MusicPlaylistManager music;
 
         private CompositeDisposable compositeDisposable;
+        private float               MusicGlobalVolume =1f;
+        private float               SoundGlobalVolume =1f;
 
         public AudioManager(
             SignalBus signalBus,
@@ -78,8 +81,8 @@
                 this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
             };
 
-            SoundManager.MusicVolume = this.soundSetting.MusicValue.Value;
-            SoundManager.SoundVolume = this.soundSetting.SoundValue.Value;
+            this.MusicGlobalVolume = this.soundSetting.MusicValue.Value;
+            this.SoundGlobalVolume = this.soundSetting.SoundValue.Value;
         }
 
         public void PlaySound(string name, AudioSource sender)
@@ -93,22 +96,23 @@
 
         public void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
+            Debug.Log("Using volume: " + SoundGlobalVolume);
             if (isLoop)
-                sfx.PlayLoop(name, volumeScale, fadeSeconds).Forget();
+                sfx.PlayLoop(name, volumeScale * SoundGlobalVolume, fadeSeconds).Forget();
             else
-                sfx.PlayOneShot(name, volumeScale).Forget();
+                sfx.PlayOneShot(name, volumeScale * SoundGlobalVolume).Forget();
         }
 
         public void PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
             if (clip != null)
-                sfx.PlayOneShot(clip, volumeScale).Forget();
+                sfx.PlayOneShot(clip, volumeScale*SoundGlobalVolume).Forget();
         }
 
         public void PlaySound(AudioClip clip, float pitch)
         {
             if (clip != null)
-                sfx.PlayOneShot(clip, pitch, 1f).Forget();
+                sfx.PlayOneShot(clip, pitch, SoundGlobalVolume).Forget();
         }
 
         public void StopSound(string name) => sfx.StopLoop(name);
@@ -125,13 +129,13 @@
 
         public void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
-            music.Play(musicName, volumeScale, fadeSeconds, persist).Forget();
+            music.Play(musicName, volumeScale*MusicGlobalVolume, fadeSeconds, persist).Forget();
         }
 
         public void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
             if (audioClip != null)
-                music.Play(audioClip, volumeScale, fadeSeconds, persist).Forget();
+                music.Play(audioClip, volumeScale*MusicGlobalVolume, fadeSeconds, persist).Forget();
         }
 
         public void StopPlayList() => music.Stop();
@@ -158,14 +162,15 @@
 
         public void PauseEverything()
         {
-            SoundManager.PauseAll();
+           this.music.Pause();
+           this.sfx.StopAll();
             AudioListener.pause = true;
         }
 
         public void ResumeEverything()
         {
             AudioListener.pause = false;
-            SoundManager.ResumeAll();
+            this.music.Resume(); 
         }
 
         #endregion
@@ -178,7 +183,7 @@
 
             if (clip == null) return;
 
-            await PushContextBGM(clip, priority, fade, volume, name);
+            await PushContextBGM(clip, priority, fade, volume*MusicGlobalVolume, name);
         }
 
         public async UniTask PushContextBGM(AudioClip clip, int priority, float fade = 1f, float volume = 1f, string name = "")
@@ -199,7 +204,7 @@
         //     // update the priority to back to last bgm
         // }
 
-        public UniTask SetBaseBGM(string name, int priority =0) => music.SetBaseBGM(name, priority);
+        public UniTask SetBaseBGM(string name, int priority = 0) => music.SetBaseBGM(name, priority);
 
         public UniTask AdjustContextPriority(string id, int newPriority)
         {
@@ -212,9 +217,16 @@
 
         #region Sound Settings
 
-        protected void SetSoundValue(float value) => SoundManager.SoundVolume = value;
+        protected void SetSoundValue(float value)
+        {
+            SoundGlobalVolume = value;
+        }
 
-        protected void SetMusicValue(float value) => SoundManager.MusicVolume = value;
+        protected void SetMusicValue(float value)
+        {
+            MusicGlobalVolume = value;
+            this.music.UpdateVolume(MusicGlobalVolume);
+        }
 
         #endregion
 
