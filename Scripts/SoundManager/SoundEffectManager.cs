@@ -2,7 +2,6 @@
 {
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
-    using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities;
     using GameFoundation.Scripts.Utilities.LogService;
@@ -48,7 +47,7 @@
     public async UniTask PlayOneShot(AudioClip clip, float volumeScale = 1f)
     {
         var source = await GetSource();
-        source.PlayOneShotSoundManaged(clip, volumeScale);
+        source.PlayOneShot(clip, volumeScale);
         await UniTask.Delay((int)(clip.length * 1000f));
         source.Recycle();
     }
@@ -57,7 +56,7 @@
     {
         var source = await GetSource();
         source.pitch = pitch;
-        source.PlayOneShotSoundManaged(clip, volumeScale);
+        source.PlayOneShot(clip, volumeScale);
         await UniTask.Delay((int)(clip.length * 1000f));
         source.Recycle();
     }
@@ -74,7 +73,7 @@
         var source = await GetSource();
 
         source.clip = clip;
-        source.PlayLoopingSoundManaged(volumeScale, fadeSeconds);
+        source.Play();
 
         loopingSources.Add(name, source);
     }
@@ -84,7 +83,7 @@
         if (!loopingSources.TryGetValue(name, out var src))
             return;
 
-        src.StopLoopingSoundManaged();
+        src.Stop();
         src.Recycle();
         loopingSources.Remove(name);
     }
@@ -93,12 +92,11 @@
     {
         foreach (var src in loopingSources.Values)
         {
-            src.StopLoopingSoundManaged();
+            src.Stop();
             src.Recycle();
         }
 
         loopingSources.Clear();
-        SoundManager.StopAllNonLoopingSounds();
     }
 }
 

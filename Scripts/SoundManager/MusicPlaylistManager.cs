@@ -39,6 +39,7 @@
         UniTask SetBaseBGM(string name, int priority =0);
 
         void AdjustContextPriority(string id, int newPriority);
+        void UpdateVolume(float globalVolume);
     }
     
     public interface IHasId
@@ -325,6 +326,11 @@
                 fadeCts = new CancellationTokenSource();
                 FadeVolume(activeSource, activeSource.volume, top.Volume, top.FadeSeconds, fadeCts.Token).Forget();
             }
+        }
+
+        public void UpdateVolume(float globalVolume)
+        {
+            FadeVolume(this.activeSource, this.activeSource.volume, globalVolume, 0.2f, CancellationToken.None).Forget();
         }
 
         /// <summary>
