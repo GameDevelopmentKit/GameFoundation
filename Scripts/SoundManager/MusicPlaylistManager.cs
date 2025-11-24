@@ -176,6 +176,8 @@
         //private readonly Dictionary<string, BgmContextEntry> dict  = new();
 
         private BgmContextEntry baseBgm;
+        
+        private float globalVolume = 1f;
 
         public MusicPlaylistManager(IGameAssets assets)
         {
@@ -330,6 +332,7 @@
 
         public void UpdateVolume(float globalVolume)
         {
+            this.globalVolume = globalVolume;
             FadeVolume(this.activeSource, this.activeSource.volume, globalVolume, 0.2f, CancellationToken.None).Forget();
         }
 
@@ -470,6 +473,7 @@
         {
             fadeCts = new CancellationTokenSource();
             var ct = fadeCts.Token;
+            volume *= this.globalVolume;
 
             bool hasOld = activeSource.clip != null && activeSource.isPlaying;
 
@@ -478,7 +482,7 @@
                 activeSource.clip   = newClip;
                 activeSource.time   = 0f;
                 activeSource.volume = 0f;
-                activeSource.PlayLoopingMusicManaged();
+                activeSource.Play();
 
                 await FadeVolume(activeSource, 0f, volume, fade, ct);
 
@@ -489,7 +493,7 @@
             inactiveSource.clip   = newClip;
             inactiveSource.time   = 0f;
             inactiveSource.volume = 0f;
-            inactiveSource.PlayLoopingMusicManaged();
+            inactiveSource.Play();
 
             float t        = 0f;
             float startOld = activeSource.volume;
@@ -522,7 +526,6 @@
                 if (ct.IsCancellationRequested) return;
 
                 t          += Time.deltaTime;
-                var globalVolume = SoundManager.MusicVolume;
                 src.volume =  Mathf.Lerp(from, to, t / duration)* globalVolume;
 
                 await UniTask.Yield();
