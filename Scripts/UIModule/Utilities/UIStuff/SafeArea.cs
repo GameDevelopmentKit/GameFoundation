@@ -1,5 +1,6 @@
 namespace UIModule.Utilities.UIStuff
 {
+    using Sirenix.OdinInspector;
     using UnityEngine;
 
     /// <summary>
@@ -16,10 +17,17 @@ namespace UIModule.Utilities.UIStuff
     {
         [SerializeField]
         private bool conformX = true; // Conform to screen safe area on X-axis (default true, disable to ignore)
+        
+        [SerializeField, ShowIf(nameof(conformX))] private bool minX = true;
+        [SerializeField, ShowIf(nameof(conformX))] private bool maxX = true;
 
         [SerializeField]
         private bool conformY = true; // Conform to screen safe area on Y-axis (default true, disable to ignore)
-
+        
+        [SerializeField, ShowIf(nameof(conformY))] private bool minY = true;
+        [SerializeField, ShowIf(nameof(conformY))] private bool maxY = true;
+        
+        
         private Rect          lastSafeArea = new Rect(0, 0, 0, 0);
         private RectTransform panel;
 
@@ -59,27 +67,14 @@ namespace UIModule.Utilities.UIStuff
         {
             this.lastSafeArea = r;
 
-            // Ignore x-axis?
-            if (!this.conformX)
-            {
-                r.x     = 0;
-                r.width = Screen.width;
-            }
-
-            // Ignore y-axis?
-            if (!this.conformY)
-            {
-                r.y      = 0;
-                r.height = Screen.height;
-            }
-
-            // Convert safe area rectangle from absolute pixels to normalised anchor coordinates
-            var anchorMin = r.position;
-            var anchorMax = r.position + r.size;
-            anchorMin.x          /= Screen.width;
-            anchorMin.y          /= Screen.height;
-            anchorMax.x          /= Screen.width;
-            anchorMax.y          /= Screen.height;
+            var anchorMin = new Vector2();
+            var anchorMax = new Vector2();
+            
+            anchorMin.x = this.conformX && this.minX ? r.x / Screen.width : 0;
+            anchorMax.x = this.conformX && this.maxX ? (r.x + r.width) / Screen.width : 1;
+            anchorMin.y = this.conformY && this.minY ? r.y / Screen.height : 0;
+            anchorMax.y = this.conformY && this.maxY ? (r.y + r.height) / Screen.height : 1;
+            
             this.panel.anchorMin =  anchorMin;
             this.panel.anchorMax =  anchorMax;
 
