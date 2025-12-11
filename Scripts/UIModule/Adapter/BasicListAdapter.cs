@@ -102,7 +102,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             this.presenters  = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized, PlayerLoopTiming.Update, cancelToken);
-            this.ResetItems(0);
+            //this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
         
