@@ -457,29 +457,30 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         #region Monobehaviour
 
-        private void Update()
-        {
-            // back button flow
-            if (!Input.GetKeyDown(KeyCode.Escape)) return;
-
-            if (this.activeScreens.Count > 1)
-            {
-                Debug.Log("Close last screen");
-                this.activeScreens.Last().CloseViewAsync();
-            }
-            else
-            {
-                Debug.Log("Show popup confirm quit app");
-
-                _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
-                {
-                    Content        = "Do you really want to quit?",
-                    Title          = "Are you sure?",
-                    Type           = NotificationType.Option,
-                    OkNoticeAction = this.QuitApplication,
-                });
-            }
-        }
+        //todo should refactor this back button flow to a dedicated class
+        // private void Update()
+        // {
+        //     // back button flow
+        //     if (!Input.GetKeyDown(KeyCode.Escape)) return;
+        //
+        //     if (this.activeScreens.Count > 1)
+        //     {
+        //         Debug.Log("Close last screen");
+        //         this.activeScreens.Last().CloseViewAsync();
+        //     }
+        //     else
+        //     {
+        //         Debug.Log("Show popup confirm quit app");
+        //
+        //         _ = this.OpenScreen<NotificationPopupPresenter, NotificationPopupModel>(new NotificationPopupModel()
+        //         {
+        //             Content        = "Do you really want to quit?",
+        //             Title          = "Are you sure?",
+        //             Type           = NotificationType.Option,
+        //             OkNoticeAction = this.QuitApplication,
+        //         });
+        //     }
+        // }
 
         private void QuitApplication()
         {
