@@ -21,7 +21,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         // Can be iterated and can also have its elements accessed by the [] operator
         private SimpleDataHelper<TModel> Models { get; set; }
         private CanvasGroup              canvasGroup;
-        private List<TPresenter>         presenters;
+        private List<TPresenter>         presenters = new List<TPresenter>();
 
         private DiContainer diContainer;
 
@@ -33,7 +33,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
             // Calling this initializes internal data and prepares the adapter to handle item count changes
             base.Start();
-
             // Retrieve the models from your data source and set the items count
             /*
             RetrieveDataAndUpdate(500);
@@ -99,7 +98,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                     baseUIItemPresenter.Dispose();
                 } 
             }
-            this.presenters  = new List<TPresenter>();
 
             await UniTask.WaitUntil(() => this.IsInitialized, PlayerLoopTiming.Update, cancelToken);
             //this.ResetItems(0);
