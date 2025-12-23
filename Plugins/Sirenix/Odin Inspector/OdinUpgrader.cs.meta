@@ -10,3 +10,10 @@ MonoImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 89041
+  packageName: Odin Inspector and Serializer
+  packageVersion: 4.0.1.2
+  assetPath: Packages/com.gdk.core/Plugins/Sirenix/Odin Inspector/OdinUpgrader.cs
+  uploadId: 835510

@@ -16,7 +16,6 @@
   "dependencies": {
     "com.unity.addressables": "1.21.21",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
-    "com.svermeulen.extenject": "10.0.0",
     "com.cysharp.r3": "1.1.12",
     "com.cysharp.unitask": "2.5.4",
     "com.cysharp.messagepipe": "1.8.1",

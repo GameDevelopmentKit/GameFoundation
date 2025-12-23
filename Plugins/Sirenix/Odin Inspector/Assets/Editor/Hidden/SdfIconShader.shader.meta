@@ -1,7 +1,9 @@
 fileFormatVersion: 2
-guid: d92d0eb8b980c6d44b5f0e64a620355b
-DefaultImporter:
+guid: 99e0f263ae4ed2d4d962a2e995dff6df
+ShaderImporter:
   externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -10,5 +12,5 @@ AssetOrigin:
   productId: 89041
   packageName: Odin Inspector and Serializer
   packageVersion: 4.0.1.2
-  assetPath: Packages/com.gdk.core/Plugins/Sirenix/Odin Inspector/Modules/Unity.Addressables.data
+  assetPath: Packages/com.gdk.core/Plugins/Sirenix/Odin Inspector/Assets/Editor/Hidden/SdfIconShader.shader
   uploadId: 835510

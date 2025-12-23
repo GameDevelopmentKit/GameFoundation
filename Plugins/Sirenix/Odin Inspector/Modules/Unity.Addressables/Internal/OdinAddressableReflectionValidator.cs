@@ -4,6 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if UNITY_EDITOR
 #if SIRENIX_INTERNAL
 using System.Collections;
 using System.Reflection;
@@ -41,4 +42,5 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor.Internal
 		}
 	}
 }
+#endif
 #endif
