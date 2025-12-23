@@ -10,9 +10,7 @@
         "Sirenix.Utilities",
         "Unity.Addressables.Editor"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
