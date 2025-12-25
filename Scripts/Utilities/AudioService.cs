@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Cysharp.Threading.Tasks;
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.Scripts.AssetLibrary;
@@ -16,11 +17,12 @@
     public interface IAudioService
     {
         UniTask PlaySound(string name, AudioSource sender);
-        UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false,bool autoUnload=true);
+        UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true);
+        UniTask PlaySoundFrequency(string name, float frequency, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true);
         void    StopSound(string name);
         void    StopAllSound();
         void    StopAll();
-        UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false,bool autoUnload=true);
+        UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false, bool autoUnload = true);
         UniTask PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
         void    StopPlayList();
         void    SetPlayListTime(float time);
@@ -48,9 +50,10 @@
         private readonly ObjectPoolManager objectPoolManager;
         private readonly ILogService       logService;
 
-        private CompositeDisposable             compositeDisposable;
-        private Dictionary<string, AudioSource> loopingSoundNameToSources = new();
-        private AudioSource                     MusicAudioSource;
+        private CompositeDisposable                         compositeDisposable;
+        private Dictionary<string, AudioSource>             loopingSoundNameToSources = new();
+        private Dictionary<string, CancellationTokenSource> frequencySoundDic         = new();
+        private AudioSource                                 MusicAudioSource;
 
         public AudioService(
             ISignalBus signalBus,
@@ -97,9 +100,9 @@
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false,bool autoUnload=true)
+        public virtual async UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true)
         {
-            var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name,isAutoUnload:autoUnload);
+            var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name, isAutoUnload: autoUnload);
             var audioSource = await this.GetAudioSource();
 
             if (isLoop)
@@ -123,8 +126,86 @@
             }
         }
 
+        public async UniTask PlaySoundFrequency(
+            string name,
+            float frequency,
+            float volumeScale = 1,
+            float fadeSeconds = 1,
+            bool isAverage = false,
+            bool autoUnload = true)
+        {
+            if (!this.frequencySoundDic.TryGetValue(name, out var token))
+            {
+                token = new CancellationTokenSource();
+                this.frequencySoundDic.Add(name, token);
+            }
+            else
+            {
+                token.Cancel();
+                token.Dispose();
+                token                        = new CancellationTokenSource();
+                this.frequencySoundDic[name] = token;
+            }
+
+            try
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    await this.PlaySound(
+                        name,
+                        isLoop: false,
+                        volumeScale: volumeScale,
+                        fadeSeconds: fadeSeconds,
+                        isAverage: isAverage,
+                        autoUnload: autoUnload
+                    );
+
+                    await UniTask.Delay(
+                        TimeSpan.FromSeconds(frequency),
+                        cancellationToken: token.Token
+                    );
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                this.logService.Log($"[Audio] Frequency sound '{name}' cancelled.");
+            }
+            finally
+            {
+                if (this.frequencySoundDic.TryGetValue(name, out var current)
+                    && current == token)
+                {
+                    this.frequencySoundDic.Remove(name);
+                }
+            }
+        }
+
+
+        private void StopFrequencySound(string name)
+        {
+            if (this.frequencySoundDic.TryGetValue(name, out var token))
+            {
+                token.Cancel();
+                token.Dispose();
+                this.frequencySoundDic.Remove(name);
+            }
+        }
+
+        private void StopAllFrequencySound()
+        {
+            foreach (var token in this.frequencySoundDic.Values)
+            {
+                token.Cancel();
+                token.Dispose();
+            }
+
+            this.frequencySoundDic.Clear();
+        }
+
         public void StopSound(string name)
         {
+            this.StopFrequencySound(name);
+
             var audioSource = this.loopingSoundNameToSources.GetValueOrDefault(name);
             SoundManager.StopOneShotSound(name);
 
@@ -149,6 +230,9 @@
                 this.RecycleAudioSource(audioSource);
             }
 
+            this.StopAllFrequencySound();
+
+            this.frequencySoundDic.Clear();
             this.loopingSoundNameToSources.Clear();
         }
 
@@ -156,6 +240,7 @@
         {
             this.StopAllSound();
             this.StopAllPlayList();
+            this.StopAllFrequencySound();
         }
 
         /// <summary>
@@ -165,11 +250,11 @@
         /// <param name="volumeScale">Additional volume scale</param>
         /// <param name="fadeSeconds">The number of seconds to fade in and out</param>
         /// <param name="persist">Whether to persist the looping music between scene changes</param>
-        public virtual async UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false,bool autoUnload=true)
+        public virtual async UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false, bool autoUnload = true)
         {
             this.StopPlayList();
 
-            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName,isAutoUnload:autoUnload);
+            var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName, isAutoUnload: autoUnload);
             this.MusicAudioSource      = await this.GetAudioSource();
             this.MusicAudioSource.clip = audioClip;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
