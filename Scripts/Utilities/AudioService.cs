@@ -19,8 +19,10 @@
         UniTask PlaySound(string name, AudioSource sender);
         UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true);
         UniTask PlaySoundFrequency(string name, float frequency, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true);
+        void    StopSoundFrequency(string name);
         void    StopSound(string name);
         void    StopAllSound();
+        void    StopAllFrequencySound();
         void    StopAll();
         UniTask PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false, bool autoUnload = true);
         UniTask PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
@@ -180,23 +182,22 @@
             }
         }
 
+        public void StopSoundFrequency(string name) { this.StopFrequencySound(name); }
 
         private void StopFrequencySound(string name)
         {
             if (this.frequencySoundDic.TryGetValue(name, out var token))
             {
                 token.Cancel();
-                token.Dispose();
                 this.frequencySoundDic.Remove(name);
             }
         }
 
-        private void StopAllFrequencySound()
+        public void StopAllFrequencySound()
         {
             foreach (var token in this.frequencySoundDic.Values)
             {
                 token.Cancel();
-                token.Dispose();
             }
 
             this.frequencySoundDic.Clear();
@@ -204,8 +205,6 @@
 
         public void StopSound(string name)
         {
-            this.StopFrequencySound(name);
-
             var audioSource = this.loopingSoundNameToSources.GetValueOrDefault(name);
             SoundManager.StopOneShotSound(name);
 
