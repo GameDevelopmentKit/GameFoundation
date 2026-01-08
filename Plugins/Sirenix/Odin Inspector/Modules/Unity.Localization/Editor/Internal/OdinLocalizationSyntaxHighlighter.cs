@@ -4,10 +4,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.Runtime.CompilerServices;
+using System;
 using System.Text;
 using Sirenix.OdinInspector.Modules.Localization.Editor.Configs;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
+using Sirenix.Utilities;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Localization.SmartFormat;
 using UnityEngine.Localization.SmartFormat.Core.Parsing;
@@ -36,7 +37,16 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Internal
 
 		public static string HighlightAsRichText(string source)
 		{
-			Format format = Formatter.Parser.ParseFormat(source, Formatter.GetNotEmptyFormatterExtensionNames());
+			Format format;
+
+			try
+			{
+				format = Formatter.Parser.ParseFormat(source, Formatter.GetNotEmptyFormatterExtensionNames());
+			}
+			catch (Exception)
+			{
+				return source;
+			}
 
 			Buffer.Clear();
 
@@ -47,12 +57,29 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Internal
 			return Buffer.Length != expectedSize ? source : Buffer.ToString();
 		}
 
-		public static string GetErrorMessage(string source, out bool foundError)
+		public static string GetErrorMessage(string source, out bool foundError, out Exception exception)
 		{
 			Formatter.Settings.ParseErrorAction = ErrorAction.OutputErrorInResult;
 			Formatter.Settings.FormatErrorAction = ErrorAction.OutputErrorInResult;
 
-			Format format = Formatter.Parser.ParseFormat(source, Formatter.GetNotEmptyFormatterExtensionNames());
+			Format format;
+
+			try
+			{
+				format = Formatter.Parser.ParseFormat(source, Formatter.GetNotEmptyFormatterExtensionNames());
+			}
+			catch (Exception e)
+			{
+				foundError = true;
+
+				exception = e;
+
+				Debug.LogException(e);
+
+				return $"Unity Formatter threw {ObjectNames.NicifyVariableName(e.GetType().GetNiceName())}: '{e.Message}'\nCheck the console for more information.";
+			}
+
+			exception = null;
 
 			Buffer.Clear();
 

@@ -1,6 +1,6 @@
 ManifestVersion: 1
 ModuleID: Unity.Localization
-ModuleVersion: 2.0.0.4
+ModuleVersion: 2.0.0.5
 ModuleFiles:
   Editor.meta
   Runtime.meta

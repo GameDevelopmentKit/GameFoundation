@@ -6,6 +6,7 @@
 
 #define USING_WIDTH_NON_PERCENT
 
+using System;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.OdinInspector.Editor.Internal;
 using Sirenix.OdinInspector.Modules.Localization.Editor.Configs;
@@ -24,6 +25,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 		private string currentSyntaxSource;
 		private string currentSyntaxHighlightedText;
 		private string currentSyntaxErrorMessage;
+		private Exception currentSyntaxException;
 		private bool currentSyntaxHasErrors;
 
 		public OdinStringTableCollectionEditor(StringTableCollection collection, OdinMenuEditorWindow relatedWindow,
@@ -221,8 +223,9 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 									if (this.currentSyntaxSource != entry.Value)
 									{
 										this.currentSyntaxHighlightedText = OdinLocalizationSyntaxHighlighter.HighlightAsRichText(entry.Value);
-										this.currentSyntaxErrorMessage = OdinLocalizationSyntaxHighlighter.GetErrorMessage(entry.Value, out bool foundError);
+										this.currentSyntaxErrorMessage = OdinLocalizationSyntaxHighlighter.GetErrorMessage(entry.Value, out bool foundError, out Exception exception);
 										this.currentSyntaxHasErrors = foundError;
+										this.currentSyntaxException = exception;
 										this.currentSyntaxSource = entry.Value;
 									}
 
@@ -261,6 +264,11 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 																			  this.currentSyntaxErrorMessage,
 																			  new Color(0.68f, 0.2f, 0.2f),
 																			  20.0f);
+
+										if (this.currentSyntaxException != null)
+										{
+											Debug.LogException(this.currentSyntaxException);
+										}
 									}
 								}
 
@@ -302,8 +310,9 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				if (changed)
 				{
 					this.currentSyntaxHighlightedText = OdinLocalizationSyntaxHighlighter.HighlightAsRichText(value);
-					this.currentSyntaxErrorMessage = OdinLocalizationSyntaxHighlighter.GetErrorMessage(value, out bool foundError);
+					this.currentSyntaxErrorMessage = OdinLocalizationSyntaxHighlighter.GetErrorMessage(value, out bool foundError, out Exception exception);
 					this.currentSyntaxHasErrors = foundError;
+					this.currentSyntaxException = exception;
 					this.currentSyntaxSource = value;
 				}
 			}
