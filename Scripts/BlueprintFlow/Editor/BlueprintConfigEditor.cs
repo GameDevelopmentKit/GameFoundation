@@ -4,7 +4,7 @@
     using UnityEditor;
     using UnityEngine.UIElements;
 
-    public class BlueprintConfigEditor : BaseGameConfigEditor<BlueprintConfig>
+    public class BlueprintConfigEditor : BaseGameConfigEditor<BlueprintConfigSO>
     {
         protected override string ConfigName { get; } = "BlueprintConfig";
         protected override string ConfigPath { get; } = "GameConfigs";

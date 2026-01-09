@@ -8,7 +8,7 @@ namespace BlueprintFlow.APIHandler
     using Zenject;
 
     /// <summary>
-    /// Class uses for downloading the blueprint zip file from <see cref="BlueprintConfig.BlueprintS3Link"/> and put it in the <see cref="BlueprintConfig.BlueprintZipFilepath"/>
+    /// Class uses for downloading the blueprint zip file from <see cref="BlueprintConfigSO.BlueprintS3Link"/> and put it in the <see cref="BlueprintConfigSO.BlueprintZipFilepath"/>
     /// </summary>
     public class BlueprintDownloader
     {

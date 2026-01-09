@@ -19,7 +19,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             this.Container.Bind<FetchBlueprintInfo>().WhenInjectedInto<BlueprintReaderManager>();
             this.Container.Bind<BlueprintDownloader>().WhenInjectedInto<BlueprintReaderManager>();
             this.Container.Bind<BlueprintReaderManager>().AsCached();
-            this.Container.Bind<BlueprintConfig>().FromResolveGetter<GDKConfig>(config => config.GetGameConfig<BlueprintConfig>().CloneType()).AsCached();
+            this.Container.Bind<BlueprintConfig>().FromResolveGetter<GDKConfig>(config => config.GetGameConfig<BlueprintConfigSO>().CloneType()).AsCached();
 
             this.Container.BindAllTypeDriveFrom<IGenericBlueprintReader>();
 
