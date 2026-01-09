@@ -11,7 +11,6 @@ public static class CustomSceneToolbar
     private static string[] scenePaths;
     private static string[] sceneNames;
 
-  
     [MainToolbarElement(
         "Custom/Open Project Settings",
         defaultDockPosition = MainToolbarDockPosition.Middle)]
@@ -29,10 +28,29 @@ public static class CustomSceneToolbar
             () => SettingsService.OpenProjectSettings());
     }
 
+    [MainToolbarElement(
+        "Custom/Reload Domain",
+        defaultDockPosition = MainToolbarDockPosition.Middle)]
+    public static MainToolbarElement ReloadDomainButton()
+    {
+        var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(
+                       "Packages/com.gdk.core/Editor/Icon/reload.png")
+                   ?? EditorGUIUtility.IconContent("d_Refresh").image as Texture2D;
+
+        var content = new MainToolbarContent(icon)
+        {
+            tooltip = "Force Domain Reload (Reset all static variables)"
+        };
+
+        return new MainToolbarButton(
+            content,
+            EditorUtility.RequestScriptReload);
+    }
+
     // [MainToolbarElement(
     //     "Custom/Scene Selector",
     //     defaultDockPosition = MainToolbarDockPosition.Left)]
-    
+
     //ToDo Re-enable Scene Selector after Unity fixing the issues with ToolbarExtender
     public static MainToolbarElement SceneSelector()
     {
