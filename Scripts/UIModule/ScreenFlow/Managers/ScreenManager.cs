@@ -45,6 +45,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         public UniTask<IScreenPresenter> OpenScreen(Type screenType);
 
         public UniTask<TPresenter> OpenScreen<TPresenter, TModel>(TModel model) where TPresenter : IScreenPresenter<TModel>;
+        public UniTask<TPresenter> OpenScreen<TPresenter, TModel>(TModel model, string customPath) where TPresenter : IScreenPresenter<TModel>;
 
         /// <summary>
         ///  Open a screen by type with model
@@ -54,6 +55,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         /// <typeparam name="TModel"></typeparam>
         /// <returns></returns>
         public UniTask<IScreenPresenter<TModel>> OpenScreen<TModel>(Type screenType, TModel model);
+        public UniTask<IScreenPresenter<TModel>> OpenScreen<TModel>(Type screenType, TModel model, string customPath);
 
         /// <summary>
         /// Close a screen on top
@@ -114,8 +116,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         private IScreenPresenter previousActiveScreen;
 
-        private Dictionary<Type, IScreenPresenter>       typeToLoadedScreenPresenter;
-        private Dictionary<Type, Task<IScreenPresenter>> typeToPendingScreen;
+        private Dictionary<Type, ScreenInfo>       typeToLoadedScreenPresenter;
+        private Dictionary<string, Task<IScreenView>> typeToPendingScreen;
 
         private SignalBus    signalBus;
         private RootUICanvas rootUICanvas;
@@ -132,8 +134,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             this.gameAssets = gameAssetsParam;
 
             this.activeScreens               = new List<IScreenPresenter>();
-            this.typeToLoadedScreenPresenter = new Dictionary<Type, IScreenPresenter>();
-            this.typeToPendingScreen         = new Dictionary<Type, Task<IScreenPresenter>>();
+            this.typeToLoadedScreenPresenter = new Dictionary<Type, ScreenInfo>();
+            this.typeToPendingScreen         = new Dictionary<string, Task<IScreenView>>();
 
             this.signalBus.Subscribe<StartLoadingNewSceneSignal>(this.CleanUpAllScreen);
             this.signalBus.Subscribe<ScreenShowSignal>(this.OnShowScreen);
@@ -164,8 +166,9 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
         public async UniTask<IScreenPresenter> OpenScreen(Type screenType)
         {
-            var nextScreen = await this.GetScreen(screenType);
-
+            var screenInfo = this.GetScreenInfo(screenType);
+            await this.SetObjectView(screenInfo);
+            var nextScreen = screenInfo.Presenter;
             if (nextScreen != null)
             {
                 try
@@ -192,9 +195,16 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             return (TPresenter)await this.OpenScreen(typeof(TPresenter), model);
         }
 
+        public async UniTask<TPresenter> OpenScreen<TPresenter, TModel>(TModel model, string customPath) where TPresenter : IScreenPresenter<TModel>
+        {
+            return (TPresenter)await this.OpenScreen(typeof(TPresenter), model, customPath);
+        }
+
         public async UniTask<IScreenPresenter<TModel>> OpenScreen<TModel>(Type screenType, TModel model)
         {
-            var nextScreen = (IScreenPresenter<TModel>)await this.GetScreen(screenType);
+            var screenInfo = this.GetScreenInfo(screenType);
+            await this.SetObjectView(screenInfo);
+            var nextScreen = (IScreenPresenter<TModel>)screenInfo.Presenter;
 
             if (nextScreen != null)
             {
@@ -218,10 +228,86 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 return default;
             }
         }
+        
+        public async UniTask<IScreenPresenter<TModel>> OpenScreen<TModel>(Type screenType, TModel model, string customPath)
+        {
+            var screenInfo = this.GetScreenInfo(screenType);
+            if (screenInfo.Presenter is ICustomPresenter customPresenter) customPresenter.CustomAddressPath = customPath;
+            await this.SetObjectView(screenInfo);
+            var nextScreen = (IScreenPresenter<TModel>)screenInfo.Presenter;
 
-        public async UniTask<T> GetScreen<T>() where T : IScreenPresenter { return (T)await this.GetScreen(typeof(T)); }
+            if (nextScreen != null)
+            {
+                nextScreen.SetViewParent(this.CheckPopupIsOverlay(nextScreen) ? this.CurrentOverlayRoot : this.CurrentRootScreen);
 
+                try
+                {
+                    await nextScreen.OpenViewAsync(model);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                return nextScreen;
+            }
+            else
+            {
+                Debug.LogError($"The {screenType.Name} screen does not exist");
+
+                return default;
+            }
+        }
+        
         public async UniTask<IScreenPresenter> GetScreen(Type screenType)
+        {
+            var screenInfo = this.GetScreenInfo(screenType);
+            await this.SetObjectView(screenInfo);
+            return screenInfo.Presenter;
+        }
+        
+
+        public async UniTask<T> GetScreen<T>() where T : IScreenPresenter
+        {
+            return (T)await GetScreen(typeof(T));
+        }
+
+        public async UniTask<IScreenView> SetObjectView(ScreenInfo screenInfo)
+        {
+            var addressPath = screenInfo.Attribute.AddressableScreenPath;
+            if (screenInfo.Presenter is ICustomPresenter customScreen) addressPath = customScreen.CustomAddressPath;
+            
+            if (screenInfo.AddressPathToScreenView.TryGetValue(addressPath, out var viewObject))
+            {
+                if (screenInfo.CurrentScreenViewPath != addressPath)
+                    screenInfo.Presenter.SetView(viewObject);
+                return viewObject;
+            }
+
+            if (!this.typeToPendingScreen.TryGetValue(addressPath, out var loadingTask))
+            {
+                loadingTask = InstantiateScreen(addressPath);
+                this.typeToPendingScreen.Add(addressPath, loadingTask);
+            }
+
+            var result = await loadingTask;
+            this.typeToPendingScreen.Remove(addressPath);
+
+            return result;
+
+            async Task<IScreenView> InstantiateScreen(string address)
+            {
+                var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(address),
+                    this.CheckPopupIsOverlay(screenInfo.Presenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
+
+                screenInfo.AddressPathToScreenView.Add(address, viewObject);
+                screenInfo.Presenter.SetView(viewObject);
+                screenInfo.CurrentScreenViewPath = address;
+                return viewObject;
+            }
+        }
+
+        public ScreenInfo GetScreenInfo(Type screenType)
         {
             //check screen type is implemented IScreenPresenter
             if (!typeof(IScreenPresenter).IsAssignableFrom(screenType))
@@ -229,34 +315,22 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 throw new ArgumentException($"The provided type {screenType.Name} does not implement IScreenPresenter.");
             }
 
-            if (this.typeToLoadedScreenPresenter.TryGetValue(screenType, out var screenPresenter)) return screenPresenter;
-
-            if (!this.typeToPendingScreen.TryGetValue(screenType, out var loadingTask))
+            if (this.typeToLoadedScreenPresenter.TryGetValue(screenType, out var screenInfo))
             {
-                loadingTask = InstantiateScreen();
-                this.typeToPendingScreen.Add(screenType, loadingTask);
+                return screenInfo;
             }
 
-            var result = await loadingTask;
-            this.typeToPendingScreen.Remove(screenType);
-
-            return result;
-
-            async Task<IScreenPresenter> InstantiateScreen()
+            var presenter = this.GetCurrentContainer().Instantiate(screenType) as IScreenPresenter;
+            screenInfo = new ScreenInfo()
             {
-                screenPresenter = this.GetCurrentContainer().Instantiate(screenType) as IScreenPresenter;
-                var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
-
-                var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(screenInfo.AddressableScreenPath),
-                    this.CheckPopupIsOverlay(screenPresenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
-
-                screenPresenter.SetView(viewObject);
-                this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
-
-                return screenPresenter;
-            }
+                Presenter = presenter,
+                AddressPathToScreenView = new Dictionary<string, IScreenView>(),
+                Attribute = presenter.GetCustomAttribute<ScreenInfoAttribute>()
+            };
+            this.typeToLoadedScreenPresenter.Add(screenType, screenInfo);
+            return screenInfo;
         }
-
+        
         public async UniTask CloseCurrentScreen()
         {
             if (this.activeScreens.Count > 0)
@@ -330,8 +404,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
 
             foreach (var screen in this.typeToLoadedScreenPresenter)
             {
-                if (screen.Value.ScreenStatus != ScreenStatus.Opened) continue;
-                screen.Value.Dispose();
+                if (screen.Value.Presenter.ScreenStatus != ScreenStatus.Opened) continue;
+                screen.Value.Presenter.Dispose();
             }
 
             this.typeToLoadedScreenPresenter.Clear();
@@ -417,7 +491,11 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var screenType      = screenPresenter.GetType();
 
             if (this.typeToLoadedScreenPresenter.ContainsKey(screenType)) return;
-            this.typeToLoadedScreenPresenter.Add(screenType, screenPresenter);
+            this.typeToLoadedScreenPresenter.Add(screenType, new ScreenInfo()
+            {
+                Presenter = screenPresenter,
+                AddressPathToScreenView = new Dictionary<string, IScreenView>()
+            });
             var screenInfo = screenPresenter.GetCustomAttribute<ScreenInfoAttribute>();
 
             var viewObj = this.CurrentRootScreen.Find(screenInfo.AddressableScreenPath);
@@ -492,5 +570,18 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
         }
 
         #endregion
+    }
+    
+    public interface ICustomPresenter
+    {
+        public string CustomAddressPath { get; set; }
+    }
+
+    public class ScreenInfo
+    {
+        public IScreenPresenter Presenter;
+        public string CurrentScreenViewPath;
+        public ScreenInfoAttribute Attribute;
+        public Dictionary<string, IScreenView> AddressPathToScreenView;
     }
 }
