@@ -62,6 +62,11 @@ namespace Models
 
         public T GetGameConfig<T>() where T : IGameConfig
         {
+            if (this.typeToGameConfig==null)
+            {
+                this.RefreshData();
+            }
+
             if (this.typeToGameConfig.TryGetValue(typeof(T), out var result))
             {
                 return (T)result;
