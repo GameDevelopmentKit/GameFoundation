@@ -2,13 +2,12 @@ namespace BlueprintFlow.BlueprintControlFlow
 {
     using System;
     using Models;
-    using Sirenix.OdinInspector;
     using UnityEngine;
 
     /// <summary>
     /// Contains all the constants, the configuration of Blueprint control flow
     /// </summary>
-    public class BlueprintConfigSO : SerializedScriptableObject, IGameConfig
+    public class BlueprintConfigSO : BaseGameConfigSO
     {
         public BlueprintConfig blueprintConfig = new();
 
@@ -34,7 +33,7 @@ namespace BlueprintFlow.BlueprintControlFlow
         public         string ResourceBlueprintPath => this.resourceBlueprintPath;
         public         string BlueprintFileType     => this.blueprintFileType;
 
-        public BlueprintConfig CloneType() => new ()
+        public BlueprintConfig CloneType() => new()
         {
             currentBlueprintVersion = this.currentBlueprintVersion,
             isResourceMode          = this.isResourceMode,

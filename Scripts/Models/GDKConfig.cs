@@ -8,7 +8,7 @@ namespace Models
 #endif
     using UnityEngine;
 
-    public class GDKConfig : SerializedScriptableObject
+    public class GDKConfig : ScriptableObject
     {
         #region Public feilds
 
@@ -34,7 +34,6 @@ namespace Models
 
         #endregion
 
-
         #region private feild
 
         [SerializeField] private string configVersion;
@@ -42,7 +41,7 @@ namespace Models
         [SerializeField] private string gameName;
         [SerializeField] private string gameId = "8a5ddf62-4c95-44b0-9db0-be5f8f9ef819";
 
-        [SerializeField] private List<IGameConfig> gameConfigs;
+        [SerializeField] private List<BaseGameConfigSO> gameConfigs;
 
         private Dictionary<Type, IGameConfig> typeToGameConfig;
 
@@ -54,6 +53,7 @@ namespace Models
         {
             if (this.gameConfigs == null || this.gameConfigs.Count == 0) return;
             this.typeToGameConfig = new Dictionary<Type, IGameConfig>();
+
             foreach (var gameConfig in this.gameConfigs)
             {
                 this.typeToGameConfig.Add(gameConfig.GetType(), gameConfig);
@@ -69,6 +69,7 @@ namespace Models
             else
             {
                 Debug.Log($"Don't find any game config with type = {typeof(T).Name}");
+
                 return default;
             }
         }
@@ -80,21 +81,21 @@ namespace Models
 #if UNITY_EDITOR
         public void AddGameConfig(IGameConfig gameConfig)
         {
-            if (this.gameConfigs == null) this.gameConfigs = new List<IGameConfig>();
-            this.gameConfigs.Add(gameConfig);
-            EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            this.RefreshData();
+            // if (this.gameConfigs == null) this.gameConfigs = new List<IGameConfig>();
+            // this.gameConfigs.Add(gameConfig);
+            // EditorUtility.SetDirty(this);
+            // AssetDatabase.SaveAssets();
+            // AssetDatabase.Refresh();
+            // this.RefreshData();
         }
 
         public void RemoveGameConfig(IGameConfig gameConfig)
         {
-            this.gameConfigs?.Remove(gameConfig);
-            EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            this.RefreshData();
+            // this.gameConfigs?.Remove(gameConfig);
+            // EditorUtility.SetDirty(this);
+            // AssetDatabase.SaveAssets();
+            // AssetDatabase.Refresh();
+            // this.RefreshData();
         }
 #endif
     }
