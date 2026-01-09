@@ -1,3 +1,5 @@
+using System;
+
 namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
 {
     using Cysharp.Threading.Tasks;
@@ -23,12 +25,39 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
     {
         private readonly IScreenManager screenManager;
 
-        public ShowPopupQueueAction(IScreenManager screenManager, string actionId, string location) : base(actionId, location) { this.screenManager = screenManager; }
+        public ShowPopupQueueAction(IScreenManager screenManager, string actionId, string location) : base(actionId,
+            location)
+        {
+            this.screenManager = screenManager;
+        }
 
         protected override async void Action()
         {
             base.Action();
             var screenPresenter = await this.screenManager.OpenScreen<TPresenter,TModel>((TModel)this.state);
+            await UniTask.WaitUntil(() => screenPresenter.ScreenStatus == ScreenStatus.Opened);
+            this.Complete();
+        }
+    }
+
+    public class ShowPopupQueueActionCustom<TModel> : BaseQueueAction
+    {
+        private readonly IScreenManager screenManager;
+        private readonly Type type;
+        private readonly string customPath;
+
+        public ShowPopupQueueActionCustom(IScreenManager screenManager, Type type, string customPath, string actionId, string location) : base(actionId,
+            location)
+        {
+            this.type = type;
+            this.customPath = customPath;
+            this.screenManager = screenManager;
+        }
+
+        protected override async void Action()
+        {
+            base.Action();
+            var screenPresenter = await this.screenManager.OpenScreen<TModel>(type, (TModel)this.state, customPath);
             await UniTask.WaitUntil(() => screenPresenter.ScreenStatus == ScreenStatus.Opened);
             this.Complete();
         }
