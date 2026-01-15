@@ -11,22 +11,22 @@ namespace DataManager.MasterData
 
     public class MasterDataManager
     {
-        private readonly SignalBus                signalBus;
-        private readonly IHandleLocalDataServices handleLocalDataService;
-        private readonly BlueprintReaderManager   blueprintReaderManager;
+        private readonly SignalBus                            signalBus;
+        private readonly LazyInject<IHandleLocalDataServices> handleLocalDataService;
+        private readonly LazyInject<BlueprintReaderManager>   blueprintReaderManager;
 
         public UniTaskCompletionSource<bool> IsReady { get; } = new();
 
         private readonly Dictionary<string, IUserData> userDataCache = new();
 
-        protected virtual List<IInitializeDataOnStart> PreloadUserDataTypes { get; } = new();
-        public            List<UniTask>                LoadingUserDataTasks { get; } = new();
+        protected virtual HashSet<IDataManagerLifecycle> DataManagerLifecyclesRequest { get; } = new();
 
-        public MasterDataManager(SignalBus signalBus, IHandleLocalDataServices handleLocalDataService, BlueprintReaderManager blueprintReaderManager)
+        public MasterDataManager(SignalBus signalBus, LazyInject<IHandleLocalDataServices> handleLocalDataService, LazyInject<BlueprintReaderManager> blueprintReaderManager)
         {
             this.signalBus              = signalBus;
             this.handleLocalDataService = handleLocalDataService;
             this.blueprintReaderManager = blueprintReaderManager;
+            this.signalBus.Subscribe<MasterDataRegisterSignal>(signal => RegisterDataManagerLifecycle(signal.DataManager));
         }
 
         public async UniTask InitializeData()
@@ -37,20 +37,10 @@ namespace DataManager.MasterData
             {
                 //Todo refactor when implement load user data from remote flow later
                 this.userDataCache.Clear();
-                
-                // load all pref load data and blueprint
-                var preloadDataTask = UniTask.WhenAll(this.PreloadUserDataTypes.Select(x => this.GetDataInternal(x.GetDataType())));
-                await UniTask.WhenAll(preloadDataTask, this.blueprintReaderManager.LoadBlueprint());
-                
-                foreach (var preloadUserData in this.PreloadUserDataTypes)
-                {
-                    if (this.userDataCache.TryGetValue(preloadUserData.GetDataType().Name, out var data))
-                    {
-                        preloadUserData.InitializeData(data);
-                    }
-                }
-                
-                this.PreloadUserDataTypes.Clear();
+
+                await this.blueprintReaderManager.Value.LoadBlueprint();
+
+                await HandleLoadDataRequests();
             }
             catch (Exception e)
             {
@@ -62,22 +52,82 @@ namespace DataManager.MasterData
             this.IsReady.TrySetResult(true);
         }
 
-        public void RegisterPreloadUserData(IInitializeDataOnStart initializeDataOnStart)
+
+
+        public void RegisterDataManagerLifecycle(IDataManagerLifecycle dataManager)
         {
-            if (this.IsReady.Task.Status != UniTaskStatus.Succeeded)
+            this.DataManagerLifecyclesRequest.Add(dataManager);
+
+            if (this.IsReady.Task.Status == UniTaskStatus.Pending) return;
+
+            // MasterDataManager is ready: batch requests until end of frame, then load them all at once
+            _ = FlushFrameBatchAsync(); // fire-and-forget - runs on main thread
+        }
+
+        private bool isEndOfFrameBatchScheduled = false;
+
+        private async UniTask FlushFrameBatchAsync()
+        {
+            if (this.DataManagerLifecyclesRequest.Count == 0 || this.isEndOfFrameBatchScheduled) return;
+            this.isEndOfFrameBatchScheduled = true;
+            try
             {
-                this.PreloadUserDataTypes.Add(initializeDataOnStart);
+                await UniTask.WaitForEndOfFrame();
+
+                await HandleLoadDataRequests();
             }
-            else
+            catch (Exception e)
             {
-                this.GetDataInternal(initializeDataOnStart.GetDataType()).ContinueWith(async data =>
-                {
-                    // return data after constructor is called
-                    await UniTask.Yield();
-                    initializeDataOnStart.InitializeData(data);
-                }).Forget();
+                Debug.LogException(e);
+            }
+            finally
+            {
+                this.isEndOfFrameBatchScheduled = false;
+
+                _ = FlushFrameBatchAsync();
             }
         }
+
+        private async UniTask HandleLoadDataRequests()
+        {
+            var dataManagerLifecycles = new List<IDataManagerLifecycle>(this.DataManagerLifecyclesRequest);
+            this.DataManagerLifecyclesRequest.Clear();
+            // Start initialize
+            foreach (var request in dataManagerLifecycles)
+            {
+                request.StartInitialize();
+            }
+
+            var loadDataRequests = new List<IInitializeDataOnStart>();
+            var loadingDataTasks  = new List<UniTask>();
+            foreach (var request in dataManagerLifecycles)
+            {
+                if (request is IInitializeDataOnStart initializeDataOnStart)
+                {
+                    loadDataRequests.Add(initializeDataOnStart);
+                    loadingDataTasks.Add(this.GetDataInternal(initializeDataOnStart.GetDataType()));
+                }
+            }
+           
+            // Load all data in parallel
+            await UniTask.WhenAll(loadingDataTasks);
+
+            // Provide loaded data to requests
+            foreach (var request in loadDataRequests)
+            {
+                if (this.userDataCache.TryGetValue(request.GetDataType().Name, out var data))
+                {
+                    request.InitializeData(data);
+                }
+            }
+
+            // Finalize
+            foreach (var request in dataManagerLifecycles)
+            {
+                request.OnDataInitialized();
+            }
+        }
+
 
         private static bool IsLocalData(Type type) { return typeof(ILocalData).IsAssignableFrom(type); }
 
@@ -94,10 +144,8 @@ namespace DataManager.MasterData
             if (this.userDataCache.TryGetValue(type.Name, out var value)) return value;
             if (IsLocalData(type))
             {
-                var uniTask = this.handleLocalDataService.Load(type);
-                this.LoadingUserDataTasks.Add(uniTask);
+                var uniTask = this.handleLocalDataService.Value.Load(type);
                 value = (IUserData)await uniTask;
-                this.LoadingUserDataTasks.Remove(uniTask);
             }
             else
                 value = Activator.CreateInstance(type) as IUserData;

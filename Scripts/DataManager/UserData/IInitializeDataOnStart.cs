@@ -2,9 +2,10 @@
 {
     using System;
 
-    public interface IInitializeDataOnStart
+    public interface IInitializeDataOnStart : IDataManagerLifecycle
     {
         internal Type GetDataType();
         public   void InitializeData(IUserData userData);
     }
+
 }
