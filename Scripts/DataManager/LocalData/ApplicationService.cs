@@ -32,15 +32,15 @@ namespace DataManager.LocalData
 
         private void OnApplicationPause(bool pauseStatus)
         {
+            // save local data to storage
+            this.handleLocalDataServices.SaveAll();
+            
             this.applicationPauseSignal.PauseStatus = pauseStatus;
             this.signalBus.Fire(this.applicationPauseSignal); // Active this signal later, when need
 
             if (pauseStatus)
             {
                 this.timeBeforeAppPause = DateTime.Now;
-
-                // save local data to storage
-                this.handleLocalDataServices.SaveAll();
             }
             else
             {
@@ -62,11 +62,8 @@ namespace DataManager.LocalData
         
         private void OnApplicationFocus(bool hasFocus)
         {
-            if(!hasFocus)
-            {
-                // save local data to storage
-                this.handleLocalDataServices.SaveAll();
-            }
+            // save local data to storage
+            this.handleLocalDataServices.SaveAll();
         }
 
         private void OnDestroy()

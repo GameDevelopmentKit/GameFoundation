@@ -9,7 +9,11 @@ namespace DataManager.MasterData
     using UnityEngine;
     using Zenject;
 
-    public class MasterDataManager
+    /// <summary>
+    ///implement ITickable to ensure this class is created on first 
+    /// because Zenject creates ITickable instances first on startup before others <see cref="Zenject.ProjectContext.InstallBindings"/>
+    /// </summary>
+    public class MasterDataManager : ITickable
     {
         private readonly SignalBus                            signalBus;
         private readonly LazyInject<IHandleLocalDataServices> handleLocalDataService;
@@ -48,8 +52,8 @@ namespace DataManager.MasterData
                 this.IsReady.TrySetException(e);
             }
 
-            this.signalBus.Fire<MasterDataReadySignal>();
             this.IsReady.TrySetResult(true);
+            this.signalBus.Fire<MasterDataReadySignal>();
         }
 
 
@@ -99,7 +103,7 @@ namespace DataManager.MasterData
             }
 
             var loadDataRequests = new List<IInitializeDataOnStart>();
-            var loadingDataTasks  = new List<UniTask>();
+            var loadingDataTasks = new List<UniTask>();
             foreach (var request in dataManagerLifecycles)
             {
                 if (request is IInitializeDataOnStart initializeDataOnStart)
@@ -108,7 +112,7 @@ namespace DataManager.MasterData
                     loadingDataTasks.Add(this.GetDataInternal(initializeDataOnStart.GetDataType()));
                 }
             }
-           
+
             // Load all data in parallel
             await UniTask.WhenAll(loadingDataTasks);
 
@@ -153,6 +157,10 @@ namespace DataManager.MasterData
             this.userDataCache.Add(type.Name, value);
 
             return value;
+        }
+        public void Tick()
+        {
+
         }
     }
 }

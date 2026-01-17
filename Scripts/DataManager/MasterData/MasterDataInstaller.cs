@@ -9,7 +9,7 @@
             this.Container.DeclareSignal<MasterDataReadySignal>();
             this.Container.DeclareSignal<MasterDataRegisterSignal>();
             
-            this.Container.Bind<MasterDataManager>().AsSingle().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<MasterDataManager>().AsSingle().NonLazy();
         }
     }
 }

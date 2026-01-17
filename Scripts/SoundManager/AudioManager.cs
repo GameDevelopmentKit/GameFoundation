@@ -96,7 +96,7 @@
 
         public void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
-            Debug.Log("Using volume: " + SoundGlobalVolume);
+            // Debug.Log("Using volume: " + SoundGlobalVolume);
             if (isLoop)
                 sfx.PlayLoop(name, volumeScale * SoundGlobalVolume, fadeSeconds).Forget();
             else

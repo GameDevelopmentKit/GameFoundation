@@ -14,14 +14,9 @@ namespace DataManager.UserData
         {
             this.SignalBus = signalBus;
 
-            _ = RegisterMasterData();
-        }
-        private async UniTask RegisterMasterData()
-        {
-            await UniTask.WaitForEndOfFrame();
             this.SignalBus.Fire(new MasterDataRegisterSignal { DataManager = this });
         }
-
+        
         public virtual void StartInitialize() { }
 
         public virtual void InitializeData(IUserData userData)
