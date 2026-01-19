@@ -47,10 +47,11 @@ namespace GameFoundation.Scripts.UIModule.Utilities.GameQueueAction
             return action;
         }
         
-        public IGameQueueAction AddScreenToQueueActionCustom<TModel>(Type type, TModel model, string customPath, string actionId = "", string location = "")
+        public IGameQueueAction AddScreenToQueueActionCustom<TModel>(Type type, TModel model, string customPath, string actionId = "", string location = "", float delay = 0f)
         {
             var action = new ShowPopupQueueActionCustom<TModel>(this.screenManager, type, customPath, string.IsNullOrEmpty(actionId) ? $"ShowScreen_{type.Name}" : actionId, location);
             action.SetState(model);
+            action.SetDelay(delay);
             this.gameQueueActionServices.Append(action);
             return action;
         }
