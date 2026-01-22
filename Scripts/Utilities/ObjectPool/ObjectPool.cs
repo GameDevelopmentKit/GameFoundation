@@ -6,7 +6,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
     public class ObjectPool : MonoBehaviour
     {
         public GameObject       prefab;
-        public List<GameObject> pooledObjects  = new List<GameObject>();
+        public List<GameObject> pooledObjects = new List<GameObject>();
 
         private bool isDestroying;
         public GameObject Spawn(Transform parent, Vector3 position, Quaternion rotation)
@@ -15,7 +15,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             if (this.pooledObjects.Count == 0)
             {
                 obj = Instantiate(this.prefab, position, rotation, this.transform);
-                obj.SetActive(true);
+                if (!obj.activeSelf) obj.SetActive(true);
             }
             else
             {

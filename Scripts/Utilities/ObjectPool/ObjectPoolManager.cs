@@ -199,7 +199,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 return spawnedObj;
             }
 
-            this.CreatePool(prefab, 1, null);
+            this.CreatePool(prefab, 0, null);
             return this.Spawn(prefab, parent, position, rotation);
         }
 
