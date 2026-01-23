@@ -55,7 +55,7 @@ public class SceneToolBarExtend : ScriptableObject
 
     public List<string> sceneFolders = new();
 
-    public void AddMoreSceneExtend(List<string> scenePaths, List<string> sceneNames)
+    public void AddMoreSceneExtend(List<string> scenePaths, List<string> sceneNames = null)
     {
         foreach (var folderName in this.sceneFolders)
         {
@@ -67,7 +67,7 @@ public class SceneToolBarExtend : ScriptableObject
                 var fullPath  = fileInfo.FullName.Replace(@"\", "/");
                 var scenePath = "Assets" + fullPath.Replace(Application.dataPath, "");
                 scenePaths.Add(scenePath);
-                sceneNames.Add(Path.GetFileNameWithoutExtension(scenePath));
+                sceneNames?.Add(Path.GetFileNameWithoutExtension(scenePath));
             }
         }
     }
