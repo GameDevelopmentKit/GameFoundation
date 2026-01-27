@@ -109,6 +109,13 @@ namespace Sirenix.OdinInspector.Editor
         {
             for (int i = 0; i < assemblyPaths.Length; i++)
             {
+                var current = assemblyPaths[i];
+
+                if (current.Contains("Library\\PackageCache"))
+                {
+                    continue;
+                }
+
                 AssemblyImportSettingsUtilities.SetAssemblyImportSettings(platform, assemblyPaths[i], importSettings);
             }
         }

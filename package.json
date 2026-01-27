@@ -8,11 +8,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GameDevelopmentKit/GameFoundation.git"
-  },
-  "author": {
-    "name": "Game Development Kit",
-    "email": "ninhnv15@gmail.com"
-  },
+  },  
   "dependencies": {
     "com.unity.addressables": "1.21.21",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
