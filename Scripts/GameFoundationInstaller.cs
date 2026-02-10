@@ -27,10 +27,6 @@
             this.Container.Bind<IGameAssets>().To<GameAssets>().AsCached();
             this.Container.Bind<ObjectPoolManager>().AsCached().NonLazy();
 
-            //note: AudioManager is singleton, rebind an inherited AudioManager will cause 2 instance and just one subcribes compositeDisposable 
-            //do not rebind IAudioManager to another AudioManager, if do rebind, keep the inherited AudioManager and comment this
-            this.Container.BindInterfacesTo<AudioManager>().AsSingle().NonLazy();
-
             //Service
             this.Container.Bind<ILogService>().To<LogService>().AsSingle().NonLazy();
 
