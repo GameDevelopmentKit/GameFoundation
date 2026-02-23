@@ -1,4 +1,4 @@
-﻿namespace Editor.Misc
+﻿namespace GDK.Editor.Misc
 {
     using System.Collections.Generic;
     using System.IO;
@@ -10,7 +10,7 @@
 
     public class ToolbarSceneDropdown
     {
-        private const string ToolElementPath = "GDK/Scene Selector";
+        public const string ToolElementPath = "GDK/Scene Selector";
 
         static string[] scenePaths;
 
@@ -25,9 +25,11 @@
             if (activeSceneName.Length == 0)
                 activeSceneName = "Untitled";
 
-            var icon    = EditorGUIUtility.IconContent("UnityLogo").image as Texture2D;
-            var content = new MainToolbarContent(activeSceneName, icon, "Select active scene");
-            return new MainToolbarDropdown(content, ShowDropdownMenu);
+            var icon     = EditorGUIUtility.IconContent("UnityLogo").image as Texture2D;
+            var content  = new MainToolbarContent(activeSceneName, icon, "Select active scene");
+            var dropdown = new MainToolbarDropdown(content, ShowDropdownMenu);
+            dropdown.displayed = SceneToolbarSettingsManager.GetSettings().enabled;
+            return dropdown;
         }
 
         static void ShowDropdownMenu(Rect dropDownRect)
@@ -86,24 +88,51 @@
             {
                 List<string> listScenePaths = new List<string>();
 
-                string folderName   = Application.dataPath + "/Scenes";
-                var    dirInfo      = new DirectoryInfo(folderName);
-                var    allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
-
-                foreach (var fileInfo in allFileInfos)
+                // Default: Assets/Scenes
+                string defaultFolder = Application.dataPath + "/Scenes";
+                if (Directory.Exists(defaultFolder))
                 {
-                    var fullPath  = fileInfo.FullName.Replace(@"\", "/");
-                    var scenePath = "Assets" + fullPath.Replace(Application.dataPath, "");
+                    var dirInfo      = new DirectoryInfo(defaultFolder);
+                    var allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
 
-                    listScenePaths.Add(scenePath);
+                    foreach (var fileInfo in allFileInfos)
+                    {
+                        var fullPath  = fileInfo.FullName.Replace(@"\", "/");
+                        var scenePath = "Assets" + fullPath.Replace(Application.dataPath, "");
+                        listScenePaths.Add(scenePath);
+                    }
                 }
 
-                //Add more SceneExtend Folder
-                SceneToolBarExtend.Instance.AddMoreSceneExtend(listScenePaths);
+                // Extra folders from ScriptableObject settings
+                var settings = SceneToolbarSettingsManager.GetSettings();
+                foreach (var folderName in settings.sceneFolders)
+                {
+                    if (!Directory.Exists(folderName)) continue;
 
-                scenePaths  = listScenePaths.ToArray();
+                    var dirInfo      = new DirectoryInfo(folderName);
+                    var allFileInfos = dirInfo.GetFiles("*.unity", SearchOption.AllDirectories);
+
+                    foreach (var fileInfo in allFileInfos)
+                    {
+                        var fullPath  = fileInfo.FullName.Replace(@"\", "/");
+                        var scenePath = "Assets" + fullPath.Replace(Application.dataPath, "");
+                        listScenePaths.Add(scenePath);
+                    }
+                }
+
+                scenePaths = listScenePaths.ToArray();
             }
-            
+        }
+
+        internal static void InvalidateSceneList()
+        {
+            scenePaths = null;
+            RefreshSceneList();
+        }
+
+        internal static void RefreshToolbar()
+        {
+            MainToolbar.Refresh(ToolElementPath);
         }
 
         static void SceneSwitched(Scene oldScene, Scene newScene)
@@ -114,7 +143,7 @@
         static ToolbarSceneDropdown()
         {
             RefreshSceneList();
-            EditorApplication.projectChanged                += RefreshSceneList;
+            EditorApplication.projectChanged                += () => { scenePaths = null; RefreshSceneList(); };
             SceneManager.activeSceneChanged                 += SceneSwitched;
             EditorSceneManager.activeSceneChangedInEditMode += SceneSwitched;
         }
