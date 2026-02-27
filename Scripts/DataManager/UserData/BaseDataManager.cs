@@ -8,7 +8,7 @@ namespace DataManager.UserData
     public abstract class BaseDataManager<TData> : IInitializeDataOnStart where TData : class, IUserData, new()
     {
         protected readonly SignalBus SignalBus;
-        protected          TData     Data { get; private set; }
+        protected TData Data { get; private set; }
 
         public BaseDataManager(SignalBus signalBus)
         {
@@ -16,8 +16,10 @@ namespace DataManager.UserData
 
             this.SignalBus.Fire(new MasterDataRegisterSignal { DataManager = this });
         }
-        
-        public virtual void StartInitialize() { }
+
+        public virtual void StartInitialize()
+        {
+        }
 
         public virtual void InitializeData(IUserData userData)
         {
@@ -25,8 +27,17 @@ namespace DataManager.UserData
             this.Data = userDataAsTData;
         }
 
-        public virtual void OnDataInitialized() { }
+        public virtual void OnDataInitialized()
+        {
+        }
 
-        Type IInitializeDataOnStart.GetDataType() { return typeof(TData); }
+        Type IInitializeDataOnStart.GetDataType()
+        {
+            return typeof(TData);
+        }
+
+        public virtual void Dispose()
+        {
+        }
     }
 }

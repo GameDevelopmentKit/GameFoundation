@@ -1,6 +1,7 @@
 ﻿namespace DataManager.UserData
 {
-    public interface IDataManagerLifecycle
+    using System;
+    public interface IDataManagerLifecycle : IDisposable
     {
         void StartInitialize() { }
         

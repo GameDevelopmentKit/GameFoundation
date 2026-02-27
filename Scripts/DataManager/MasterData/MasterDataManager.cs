@@ -6,6 +6,7 @@ namespace DataManager.MasterData
     using DataManager.Blueprint.BlueprintController;
     using DataManager.LocalData;
     using DataManager.UserData;
+    using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
     using Zenject;
 
@@ -15,22 +16,25 @@ namespace DataManager.MasterData
     /// </summary>
     public class MasterDataManager : ITickable
     {
-        private readonly SignalBus                            signalBus;
+        private readonly SignalBus signalBus;
         private readonly LazyInject<IHandleLocalDataServices> handleLocalDataService;
-        private readonly LazyInject<BlueprintReaderManager>   blueprintReaderManager;
+        private readonly LazyInject<BlueprintReaderManager> blueprintReaderManager;
 
         public UniTaskCompletionSource<bool> IsReady { get; } = new();
 
         private readonly Dictionary<string, IUserData> userDataCache = new();
 
         protected virtual HashSet<IDataManagerLifecycle> DataManagerLifecyclesRequest { get; } = new();
+        protected virtual HashSet<IDataManagerLifecycle> LoadedDataManagerLifecycles { get; } = new();
 
-        public MasterDataManager(SignalBus signalBus, LazyInject<IHandleLocalDataServices> handleLocalDataService, LazyInject<BlueprintReaderManager> blueprintReaderManager)
+        public MasterDataManager(SignalBus signalBus, LazyInject<IHandleLocalDataServices> handleLocalDataService,
+            LazyInject<BlueprintReaderManager> blueprintReaderManager)
         {
-            this.signalBus              = signalBus;
+            this.signalBus = signalBus;
             this.handleLocalDataService = handleLocalDataService;
             this.blueprintReaderManager = blueprintReaderManager;
-            this.signalBus.Subscribe<MasterDataRegisterSignal>(signal => RegisterDataManagerLifecycle(signal.DataManager));
+            this.signalBus.Subscribe<MasterDataRegisterSignal>(signal =>
+                RegisterDataManagerLifecycle(signal.DataManager));
         }
 
         public async UniTask InitializeData()
@@ -57,7 +61,6 @@ namespace DataManager.MasterData
         }
 
 
-
         public void RegisterDataManagerLifecycle(IDataManagerLifecycle dataManager)
         {
             this.DataManagerLifecyclesRequest.Add(dataManager);
@@ -66,6 +69,33 @@ namespace DataManager.MasterData
 
             // MasterDataManager is ready: batch requests until end of frame, then load them all at once
             _ = FlushFrameBatchAsync(); // fire-and-forget - runs on main thread
+        }
+
+        public UniTask SaveAllData()
+        {
+            return this.handleLocalDataService.Value.SaveAll();
+        }
+
+        public void DeleteAllData()
+        {
+            this.userDataCache.Clear();
+            this.handleLocalDataService.Value.DeleteAll();
+        }
+
+        public UniTask ReloadAllDataManager()
+        {
+            DeleteAllData();
+
+            //dispose all data manager lifecycle
+            foreach (var dataManagerLifecycle in this.LoadedDataManagerLifecycles)
+            {
+                dataManagerLifecycle.Dispose();
+            }
+
+            //reload all data manager lifecycle
+            DataManagerLifecyclesRequest.AddRange(LoadedDataManagerLifecycles);
+            LoadedDataManagerLifecycles.Clear();
+            return FlushFrameBatchAsync();
         }
 
         private bool isEndOfFrameBatchScheduled = false;
@@ -129,20 +159,25 @@ namespace DataManager.MasterData
             foreach (var request in dataManagerLifecycles)
             {
                 request.OnDataInitialized();
+                this.LoadedDataManagerLifecycles.Add(request);
             }
         }
 
 
-        private static bool IsLocalData(Type type) { return typeof(ILocalData).IsAssignableFrom(type); }
+        private static bool IsLocalData(Type type)
+        {
+            return typeof(ILocalData).IsAssignableFrom(type);
+        }
 
         public async UniTask<T> Get<T>() where T : class, IUserData, new()
         {
             await this.IsReady.Task;
-            var type  = typeof(T);
+            var type = typeof(T);
             var value = await this.GetDataInternal(type);
 
             return value as T;
         }
+
         private async UniTask<IUserData> GetDataInternal(Type type)
         {
             if (this.userDataCache.TryGetValue(type.Name, out var value)) return value;
@@ -158,9 +193,9 @@ namespace DataManager.MasterData
 
             return value;
         }
+
         public void Tick()
         {
-
         }
     }
 }
