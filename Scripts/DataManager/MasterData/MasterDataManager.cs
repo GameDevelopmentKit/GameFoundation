@@ -25,7 +25,7 @@ namespace DataManager.MasterData
         private readonly Dictionary<string, IUserData> userDataCache = new();
 
         protected virtual HashSet<IDataManagerLifecycle> DataManagerLifecyclesRequest { get; } = new();
-        protected virtual HashSet<IDataManagerLifecycle> LoadedDataManagerLifecycles { get; } = new();
+        protected virtual HashSet<Type> LoadedDataManagerTypes { get; } = new();
 
         public MasterDataManager(SignalBus signalBus, LazyInject<IHandleLocalDataServices> handleLocalDataService,
             LazyInject<BlueprintReaderManager> blueprintReaderManager)
@@ -86,15 +86,21 @@ namespace DataManager.MasterData
         {
             DeleteAllData();
 
+            var currentDiContainer = this.GetCurrentContainer();
+
             //dispose all data manager lifecycle
-            foreach (var dataManagerLifecycle in this.LoadedDataManagerLifecycles)
+            foreach (var type in this.LoadedDataManagerTypes)
             {
-                dataManagerLifecycle.Dispose();
+                if (currentDiContainer.HasBinding(type) &&
+                    currentDiContainer.TryResolve(type) is IDataManagerLifecycle dataManagerLifecycle)
+                {
+                    dataManagerLifecycle.Dispose();
+                    DataManagerLifecyclesRequest.Add(dataManagerLifecycle);
+                }
             }
 
             //reload all data manager lifecycle
-            DataManagerLifecyclesRequest.AddRange(LoadedDataManagerLifecycles);
-            LoadedDataManagerLifecycles.Clear();
+            this.LoadedDataManagerTypes.Clear();
             return FlushFrameBatchAsync();
         }
 
@@ -159,7 +165,7 @@ namespace DataManager.MasterData
             foreach (var request in dataManagerLifecycles)
             {
                 request.OnDataInitialized();
-                this.LoadedDataManagerLifecycles.Add(request);
+                this.LoadedDataManagerTypes.Add(request.GetType());
             }
         }
 
