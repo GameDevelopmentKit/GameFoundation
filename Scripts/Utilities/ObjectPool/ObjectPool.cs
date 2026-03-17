@@ -25,7 +25,6 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
                 var transformObj = obj.transform;
                 transformObj.SetLocalPositionAndRotation(position, rotation);
-                transformObj.localRotation = rotation;
                 obj.SetActive(true);
             }
 
@@ -45,7 +44,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             // this.spawnedObjects.Remove(obj);
             obj.SetActive(false);
             if (!this.isDestroying && obj.transform.parent != this.transform)
-                obj.transform.SetParent(this.transform);
+                obj.transform.SetParent(this.transform, false);
         }
 
         public void CleanUpPooled()
