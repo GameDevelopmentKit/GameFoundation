@@ -163,9 +163,9 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         }
 
         private Dictionary<string, Task<GameObject>> prefabNameToLoadingTask = new();
-        public async UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position, Quaternion rotation)
+        public async UniTask<GameObject> Spawn(string prefabName, Transform? parent = null, Vector3 position = default, Quaternion rotation = default, bool spawnInWorldSpace = true)
         {
-            if (this.cachedLoadedPrefab.TryGetValue(prefabName, out var value)) return this.Spawn(value, parent, position, rotation);
+            if (this.cachedLoadedPrefab.TryGetValue(prefabName, out var value)) return this.Spawn(value, parent, position, rotation, spawnInWorldSpace);
 
             if (!this.prefabNameToLoadingTask.ContainsKey(prefabName))
             {
@@ -181,61 +181,30 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
                 this.mapPrefabToKey.Add(prefab, prefabName);
             }
 
-            return this.Spawn(prefab, parent, position, rotation);
+            return this.Spawn(prefab, parent, position, rotation, spawnInWorldSpace);
         }
         #endregion
 
         #region Spawn
-        public GameObject Spawn(GameObject prefab, Transform parent, Vector3 position, Quaternion rotation)
+        public GameObject Spawn(GameObject prefab, Transform? parent = null, Vector3 position = default, Quaternion rotation = default, bool spawnInWorldSpace = true)
         {
             if (prefab == null)
                 return null;
 
-            if (this.prefabToObjectPool.ContainsKey(prefab))
+            if (this.prefabToObjectPool.TryGetValue(prefab, out var pool))
             {
-                var pool       = this.prefabToObjectPool[prefab];
-                var spawnedObj = pool.Spawn(parent, position, rotation);
+                var spawnedObj = pool.Spawn(parent, position, rotation, spawnInWorldSpace);
                 this.spawnedObjToObjectPool.Add(spawnedObj, pool);
                 return spawnedObj;
             }
 
             this.CreatePool(prefab, 0, null);
-            return this.Spawn(prefab, parent, position, rotation);
+            return this.Spawn(prefab, parent, position, rotation, spawnInWorldSpace);
         }
 
-        public GameObject Spawn(GameObject prefab, Transform parent, Vector3 position) => this.Spawn(prefab, parent, position, Quaternion.identity);
+        public T Spawn<T>(T prefab, Transform? parent = null, Vector3 position = default, Quaternion rotation = default, bool spawnInWorldSpace = true) where T : Component => this.Spawn(prefab.gameObject, parent, position, rotation, spawnInWorldSpace).GetComponent<T>();
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation) => this.Spawn(prefab, null, position, rotation);
-
-        public GameObject Spawn(GameObject prefab, Transform parent) => this.Spawn(prefab, parent, Vector3.zero, Quaternion.identity);
-
-        public GameObject Spawn(GameObject prefab, Vector3 position) => this.Spawn(prefab, null, position, Quaternion.identity);
-
-        public GameObject Spawn(GameObject prefab) => this.Spawn(prefab, null, Vector3.zero, Quaternion.identity);
-
-        public T Spawn<T>(T prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Component => this.Spawn(prefab.gameObject, parent, position, rotation).GetComponent<T>();
-
-        public T Spawn<T>(T prefab, Vector3 position, Quaternion rotation) where T : Component => this.Spawn(prefab.gameObject, null, position, rotation).GetComponent<T>();
-
-        public T Spawn<T>(T prefab, Transform parent, Vector3 position) where T : Component => this.Spawn(prefab.gameObject, parent, position, Quaternion.identity).GetComponent<T>();
-
-        public T Spawn<T>(T prefab, Vector3 position) where T : Component => this.Spawn(prefab.gameObject, null, position, Quaternion.identity).GetComponent<T>();
-
-        public T Spawn<T>(T prefab, Transform parent) where T : Component => this.Spawn(prefab.gameObject, parent, Vector3.zero, Quaternion.identity).GetComponent<T>();
-
-        public T Spawn<T>(T prefab) where T : Component => this.Spawn(prefab.gameObject, null, Vector3.zero, Quaternion.identity).GetComponent<T>();
-
-        public UniTask<GameObject> Spawn(string prefabName, Transform parent) => this.Spawn(prefabName, parent, Vector3.zero, Quaternion.identity);
-
-        public UniTask<GameObject> Spawn(string prefabName, Vector3 position) => this.Spawn(prefabName, null, position, Quaternion.identity);
-
-        public UniTask<GameObject> Spawn(string prefabName, Transform parent, Vector3 position) => this.Spawn(prefabName, parent, position, Quaternion.identity);
-
-        public UniTask<GameObject> Spawn(string prefabName, Vector3 position, Quaternion rotation) => this.Spawn(prefabName, null, position, rotation);
-
-        public UniTask<GameObject> Spawn(string prefabName) => this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity);
-
-        public async UniTask<T> Spawn<T>(string prefabName) where T : Component => (await this.Spawn(prefabName, null, Vector3.zero, Quaternion.identity)).GetComponent<T>();
+        public async UniTask<T> Spawn<T>(string prefabName, Transform? parent = null, Vector3 position = default, Quaternion rotation = default, bool spawnInWorldSpace = true) where T : Component => (await this.Spawn(prefabName, parent, position, rotation, spawnInWorldSpace)).GetComponent<T>();
         #endregion
 
         #region Recycle
