@@ -9,7 +9,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
         public List<GameObject> pooledObjects = new List<GameObject>();
 
         private bool isDestroying;
-        public GameObject Spawn(Transform parent, Vector3 position, Quaternion rotation)
+        public GameObject Spawn(Transform? parent = null, Vector3 position = default, Quaternion rotation = default, bool spawnInWorldSpace = true)
         {
             GameObject obj;
             if (this.pooledObjects.Count == 0)
@@ -25,13 +25,12 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
 
                 var transformObj = obj.transform;
                 transformObj.SetLocalPositionAndRotation(position, rotation);
-                transformObj.localRotation = rotation;
                 obj.SetActive(true);
             }
 
             if (!ReferenceEquals(parent, null) && parent != obj.transform.parent)
             {
-                obj.transform.SetParent(parent);
+                obj.transform.SetParent(parent, spawnInWorldSpace);
             }
 
             // this.spawnedObjects.Add(obj);
@@ -45,7 +44,7 @@ namespace GameFoundation.Scripts.Utilities.ObjectPool
             // this.spawnedObjects.Remove(obj);
             obj.SetActive(false);
             if (!this.isDestroying && obj.transform.parent != this.transform)
-                obj.transform.SetParent(this.transform);
+                obj.transform.SetParent(this.transform, false);
         }
 
         public void CleanUpPooled()
