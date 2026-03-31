@@ -122,7 +122,7 @@ namespace DigitalRuby.SoundManagerNamespace
         {
             if (AudioSource != null && AudioSource.isPlaying && !Stopping)
             {
-                startVolume       = AudioSource.volume;
+                startVolume = AudioSource.volume;
                 // TargetVolume      = 0.0f;
                 currentMultiplier = stopMultiplier;
                 Stopping          = true;
@@ -567,8 +567,12 @@ namespace DigitalRuby.SoundManagerNamespace
             }
 
             volumes.Add(requestedVolume);
-            source.PlayOneShot(clip, requestedVolume);
-            instance.StartCoroutine(RemoveVolumeFromClip(clip, requestedVolume));
+
+            source.volume = requestedVolume;
+            source.clip   = clip;
+            source.Play();
+            // source.PlayOneShot(clip, requestedVolume);
+            // instance.StartCoroutine(RemoveVolumeFromClip(clip, requestedVolume));
 
             if (!listSoundOneshot.Contains(source))
             {
@@ -717,6 +721,7 @@ namespace DigitalRuby.SoundManagerNamespace
                 if (s != null && s.clip != null && s.clip.name.Equals(clipname))
                 {
                     s.Stop();
+                    s.gameObject.SetActive(false);
                 }
             }
 
