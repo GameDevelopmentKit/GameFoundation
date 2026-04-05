@@ -9,7 +9,7 @@
     using DataManager.Blueprint.APIHandler;
     using DataManager.Blueprint.BlueprintController;
     using DataManager.Blueprint.Signals;
-    using DataManager.LocalData;
+    using DataManager.LocalSave.Handler;
     using GameFoundation.Scripts.Utilities.Extension;
     using GameFoundation.Scripts.Utilities.LogService;
     using Zenject;
@@ -19,23 +19,23 @@
         public BlueprintSourceType BlueprintSource { get; } = BlueprintSourceType.Cloud;
 
 
-        private readonly SignalBus                signalBus;
+        private readonly SignalBus signalBus;
         private readonly IHandleLocalDataServices handleLocalDataServices;
-        private readonly BlueprintConfig          blueprintConfig;
-        private readonly FetchBlueprintInfo       fetchBlueprintInfo;
-        private readonly BlueprintDownloader      blueprintDownloader;
-        private readonly ILogService              logService;
+        private readonly BlueprintConfig blueprintConfig;
+        private readonly FetchBlueprintInfo fetchBlueprintInfo;
+        private readonly BlueprintDownloader blueprintDownloader;
+        private readonly ILogService logService;
 
 
         public CloudBlueprintLoader(SignalBus signalBus, IHandleLocalDataServices handleLocalDataServices, BlueprintConfig blueprintConfig,
             FetchBlueprintInfo fetchBlueprintInfo, BlueprintDownloader blueprintDownloader, ILogService logService)
         {
-            this.signalBus               = signalBus;
+            this.signalBus = signalBus;
             this.handleLocalDataServices = handleLocalDataServices;
-            this.blueprintConfig         = blueprintConfig;
-            this.fetchBlueprintInfo      = fetchBlueprintInfo;
-            this.blueprintDownloader     = blueprintDownloader;
-            this.logService              = logService;
+            this.blueprintConfig = blueprintConfig;
+            this.fetchBlueprintInfo = fetchBlueprintInfo;
+            this.blueprintDownloader = blueprintDownloader;
+            this.logService = logService;
         }
 
 
@@ -51,7 +51,7 @@
             if (File.Exists(this.blueprintConfig.BlueprintZipFilepath))
             {
                 // Save blueprint info to local
-                this.handleLocalDataServices.Save(newBlueprintInfo, true);
+                this.handleLocalDataServices.SaveData(newBlueprintInfo, true);
 
                 // Unzip file to memory
 
@@ -67,9 +67,9 @@
         }
         private async UniTask<(Dictionary<string, string> dataPathToRawBlueprint, HashSet<string> failedDataPathList)> UnzipBlueprint(HashSet<string> dataPathList)
         {
-            var       blueprintData = new Dictionary<string, string>();
-            var       listTask      = new List<Task>();
-            using var archive       = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath);
+            var blueprintData = new Dictionary<string, string>();
+            var listTask = new List<Task>();
+            using var archive = ZipFile.OpenRead(this.blueprintConfig.BlueprintZipFilepath);
             foreach (var entry in archive.Entries)
             {
                 var nameWithoutExtension = Path.GetFileNameWithoutExtension(entry.Name);
@@ -81,7 +81,7 @@
                     blueprintData.Add(nameWithoutExtension, task.Result);
                     dataPathList.Remove(nameWithoutExtension);
                 }));
-               
+
             }
 
             await Task.WhenAll(listTask);
@@ -91,7 +91,7 @@
 
 
         protected virtual async UniTask<bool> IsCachedBlueprintUpToDate(string url, string hash) =>
-            (await this.handleLocalDataServices.Load<BlueprintInfoData>()).Url == url &&
+            (await this.handleLocalDataServices.LoadData<BlueprintInfoData>()).Url == url &&
             MD5Utils.GetMD5HashFromFile(this.blueprintConfig.BlueprintZipFilepath) == hash;
 
 

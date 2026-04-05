@@ -1,0 +1,20 @@
+{
+    "name": "GameFoundation.Auth.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.Editor",
+        "GameFoundation.Auth",
+        "GameFoundation.GameConfigs"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

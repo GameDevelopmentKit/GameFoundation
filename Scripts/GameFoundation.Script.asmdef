@@ -5,7 +5,6 @@
         "GameFoundation.Utilities",
         "GameFoundation.AssetLibrary",
         "GameFoundation.UIModule",
-        "I2Localization.Scripts",
         "Zenject-Source",
         "Zenject-Signals",
         "UniTask",

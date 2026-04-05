@@ -1,0 +1,31 @@
+{
+    "name": "GameFoundation.Backup",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.DataManager",
+        "GameFoundation.Utilities",
+        "GameFoundation.GameConfigs",
+        "GameFoundation.Auth",
+        "UniTask",
+        "Zenject-Source",
+        "Zenject-Signals",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication",
+        "Unity.Services.CloudSave"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.services.cloudsave",
+            "expression": "",
+            "define": "UGS_CLOUD_SAVE"
+        }
+    ],
+    "noEngineReferences": false
+}

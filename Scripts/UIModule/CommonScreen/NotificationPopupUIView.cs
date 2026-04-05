@@ -55,8 +55,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         private void Init()
         {
             this.View.BtnOk.onClick.AddListener(this.OkAction);
-            this.View.BtnOkNotice.onClick.AddListener(this.OkNoticeAction);
-            this.View.BtnCancel.onClick.AddListener(this.CloseView);
+            this.View.BtnOkNotice.onClick.AddListener(this.OkAction);
+            this.View.BtnCancel.onClick.AddListener(this.CancelAction);
         }
 
         private void SwitchMode()
@@ -65,39 +65,38 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
             this.View.CloseObj.SetActive(this.Model.Type == NotificationType.Close);
         }
 
-        public override void CloseView()
+        public void CancelAction()
         {
             this.audioManager.PlaySound("button_click");
             base.CloseView();
-            this.Model.CloseAction?.Invoke();
             this.Model.CancelAction?.Invoke();
         }
-
+        
         private void OkAction()
         {
             this.audioManager.PlaySound("button_click");
             this.CloseView();
             this.Model.OkAction?.Invoke();
         }
-
-        private void OkNoticeAction()
-        {
-            this.audioManager.PlaySound("button_click");
-            this.CloseView();
-            this.Model.OkNoticeAction?.Invoke();
-        }
-
+        
         private void SetNotificationContent()
         {
             this.View.TxtTitle.text   = this.Model.Title;
             this.View.TxtContent.text = this.Model.Content;
+        }
+        
+        public override void CloseView()
+        {
+            base.CloseView();
+            this.Model.CloseAction?.Invoke();
         }
 
         public override void Dispose()
         {
             base.Dispose();
             this.View.BtnOk.onClick.RemoveListener(this.OkAction);
-            this.View.BtnCancel.onClick.RemoveListener(this.CloseView);
+            this.View.BtnCancel.onClick.RemoveListener(this.CancelAction);
+            this.View.BtnOkNotice.onClick.RemoveListener(this.OkAction);
         }
     }
 
@@ -108,7 +107,6 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         public NotificationType Type;
 
         public Action OkAction       { get; set; }
-        public Action OkNoticeAction { get; set; }
         public Action CancelAction   { get; set; }
         public Action CloseAction    { get; set; }
     }

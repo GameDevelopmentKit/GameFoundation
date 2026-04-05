@@ -11,11 +11,11 @@ namespace DataManager.Blueprint.APIHandler
     /// </summary>
     public class BlueprintDownloadRequest : BaseHttpRequest<GetBlueprintResponseData>
     {
-        #region zenject
+    #region zenject
 
         private readonly BlueprintReaderManager blueprintReaderManager;
 
-        #endregion
+    #endregion
 
         public BlueprintDownloadRequest(ILogService logger, BlueprintReaderManager blueprintReaderManager) :
             base(logger)
@@ -35,11 +35,12 @@ namespace DataManager.Blueprint.APIHandler
     using System.IO;
     using System.Net;
     using System.Threading.Tasks;
-    using DataManager.LocalData;
+    using DataManager.LocalSave.Handler;
+    using DataManager.UserData;
     using Newtonsoft.Json;
     using UnityEngine;
 
-    public class BlueprintInfoData : ILocalData
+    public class BlueprintInfoData : IUserData
     {
         public string Version;
         public string Hash;
@@ -54,19 +55,19 @@ namespace DataManager.Blueprint.APIHandler
         {
             try
             {
-                var request      = (HttpWebRequest)WebRequest.Create(fetchUri);
-                var response     = (HttpWebResponse)(await request.GetResponseAsync());
-                var reader       = new StreamReader(response.GetResponseStream());
+                var request = (HttpWebRequest)WebRequest.Create(fetchUri);
+                var response = (HttpWebResponse)(await request.GetResponseAsync());
+                var reader = new StreamReader(response.GetResponseStream());
                 var jsonResponse = await reader.ReadToEndAsync();
-                var definition   = new { data = new {blueprint = new BlueprintInfoData()} };
+                var definition = new { data = new { blueprint = new BlueprintInfoData() } };
                 var responseData = JsonConvert.DeserializeAnonymousType(jsonResponse, definition);
-                return responseData?.data.blueprint ;
+                return responseData?.data.blueprint;
             }
             catch (Exception e)
             {
                 //if fetch info fails get info from local
                 Debug.LogException(e);
-                return await this.handleLocalDataServices.Load<BlueprintInfoData>();
+                return await this.handleLocalDataServices.LoadData<BlueprintInfoData>();
             }
         }
     }

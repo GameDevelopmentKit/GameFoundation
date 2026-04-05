@@ -1,5 +1,64 @@
-Label {
-    font-size: 20px;
+/* ── GDK Manager Editor Styles ── */
+
+/* Header */
+.gdk-header {
+    font-size: 16px;
     -unity-font-style: bold;
     color: rgb(68, 138, 255);
+    margin: 8px 8px 4px 8px;
+}
+
+/* ── Tab Bar ── */
+.gdk-tab-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 0 4px;
+    padding: 2px 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.15);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+/* Tab button (inactive) */
+.gdk-tab-button {
+    font-size: 11px;
+    -unity-font-style: bold;
+    padding: 6px 14px;
+    margin: 2px 1px;
+    border-radius: 4px 4px 0 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0.08);
+    color: rgba(255, 255, 255, 0.55);
+    cursor: link;
+    min-width: 60px;
+}
+
+.gdk-tab-button:hover {
+    background-color: rgba(68, 138, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Tab button (active) */
+.gdk-tab-button--active {
+    background-color: rgba(68, 138, 255, 0.25);
+    color: rgb(68, 138, 255);
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(68, 138, 255);
+}
+
+.gdk-tab-button--active:hover {
+    background-color: rgba(68, 138, 255, 0.3);
+    color: rgb(100, 160, 255);
+}
+
+/* ── Tab Content Area ── */
+.gdk-tab-content {
+    flex-grow: 1;
+    padding: 8px;
+    margin: 0 4px 4px 4px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
 }

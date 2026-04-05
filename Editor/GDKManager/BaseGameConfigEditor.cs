@@ -1,10 +1,12 @@
-﻿
+
+    using System.Text.RegularExpressions;
     using GameConfigs;
     using UnityEngine;
     using UnityEngine.UIElements;
 
     public interface IGameConfigEditor
     {
+        string        TabName { get; }
         void          InitConfig(GDKConfig gdkConfig);
         VisualElement LoadView();
     }
@@ -14,6 +16,15 @@
         protected          T      Config;
         protected abstract string ConfigName { get; }
         protected abstract string ConfigPath { get; }
+
+        public virtual string TabName
+        {
+            get
+            {
+                var raw = this.ConfigName.Replace("Config", "").Trim();
+                return Regex.Replace(raw, "(?<=[a-z])([A-Z])", " $1");
+            }
+        }
 
         public virtual void InitConfig(GDKConfig gdkConfig)
         {

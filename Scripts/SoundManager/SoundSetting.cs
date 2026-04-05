@@ -1,9 +1,9 @@
 namespace GameFoundation.Scripts.Models
 {
-    using DataManager.LocalData;
+    using DataManager.UserData;
     using UniRx;
 
-    public class SoundSetting : ILocalData
+    public class SoundSetting : IUserData
     {
         public BoolReactiveProperty  MasterVolume { get; set; } = new(true);
         public BoolReactiveProperty  MuteMusic    { get; set; } = new(false);

@@ -1,0 +1,28 @@
+{
+    "name": "GameFoundation.Auth",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.Utilities",
+        "GameFoundation.GameConfigs",
+        "UniTask",
+        "Zenject-Source",
+        "Zenject-Signals",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.services.authentication",
+            "expression": "",
+            "define": "UGS_AUTH"
+        }
+    ],
+    "noEngineReferences": false
+}

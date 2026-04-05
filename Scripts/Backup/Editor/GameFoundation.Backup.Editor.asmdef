@@ -1,0 +1,21 @@
+{
+    "name": "GameFoundation.Backup.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.Backup",
+        "GameFoundation.GameConfigs",
+        "GameFoundation.GameConfigs.Editor",
+        "GameFoundation.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
     public class GeneralConfigEditor : VisualElement, IGameConfigEditor
     {
         private GDKConfig gdkConfig;
+        public  string    TabName => "General";
         public  void      InitConfig(GDKConfig gdkConfigParam) { this.gdkConfig = gdkConfigParam;}
         
         public VisualElement LoadView()

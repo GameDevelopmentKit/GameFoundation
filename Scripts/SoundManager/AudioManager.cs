@@ -3,6 +3,7 @@
     using System;
     using Cysharp.Threading.Tasks;
     using DataManager.MasterData;
+    using DataManager.UserData;
     using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
@@ -38,51 +39,38 @@
         //UniTask RestoreBGM();
         UniTask SetBaseBGM(string name, int priority = 0);
         UniTask AdjustContextPriority(string id, int newPriority);
+
+        void  SetSoundValue(float value);
+        void  SetMusicValue(float value);
+        float SoundVolume { get; }
+        float MusicVolume { get; }
     }
 
-    public class AudioManager : IAudioManager, IInitializable, IDisposable
+    public class AudioManager : BaseDataManager<SoundSetting>, IAudioManager
     {
         public static string       AudioSourceKey = "AudioSource";
         public static AudioManager Instance { get; private set; }
 
-        private readonly SignalBus            signalBus;
-        private readonly SoundSetting         soundSetting;
         private readonly IGameAssets          gameAssets;
         private readonly SoundEffectManager   sfx;
         private readonly MusicPlaylistManager music;
 
-        private CompositeDisposable compositeDisposable;
-        private float               MusicGlobalVolume =1f;
-        private float               SoundGlobalVolume =1f;
-
         public AudioManager(
             SignalBus signalBus,
-            SoundSetting soundSetting,
             IGameAssets gameAssets,
             SoundEffectManager sfx,
             MusicPlaylistManager music
-        )
+        ) : base(signalBus)
         {
-            this.signalBus    = signalBus;
-            this.soundSetting = soundSetting;
-            this.gameAssets   = gameAssets;
-            this.sfx          = sfx;
-            this.music        = music;
-            Instance          = this;
+            this.gameAssets = gameAssets;
+            this.sfx        = sfx;
+            this.music      = music;
+            Instance        = this;
         }
 
-        public void Initialize() { this.signalBus.Subscribe<MasterDataReadySignal>(this.SubscribeMasterAudio); }
-
-        private void SubscribeMasterAudio()
+        public override void OnDataInitialized()
         {
-            this.compositeDisposable = new CompositeDisposable
-            {
-                this.soundSetting.MusicValue.Subscribe(this.SetMusicValue),
-                this.soundSetting.SoundValue.Subscribe(this.SetSoundValue),
-            };
-
-            this.MusicGlobalVolume = this.soundSetting.MusicValue.Value;
-            this.SoundGlobalVolume = this.soundSetting.SoundValue.Value;
+            this.music.UpdateVolume(this.MusicVolume);
         }
 
         public void PlaySound(string name, AudioSource sender)
@@ -96,23 +84,23 @@
 
         public void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
-            // Debug.Log("Using volume: " + SoundGlobalVolume);
+            // Debug.Log("Using volume: " + Data.SoundValue.Value);
             if (isLoop)
-                sfx.PlayLoop(name, volumeScale * SoundGlobalVolume, fadeSeconds).Forget();
+                sfx.PlayLoop(name, volumeScale * SoundVolume, fadeSeconds).Forget();
             else
-                sfx.PlayOneShot(name, volumeScale * SoundGlobalVolume).Forget();
+                sfx.PlayOneShot(name, volumeScale * SoundVolume).Forget();
         }
 
         public void PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
             if (clip != null)
-                sfx.PlayOneShot(clip, volumeScale*SoundGlobalVolume).Forget();
+                sfx.PlayOneShot(clip, volumeScale * SoundVolume).Forget();
         }
 
         public void PlaySound(AudioClip clip, float pitch)
         {
             if (clip != null)
-                sfx.PlayOneShot(clip, pitch, SoundGlobalVolume).Forget();
+                sfx.PlayOneShot(clip, pitch, SoundVolume).Forget();
         }
 
         public void StopSound(string name) => sfx.StopLoop(name);
@@ -126,16 +114,15 @@
         }
 
         #region Playlist / Music
-
         public void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
-            music.Play(musicName, volumeScale*MusicGlobalVolume, fadeSeconds, persist).Forget();
+            music.Play(musicName, volumeScale * this.MusicVolume, fadeSeconds, persist).Forget();
         }
 
         public void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
         {
             if (audioClip != null)
-                music.Play(audioClip, volumeScale*MusicGlobalVolume, fadeSeconds, persist).Forget();
+                music.Play(audioClip, volumeScale * this.MusicVolume, fadeSeconds, persist).Forget();
         }
 
         public void StopPlayList() => music.Stop();
@@ -155,35 +142,31 @@
         public bool IsPlayingPlayList() => music.IsPlaying();
 
         public void StopAllPlayList() => StopPlayList();
-
         #endregion
 
         #region Everything
-
         public void PauseEverything()
         {
-           this.music.Pause();
-           this.sfx.StopAll();
+            this.music.Pause();
+            this.sfx.StopAll();
             AudioListener.pause = true;
         }
 
         public void ResumeEverything()
         {
             AudioListener.pause = false;
-            this.music.Resume(); 
+            this.music.Resume();
         }
-
         #endregion
 
         #region Context BGM
-
         public async UniTask PushContextBGM(string name, int priority, float fade = 1f, float volume = 1f)
         {
             var clip = await gameAssets.LoadAssetAsync<AudioClip>(name).ToUniTask();
 
             if (clip == null) return;
 
-            await PushContextBGM(clip, priority, fade, volume*MusicGlobalVolume, name);
+            await PushContextBGM(clip, priority, fade, volume * this.MusicVolume, name);
         }
 
         public async UniTask PushContextBGM(AudioClip clip, int priority, float fade = 1f, float volume = 1f, string name = "")
@@ -212,24 +195,23 @@
 
             return UniTask.CompletedTask;
         }
-
         #endregion
 
         #region Sound Settings
+        public float SoundVolume => Data != null ? Data.SoundValue.Value : 0f;
 
-        protected void SetSoundValue(float value)
+        public float MusicVolume => Data != null ? Data.MusicValue.Value : 0f;
+
+        public void SetSoundValue(float value)
         {
-            SoundGlobalVolume = value;
+            this.Data.SoundValue.Value = value;
         }
 
-        protected void SetMusicValue(float value)
+        public void SetMusicValue(float value)
         {
-            MusicGlobalVolume = value;
-            this.music.UpdateVolume(MusicGlobalVolume);
+            Data.MusicValue.Value = value;
+            this.music.UpdateVolume(value);
         }
-
         #endregion
-
-        public void Dispose() => compositeDisposable?.Dispose();
     }
 }
