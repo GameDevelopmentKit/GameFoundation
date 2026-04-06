@@ -144,7 +144,6 @@
             else
             {
                 token.Cancel();
-                token.Dispose();
                 token                        = new CancellationTokenSource();
                 this.frequencySoundDic[name] = token;
             }
