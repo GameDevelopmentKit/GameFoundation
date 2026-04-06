@@ -114,6 +114,19 @@ namespace UIModule.Adapter
         public BaseUIItemPresenter<TView, TModel> GetPresenterAtIndex(int index) { return this.indexToPresenter[index]; }
 
         public List<BaseUIItemPresenter<TView, TModel>> GetPresenters() { return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList(); }
+
+        protected override void Dispose()
+        {
+            base.Dispose();
+            
+            foreach (var presenter in this.viewToPresenter.Values)
+            {
+                presenter.Dispose();
+            }
+            
+            this.viewToPresenter.Clear();
+            this.indexToPresenter.Clear();
+        }
     }
 
     [Serializable]

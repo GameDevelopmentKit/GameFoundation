@@ -26,7 +26,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private DiContainer diContainer;
 
         #region OSA implementation
-
         protected override void Start()
         {
             this.Models = new SimpleDataHelper<TModel>(this);
@@ -78,7 +77,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 this.presenters[index].BindData(model);
             }
         }
-
         #endregion
 
         // These are common data manipulation methods
@@ -90,20 +88,20 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         {
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
-            
+
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
                     baseUIItemPresenter.Dispose();
-                } 
+                }
             }
 
             await UniTask.WaitUntil(() => this.IsInitialized, PlayerLoopTiming.Update, cancelToken);
             //this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
-        
+
         /// <summary>
         /// We need this because the original method only update to  this.VisibleItemsCount - 1
         /// </summary>
@@ -119,8 +117,22 @@ namespace GameFoundation.Scripts.UIModule.Adapter
                 this.ForceUpdateViewsHolderIfVisible(i);
             }
         }
-        
+
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
+
+        protected override void Dispose()
+        {
+            base.Dispose();
+            if (this.presenters != null)
+            {
+                foreach (var baseUIItemPresenter in this.presenters)
+                {
+                    baseUIItemPresenter.Dispose();
+                }
+
+                presenters.Clear();
+            }
+        }
     }
 
 // This class keeps references to an item's views.

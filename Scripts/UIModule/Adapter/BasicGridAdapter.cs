@@ -110,6 +110,19 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
 
         public List<TPresenter> GetPresenters() => this.presenters;
+
+        protected override void Dispose()
+        {
+            base.Dispose();
+            if (this.presenters != null)
+            {
+                foreach (var baseUIItemPresenter in this.presenters)
+                {
+                    baseUIItemPresenter.Dispose();
+                }
+                presenters.Clear();
+            }
+        }
     }
 
     // This class keeps references to an item's views.
