@@ -437,7 +437,13 @@ namespace DigitalRuby.SoundManagerNamespace
             {
                 if (!s.Stopping)
                 {
-                    s.TargetVolume = s.OriginalTargetVolume * musicVolume;
+                    s.TargetVolume       = s.OriginalTargetVolume * musicVolume;
+                    s.AudioSource.volume = s.TargetVolume;
+                }
+
+                if (!s.AudioSource.isPlaying)
+                {
+                    s.AudioSource.Play();
                 }
             }
 
@@ -501,14 +507,15 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void StopLooping(AudioSource source, List<LoopingAudioSource> sources)
         {
-            foreach (LoopingAudioSource s in sources)
+            for (var index = 0; index < sources.Count; index++)
             {
+                var s = sources[index];
+
                 if (s.AudioSource == source)
                 {
                     s.Stop();
                     source = null;
-
-                    break;
+                    sources.Remove(s);
                 }
             }
 
@@ -542,10 +549,10 @@ namespace DigitalRuby.SoundManagerNamespace
                 volumes             = new List<float>();
                 soundsOneShot[clip] = volumes;
             }
-            else if (volumes.Count == MaxDuplicateAudioClips)
-            {
-                return;
-            }
+            // else if (volumes.Count == MaxDuplicateAudioClips)
+            // {
+            //     return;
+            // }
 
             float requestedVolume = (volumeScale * soundVolume);
 

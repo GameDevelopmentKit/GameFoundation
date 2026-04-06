@@ -99,6 +99,7 @@
         public virtual async UniTask PlaySound(string name, AudioSource sender)
         {
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(name);
+            sender.gameObject.SetActive(true);
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
@@ -106,7 +107,7 @@
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name, isAutoUnload: autoUnload);
             var audioSource = await this.GetAudioSource();
-
+            audioSource.gameObject.SetActive(true);
             if (isLoop)
             {
                 if (this.loopingSoundNameToSources.ContainsKey(name))
@@ -170,6 +171,7 @@
             catch (OperationCanceledException)
             {
                 this.logService.Log($"[Audio] Frequency sound '{name}' cancelled.");
+                token.Dispose();
             }
             finally
             {
@@ -178,6 +180,7 @@
                 {
                     this.frequencySoundDic.Remove(name);
                 }
+                token.Dispose();
             }
         }
 
