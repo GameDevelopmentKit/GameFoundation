@@ -1,10 +1,10 @@
-﻿namespace GameFoundation.Scripts.Utilities
+namespace GameFoundation.Scripts.Utilities
 {
     using System;
     using Cysharp.Threading.Tasks;
     using DataManager.MasterData;
     using DataManager.UserData;
-    using DigitalRuby.SoundManagerNamespace;
+
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using SoundManager;
@@ -20,8 +20,7 @@
         void  StopSound(string name);
         void  StopAllSound();
         void  StopAll();
-        void  PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
-        void  PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false);
+
         void  StopPlayList();
         void  SetPlayListTime(float time);
         float GetPlayListTime();
@@ -114,16 +113,6 @@
         }
 
         #region Playlist / Music
-        public void PlayPlayList(string musicName, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
-        {
-            music.Play(musicName, volumeScale * this.MusicVolume, fadeSeconds, persist).Forget();
-        }
-
-        public void PlayPlayList(AudioClip audioClip, bool random = false, float volumeScale = 1f, float fadeSeconds = 1f, bool persist = false)
-        {
-            if (audioClip != null)
-                music.Play(audioClip, volumeScale * this.MusicVolume, fadeSeconds, persist).Forget();
-        }
 
         public void StopPlayList() => music.Stop();
 

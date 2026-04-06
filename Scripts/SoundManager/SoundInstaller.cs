@@ -8,7 +8,7 @@
         public override void InstallBindings()
         {
             this.Container.Bind<SoundEffectManager>().AsCached().NonLazy();
-            this.Container.Bind<MusicPlaylistManager>().AsCached().NonLazy();
+            this.Container.BindInterfacesAndSelfTo<MusicPlaylistManager>().AsCached().NonLazy();
             
             //note: AudioManager is singleton, rebind an inherited AudioManager will cause 2 instance and just one subcribes compositeDisposable 
             //do not rebind IAudioManager to another AudioManager, if do rebind, keep the inherited AudioManager and comment this
