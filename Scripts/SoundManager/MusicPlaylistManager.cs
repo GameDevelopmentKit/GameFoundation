@@ -26,8 +26,7 @@ namespace SoundManager
 
         // Context BGM (async only for asset loading)
         UniTask PushContextBGM(string id, AudioClip clip, int priority,
-            float fadeSeconds = 0.8f, float volumeScale = 1f,
-            List<AudioClip> playlist = null, bool loopPlaylist = false);
+            float fadeSeconds = 0.8f, float volumeScale = 1f);
 
         void RemoveContextBGM(string id, float fadeSeconds = 0.8f);
 
@@ -147,14 +146,10 @@ namespace SoundManager
     /// </summary>
     class BgmContextEntry : IComparable<BgmContextEntry>, IHasId
     {
-        public int    Priority;
-
-        public List<AudioClip> Playlist;
-        public bool            LoopPlaylist;
-        public int             PlaylistIndex;
-
-        public float Volume;
-        public float FadeSeconds;
+        public int       Priority;
+        public AudioClip Clip;
+        public float     Volume;
+        public float     FadeSeconds;
 
         public int CompareTo(BgmContextEntry other)
             => Priority.CompareTo(other.Priority); // max priority first
@@ -245,7 +240,7 @@ namespace SoundManager
             if (activeSource == null || inactiveSource == null) return;
             if (fadeMode == FadeMode.None) return;
 
-            fadeElapsed += Time.deltaTime;
+            fadeElapsed += Time.unscaledDeltaTime;
             float t = fadeDuration > 0f ? Mathf.Clamp01(fadeElapsed / fadeDuration) : 1f;
 
             switch (fadeMode)
@@ -387,7 +382,7 @@ namespace SoundManager
         {
             var top = queue.Count > 0 ? queue.Peek() : baseBgm;
 
-            if (top == null || top.Playlist == null || top.Playlist.Count == 0)
+            if (top == null || top.Clip == null)
             {
                 // Nothing to play — fade out current
                 if (activeSource != null && activeSource.isPlaying)
@@ -396,8 +391,7 @@ namespace SoundManager
             }
 
             float fade = fadeOverride >= 0f ? fadeOverride : top.FadeSeconds;
-            var targetClip = top.Playlist[top.PlaylistIndex];
-            CrossFadeTo(targetClip, fade, top.Volume);
+            CrossFadeTo(top.Clip, fade, top.Volume);
         }
 
         // ── Public API: Context BGM ─────────────────────────────────────
@@ -414,13 +408,11 @@ namespace SoundManager
 
             baseBgm = new BgmContextEntry
             {
-                Id            = name,
-                Priority      = priority,
-                Playlist      = new List<AudioClip>() { clip },
-                PlaylistIndex = 0,
-                LoopPlaylist  = false,
-                Volume        = 1f,
-                FadeSeconds   = 1f
+                Id          = name,
+                Priority    = priority,
+                Clip        = clip,
+                Volume      = 1f,
+                FadeSeconds = 1f
             };
 
             // If nothing in the queue, start playing baseBgm
@@ -433,39 +425,29 @@ namespace SoundManager
         /// </summary>
         public async UniTask PushContextBGM(
             string id, AudioClip clip, int priority,
-            float fadeSeconds = 0.8f, float volumeScale = 1f,
-            List<AudioClip> playlist = null, bool loopPlaylist = false)
+            float fadeSeconds = 0.8f, float volumeScale = 1f)
         {
             await WaitInit();
-
-            List<AudioClip> list =
-                playlist != null && playlist.Count > 0
-                    ? playlist
-                    : new List<AudioClip>() { clip };
 
             if (!queue.TryGet(id, out var entry))
             {
                 entry = new BgmContextEntry
                 {
-                    Id            = id,
-                    Priority      = priority,
-                    Playlist      = list,
-                    LoopPlaylist  = loopPlaylist,
-                    PlaylistIndex = 0,
-                    Volume        = volumeScale,
-                    FadeSeconds   = fadeSeconds
+                    Id          = id,
+                    Priority    = priority,
+                    Clip        = clip,
+                    Volume      = volumeScale,
+                    FadeSeconds = fadeSeconds
                 };
 
                 queue.Push(entry);
             }
             else
             {
-                entry.Priority      = priority;
-                entry.Playlist      = list;
-                entry.LoopPlaylist  = loopPlaylist;
-                entry.PlaylistIndex = 0;
-                entry.Volume        = volumeScale;
-                entry.FadeSeconds   = fadeSeconds;
+                entry.Priority    = priority;
+                entry.Clip        = clip;
+                entry.Volume      = volumeScale;
+                entry.FadeSeconds = fadeSeconds;
 
                 queue.Resort(entry);
             }

@@ -53,6 +53,7 @@ namespace GameFoundation.Scripts.Utilities
         private readonly IGameAssets          gameAssets;
         private readonly SoundEffectManager   sfx;
         private readonly MusicPlaylistManager music;
+        private readonly CompositeDisposable  disposables = new();
 
         public AudioManager(
             SignalBus signalBus,
@@ -70,6 +71,17 @@ namespace GameFoundation.Scripts.Utilities
         public override void OnDataInitialized()
         {
             this.music.UpdateVolume(this.MusicVolume);
+
+            // Subscribe to mute/master toggles to update music volume in real-time
+            Data.MuteMusic.Subscribe(_ => this.music.UpdateVolume(this.MusicVolume)).AddTo(disposables);
+            Data.MuteSound.Subscribe(_ => { }).AddTo(disposables); // SFX volume is read per-call
+            Data.MasterVolume.Subscribe(_ => this.music.UpdateVolume(this.MusicVolume)).AddTo(disposables);
+        }
+
+        public override void Dispose()
+        {
+            disposables.Dispose();
+            base.Dispose();
         }
 
         public void PlaySound(string name, AudioSource sender)
@@ -92,7 +104,10 @@ namespace GameFoundation.Scripts.Utilities
 
         public void PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
         {
-            if (clip != null)
+            if (clip == null) return;
+            if (isLoop)
+                sfx.PlayLoop(clip, volumeScale * SoundVolume);
+            else
                 sfx.PlayOneShot(clip, volumeScale * SoundVolume).Forget();
         }
 
@@ -155,7 +170,7 @@ namespace GameFoundation.Scripts.Utilities
 
             if (clip == null) return;
 
-            await PushContextBGM(clip, priority, fade, volume * this.MusicVolume, name);
+            await PushContextBGM(clip, priority, fade, volume, name);
         }
 
         public async UniTask PushContextBGM(AudioClip clip, int priority, float fade = 1f, float volume = 1f, string name = "")
@@ -187,9 +202,25 @@ namespace GameFoundation.Scripts.Utilities
         #endregion
 
         #region Sound Settings
-        public float SoundVolume => Data != null ? Data.SoundValue.Value : 0f;
+        public float SoundVolume
+        {
+            get
+            {
+                if (Data == null) return 0f;
+                if (!Data.MasterVolume.Value || Data.MuteSound.Value) return 0f;
+                return Data.SoundValue.Value;
+            }
+        }
 
-        public float MusicVolume => Data != null ? Data.MusicValue.Value : 0f;
+        public float MusicVolume
+        {
+            get
+            {
+                if (Data == null) return 0f;
+                if (!Data.MasterVolume.Value || Data.MuteMusic.Value) return 0f;
+                return Data.MusicValue.Value;
+            }
+        }
 
         public void SetSoundValue(float value)
         {
@@ -199,7 +230,7 @@ namespace GameFoundation.Scripts.Utilities
         public void SetMusicValue(float value)
         {
             Data.MusicValue.Value = value;
-            this.music.UpdateVolume(value);
+            this.music.UpdateVolume(this.MusicVolume);
         }
         #endregion
     }
