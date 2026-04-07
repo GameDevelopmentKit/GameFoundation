@@ -1,27 +1,22 @@
-﻿namespace SoundManager
+namespace SoundManager
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using Cysharp.Threading.Tasks;
-    using DigitalRuby.SoundManagerNamespace;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Utilities;
-    using GameFoundation.Scripts.Utilities.Extension;
     using UnityEngine;
+    using Zenject;
     using Object = UnityEngine.Object;
 
     public interface IMusicPlaylistManager
     {
-        UniTask Play(string name, float volumeScale = 1f, float fadeSeconds = 0.8f, bool persist = false);
-        UniTask Play(AudioClip clip, float volumeScale = 1f, float fadeSeconds = 0.8f, bool persist = false);
-
         void Stop();
         void Pause();
         void Resume();
         bool IsPlaying();
 
-        void  SetTime(float time);
+        void SetTime(float time);
         float GetTime();
 
         void SetPitch(float pitch);
@@ -29,19 +24,18 @@
 
         void StopAll();
 
-        // Priority context API
+        // Context BGM (async only for asset loading)
         UniTask PushContextBGM(string id, AudioClip clip, int priority,
-            float fadeSeconds = 0.8f, float volumeScale = 1f,
-            List<AudioClip> playlist = null, bool loopPlaylist = false);
+            float fadeSeconds = 0.8f, float volumeScale = 1f);
 
-        UniTask RemoveContextBGM(string id, float fadeSeconds = 0.8f);
+        void RemoveContextBGM(string id, float fadeSeconds = 0.8f);
 
-        UniTask SetBaseBGM(string name, int priority =0);
+        UniTask SetBaseBGM(string name, int priority = 0);
 
         void AdjustContextPriority(string id, int newPriority);
         void UpdateVolume(float globalVolume);
     }
-    
+
     public interface IHasId
     {
         string Id { get; }
@@ -50,14 +44,13 @@
     /// <summary>
     /// PRIORITY QUEUE (MAX-HEAP)
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class PriorityQueue<T> where T : IComparable<T>,IHasId
+    public class PriorityQueue<T> where T : IComparable<T>, IHasId
     {
         private readonly List<T> heap = new();
 
-        public int  Count   => heap.Count;
+        public int Count => heap.Count;
         public void Clear() => heap.Clear();
-        public T    Peek()  => heap.Count > 0 ? heap[0] : default;
+        public T Peek() => heap.Count > 0 ? heap[0] : default;
 
         public void Push(T item)
         {
@@ -72,9 +65,17 @@
             if (index < 0) return false;
 
             int last = heap.Count - 1;
+
+            if (index == last)
+            {
+                heap.RemoveAt(last);
+                return true;
+            }
+
             heap[index] = heap[last];
             heap.RemoveAt(last);
 
+            HeapifyUp(index);
             HeapifyDown(index);
 
             return true;
@@ -99,7 +100,7 @@
                 if (heap[index].CompareTo(heap[p]) <= 0) break;
 
                 (heap[index], heap[p]) = (heap[p], heap[index]);
-                index                  = p;
+                index = p;
             }
         }
 
@@ -109,17 +110,17 @@
 
             while (true)
             {
-                int left    = index * 2 + 1;
-                int right   = index * 2 + 2;
+                int left = index * 2 + 1;
+                int right = index * 2 + 2;
                 int largest = index;
 
-                if (left <= last && heap[left].CompareTo(heap[largest]) > 0) largest   = left;
+                if (left <= last && heap[left].CompareTo(heap[largest]) > 0) largest = left;
                 if (right <= last && heap[right].CompareTo(heap[largest]) > 0) largest = right;
 
                 if (largest == index) break;
 
                 (heap[index], heap[largest]) = (heap[largest], heap[index]);
-                index                        = largest;
+                index = largest;
             }
         }
 
@@ -137,20 +138,15 @@
             result = default;
             return false;
         }
-
     }
 
     /// <summary>
     /// BGM CONTEXT ENTRY
     /// </summary>
-    class BgmContextEntry : IComparable<BgmContextEntry>,IHasId
+    class BgmContextEntry : IComparable<BgmContextEntry>, IHasId
     {
-        public int    Priority;
-
-        public List<AudioClip> Playlist; 
-        public bool            LoopPlaylist;
-        public int             PlaylistIndex;
-
+        public int Priority;
+        public AudioClip Clip;
         public float Volume;
         public float FadeSeconds;
 
@@ -159,33 +155,57 @@
 
         public string Id { get; set; }
     }
-    
-    public class MusicPlaylistManager : IMusicPlaylistManager, IDisposable
+
+    /// <summary>
+    /// Tick-based state machine for BGM crossfading.
+    /// No async loops, no CancellationTokenSource.
+    /// </summary>
+    public class MusicPlaylistManager : IMusicPlaylistManager, IDisposable, ITickable
     {
         private readonly IGameAssets assets;
 
         private AudioSource activeSource;
         private AudioSource inactiveSource;
 
-        private CancellationTokenSource fadeCts;
-        private CancellationTokenSource playCts;
+        private bool initialized;
+        private bool disposed;
 
-        private bool initialized = false;
+        private readonly PriorityQueue<BgmContextEntry> queue = new();
 
-        private readonly PriorityQueue<BgmContextEntry>      queue = new();
-        //private readonly Dictionary<string, BgmContextEntry> dict  = new();
-
+        /// <summary>
+        /// baseBgm is the permanent fallback — it is NEVER in the queue.
+        /// When the queue empties, we always fall back to baseBgm.
+        /// </summary>
         private BgmContextEntry baseBgm;
-        
+
         private float globalVolume = 1f;
+
+        // ── Fade state machine ──────────────────────────────────────────
+
+        private enum FadeMode
+        {
+            None,
+            FadeIn,
+            CrossFade,
+            FadeOut
+        }
+
+        private FadeMode fadeMode;
+        private float fadeElapsed;
+        private float fadeDuration;
+        private float fadeFromVolume; // active source start volume
+        private float fadeToVolume; // active source target volume
+        private float fadeNewFromVolume; // inactive source start (crossfade)
+        private float fadeNewToVolume; // inactive source target (crossfade)
+
+        // ── Constructor ─────────────────────────────────────────────────
 
         public MusicPlaylistManager(IGameAssets assets)
         {
             this.assets = assets;
-            InitializeAsync().Forget();
         }
 
-        private async UniTaskVoid InitializeAsync()
+        public async UniTaskVoid InitializeAsync(float initialVolume)
         {
             var prefab = await assets.LoadAssetAsync<GameObject>(AudioManager.AudioSourceKey);
 
@@ -195,17 +215,19 @@
             Object.DontDestroyOnLoad(go1);
             Object.DontDestroyOnLoad(go2);
 
-            activeSource   = go1.GetComponent<AudioSource>();
+            activeSource = go1.GetComponent<AudioSource>();
             inactiveSource = go2.GetComponent<AudioSource>();
 
-            activeSource.playOnAwake   = false;
+            activeSource.playOnAwake = false;
             inactiveSource.playOnAwake = false;
 
-            activeSource.loop   = true;
+            activeSource.loop = true;
             inactiveSource.loop = true;
 
-            activeSource.volume   = 0f;
+            activeSource.volume = 0f;
             inactiveSource.volume = 0f;
+
+            UpdateVolume(initialVolume);
 
             initialized = true;
         }
@@ -216,382 +238,365 @@
                 await UniTask.Yield();
         }
 
-        private void CancelFade()
+        // ── ITickable ───────────────────────────────────────────────────
+
+        public void Tick()
         {
-            fadeCts?.Cancel();
-            fadeCts?.Dispose();
-            fadeCts = null;
-        }
+            if (disposed || !initialized) return;
+            if (activeSource == null || inactiveSource == null) return;
+            if (fadeMode == FadeMode.None) return;
 
-        private void CancelPlayWait()
-        {
-            playCts?.Cancel();
-            playCts?.Dispose();
-            playCts = null;
-        }
+            fadeElapsed += Time.unscaledDeltaTime;
+            float t = fadeDuration > 0f ? Mathf.Clamp01(fadeElapsed / fadeDuration) : 1f;
 
-        /// <summary>
-        /// simple play
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="volumeScale"></param>
-        /// <param name="fadeSeconds"></param>
-        /// <param name="persist"></param>
-        public async UniTask Play(string name, float volumeScale = 1f, float fadeSeconds = 0.8f, bool persist = false)
-        {
-            var clip = await assets.LoadAssetAsync<AudioClip>(name);
-            await Play(clip, volumeScale, fadeSeconds, persist);
-        }
-
-        public async UniTask Play(AudioClip clip, float volumeScale = 1f, float fadeSeconds = 0.8f, bool persist = false)
-        {
-            if (clip == null) return;
-            await WaitInit();
-
-            CancelFade();
-            CancelPlayWait();
-            
-            queue.Clear();
-
-            var entry = new BgmContextEntry
+            switch (fadeMode)
             {
-                Id            = "temp",
-                Priority      = int.MaxValue,
-                Playlist      = new List<AudioClip>() { clip },
-                LoopPlaylist  = false,
-                PlaylistIndex = 0,
-                Volume        = volumeScale,
-                FadeSeconds   = fadeSeconds
-            };
-            
-            queue.Push(entry);
+                case FadeMode.FadeIn:
+                    activeSource.volume = Mathf.Lerp(fadeFromVolume, fadeToVolume, t);
+                    break;
 
-            playCts = new CancellationTokenSource();
-            await PlayContext(entry, playCts.Token);
+                case FadeMode.CrossFade:
+                    // Fade out old (active), fade in new (inactive)
+                    activeSource.volume = Mathf.Lerp(fadeFromVolume, 0f, t);
+                    inactiveSource.volume = Mathf.Lerp(fadeNewFromVolume, fadeNewToVolume, t);
+                    break;
+
+                case FadeMode.FadeOut:
+                    activeSource.volume = Mathf.Lerp(fadeFromVolume, 0f, t);
+                    break;
+            }
+
+            if (t >= 1f) CompleteFade();
         }
 
         /// <summary>
-        /// set base bgm
+        /// Finalize the current fade — swap sources if crossfade, stop old source.
         /// </summary>
-        /// <param name="name"></param>
+        private void CompleteFade()
+        {
+            switch (fadeMode)
+            {
+                case FadeMode.FadeIn:
+                    if (activeSource != null) activeSource.volume = fadeToVolume;
+                    break;
+
+                case FadeMode.CrossFade:
+                    if (activeSource != null)
+                    {
+                        activeSource.Stop();
+                        activeSource.volume = 0f;
+                    }
+
+                    if (inactiveSource != null) inactiveSource.volume = fadeNewToVolume;
+
+                    // Swap: the new source becomes active
+                    (activeSource, inactiveSource) = (inactiveSource, activeSource);
+                    break;
+
+                case FadeMode.FadeOut:
+                    if (activeSource != null)
+                    {
+                        activeSource.Stop();
+                        activeSource.volume = 0f;
+                    }
+
+                    break;
+            }
+
+            fadeMode = FadeMode.None;
+        }
+
+        /// <summary>
+        /// If a fade is in progress, snap it to completion immediately.
+        /// This ensures clean state before starting a new fade.
+        /// </summary>
+        private void SnapCurrentFade()
+        {
+            if (fadeMode != FadeMode.None) CompleteFade();
+        }
+
+        // ── Crossfade / Fade helpers (sync — state machine driven) ──────
+
+        private void CrossFadeTo(AudioClip newClip, float duration, float targetVolume)
+        {
+            if (activeSource == null || inactiveSource == null) return;
+
+            // Snap any in-progress fade first
+            SnapCurrentFade();
+
+            targetVolume *= globalVolume;
+
+            // No old clip playing → simple fade in
+            if (activeSource.clip == null || !activeSource.isPlaying)
+            {
+                activeSource.clip = newClip;
+                activeSource.time = 0f;
+                activeSource.volume = 0f;
+                activeSource.Play();
+
+                fadeMode = FadeMode.FadeIn;
+                fadeElapsed = 0f;
+                fadeDuration = duration;
+                fadeFromVolume = 0f;
+                fadeToVolume = targetVolume;
+                return;
+            }
+
+            // Same clip already playing → just adjust volume
+            if (activeSource.clip == newClip && activeSource.isPlaying)
+            {
+                fadeMode = FadeMode.FadeIn;
+                fadeElapsed = 0f;
+                fadeDuration = duration;
+                fadeFromVolume = activeSource.volume;
+                fadeToVolume = targetVolume;
+                return;
+            }
+
+            // Different clip → crossfade
+            inactiveSource.clip = newClip;
+            inactiveSource.time = 0f;
+            inactiveSource.volume = 0f;
+            inactiveSource.Play();
+
+            fadeMode = FadeMode.CrossFade;
+            fadeElapsed = 0f;
+            fadeDuration = duration;
+            fadeFromVolume = activeSource.volume; // old → 0
+            fadeToVolume = 0f;
+            fadeNewFromVolume = 0f; // new → target
+            fadeNewToVolume = targetVolume;
+        }
+
+        private void StartFadeOut(float duration)
+        {
+            if (activeSource == null) return;
+
+            SnapCurrentFade();
+
+            fadeMode = FadeMode.FadeOut;
+            fadeElapsed = 0f;
+            fadeDuration = duration;
+            fadeFromVolume = activeSource.volume;
+        }
+
+        // ── Queue evaluation ────────────────────────────────────────────
+
+        /// <summary>
+        /// Check the top of the priority queue and crossfade to it if needed.
+        /// Falls back to baseBgm when queue is empty.
+        /// </summary>
+        private void EvaluateTopAndPlay(float fadeOverride = -1f)
+        {
+            var top = queue.Count > 0 ? queue.Peek() : baseBgm;
+
+            if (top == null || top.Clip == null)
+            {
+                // Nothing to play — fade out current
+                if (activeSource != null && activeSource.isPlaying)
+                    StartFadeOut(0.5f);
+                return;
+            }
+
+            float fade = fadeOverride >= 0f ? fadeOverride : top.FadeSeconds;
+            CrossFadeTo(top.Clip, fade, top.Volume);
+        }
+
+        // ── Public API: Context BGM ─────────────────────────────────────
+
+        /// <summary>
+        /// Set the base (fallback) BGM. Stored separately from the queue.
+        /// Played when the queue is empty.
+        /// </summary>
         public async UniTask SetBaseBGM(string name, int priority = 0)
         {
             var clip = await assets.LoadAssetAsync<AudioClip>(name);
-
             if (clip == null) return;
-            await this.WaitInit();
+            await WaitInit();
+
             baseBgm = new BgmContextEntry
             {
-                Id            = "base",
-                Priority      = priority,
-                Playlist      = new List<AudioClip>() { clip },
-                PlaylistIndex = 0,
-                LoopPlaylist  = false,
-                Volume        = 1f,
-                FadeSeconds   = 1f
+                Id = name,
+                Priority = priority,
+                Clip = clip,
+                Volume = 1f,
+                FadeSeconds = 1f
             };
-            
-            {
-                queue.Push(baseBgm);
-            }
+
+            // If nothing in the queue, start playing baseBgm
+            if (queue.Count == 0)
+                EvaluateTopAndPlay();
         }
 
         /// <summary>
-        /// adjust priority of a playlist
+        /// Push or update a context BGM entry in the priority queue.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="newPriority"></param>
-        public void AdjustContextPriority(string id, int newPriority)
-        {
-            if(!this.queue.TryGet(id, out var entry)) return;
-            entry.Priority = newPriority;
-            queue.Resort(entry);
-
-            var top        = queue.Peek();
-            var targetClip = top.Playlist[top.PlaylistIndex];
-
-            // Cancel any pending play operation
-            playCts?.Cancel();
-            playCts?.Dispose();
-            playCts = null;
-
-            
-            if (activeSource.clip != targetClip)
-            {
-                playCts = new CancellationTokenSource();
-                PlayContext(top, playCts.Token).Forget();
-            }
-            else
-            {
-                fadeCts?.Cancel();
-                fadeCts?.Dispose();
-                fadeCts = new CancellationTokenSource();
-                FadeVolume(activeSource, activeSource.volume, top.Volume, top.FadeSeconds, fadeCts.Token).Forget();
-            }
-        }
-
-        public void UpdateVolume(float globalVolume)
-        {
-            this.globalVolume = globalVolume;
-            FadeVolume(this.activeSource, this.activeSource.volume, globalVolume, 0.2f, CancellationToken.None).Forget();
-        }
-
-        /// <summary>
-        /// create or update entry of queue
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="clip"></param>
-        /// <param name="priority"></param>
-        /// <param name="fadeSeconds"></param>
-        /// <param name="volumeScale"></param>
-        /// <param name="playlist"></param>
-        /// <param name="loopPlaylist"></param>
         public async UniTask PushContextBGM(
             string id, AudioClip clip, int priority,
-            float fadeSeconds = 0.8f, float volumeScale = 1f,
-            List<AudioClip> playlist = null, bool loopPlaylist = false)
+            float fadeSeconds = 0.8f, float volumeScale = 1f)
         {
             await WaitInit();
 
-            CancelFade();
-            CancelPlayWait();
-            
-            List<AudioClip> list =
-                playlist != null && playlist.Count > 0
-                    ? playlist
-                    : new List<AudioClip>() { clip };
-
-            if (!this.queue.TryGet(id, out var entry))
+            if (!queue.TryGet(id, out var entry))
             {
                 entry = new BgmContextEntry
                 {
-                    Id            = id,
-                    Priority      = priority,
-                    Playlist      = list,
-                    LoopPlaylist  = loopPlaylist,
-                    PlaylistIndex = 0,
-                    Volume        = volumeScale,
-                    FadeSeconds   = fadeSeconds
+                    Id = id,
+                    Priority = priority,
+                    Clip = clip,
+                    Volume = volumeScale,
+                    FadeSeconds = fadeSeconds
                 };
-                
+
                 queue.Push(entry);
             }
             else
             {
-                entry.Priority      = priority;
-                entry.Playlist      = list;
-                entry.LoopPlaylist  = loopPlaylist;
-                entry.PlaylistIndex = 0;
-                entry.Volume        = volumeScale;
-                entry.FadeSeconds   = fadeSeconds;
+                entry.Priority = priority;
+                entry.Clip = clip;
+                entry.Volume = volumeScale;
+                entry.FadeSeconds = fadeSeconds;
 
                 queue.Resort(entry);
             }
 
-            var top        = queue.Peek();
-            var targetClip = top.Playlist[top.PlaylistIndex];
-
-            if (activeSource.clip != targetClip)
-            {
-                // new clip → replay
-                playCts = new CancellationTokenSource();
-                await PlayContext(top, playCts.Token);
-            }
-            else
-            {
-                // same clip -> update volume
-                FadeVolume(activeSource, activeSource.volume, top.Volume, top.FadeSeconds, default).Forget();
-            }
+            EvaluateTopAndPlay(fadeSeconds);
         }
 
         /// <summary>
-        /// remove entry
+        /// Remove a context BGM entry from the queue and play the next top.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="fadeSeconds"></param>
-        public async UniTask RemoveContextBGM(string id, float fadeSeconds = 0.8f)
+        public void RemoveContextBGM(string id, float fadeSeconds = 0.8f)
         {
-            if (!this.queue.TryGet(id, out var entry))
-                return;
+            if (!queue.TryGet(id, out var entry)) return;
 
             queue.Remove(entry);
-
-            BgmContextEntry next = queue.Count > 0 ? queue.Peek() : baseBgm;
-
-            if (next != null)
-            {
-                next.FadeSeconds = fadeSeconds;
-                playCts          = new CancellationTokenSource();
-                await PlayContext(next, playCts.Token);
-            }
-            else
-            {
-                Stop();
-            }
+            EvaluateTopAndPlay(fadeSeconds);
         }
 
         /// <summary>
-        /// play playlist of entry
+        /// Adjust priority of a context BGM entry.
+        /// Priority ≤ 0 is treated as removal (the caller is done with this BGM).
         /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="ct"></param>
-        private async UniTask PlayContext(BgmContextEntry entry, CancellationToken ct)
+        public void AdjustContextPriority(string id, int newPriority)
         {
-            if (entry == null || entry.Playlist == null || entry.Playlist.Count == 0)
-                return;
+            if (!queue.TryGet(id, out var entry)) return;
 
-            await WaitInit();
-            CancelFade();
-
-            var clip = entry.Playlist[entry.PlaylistIndex];
-
-            if (activeSource.clip == clip && activeSource.isPlaying)
-                return;
-
-            await PlayPlaylist(entry, ct);
-        }
-
-        private async UniTask PlayPlaylist(BgmContextEntry entry, CancellationToken ct)
-        {
-            int count = entry.Playlist.Count;
-
-            while (!ct.IsCancellationRequested)
+            if (newPriority <= 0)
             {
-                var clip = entry.Playlist[entry.PlaylistIndex];
-
-                await CrossFadeTo(clip, entry.FadeSeconds, entry.Volume);
-                await WaitForClipEnd(activeSource, ct);
-
-                if (count == 1 || !entry.LoopPlaylist)
-                    break;
-
-                entry.PlaylistIndex = (entry.PlaylistIndex + 1) % count;
-            }
-        }
-        
-        private async UniTask CrossFadeTo(AudioClip newClip, float fade, float volume)
-        {
-            fadeCts = new CancellationTokenSource();
-            var ct = fadeCts.Token;
-            volume *= this.globalVolume;
-
-            bool hasOld = activeSource.clip != null && activeSource.isPlaying;
-
-            if (!hasOld)
-            {
-                activeSource.clip   = newClip;
-                activeSource.time   = 0f;
-                activeSource.volume = 0f;
-                activeSource.Play();
-
-                await FadeVolume(activeSource, 0f, volume, fade, ct);
-
+                // Treat as removal — caller is done with this BGM
+                RemoveContextBGM(id, entry.FadeSeconds);
                 return;
             }
 
-            // Setup next clip
-            inactiveSource.clip   = newClip;
-            inactiveSource.time   = 0f;
-            inactiveSource.volume = 0f;
-            inactiveSource.Play();
-
-            float t        = 0f;
-            float startOld = activeSource.volume;
-
-            while (t < fade)
-            {
-                if (ct.IsCancellationRequested) return;
-
-                t += Time.deltaTime;
-                float k            = t / fade;
-
-                inactiveSource.volume = k * volume;
-                activeSource.volume   = (1f - k) * startOld;
-
-                await UniTask.Yield();
-            }
-
-            inactiveSource.volume = volume;
-
-            activeSource.Stop();
-            (activeSource, inactiveSource) = (inactiveSource, activeSource);
+            entry.Priority = newPriority;
+            queue.Resort(entry);
+            EvaluateTopAndPlay();
         }
 
-        private async UniTask FadeVolume(AudioSource src, float from, float to, float duration, CancellationToken ct)
+        public void UpdateVolume(float newGlobalVolume)
         {
-            float t = 0f;
+            globalVolume = newGlobalVolume;
 
-            while (t < duration)
+            // If currently fading, adjust the target volume
+            if (fadeMode == FadeMode.FadeIn)
             {
-                if (ct.IsCancellationRequested) return;
-
-                t          += Time.deltaTime;
-                src.volume =  Mathf.Lerp(from, to, t / duration)* globalVolume;
-
-                await UniTask.Yield();
+                var top = queue.Count > 0 ? queue.Peek() : baseBgm;
+                if (top != null) fadeToVolume = top.Volume * globalVolume;
             }
-
-            src.volume = to;
-        }
-
-        private async UniTask WaitForClipEnd(AudioSource src, CancellationToken ct)
-        {
-            float length = src.clip.length;
-
-            float t = 0f;
-
-            while (t < length)
+            else if (fadeMode == FadeMode.CrossFade)
             {
-                if (!src.isPlaying || ct.IsCancellationRequested)
-                    return;
-
-                t          += Time.deltaTime;
-                await UniTask.Yield();
+                var top = queue.Count > 0 ? queue.Peek() : baseBgm;
+                if (top != null) fadeNewToVolume = top.Volume * globalVolume;
+            }
+            else if (fadeMode == FadeMode.None && activeSource != null && activeSource.isPlaying)
+            {
+                // No fade in progress — set volume directly with a quick fade
+                var top = queue.Count > 0 ? queue.Peek() : baseBgm;
+                if (top != null)
+                {
+                    float targetVol = top.Volume * globalVolume;
+                    fadeMode = FadeMode.FadeIn;
+                    fadeElapsed = 0f;
+                    fadeDuration = 0.2f;
+                    fadeFromVolume = activeSource.volume;
+                    fadeToVolume = targetVol;
+                }
             }
         }
-        
+
+        // ── Public API: Playback control ────────────────────────────────
+
         public void Stop()
         {
-            activeSource.Stop();
-            inactiveSource.Stop();
+            SnapCurrentFade();
+
+            if (activeSource != null) activeSource.Stop();
+            if (inactiveSource != null) inactiveSource.Stop();
         }
 
         public void Pause()
         {
-            activeSource.Pause();
-            inactiveSource.Pause();
+            if (activeSource != null) activeSource.Pause();
+            if (inactiveSource != null) inactiveSource.Pause();
         }
 
         public void Resume()
         {
-            activeSource.UnPause();
-            inactiveSource.UnPause();
+            if (activeSource != null) activeSource.UnPause();
+            if (inactiveSource != null) inactiveSource.UnPause();
         }
 
-        public bool IsPlaying() => activeSource.isPlaying;
+        public bool IsPlaying() => activeSource != null && activeSource.isPlaying;
 
         public void SetTime(float time)
         {
-            if (activeSource.clip != null)
+            if (activeSource != null && activeSource.clip != null)
                 activeSource.time = Mathf.Clamp(time, 0, activeSource.clip.length);
         }
 
-        public float GetTime() => activeSource.clip != null ? activeSource.time : 0;
+        public float GetTime() => activeSource != null && activeSource.clip != null
+            ? activeSource.time
+            : 0;
 
         public void SetPitch(float pitch)
         {
-            activeSource.pitch   = pitch;
-            inactiveSource.pitch = pitch;
+            if (activeSource != null) activeSource.pitch = pitch;
+            if (inactiveSource != null) inactiveSource.pitch = pitch;
         }
 
         public void SetLoop(bool loop)
         {
-            activeSource.loop   = loop;
-            inactiveSource.loop = loop;
+            if (activeSource != null) activeSource.loop = loop;
+            if (inactiveSource != null) inactiveSource.loop = loop;
         }
 
         public void StopAll() => Stop();
 
-        public void Dispose() { Stop(); }
+        // ── Dispose ─────────────────────────────────────────────────────
+
+        public void Dispose()
+        {
+            disposed = true;
+            fadeMode = FadeMode.None;
+
+            if (activeSource != null)
+            {
+                activeSource.Stop();
+                Object.Destroy(activeSource.gameObject);
+                activeSource = null;
+            }
+
+            if (inactiveSource != null)
+            {
+                inactiveSource.Stop();
+                Object.Destroy(inactiveSource.gameObject);
+                inactiveSource = null;
+            }
+
+            queue.Clear();
+            baseBgm = null;
+            initialized = false;
+        }
     }
 }
