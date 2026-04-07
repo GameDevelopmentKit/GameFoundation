@@ -4,7 +4,6 @@ namespace GameFoundation.Scripts.Utilities
     using Cysharp.Threading.Tasks;
     using DataManager.MasterData;
     using DataManager.UserData;
-
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.Models;
     using SoundManager;
@@ -14,24 +13,29 @@ namespace GameFoundation.Scripts.Utilities
 
     public interface IAudioManager
     {
-        void  PlaySound(string name, AudioSource sender);
-        void  PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
-        void  PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false);
-        void  StopSound(string name);
-        void  StopAllSound();
-        void  StopAll();
+        void PlaySound(string name, AudioSource sender);
 
-        void  StopPlayList();
-        void  SetPlayListTime(float time);
+        void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f,
+            bool isAverage = false);
+
+        void PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f,
+            bool isAverage = false);
+
+        void StopSound(string name);
+        void StopAllSound();
+        void StopAll();
+
+        void StopPlayList();
+        void SetPlayListTime(float time);
         float GetPlayListTime();
-        void  SetPlayListPitch(float pitch);
-        void  SetPlayListLoop(bool isLoop);
-        void  PausePlayList();
-        void  ResumePlayList();
-        bool  IsPlayingPlayList();
-        void  StopAllPlayList();
-        void  PauseEverything();
-        void  ResumeEverything();
+        void SetPlayListPitch(float pitch);
+        void SetPlayListLoop(bool isLoop);
+        void PausePlayList();
+        void ResumePlayList();
+        bool IsPlayingPlayList();
+        void StopAllPlayList();
+        void PauseEverything();
+        void ResumeEverything();
 
         UniTask PushContextBGM(string name, int priority, float fade = 1f, float volume = 1f);
 
@@ -39,21 +43,21 @@ namespace GameFoundation.Scripts.Utilities
         UniTask SetBaseBGM(string name, int priority = 0);
         UniTask AdjustContextPriority(string id, int newPriority);
 
-        void  SetSoundValue(float value);
-        void  SetMusicValue(float value);
+        void SetSoundValue(float value);
+        void SetMusicValue(float value);
         float SoundVolume { get; }
         float MusicVolume { get; }
     }
 
     public class AudioManager : BaseDataManager<SoundSetting>, IAudioManager
     {
-        public static string       AudioSourceKey = "AudioSource";
+        public static string AudioSourceKey = "AudioSource";
         public static AudioManager Instance { get; private set; }
 
-        private readonly IGameAssets          gameAssets;
-        private readonly SoundEffectManager   sfx;
+        private readonly IGameAssets gameAssets;
+        private readonly SoundEffectManager sfx;
         private readonly MusicPlaylistManager music;
-        private readonly CompositeDisposable  disposables = new();
+        private readonly CompositeDisposable disposables = new();
 
         public AudioManager(
             SignalBus signalBus,
@@ -63,18 +67,20 @@ namespace GameFoundation.Scripts.Utilities
         ) : base(signalBus)
         {
             this.gameAssets = gameAssets;
-            this.sfx        = sfx;
-            this.music      = music;
-            Instance        = this;
+            this.sfx = sfx;
+            this.music = music;
+            Instance = this;
         }
 
         public override void OnDataInitialized()
         {
-            this.music.UpdateVolume(this.MusicVolume);
+            // Apply the user's saved volume BEFORE any music starts playing.
+            // BGM methods (SetBaseBGM, PushContextBGM) are gated on dataReady,
+            // so setting it here ensures correct volume from the first note.
+            this.music.InitializeAsync(this.MusicVolume).Forget();
 
             // Subscribe to mute/master toggles to update music volume in real-time
             Data.MuteMusic.Subscribe(_ => this.music.UpdateVolume(this.MusicVolume)).AddTo(disposables);
-            Data.MuteSound.Subscribe(_ => { }).AddTo(disposables); // SFX volume is read per-call
             Data.MasterVolume.Subscribe(_ => this.music.UpdateVolume(this.MusicVolume)).AddTo(disposables);
         }
 
@@ -93,7 +99,8 @@ namespace GameFoundation.Scripts.Utilities
             });
         }
 
-        public void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
+        public void PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f,
+            bool isAverage = false)
         {
             // Debug.Log("Using volume: " + Data.SoundValue.Value);
             if (isLoop)
@@ -102,7 +109,8 @@ namespace GameFoundation.Scripts.Utilities
                 sfx.PlayOneShot(name, volumeScale * SoundVolume).Forget();
         }
 
-        public void PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false)
+        public void PlaySound(AudioClip clip, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f,
+            bool isAverage = false)
         {
             if (clip == null) return;
             if (isLoop)
@@ -146,9 +154,11 @@ namespace GameFoundation.Scripts.Utilities
         public bool IsPlayingPlayList() => music.IsPlaying();
 
         public void StopAllPlayList() => StopPlayList();
+
         #endregion
 
         #region Everything
+
         public void PauseEverything()
         {
             this.music.Pause();
@@ -161,9 +171,11 @@ namespace GameFoundation.Scripts.Utilities
             AudioListener.pause = false;
             this.music.Resume();
         }
+
         #endregion
 
         #region Context BGM
+
         public async UniTask PushContextBGM(string name, int priority, float fade = 1f, float volume = 1f)
         {
             var clip = await gameAssets.LoadAssetAsync<AudioClip>(name).ToUniTask();
@@ -173,14 +185,15 @@ namespace GameFoundation.Scripts.Utilities
             await PushContextBGM(clip, priority, fade, volume, name);
         }
 
-        public async UniTask PushContextBGM(AudioClip clip, int priority, float fade = 1f, float volume = 1f, string name = "")
+        public async UniTask PushContextBGM(AudioClip clip, int priority, float fade = 1f, float volume = 1f,
+            string name = "")
         {
             if (clip == null) return;
 
             await music.PushContextBGM(
                 name,
                 clip: clip,
-                priority: priority, // context BGM priority
+                priority: priority,
                 fadeSeconds: fade,
                 volumeScale: volume
             );
@@ -199,9 +212,11 @@ namespace GameFoundation.Scripts.Utilities
 
             return UniTask.CompletedTask;
         }
+
         #endregion
 
         #region Sound Settings
+
         public float SoundVolume
         {
             get
@@ -232,6 +247,7 @@ namespace GameFoundation.Scripts.Utilities
             Data.MusicValue.Value = value;
             this.music.UpdateVolume(this.MusicVolume);
         }
+
         #endregion
     }
 }

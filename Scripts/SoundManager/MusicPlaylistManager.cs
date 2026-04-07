@@ -16,7 +16,7 @@ namespace SoundManager
         void Resume();
         bool IsPlaying();
 
-        void  SetTime(float time);
+        void SetTime(float time);
         float GetTime();
 
         void SetPitch(float pitch);
@@ -48,9 +48,9 @@ namespace SoundManager
     {
         private readonly List<T> heap = new();
 
-        public int  Count   => heap.Count;
+        public int Count => heap.Count;
         public void Clear() => heap.Clear();
-        public T    Peek()  => heap.Count > 0 ? heap[0] : default;
+        public T Peek() => heap.Count > 0 ? heap[0] : default;
 
         public void Push(T item)
         {
@@ -100,7 +100,7 @@ namespace SoundManager
                 if (heap[index].CompareTo(heap[p]) <= 0) break;
 
                 (heap[index], heap[p]) = (heap[p], heap[index]);
-                index                  = p;
+                index = p;
             }
         }
 
@@ -110,17 +110,17 @@ namespace SoundManager
 
             while (true)
             {
-                int left    = index * 2 + 1;
-                int right   = index * 2 + 2;
+                int left = index * 2 + 1;
+                int right = index * 2 + 2;
                 int largest = index;
 
-                if (left <= last && heap[left].CompareTo(heap[largest]) > 0) largest   = left;
+                if (left <= last && heap[left].CompareTo(heap[largest]) > 0) largest = left;
                 if (right <= last && heap[right].CompareTo(heap[largest]) > 0) largest = right;
 
                 if (largest == index) break;
 
                 (heap[index], heap[largest]) = (heap[largest], heap[index]);
-                index                        = largest;
+                index = largest;
             }
         }
 
@@ -138,7 +138,6 @@ namespace SoundManager
             result = default;
             return false;
         }
-
     }
 
     /// <summary>
@@ -146,10 +145,10 @@ namespace SoundManager
     /// </summary>
     class BgmContextEntry : IComparable<BgmContextEntry>, IHasId
     {
-        public int       Priority;
+        public int Priority;
         public AudioClip Clip;
-        public float     Volume;
-        public float     FadeSeconds;
+        public float Volume;
+        public float FadeSeconds;
 
         public int CompareTo(BgmContextEntry other)
             => Priority.CompareTo(other.Priority); // max priority first
@@ -183,25 +182,30 @@ namespace SoundManager
 
         // ── Fade state machine ──────────────────────────────────────────
 
-        private enum FadeMode { None, FadeIn, CrossFade, FadeOut }
+        private enum FadeMode
+        {
+            None,
+            FadeIn,
+            CrossFade,
+            FadeOut
+        }
 
         private FadeMode fadeMode;
-        private float    fadeElapsed;
-        private float    fadeDuration;
-        private float    fadeFromVolume;   // active source start volume
-        private float    fadeToVolume;     // active source target volume
-        private float    fadeNewFromVolume; // inactive source start (crossfade)
-        private float    fadeNewToVolume;   // inactive source target (crossfade)
+        private float fadeElapsed;
+        private float fadeDuration;
+        private float fadeFromVolume; // active source start volume
+        private float fadeToVolume; // active source target volume
+        private float fadeNewFromVolume; // inactive source start (crossfade)
+        private float fadeNewToVolume; // inactive source target (crossfade)
 
         // ── Constructor ─────────────────────────────────────────────────
 
         public MusicPlaylistManager(IGameAssets assets)
         {
             this.assets = assets;
-            InitializeAsync().Forget();
         }
 
-        private async UniTaskVoid InitializeAsync()
+        public async UniTaskVoid InitializeAsync(float initialVolume)
         {
             var prefab = await assets.LoadAssetAsync<GameObject>(AudioManager.AudioSourceKey);
 
@@ -211,17 +215,19 @@ namespace SoundManager
             Object.DontDestroyOnLoad(go1);
             Object.DontDestroyOnLoad(go2);
 
-            activeSource   = go1.GetComponent<AudioSource>();
+            activeSource = go1.GetComponent<AudioSource>();
             inactiveSource = go2.GetComponent<AudioSource>();
 
-            activeSource.playOnAwake   = false;
+            activeSource.playOnAwake = false;
             inactiveSource.playOnAwake = false;
 
-            activeSource.loop   = true;
+            activeSource.loop = true;
             inactiveSource.loop = true;
 
-            activeSource.volume   = 0f;
+            activeSource.volume = 0f;
             inactiveSource.volume = 0f;
+
+            UpdateVolume(initialVolume);
 
             initialized = true;
         }
@@ -251,7 +257,7 @@ namespace SoundManager
 
                 case FadeMode.CrossFade:
                     // Fade out old (active), fade in new (inactive)
-                    activeSource.volume   = Mathf.Lerp(fadeFromVolume, 0f, t);
+                    activeSource.volume = Mathf.Lerp(fadeFromVolume, 0f, t);
                     inactiveSource.volume = Mathf.Lerp(fadeNewFromVolume, fadeNewToVolume, t);
                     break;
 
@@ -280,6 +286,7 @@ namespace SoundManager
                         activeSource.Stop();
                         activeSource.volume = 0f;
                     }
+
                     if (inactiveSource != null) inactiveSource.volume = fadeNewToVolume;
 
                     // Swap: the new source becomes active
@@ -292,6 +299,7 @@ namespace SoundManager
                         activeSource.Stop();
                         activeSource.volume = 0f;
                     }
+
                     break;
             }
 
@@ -321,43 +329,43 @@ namespace SoundManager
             // No old clip playing → simple fade in
             if (activeSource.clip == null || !activeSource.isPlaying)
             {
-                activeSource.clip   = newClip;
-                activeSource.time   = 0f;
+                activeSource.clip = newClip;
+                activeSource.time = 0f;
                 activeSource.volume = 0f;
                 activeSource.Play();
 
-                fadeMode       = FadeMode.FadeIn;
-                fadeElapsed    = 0f;
-                fadeDuration   = duration;
+                fadeMode = FadeMode.FadeIn;
+                fadeElapsed = 0f;
+                fadeDuration = duration;
                 fadeFromVolume = 0f;
-                fadeToVolume   = targetVolume;
+                fadeToVolume = targetVolume;
                 return;
             }
 
             // Same clip already playing → just adjust volume
             if (activeSource.clip == newClip && activeSource.isPlaying)
             {
-                fadeMode       = FadeMode.FadeIn;
-                fadeElapsed    = 0f;
-                fadeDuration   = duration;
+                fadeMode = FadeMode.FadeIn;
+                fadeElapsed = 0f;
+                fadeDuration = duration;
                 fadeFromVolume = activeSource.volume;
-                fadeToVolume   = targetVolume;
+                fadeToVolume = targetVolume;
                 return;
             }
 
             // Different clip → crossfade
-            inactiveSource.clip   = newClip;
-            inactiveSource.time   = 0f;
+            inactiveSource.clip = newClip;
+            inactiveSource.time = 0f;
             inactiveSource.volume = 0f;
             inactiveSource.Play();
 
-            fadeMode          = FadeMode.CrossFade;
-            fadeElapsed       = 0f;
-            fadeDuration      = duration;
-            fadeFromVolume    = activeSource.volume;   // old → 0
-            fadeToVolume      = 0f;
-            fadeNewFromVolume = 0f;                    // new → target
-            fadeNewToVolume   = targetVolume;
+            fadeMode = FadeMode.CrossFade;
+            fadeElapsed = 0f;
+            fadeDuration = duration;
+            fadeFromVolume = activeSource.volume; // old → 0
+            fadeToVolume = 0f;
+            fadeNewFromVolume = 0f; // new → target
+            fadeNewToVolume = targetVolume;
         }
 
         private void StartFadeOut(float duration)
@@ -366,9 +374,9 @@ namespace SoundManager
 
             SnapCurrentFade();
 
-            fadeMode       = FadeMode.FadeOut;
-            fadeElapsed    = 0f;
-            fadeDuration   = duration;
+            fadeMode = FadeMode.FadeOut;
+            fadeElapsed = 0f;
+            fadeDuration = duration;
             fadeFromVolume = activeSource.volume;
         }
 
@@ -408,10 +416,10 @@ namespace SoundManager
 
             baseBgm = new BgmContextEntry
             {
-                Id          = name,
-                Priority    = priority,
-                Clip        = clip,
-                Volume      = 1f,
+                Id = name,
+                Priority = priority,
+                Clip = clip,
+                Volume = 1f,
                 FadeSeconds = 1f
             };
 
@@ -433,10 +441,10 @@ namespace SoundManager
             {
                 entry = new BgmContextEntry
                 {
-                    Id          = id,
-                    Priority    = priority,
-                    Clip        = clip,
-                    Volume      = volumeScale,
+                    Id = id,
+                    Priority = priority,
+                    Clip = clip,
+                    Volume = volumeScale,
                     FadeSeconds = fadeSeconds
                 };
 
@@ -444,9 +452,9 @@ namespace SoundManager
             }
             else
             {
-                entry.Priority    = priority;
-                entry.Clip        = clip;
-                entry.Volume      = volumeScale;
+                entry.Priority = priority;
+                entry.Clip = clip;
+                entry.Volume = volumeScale;
                 entry.FadeSeconds = fadeSeconds;
 
                 queue.Resort(entry);
@@ -508,11 +516,11 @@ namespace SoundManager
                 if (top != null)
                 {
                     float targetVol = top.Volume * globalVolume;
-                    fadeMode       = FadeMode.FadeIn;
-                    fadeElapsed    = 0f;
-                    fadeDuration   = 0.2f;
+                    fadeMode = FadeMode.FadeIn;
+                    fadeElapsed = 0f;
+                    fadeDuration = 0.2f;
                     fadeFromVolume = activeSource.volume;
-                    fadeToVolume   = targetVol;
+                    fadeToVolume = targetVol;
                 }
             }
         }
@@ -553,13 +561,13 @@ namespace SoundManager
 
         public void SetPitch(float pitch)
         {
-            if (activeSource != null) activeSource.pitch   = pitch;
+            if (activeSource != null) activeSource.pitch = pitch;
             if (inactiveSource != null) inactiveSource.pitch = pitch;
         }
 
         public void SetLoop(bool loop)
         {
-            if (activeSource != null) activeSource.loop   = loop;
+            if (activeSource != null) activeSource.loop = loop;
             if (inactiveSource != null) inactiveSource.loop = loop;
         }
 
@@ -587,7 +595,7 @@ namespace SoundManager
             }
 
             queue.Clear();
-            baseBgm     = null;
+            baseBgm = null;
             initialized = false;
         }
     }
