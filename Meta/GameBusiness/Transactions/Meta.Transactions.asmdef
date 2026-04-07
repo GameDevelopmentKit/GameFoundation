@@ -1,0 +1,23 @@
+{
+    "name": "Meta.Transactions",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "Zenject-Source",
+        "GameFoundation.Utilities",
+        "GameFoundation.DataManager",
+        "3rd.IAP",
+        "3rdCore.Ads",
+        "Zenject-Signals",
+        "Meta.Wallet"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

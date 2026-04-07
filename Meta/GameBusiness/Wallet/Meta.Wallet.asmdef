@@ -1,0 +1,21 @@
+{
+    "name": "Meta.Wallet",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "GameFoundation.Utilities",
+        "UniRx",
+        "Zenject-Source",
+        "GameFoundation.DataManager",
+        "Zenject-Signals"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

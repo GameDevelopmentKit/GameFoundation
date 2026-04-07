@@ -1,0 +1,23 @@
+{
+    "name": "Meta.InterstitialOffer",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.DataManager",
+        "GameFoundation.Utilities",
+        "3rd.IAP",
+        "Zenject-Source",
+        "Zenject-Signals",
+        "UniTask",
+        "Meta.Transactions",
+        "Meta.Wallet"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

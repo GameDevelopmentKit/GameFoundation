@@ -1,0 +1,17 @@
+{
+    "name": "Meta.RequirementSystem",
+    "rootNamespace": "",
+    "references": [
+        "Zenject-Source",
+        "GameFoundation.DataManager"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,7 +1,7 @@
 {
   "name": "com.gdk.core",
-  "displayName": "Game Foundation Core",
-  "description": "Game Foundation provides pre-built common game systems that are flexible and extensible so that developers can focus on building unique gameplay.",
+  "displayName": "GDK Core",
+  "description": "GDK Core provides pre-built common game systems that are flexible and extensible so that developers can focus on building unique gameplay.",
   "version": "0.0.1",
   "unity": "2021.3",
   "license": "MIT",
