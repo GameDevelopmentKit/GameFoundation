@@ -4,12 +4,16 @@
     "references": [
         "GameFoundation.DataManager",
         "GameFoundation.Utilities",
+        "GameFoundation.UIModule",
         "3rd.IAP",
         "Zenject-Source",
         "Zenject-Signals",
         "UniTask",
+        "UniRx",
+        "Unity.TextMeshPro",
         "Meta.Transactions",
-        "Meta.Wallet"
+        "Meta.Wallet",
+        "GameFoundation.AssetLibrary"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

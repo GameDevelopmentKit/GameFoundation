@@ -2,16 +2,16 @@ namespace GameBusiness.Shop.Manager
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
-    using DataManager.MasterData;
     using DataManager.UserData;
     using GameBusiness.Shop.Blueprint;
     using GameBusiness.Shop.Model;
+    using GameBusiness.Shop.UI;
     using GameBusiness.Transactions.Blueprint;
     using GameBusiness.Transactions.Manager;
     using GameBusiness.Transactions.Model;
     using ServiceImplementation.IAPServices;
-    using UnityEngine;
     using Zenject;
 
     /// <summary>
@@ -19,10 +19,10 @@ namespace GameBusiness.Shop.Manager
     /// Handles pure data queries and purchase logic. No toast, no localization, no asset display.
     /// Each game provides its own TData extending IShopData and wraps this with a game-specific handler.
     /// </summary>
-    public class ShopManager<TData> : BaseDataManager<TData>
+    public class ShopManager<TData> : BaseDataManager<TData>, IShopService
         where TData : class, IShopData, IUserData, new()
     {
-        public const string MainShopLayout = "MainShop";
+        private string defaultShopLayout = "MainShop";
 
         private readonly ShopLayoutBlueprint      shopLayoutBlueprint;
         private readonly ExchangePackageBlueprint exchangePackageBlueprint;
@@ -43,9 +43,14 @@ namespace GameBusiness.Shop.Manager
         {
             base.OnDataInitialized();
 
+            var firstLayout                                                    = shopLayoutBlueprint.FirstOrDefault();
+            if (!string.IsNullOrEmpty(firstLayout.Key)) this.defaultShopLayout = firstLayout.Key;
+
             foreach (var packageData in Data.PurchasedPackages)
             {
-                packageData.Value.UpdateRecord(this.exchangePackageBlueprint.GetDataById(packageData.Value.BlueprintId));
+                packageData.Value.UpdateRecord(
+                    this.exchangePackageBlueprint.GetDataById(packageData.Value.BlueprintId));
+                packageData.Value.IsUnlocked = true; // already purchased or cached package should be unlocked
             }
         }
 
@@ -69,6 +74,7 @@ namespace GameBusiness.Shop.Manager
                     }
                 }
             }
+
             return iapPacks;
         }
 
@@ -80,7 +86,7 @@ namespace GameBusiness.Shop.Manager
 
         public bool TryGetDefaultShopLayoutRecord(out ShopLayoutRecord shopLayoutRecord)
         {
-            return shopLayoutBlueprint.TryGetValue(MainShopLayout, out shopLayoutRecord);
+            return shopLayoutBlueprint.TryGetValue(defaultShopLayout, out shopLayoutRecord);
         }
         #endregion
 
@@ -96,6 +102,7 @@ namespace GameBusiness.Shop.Manager
                     results.Add(package);
                 }
             }
+
             return results;
         }
 
@@ -111,7 +118,8 @@ namespace GameBusiness.Shop.Manager
 
             if (!isPurchasedPackage || (purchasedPackage.BlueprintId != packageBlueprintId))
             {
-                purchasedPackage = new ExchangePackageData(exchangePackageBlueprint.GetDataById(packageBlueprintId), packageId);
+                purchasedPackage =
+                    new ExchangePackageData(exchangePackageBlueprint.GetDataById(packageBlueprintId), packageId);
             }
 
             return purchasedPackage.IsExistPurchaseOption() ? purchasedPackage : null;
@@ -142,15 +150,18 @@ namespace GameBusiness.Shop.Manager
         /// Try get the first valid purchase option that user can purchase.
         /// If none is valid, return false and output the last option as default.
         /// </summary>
-        public bool TryGetPossiblePurchaseOptions(ExchangePackageData package, int quantity, out PurchaseOptionData option)
+        public bool TryGetPossiblePurchaseOptions(ExchangePackageData package, int quantity,
+            out PurchaseOptionData option)
         {
             foreach (var purchaseOption in package.PurchaseOptions)
             {
                 if (purchaseOption.IsAvailableToPurchase(out var isJustRefresh))
                 {
-                    if (purchaseOption.Record.AutoGeneratePayout && (isJustRefresh || package.CachedGeneratedPayoutAssets == null))
+                    if (purchaseOption.Record.AutoGeneratePayout &&
+                        (isJustRefresh || package.CachedGeneratedPayoutAssets == null))
                     {
-                        package.CachedGeneratedPayoutAssets                    = transactionManager.GetPayoutAssets(package.Record.Payouts);
+                        package.CachedGeneratedPayoutAssets =
+                            transactionManager.GetPayoutAssets(package.Record.Payouts);
                         this.Data.PurchasedPackages[package.InstancePackageId] = package;
                     }
 
@@ -161,6 +172,7 @@ namespace GameBusiness.Shop.Manager
                     }
                 }
             }
+
             option = package.PurchaseOptions[^1];
             return false;
         }
@@ -185,16 +197,58 @@ namespace GameBusiness.Shop.Manager
             if (package.CachedGeneratedPayoutAssets != null)
             {
                 await this.transactionManager.MakePayments(purchaseOption.Record.Costs, package.BlueprintId, quantity);
-                transactionResult = new TransactionResult(purchaseOption.Record.Costs, package.Record.Payouts, package.BlueprintId, package.CachedGeneratedPayoutAssets);
+                transactionResult = new TransactionResult(purchaseOption.Record.Costs, package.Record.Payouts,
+                    package.BlueprintId, package.CachedGeneratedPayoutAssets);
             }
             else
             {
-                transactionResult = await this.transactionManager.BeginTransaction(purchaseOption.Record.Costs, package.Record.Payouts, package.BlueprintId, quantity);
+                transactionResult = await this.transactionManager.BeginTransaction(purchaseOption.Record.Costs,
+                    package.Record.Payouts, package.BlueprintId, quantity);
             }
 
             this.Data.PurchasedPackages.TryAdd(package.InstancePackageId, package);
             purchaseOption.OnPurchase(quantity);
             return transactionResult;
+        }
+        #endregion
+
+        #region Utility
+        public virtual string GenerateCostText(string packageId, int quantity = 1)
+        {
+            var exchangePackageData = this.QueryExchangePackage(packageId);
+            var canPurchase         = this.TryGetPossiblePurchaseOptions(exchangePackageData, quantity, out var purchaseOptions);
+            return this.GenerateCostText(purchaseOptions.Record.Costs, canPurchase, quantity);
+        }
+
+        public virtual string GenerateCostText(List<CostRecord> costs, bool canPurchase, int quantity = 1)
+        {
+
+            var stringBuilder = new System.Text.StringBuilder();
+
+            foreach (var cost in costs)
+            {
+                switch (cost.PaymentType)
+                {
+                    case PaymentTypes.Ads:
+                        stringBuilder.AppendLine($"<sprite name=\"reward_ads\" > Free");
+                        continue;
+                    case PaymentTypes.Free:
+                        stringBuilder.AppendLine("Free");
+                        continue;
+                    case PaymentTypes.IAP:
+                        stringBuilder.AppendLine(this.iapServices.GetLocalizedPriceString(cost.CostAssetId, $"${cost.CostAmount}"));
+                        continue;
+                    default:
+                        stringBuilder.AppendLine(!canPurchase
+                            ? $"<sprite name=\"{cost.CostAssetId}\" > <color=#FF0000>{(cost.CostAmount * quantity).NumberFormat()}</color>"
+                            : $"<sprite name=\"{cost.CostAssetId}\" > {(cost.CostAmount * quantity).NumberFormat()}");
+
+
+                        break;
+                }
+            }
+
+            return stringBuilder.ToString();
         }
         #endregion
     }

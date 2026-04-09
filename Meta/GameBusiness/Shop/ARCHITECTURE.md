@@ -7,31 +7,32 @@ module, and AI agents tasked with modifying or integrating it.
 ## Module Boundary
 
 ```
-Assets/SharedModules/GameBusiness/     <-- THIS MODULE (GameBusiness.asmdef)
-  Shop/
-    Blueprint/
-      ExchangePackageBlueprint.cs      CSV reader for exchange packages
-      ShopLayoutBlueprint.cs           CSV reader for shop UI layout
-    Manager/
-      ShopManager.cs                   Generic ShopManager<TData> (core logic)
-      ShopPurchasePackageSuccessSignal.cs  Zenject signal on purchase
-    Model/
-      ExchangePackageData.cs           ExchangePackageData + PurchaseOptionData
-      IShopData.cs                     Interface: Dictionary<string, ExchangePackageData>
-      ShopPurchaseException.cs         Exception + ShopPurchaseError enum
-  InterstitialOffer/
-    Blueprint/
-      InterstitialBlueprint.cs         CSV reader for interstitial offers
-    Manager/
-      BaseInterstitialManager.cs       Abstract base with lifecycle logic
-      ShowInterstitialOfferSignal.cs   Zenject signal for offer display
-    Model/
-      InterstitialData.cs              InterstitialData + InterstitialOffer + state enum
-  Utilities/
-    DateTimeUtils.cs                   GetNearestTimeFromPeriod extension method
+Assets/SharedModules/GameBusiness/     <-- THIS MODULE (Meta.Shop.asmdef)
+  Blueprint/
+    ExchangePackageBlueprint.cs      CSV reader for exchange packages
+    ShopLayoutBlueprint.cs           CSV reader for shop UI layout
+  Installer/
+    BaseShopInstaller.cs             Abstract generic installer (Zenject Installer<T>)
+  Manager/
+    ShopManager.cs                   Generic ShopManager<TData> : IShopService (core logic)
+    ShopPurchasePackageSuccessSignal.cs  Zenject signal on purchase
+  Model/
+    ExchangePackageData.cs           ExchangePackageData + PurchaseOptionData
+    IShopData.cs                     Interface: Dictionary<string, ExchangePackageData>
+    ShopPurchaseException.cs         Exception + ShopPurchaseError enum
+  Services/
+    IShopService.cs                  Non-generic shop interface (UI depends on this)
+    ICostTextGenerator.cs            Strategy for cost text formatting
+  UI/
+    ThemeConfig.cs                   Serializable color palette applicator
+    ShopItemModel.cs                 View-model for shop items (MultiplePrefabsModel)
+    ShopSectionModel.cs              View-model for shop sections (MultiplePrefabsModel)
+    BasePurchaseButton.cs            Abstract MonoBehaviour for purchase buttons
+    BaseShopItemView.cs              Abstract TViewMono for shop item views
+    BaseShopSectionPresenter.cs      Abstract presenter for shop sections + ShopSectionView
   Tests/
-    GameBusiness.Tests.asmdef          Editor-only test assembly
-    GameBusinessTests.cs               Unit tests for data models and utilities
+    GameBusiness.Tests.asmdef        Editor-only test assembly
+    GameBusinessTests.cs             Unit tests for data models and utilities
 ```
 
 ## Design Principles
@@ -65,16 +66,16 @@ Assets/SharedModules/GameBusiness/     <-- THIS MODULE (GameBusiness.asmdef)
               |                                 |
   +-----------v-----------+      +--------------v--------------+
   | ShopManager<TData>    |      | BaseInterstitialManager<T>  |
-  | where TData: IShopData|      | where T: InterstitialData   |
-  |                       |      |                              |
-  | QueryExchangePackage  |      | MarkPurchasedOffer           |
-  | UnlockExchangePackage |      | RefreshInterstitialOffers    |
-  | PurchaseAsync (throws)|      | Verified                     |
-  | TryGetPossibleOptions |      | ActiveInterstitialOffers     |
-  | GetIapProductIds      |      |                              |
-  | TryGetShopLayoutRecord|      | abstract OnOfferActivated    |
-  +-----------+-----------+      | abstract IsPackageAvailable  |
-              |                  | abstract IsPackageExpired    |
+  | : IShopService        |      | where T: InterstitialData   |
+  | where TData: IShopData|      |                              |
+  |                       |      | MarkPurchasedOffer           |
+  | QueryExchangePackage  |      | RefreshInterstitialOffers    |
+  | UnlockExchangePackage |      | Verified                     |
+  | PurchaseAsync (throws)|      | ActiveInterstitialOffers     |
+  | TryGetPossibleOptions |      |                              |
+  | GetIapProductIds      |      | abstract OnOfferActivated    |
+  | TryGetShopLayoutRecord|      | abstract IsPackageAvailable  |
+  +-----------+-----------+      | abstract IsPackageExpired    |
               |                  +--------------+---------------+
    Game side  |                                |  Game side
               v                                v
@@ -90,12 +91,59 @@ Assets/SharedModules/GameBusiness/     <-- THIS MODULE (GameBusiness.asmdef)
   +-----------+-----------+
   | ShopServiceHandler    |
   | : IInitializable      |
+  | : ICostTextGenerator  |
   |                       |
   | + IAP init (tangles)  |
   | + Toast messages      |
   | + Localized cost text |
   | + GetPossiblePayouts  |
   +-----------------------+
+
+  Module Installer & UI Layer:
+
+  +-----------------------------------+
+  | BaseShopInstaller<TInst,TData,TMgr|  (module)
+  | Binds: TManager, ShopManager<T>,  |
+  |   IShopService, Signal            |
+  | virtual InstallGameBindings()     |
+  +----------------+------------------+
+                   |  Game side
+                   v
+  +----------------+---------+
+  | ShopInstaller            |
+  | : BaseShopInstaller<     |
+  |   ShopInstaller,         |
+  |   ShopData, BAShopManager|
+  | Binds: ShopServiceHandler|
+  +-------- +-+--------------+
+
+  +----------------------------+     +------------------------+
+  | BasePurchaseButton (module)|     | BaseShopItemView       |
+  | [Inject] IShopService      |     | (module, abstract)     |
+  | [Inject] ICostTextGenerator|     | theme, title, tag,     |
+  | abstract OnClickBtnPurchase|     | icon, buttons hooks    |
+  | abstract OnPurchaseComplete|     +----------+-------------+
+  +-------------+--------------+                |
+                |                               v
+                v                    +----------+-------------+
+  +-------------+--------------+     | ShopItemCommonView (BA)|
+  | PurchaseButton (BA)        |     | + LoadImageHelper      |
+  | + ClaimRewardPopup         |     | + AssetService         |
+  | + ShopServiceHandler       |     +-----------+------------+
+  +----------------------------+                 |
+                                                 v
+  +------------------------------------------+   
+  | BaseShopSectionPresenter (module)        |   
+  | PrepareContent, CreateItemModel          |   
+  | abstract BindContent(models, contentRoot)|   
+  +-------------------+----------------------+   
+                      |                          
+                      v                          
+  +-------------------+----------------------+   
+  | ShopSectionPresenter (BA)                |   
+  | + TextLocalizer section header           |   
+  | subclasses: Grid, Flex, Page             |   
+  +------------------------------------------+   
 
   (*) BA's InterstitialManager currently extends BaseDataManager directly.
       Migration to BaseInterstitialManager is a Phase 2 task.
@@ -258,3 +306,4 @@ grep "Game.Scripts" Assets/SharedModules/GameBusiness/GameBusiness.asmdef
 | Date | Change | Author |
 |------|--------|--------|
 | 2026-04-07 | Initial extraction from BackpackAdventures (Phase 1: Shop + InterstitialOffer) | Claude Code + NINH |
+| 2026-04-08 | Added ShopInstaller, IShopService, ICostTextGenerator, base UI layer (BasePurchaseButton, BaseShopItemView, BaseShopSectionPresenter, ThemeConfig, ShopItemModel, ShopSectionModel). Migrated BA to extend module bases. | Claude Code + NINH |
