@@ -3,6 +3,9 @@
 namespace GameFoundation.Scripts.Utilities.Extension
 {
     using System;
+    using global::Utilities.Utils;
+    using TMPro;
+    using UniRx;
 
     public static class DateTimeExtensions
     {
@@ -26,7 +29,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         }
 
         public static string ToFormatDateTime(this DateTime dateTime) { return $"{dateTime:dd/MM/yyyy}"; }
-        
+
         /// <summary>
         /// Calculates the nearest period-aligned time from a reference point.
         /// Used by PurchaseOptionData to align refresh timers to period boundaries.
@@ -78,6 +81,23 @@ namespace GameFoundation.Scripts.Utilities.Extension
             var now           = DateTime.UtcNow;
             var periodsPassed = (int)(now - lastTime).TotalSeconds / (int)period;
             return lastTime.AddSeconds(periodsPassed * period);
+        }
+
+        public static IDisposable CountDown(this TMP_Text text, TimeSpan remainingTime, string format = "Refresh in {0}", Action onComplete = null)
+        {
+            return Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(1)).Subscribe(_ =>
+            {
+                text.text = string.Format(format, remainingTime.ToLongTimeString(false, true));
+
+                if (remainingTime.TotalSeconds <= 0)
+                {
+                    onComplete?.Invoke();
+                }
+                else
+                {
+                    remainingTime = remainingTime.Subtract(TimeSpan.FromSeconds(1));
+                }
+            });
         }
     }
 }

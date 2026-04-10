@@ -1,10 +1,14 @@
 namespace GameBusiness.Shop.UI
 {
     using System.Collections.Generic;
+    using System.Linq;
+    using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.UIModule.MVP;
+    using GameFoundation.Scripts.UIModule.Utilities.LoadImage;
     using TMPro;
     using UnityEngine;
     using UnityEngine.UI;
+    using Zenject;
 
     /// <summary>
     /// Abstract base view for a single shop item. Handles theme application,
@@ -37,6 +41,9 @@ namespace GameBusiness.Shop.UI
 
         #endregion
 
+        [Inject] protected LoadImageHelper LoadImageHelper;
+        
+        
         #region Public API
 
         public virtual void BindData(ShopItemModel model)
@@ -75,7 +82,16 @@ namespace GameBusiness.Shop.UI
             }
         }
 
-        protected virtual void BindIcon(ShopItemModel model) { }
+        protected virtual void BindIcon(ShopItemModel model)
+        {
+            if (!string.IsNullOrEmpty(model.PackageIcon))
+            {
+                this.LoadImageHelper.LoadLocalSprite(model.PackageIcon).ContinueWith(iconSprite =>
+                {
+                    this.ImgIcon.sprite = iconSprite;
+                }).Forget();
+            }
+        }
 
         protected virtual void BindTagIcon(ShopItemModel model)
         {

@@ -1,0 +1,28 @@
+{
+    "name": "Meta.Shop.UI",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e7f0ab2ac424208429d649986281d535",
+        "GUID:5dbec31b46fb0774d977c57e0c96f695",
+        "GUID:4d364aeb8f41c2942a00b8ba2492258f",
+        "GUID:83d7a19443b8bb345af07e5d5c047c0d",
+        "GUID:3160336edb76dac4ca39bf4bd7da7d7e",
+        "GUID:570288d68c06d364a82f87aca0bc1a34",
+        "GUID:22661d2aff59d9c4a8c6d682570d3587",
+        "GUID:3f3a28daf690d7f488ada44cceab39a8",
+        "GUID:f072e216975d56b4f9ab0e22fb7a76a5",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:3d4daf6696a825240b11d99d0d2865ed"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

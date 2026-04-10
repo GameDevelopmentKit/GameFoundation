@@ -1,20 +1,14 @@
 ﻿namespace GameBusiness.Shop.UI
 {
-    using GameBusiness.Wallet.Model;
     using UnityEngine;
 
     public static class CurrenciesHelper
     {
         private static readonly string[] Digits = new string[] { "", "K", "M", "B", "T", "Qa" };
-
-        public static string ValueFormatted(this Currency currency)
-        {
-            return NumberFormat(currency.Value);
-        }
-
+        
         public static string NumberFormat(this int value)
         {
-            return NumberFormat((float)value);
+            return ((float)value).NumberFormat();
         }
         
         public static string NumberFormat(this float value)

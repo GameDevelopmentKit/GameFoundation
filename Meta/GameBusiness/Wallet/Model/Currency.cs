@@ -1,5 +1,6 @@
 ﻿namespace GameBusiness.Wallet.Model
 {
+    using GameBusiness.Shop.UI;
     using GameBusiness.Wallet.Blueprint;
     using Newtonsoft.Json;
 
@@ -43,5 +44,7 @@
         public virtual void Add(int value) { this.Value += value; }
 
         public override string ToString() { return this.Value.ToString(); }
+        
+        public void GetValueFormatted() => this.Value.NumberFormat();
     }
 }

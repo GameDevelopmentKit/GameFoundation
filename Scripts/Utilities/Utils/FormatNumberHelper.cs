@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-
-namespace UIModule.Utilities
+﻿namespace Utilities.Utils
 {
     using System;
     using TMPro;
+    using UnityEngine;
 
     public static class FormatNumberHelper
     {

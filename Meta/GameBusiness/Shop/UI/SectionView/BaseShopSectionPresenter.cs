@@ -7,8 +7,53 @@ namespace GameBusiness.Shop.UI
     using GameBusiness.Shop.Manager;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.MVP;
+    using UIModule.Adapter;
+    using UniRx;
     using UnityEngine;
     using Zenject;
+
+    /// <summary>
+    /// View-model for a shop section. Wraps a <see cref="BaseShopSectionRecord"/> and tracks
+    /// whether content has changed size (used by OSA adapters for dynamic resizing).
+    /// Extends <see cref="MultiplePrefabsModel"/> for multi-prefab section layouts.
+    /// </summary>
+    public class ShopSectionModel : MultiplePrefabsModel
+    {
+        public override string PrefabName { get; }
+        public override Type PresenterType { get; }
+
+        /// <summary>The blueprint record describing this section's layout and packages.</summary>
+        public ShopSectionRecord SectionRecord { get; }
+
+        /// <summary>
+        /// Reactive flag for OSA adapters. Set to true when content is first bound
+        /// or refreshed so the adapter can schedule a twin-pass resize.
+        /// </summary>
+        public BoolReactiveProperty HasPendingSizeChange { get; set; } = new(false);
+
+        public ShopSectionModel(ShopSectionRecord sectionRecord, Type presenterType)
+        {
+            this.SectionRecord = sectionRecord;
+            this.PrefabName = sectionRecord.SectionTypeToPrefabView.Item2;
+            this.PresenterType = presenterType;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ShopSectionTypeAttribute : Attribute
+    {
+        public string Type { get; }
+
+        public ShopSectionTypeAttribute(string type)
+        {
+            this.Type = type;
+        }
+    }
+
+    public interface IShopSectionPresenter
+    {
+        void RefreshContent();
+    }
 
     /// <summary>
     /// Abstract base presenter for a shop section.
@@ -16,10 +61,10 @@ namespace GameBusiness.Shop.UI
     /// builds <see cref="ShopItemModel"/> list, and calls <see cref="BindContent"/>.
     /// Subclasses decide how to render (grid with ObjectPool, flex layout, paged adapter, etc.).
     /// </summary>
-    public abstract class BaseShopSectionPresenter<TView, TModel> : BaseUIItemPresenter<TView, TModel> where TView : ShopSectionView where TModel : ShopSectionModel
+    public abstract class BaseShopSectionPresenter: BaseUIItemPresenter<ShopSectionView, ShopSectionModel>, IShopSectionPresenter
     {
         protected readonly IShopService ShopService;
-        protected readonly DiContainer  DiContainer;
+        protected readonly DiContainer DiContainer;
 
         private ShopSectionModel model;
 
@@ -32,7 +77,7 @@ namespace GameBusiness.Shop.UI
 
         #region Public API
 
-        public override void BindData(TModel param)
+        public override void BindData(ShopSectionModel param)
         {
             this.model = param;
             this.BindSectionHeader(param);
@@ -106,7 +151,9 @@ namespace GameBusiness.Shop.UI
 
         protected abstract UniTask<bool> BindContent(List<ShopItemModel> models, RectTransform contentRoot);
 
-        protected virtual void OnBindContentComplete() { }
+        protected virtual void OnBindContentComplete()
+        {
+        }
 
         #endregion
     }
@@ -116,7 +163,7 @@ namespace GameBusiness.Shop.UI
     /// </summary>
     public abstract class ShopSectionView : TViewMono
     {
-        [field: SerializeField] public RectTransform  ContentRoot  { get; private set; }
-        [field: SerializeField] public ThemeConfig    ThemeConfig  { get; private set; }
+        [field: SerializeField] public RectTransform ContentRoot { get; private set; }
+        [field: SerializeField] public ThemeConfig ThemeConfig { get; private set; }
     }
 }

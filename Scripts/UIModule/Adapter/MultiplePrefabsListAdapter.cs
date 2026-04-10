@@ -19,12 +19,13 @@ namespace UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public           SimpleDataHelper<TModel>                              Models { get; private set; }
-        private          DiContainer                                           container;
-        private readonly Dictionary<TView, BaseUIItemPresenter<TView, TModel>> viewToPresenter  = new();
-        private readonly Dictionary<int, BaseUIItemPresenter<TView, TModel>>   indexToPresenter = new();
+        public SimpleDataHelper<TModel> Models { get; private set; }
+        private DiContainer container;
+        private readonly Dictionary<TView, BaseUIItemPresenter<TView, TModel>> viewToPresenter = new();
+        private readonly Dictionary<int, BaseUIItemPresenter<TView, TModel>> indexToPresenter = new();
 
         #region OSA implementation
+
         protected override void Awake()
         {
             base.Awake();
@@ -53,7 +54,7 @@ namespace UIModule.Adapter
 
             if (this.Models.Count <= index || index < 0) return;
             var model = this.Models[index];
-            var view  = vh.root.GetComponentInChildren<TView>(true);
+            var view = vh.root.GetComponentInChildren<TView>(true);
 
             if (this.viewToPresenter.TryGetValue(view, out var presenter))
             {
@@ -61,7 +62,8 @@ namespace UIModule.Adapter
             }
             else
             {
-                presenter = this.viewToPresenter[view] = this.container.Instantiate(this.Models[index].PresenterType) as BaseUIItemPresenter<TView, TModel>;
+                presenter = this.viewToPresenter[view] =
+                    this.container.Instantiate(this.Models[index].PresenterType) as BaseUIItemPresenter<TView, TModel>;
                 presenter.SetView(view);
             }
 
@@ -70,7 +72,11 @@ namespace UIModule.Adapter
             presenter.BindData(model);
         }
 
-        protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _) { return this.Models[vh.ItemIndex].PresenterType == this.Models[itemIndex].PresenterType; }
+        protected override bool IsRecyclable(BaseItemViewsHolder vh, int itemIndex, double _)
+        {
+            return this.Models[vh.ItemIndex].PresenterType == this.Models[itemIndex].PresenterType;
+        }
+
         #endregion
 
         // These are common data manipulation methods
@@ -92,11 +98,13 @@ namespace UIModule.Adapter
             {
                 if (!this.Parameters.ItemPrefabs.ContainsKey(model.PrefabName))
                 {
-                    var itemPrefab   = await diContainer.Resolve<IGameAssets>().LoadAssetAsync<GameObject>(model.PrefabName);
+                    var itemPrefab = await diContainer.Resolve<IGameAssets>()
+                        .LoadAssetAsync<GameObject>(model.PrefabName);
                     var itemPrefabRt = itemPrefab.GetComponent<RectTransform>();
                     this.Parameters.ItemPrefabs[model.PrefabName] = itemPrefabRt;
                 }
             }
+
             this.Parameters.UpdateItemSizes();
 
             this.ResetItems(0);
@@ -111,19 +119,25 @@ namespace UIModule.Adapter
             }
         }
 
-        public BaseUIItemPresenter<TView, TModel> GetPresenterAtIndex(int index) { return this.indexToPresenter[index]; }
+        public BaseUIItemPresenter<TView, TModel> GetPresenterAtIndex(int index)
+        {
+            return this.indexToPresenter[index];
+        }
 
-        public List<BaseUIItemPresenter<TView, TModel>> GetPresenters() { return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList(); }
+        public List<BaseUIItemPresenter<TView, TModel>> GetPresenters()
+        {
+            return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        }
 
         protected override void Dispose()
         {
             base.Dispose();
-            
+
             foreach (var presenter in this.viewToPresenter.Values)
             {
                 presenter.Dispose();
             }
-            
+
             this.viewToPresenter.Clear();
             this.indexToPresenter.Clear();
         }
@@ -133,10 +147,10 @@ namespace UIModule.Adapter
     public class MultiplePrefabsParams : BaseParams
     {
         [SerializeField] private List<RectTransform> itemPrefabs;
-        [SerializeField] private bool                prefabControlsDefaultItemSize = true;
+        [SerializeField] private bool prefabControlsDefaultItemSize = true;
 
         public Dictionary<string, RectTransform> ItemPrefabs { get; set; } = new();
-        public Dictionary<string, float>         ItemSizes   { get; }      = new();
+        public Dictionary<string, float> ItemSizes { get; } = new();
 
         public bool PrefabControlsDefaultItemSize => this.prefabControlsDefaultItemSize;
 
@@ -159,14 +173,14 @@ namespace UIModule.Adapter
             {
                 this.AssertValidWidthHeight(itemPrefab);
                 this.ItemSizes[itemPrefab.name] = IsHorizontal ? itemPrefab.rect.width : itemPrefab.rect.height;
-                this.DefaultItemSize            = Mathf.Max(this.DefaultItemSize, this.ItemSizes[itemPrefab.name]);
+                this.DefaultItemSize = Mathf.Max(this.DefaultItemSize, this.ItemSizes[itemPrefab.name]);
             }
         }
     }
 
     public abstract class MultiplePrefabsModel
     {
-        public abstract string PrefabName    { get; }
-        public abstract Type   PresenterType { get; }
+        public abstract string PrefabName { get; }
+        public abstract Type PresenterType { get; }
     }
 }
