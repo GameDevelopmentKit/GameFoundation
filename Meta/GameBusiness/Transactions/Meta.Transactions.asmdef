@@ -7,7 +7,6 @@
         "GameFoundation.Utilities",
         "GameFoundation.DataManager",
         "3rd.IAP",
-        "3rdCore.Ads",
         "Zenject-Signals",
         "Meta.Wallet"
     ],

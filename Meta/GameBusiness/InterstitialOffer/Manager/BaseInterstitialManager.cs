@@ -13,17 +13,17 @@ namespace GameBusiness.InterstitialOffer.Manager
     public abstract class BaseInterstitialManager<TData> : BaseDataManager<TData>
         where TData : InterstitialData, new()
     {
-        protected readonly InterstitialBlueprint interstitialBlueprint;
+        protected readonly InterstitialOfferBlueprint InterstitialOfferBlueprint;
 
-        protected BaseInterstitialManager(InterstitialBlueprint interstitialBlueprint, SignalBus signalBus) : base(signalBus)
+        protected BaseInterstitialManager(InterstitialOfferBlueprint interstitialOfferBlueprint, SignalBus signalBus) : base(signalBus)
         {
-            this.interstitialBlueprint = interstitialBlueprint;
+            this.InterstitialOfferBlueprint = interstitialOfferBlueprint;
         }
 
         public override void OnDataInitialized()
         {
             base.OnDataInitialized();
-            foreach (var interstitial in interstitialBlueprint.Values)
+            foreach (var interstitial in InterstitialOfferBlueprint.Values)
             {
                 if (!this.Data.InterstitialOffers.TryGetValue(interstitial.Id, out var interstitialOffer))
                 {

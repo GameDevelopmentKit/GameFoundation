@@ -36,8 +36,7 @@ namespace DataManager.Blueprint.BlueprintReader.Converter
             }
             catch (Exception e)
             {
-                Debug.LogError($"GetField - {name}:"+ e);
-                return string.Empty;
+               throw new Exception($"Failed to get field with name {name} from csv reader. Make sure the field name is correct and exists in the csv file. Original exception message: {e.Message}");
             }
         }
 

@@ -213,7 +213,7 @@ namespace DataManager.MasterData
             var uniTask = this.handleLocalDataService.Value.LoadData(type);
             value = (IUserData)await uniTask;
 
-            this.userDataCache.Add(type.Name, value);
+            this.userDataCache.TryAdd(type.Name, value);
 
             return value;
         }

@@ -2,8 +2,8 @@ namespace GameBusiness.InterstitialOffer.Blueprint
 {
     using System.Collections.Generic;
     using DataManager.Blueprint.BlueprintReader;
-    [BlueprintReader("Interstitial")]
-    public class InterstitialBlueprint : GenericBlueprintReaderByRow<string, InterstitialRecord>
+    [BlueprintReader("InterstitialOffer")]
+    public class InterstitialOfferBlueprint : GenericBlueprintReaderByRow<string, InterstitialRecord>
     {
         
     }

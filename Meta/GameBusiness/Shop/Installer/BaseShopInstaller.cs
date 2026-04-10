@@ -1,4 +1,4 @@
-﻿namespace GameBusiness.Shop.Installer
+namespace GameBusiness.Shop.Installer
 {
     using DataManager.UserData;
     using GameBusiness.Shop.Manager;
@@ -10,7 +10,7 @@
     /// Binds TManager as singleton, wires ShopManager&lt;TData&gt; and IShopService
     /// resolution to TManager, and declares the standard purchase-success signal.
     /// </summary>
-    /// <typeparam name="TInstaller">The concrete installer type (CRTP for Installer&lt;T&gt;).</typeparam>
+    /// <typeparam name="TDerived">The concrete installer type (CRTP for Installer&lt;T&gt;).</typeparam>
     /// <typeparam name="TData">Shop data type implementing <see cref="IShopData"/> and <see cref="IUserData"/>.</typeparam>
     /// <typeparam name="TManager">Concrete shop manager type deriving from <see cref="ShopManager{TData}"/>.</typeparam>
     /// <example>
@@ -25,7 +25,8 @@
     /// }
     /// </code>
     /// </example>
-    public class BaseShopInstaller<TData, TManager> : Installer<BaseShopInstaller<TData, TManager> >
+    public class BaseShopInstaller<TDerived, TData, TManager> : Installer<TDerived>
+        where TDerived   : BaseShopInstaller<TDerived, TData, TManager>
         where TData      : class, IShopData, IUserData, new()
         where TManager   : ShopManager<TData>
     {

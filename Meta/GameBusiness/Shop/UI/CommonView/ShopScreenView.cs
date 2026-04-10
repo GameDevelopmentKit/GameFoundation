@@ -71,7 +71,13 @@ namespace GameBusiness.Shop.UI.CommonView
                         typeof(ShopSectionTypeAttribute));
                 if (attribute != null)
                 {
-                    this.sectionPresenterTypes.Add(attribute.Type, sectionPresenter);
+                    if (this.sectionPresenterTypes.ContainsKey(attribute.Type))
+                    {
+                        Debug.LogError(
+                            $"ShopSectionTypeAttribute already exists for {attribute.Type}, will take last one");
+                    }
+
+                    this.sectionPresenterTypes[attribute.Type] = sectionPresenter;
                 }
                 else
                 {
