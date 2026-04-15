@@ -15,12 +15,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public  SimpleDataHelper<TModel> Models { get; private set; }
-        private CanvasGroup              canvasGroup;
-        private List<TPresenter>         presenters;
-        private HashSet<TView>           readiedViewSet = new();
+        protected SimpleDataHelper<TModel> Models { get; private set; }
+        protected CanvasGroup              canvasGroup;
+        protected List<TPresenter>         presenters;
+        protected HashSet<TView>           readiedViewSet = new();
 
-        private DiContainer diContainer;
+        protected DiContainer diContainer;
 
         #region GridAdapter implementation
 
@@ -116,6 +116,8 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
 
         public List<TPresenter> GetPresenters() => this.presenters;
+        
+        public virtual void OnRemoveItem(int index, int countToRemoveAfter, bool freezeBehind = false) { this.Models.RemoveItems(index, countToRemoveAfter, freezeBehind); }
     }
 
     // This class keeps references to an item's views.

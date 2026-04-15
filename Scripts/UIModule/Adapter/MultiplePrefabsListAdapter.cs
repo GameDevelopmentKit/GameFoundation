@@ -20,10 +20,10 @@ namespace UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public           SimpleDataHelper<TModel>      Models { get; private set; }
-        private          DiContainer                   container;
-        private readonly Dictionary<TView, TPresenter> viewToPresenter  = new();
-        private readonly Dictionary<int, TPresenter>   indexToPresenter = new();
+        protected SimpleDataHelper<TModel>      Models { get; private set; }
+        protected DiContainer                   container;
+        protected Dictionary<TView, TPresenter> viewToPresenter  = new();
+        protected Dictionary<int, TPresenter>   indexToPresenter = new();
 
         #region OSA implementation
 
@@ -103,7 +103,8 @@ namespace UIModule.Adapter
 
         public TPresenter GetPresenterAtIndex(int index) { return this.indexToPresenter[index]; }
 
-        public List<TPresenter> GetPresenters() { return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList(); }
+        public         List<TPresenter> GetPresenters() { return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList(); }
+        public virtual void             OnRemoveItem(int index, int countToRemoveAfter, bool freezeBehind = false) { this.Models.RemoveItems(index, countToRemoveAfter, freezeBehind); }
     }
 
     [Serializable]
