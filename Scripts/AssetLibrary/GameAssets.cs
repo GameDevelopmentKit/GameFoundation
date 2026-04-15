@@ -379,9 +379,9 @@ namespace GameFoundation.Scripts.AssetLibrary
                     Addressables.Release(handle.Value);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Debug.LogError($"[GameAssets] Unable to Release {key}");
+                Debug.LogError($"[GameAssets] Unable to Release {key}, error: {e.Message}");
             }
         }
 
