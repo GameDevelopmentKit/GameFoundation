@@ -11,6 +11,8 @@ using System.Collections.Generic;
 
 namespace DigitalRuby.SoundManagerNamespace
 {
+    using DG.Tweening;
+
     /// <summary>
     /// Provides an easy wrapper to looping audio sources with nice transitions for volume when starting and stopping
     /// </summary>
@@ -425,7 +427,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void UpdateSounds()
         {
-            foreach (LoopingAudioSource s in sounds)
+            foreach (var s in sounds)
             {
                 s.TargetVolume = s.OriginalTargetVolume * soundVolume;
             }
@@ -433,7 +435,7 @@ namespace DigitalRuby.SoundManagerNamespace
 
         private static void UpdateMusic()
         {
-            foreach (LoopingAudioSource s in music)
+            foreach (var s in music)
             {
                 if (!s.Stopping)
                 {
@@ -441,13 +443,16 @@ namespace DigitalRuby.SoundManagerNamespace
                     s.AudioSource.volume = s.TargetVolume;
                 }
 
-                if (!s.AudioSource.isPlaying)
+                DOVirtual.DelayedCall(0.1f, () =>
                 {
-                    s.AudioSource.Play();
-                }
+                    if (!s.AudioSource.isPlaying)
+                    {
+                        s.AudioSource.Play();
+                    }
+                });
             }
 
-            foreach (AudioSource s in musicOneShot)
+            foreach (var s in musicOneShot)
             {
                 s.volume = musicVolume;
             }
