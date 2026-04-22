@@ -111,72 +111,83 @@ namespace DataManager.LocalSave.Provider
 
         /// <summary>
         /// Internal save implementation. Must be called under the per-key semaphore.
+        /// All disk I/O (write, fsync, atomic rename) runs on a background thread to avoid
+        /// blocking the main thread during OnApplicationPause/OnApplicationFocus, which was
+        /// the root cause of ANR cluster A1 in v0.2.2.69.
         /// </summary>
         private async UniTask SaveAsyncInternal(string filePath, string key, string json)
         {
             var tempPath = filePath + TempExtension;
             var backupPath = filePath + BackupExtension;
 
-            try
+            // Move all blocking I/O off the main thread.
+            // fs.Flush(flushToDisk: true) is a synchronous fsync syscall that can block
+            // 5-200 ms per file on Android flash; calling it on the main thread during
+            // app pause causes the ANR seen in cluster A1.
+            await UniTask.RunOnThreadPool(() =>
             {
-                // Ensure directory exists (CreateDirectory is idempotent)
-                var directory = Path.GetDirectoryName(filePath);
-                if (!string.IsNullOrEmpty(directory))
+                try
                 {
-                    Directory.CreateDirectory(directory);
-                }
+                    // Ensure directory exists (CreateDirectory is idempotent)
+                    var directory = Path.GetDirectoryName(filePath);
+                    if (!string.IsNullOrEmpty(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
 
-                // Write to temp file with explicit flush to disk for mobile durability
-                await using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write,
-                    FileShare.None, 4096, FileOptions.WriteThrough))
-                await using (var writer = new StreamWriter(fs))
-                {
-                    await writer.WriteAsync(json);
-                    await writer.FlushAsync();
-                    fs.Flush(flushToDisk: true);
-                }
+                    // Write to temp file with explicit flush to disk for mobile durability
+                    using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write,
+                        FileShare.None, 4096, FileOptions.WriteThrough))
+                    using (var writer = new StreamWriter(fs))
+                    {
+                        writer.Write(json);
+                        writer.Flush();
+                        fs.Flush(flushToDisk: true);
+                    }
 
-                // Safe atomic rename: original → .bak → move temp → delete .bak
-                // At every step, at least one valid file exists on disk.
-                if (File.Exists(filePath))
-                {
-                    // Remove stale .bak if it exists, then move original to .bak
+                    // Safe atomic rename: original -> .bak -> move temp -> delete .bak
+                    // At every step, at least one valid file exists on disk.
+                    if (File.Exists(filePath))
+                    {
+                        // Remove stale .bak if it exists, then move original to .bak
+                        this.TryDeleteFile(backupPath);
+                        File.Move(filePath, backupPath);
+                    }
+
+                    File.Move(tempPath, filePath);
+
+                    // Clean up backup after successful rename
                     this.TryDeleteFile(backupPath);
-                    File.Move(filePath, backupPath);
                 }
-
-                File.Move(tempPath, filePath);
-
-                // Clean up backup after successful rename
-                this.TryDeleteFile(backupPath);
-            }
-            catch (Exception ex)
-            {
-                // Attempt recovery: if original was moved to .bak but temp→target failed,
-                // restore the backup so we don't lose the previous save.
-                if (!File.Exists(filePath) && File.Exists(backupPath))
+                catch (Exception ex)
                 {
-                    try
+                    // Attempt recovery: if original was moved to .bak but temp->target failed,
+                    // restore the backup so we don't lose the previous save.
+                    if (!File.Exists(filePath) && File.Exists(backupPath))
                     {
-                        File.Move(backupPath, filePath);
+                        try
+                        {
+                            File.Move(backupPath, filePath);
+                        }
+                        catch (Exception restoreEx)
+                        {
+                            this.logService.Error($"[FileStorage] Failed to restore backup for {key}: {restoreEx.Message}");
+                        }
                     }
-                    catch (Exception restoreEx)
-                    {
-                        this.logService.Error($"[FileStorage] Failed to restore backup for {key}: {restoreEx.Message}");
-                    }
-                }
 
-                // Clean up temp file on failure
-                this.TryDeleteFile(tempPath);
-                this.logService.Error($"[FileStorage] Failed to save {key}: {ex.Message}");
-                throw;
-            }
+                    // Clean up temp file on failure
+                    this.TryDeleteFile(tempPath);
+                    this.logService.Error($"[FileStorage] Failed to save {key}: {ex.Message}");
+                    throw;
+                }
+            });
         }
 
         /// <summary>
         /// Load raw JSON string from a file.
         /// Returns null only when the file genuinely does not exist.
         /// Throws on I/O errors to prevent the caller from silently overwriting real data.
+        /// Disk read runs on a background thread to avoid blocking the main thread.
         /// </summary>
         public async UniTask<string> LoadAsync(string profileId, string key)
         {
@@ -184,7 +195,14 @@ namespace DataManager.LocalSave.Provider
 
             try
             {
-                return await File.ReadAllTextAsync(filePath);
+                return await UniTask.RunOnThreadPool(() =>
+                {
+                    if (!File.Exists(filePath))
+                    {
+                        return (string)null;
+                    }
+                    return File.ReadAllText(filePath);
+                });
             }
             catch (FileNotFoundException)
             {

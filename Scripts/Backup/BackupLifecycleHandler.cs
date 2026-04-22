@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.Backup
 {
     using Cysharp.Threading.Tasks;
+    using DataManager.LocalSave;
     using DataManager.LocalSave.Handler;
     using UnityEngine;
     using Zenject;
@@ -14,17 +15,22 @@ namespace GameFoundation.Scripts.Backup
     /// Replaces the old <c>CloudSyncLifecycleHandler</c>.
     ///
     /// Triggers:
-    ///   - OnApplicationPause(true)  → Save local data FIRST, then backup to cloud
-    ///   - OnApplicationPause(false) → Recovery check to detect changes from other devices
-    ///   - OnApplicationQuit         → No-op on mobile (process killed before async work completes)
+    ///   - OnApplicationPause(true)  -> Save local data FIRST, then backup to cloud
+    ///   - OnApplicationPause(false) -> Recovery check to detect changes from other devices
+    ///   - OnApplicationQuit         -> No-op on mobile (process killed before async work completes)
     ///
     /// IMPORTANT: This handler ensures local data is saved to disk BEFORE reading it for cloud
     /// upload. Without this sequencing, the upload could read stale or partially-written data.
+    ///
+    /// Coordinates with <see cref="ApplicationService"/> (when available) to avoid issuing a
+    /// redundant parallel save on the same pause event - that double-save was an aggravating
+    /// factor in ANR cluster A1 (v0.2.2.69).
     /// </summary>
     public class BackupLifecycleHandler : MonoBehaviour
     {
-        [Inject] private IBackupService backupService;
-        [Inject] private IHandleLocalDataServices localDataServices;
+        [Inject]                            private IBackupService            backupService;
+        [Inject]                            private IHandleLocalDataServices  localDataServices;
+        [Inject(Optional = true)]           private ApplicationService        applicationService;
 
         private void Awake()
         {
@@ -38,13 +44,13 @@ namespace GameFoundation.Scripts.Backup
 
             if (pauseStatus)
             {
-                // App going to background → save local data first, then backup.
+                // App going to background -> save local data first (if not already in flight), then backup.
                 Debug.Log("[Backup] App paused. Saving local data then backing up to cloud...");
                 SaveThenBackupAsync().Forget();
             }
             else
             {
-                // App resumed → recovery check to detect changes from other devices
+                // App resumed -> recovery check to detect changes from other devices
                 Debug.Log("[Backup] App resumed. Checking for recovery...");
                 this.backupService.CheckAndRecoverAsync().Forget();
             }
@@ -59,17 +65,30 @@ namespace GameFoundation.Scripts.Backup
         }
 
         /// <summary>
-        /// Sequence: save local data to disk → backup to cloud.
-        /// This guarantees the backup reads fresh, complete data from disk.
+        /// Sequence: ensure local data is on disk -> backup to cloud.
+        /// If ApplicationService has already started a save (OnApplicationPause fires both handlers
+        /// in the same frame), wait for it to finish instead of issuing a parallel save - that
+        /// double-save doubled the I/O pressure during the surfaceDestroyed window and contributed
+        /// to ANR cluster A1.
         /// </summary>
         private async UniTaskVoid SaveThenBackupAsync()
         {
             try
             {
                 // Step 1: Ensure all cached data is written to disk
-                await this.localDataServices.SaveCurrentProfile();
+                if (this.applicationService != null && this.applicationService.IsSaving)
+                {
+                    // ApplicationService is already saving - wait for it instead of stacking another save.
+                    // Bound the wait to avoid hanging the backup if the save stalls.
+                    await UniTask.WaitUntil(() => !this.applicationService.IsSaving)
+                        .Timeout(System.TimeSpan.FromSeconds(10));
+                }
+                else
+                {
+                    await this.localDataServices.SaveCurrentProfile();
+                }
 
-                // Step 2: Now safe to backup — disk has the latest data
+                // Step 2: Now safe to backup - disk has the latest data
                 await this.backupService.BackupCurrentProfileAsync();
             }
             catch (System.Exception ex)

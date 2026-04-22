@@ -1,6 +1,7 @@
 namespace DataManager.LocalSave
 {
     using System;
+    using System.Threading;
     using Cysharp.Threading.Tasks;
     using DataManager.LocalSave.Handler;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
@@ -10,7 +11,7 @@ namespace DataManager.LocalSave
 
     /// <summary>
     /// Catches application lifecycle events (pause, focus, quit, scene load) and saves local data.
-    /// Uses a debounce guard to prevent concurrent/redundant saves when multiple events fire
+    /// Uses an atomic debounce guard to prevent concurrent/redundant saves when multiple events fire
     /// in the same frame (e.g. OnApplicationPause + OnApplicationFocus on Android).
     /// </summary>
     public class ApplicationService : MonoBehaviour
@@ -22,7 +23,19 @@ namespace DataManager.LocalSave
         private readonly UpdateTimeAfterFocusSignal updateTimeAfterFocusSignal = new UpdateTimeAfterFocusSignal();
 
         private DateTime timeBeforeAppPause = DateTime.Now;
-        private bool isSaving;
+
+        /// <summary>
+        /// Atomic save-in-progress flag. 0 = idle, 1 = saving.
+        /// Uses Interlocked so OnApplicationPause + OnApplicationFocus racing in the same
+        /// frame cannot both enter SaveAsync concurrently.
+        /// </summary>
+        private int saveInProgress;
+
+        /// <summary>
+        /// True while a save is in flight. Used by BackupLifecycleHandler to avoid
+        /// issuing a redundant parallel save on the same pause event.
+        /// </summary>
+        public bool IsSaving => this.saveInProgress != 0;
 
         //Todo need
         private const int MinimizeTimeToReload = 5;
@@ -83,20 +96,21 @@ namespace DataManager.LocalSave
         }
 
         /// <summary>
-        /// Debounced save — prevents concurrent saves when multiple lifecycle events
+        /// Atomically debounced save — prevents concurrent saves when multiple lifecycle events
         /// fire in the same frame (e.g. OnApplicationPause + OnApplicationFocus on Android).
         /// </summary>
         private void RequestSave()
         {
             if (!this.handleLocalDataServices.IsInitialized) return;
-            if (this.isSaving) return;
+
+            // Atomic check-and-set: only one caller wins; losers return immediately.
+            if (Interlocked.CompareExchange(ref this.saveInProgress, 1, 0) != 0) return;
 
             SaveAsync().Forget();
         }
 
         private async UniTaskVoid SaveAsync()
         {
-            this.isSaving = true;
             try
             {
                 await this.handleLocalDataServices.SaveCurrentProfile();
@@ -107,7 +121,7 @@ namespace DataManager.LocalSave
             }
             finally
             {
-                this.isSaving = false;
+                Interlocked.Exchange(ref this.saveInProgress, 0);
             }
         }
     }
