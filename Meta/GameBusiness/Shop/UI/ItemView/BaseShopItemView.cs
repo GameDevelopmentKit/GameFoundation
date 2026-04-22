@@ -84,7 +84,7 @@ namespace GameBusiness.Shop.UI
 
         protected virtual void BindIcon(ShopItemModel model)
         {
-            if (!string.IsNullOrEmpty(model.PackageIcon))
+            if (!string.IsNullOrEmpty(model.PackageIcon) && this.imgIcon != null)
             {
                 this.LoadImageHelper.LoadLocalSprite(model.PackageIcon).ContinueWith(iconSprite =>
                 {

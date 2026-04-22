@@ -109,8 +109,8 @@ namespace GameBusiness.Shop.UI
             {
                 this.txtPurchaseLeft.gameObject.SetActive(true);
                 this.txtPurchaseLeft.text = purchaseOptions.IsOneTimePurchase
-                    ? "1x"
-                    : purchaseOptions.RemainAmount.ToString();
+                    ? "One-time only"
+                    : $"Purchase left: {purchaseOptions.RemainAmount.ToString()}";
             }
         }
 
