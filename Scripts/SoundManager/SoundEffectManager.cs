@@ -99,7 +99,10 @@ namespace SoundManager
             source.PlayOneShot(clip, volumeScale);
             await UniTask.Delay((int)(clip.length * 1000f));
             DecrementPlayCount(clip);
-            source.Recycle();
+            // Guard: the AudioSource GameObject may have been destroyed during the delay
+            // (e.g. scene reload or pool cleanup during a scene transition).
+            // Unity's == null operator correctly detects destroyed native objects.
+            if (source != null) source.Recycle();
         }
 
         public async UniTask PlayOneShot(AudioClip clip, float pitch, float volumeScale = 1f)
@@ -112,7 +115,8 @@ namespace SoundManager
             source.PlayOneShot(clip, volumeScale);
             await UniTask.Delay((int)(clip.length / Mathf.Abs(pitch) * 1000f));
             DecrementPlayCount(clip);
-            source.Recycle();
+            // Guard: same destroyed-during-delay protection as the overload above.
+            if (source != null) source.Recycle();
         }
 
         public async UniTask PlayLoop(string name, float volumeScale = 1f, float fadeSeconds = 1f)
