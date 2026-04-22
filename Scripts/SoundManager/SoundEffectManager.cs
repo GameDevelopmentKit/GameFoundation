@@ -124,7 +124,9 @@ namespace SoundManager
             }
 
             var clip = await LoadClipCached(name);
-            PlayLoopInternal(name, clip, volumeScale);
+            // Re-check after the async clip load: StopLoop may have been called while we were loading
+            if (loopingSources.ContainsKey(name)) return;
+            await PlayLoopInternal(name, clip, volumeScale);
         }
 
         public void PlayLoop(AudioClip clip, float volumeScale = 1f)
@@ -138,12 +140,29 @@ namespace SoundManager
                 return;
             }
 
-            PlayLoopInternal(name, clip, volumeScale);
+            PlayLoopInternal(name, clip, volumeScale).Forget();
         }
 
-        private async void PlayLoopInternal(string name, AudioClip clip, float volumeScale)
+        // Changed from async void to async UniTask to prevent AudioSource pool leaks.
+        // The old async void version had a race: StopLoop() called between GetSource() await
+        // and the loopingSources assignment would leave the pooled AudioSource unreturned.
+        // Now the sentinel entry is set before GetSource() awaits so StopLoop() can cancel it.
+        private async UniTask PlayLoopInternal(string name, AudioClip clip, float volumeScale)
         {
+            if (clip == null) return;
+
+            // Reserve the slot before awaiting GetSource so that a concurrent StopLoop(name)
+            // can see this entry and recycle the source when it arrives.
+            loopingSources[name] = null;
+
             var source = await GetSource();
+
+            // If StopLoop was called while we were waiting for a pooled source, clean up and bail.
+            if (!loopingSources.ContainsKey(name))
+            {
+                source.Recycle();
+                return;
+            }
 
             source.clip   = clip;
             source.loop   = true;
@@ -158,15 +177,22 @@ namespace SoundManager
             if (!loopingSources.TryGetValue(name, out var src))
                 return;
 
+            // Remove the key first — PlayLoopInternal checks ContainsKey after GetSource() to detect cancellation
+            loopingSources.Remove(name);
+
+            // src is null when PlayLoopInternal is still awaiting GetSource(); it will recycle itself
+            if (src == null) return;
+
             src.Stop();
             src.Recycle();
-            loopingSources.Remove(name);
         }
 
         public void StopAll()
         {
             foreach (var src in loopingSources.Values)
             {
+                // src is null when PlayLoopInternal is still awaiting GetSource(); it will recycle itself
+                if (src == null) continue;
                 src.Stop();
                 src.Recycle();
             }
