@@ -125,6 +125,16 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
+                var innerType = type.GetGenericArguments()[0];
+
+                if (innerType.GetTypeInfo().IsGenericType &&
+                    innerType.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    this.AddConverter(type, new ListOfListGenericConverter());
+                    return this.GetConverter(type);
+                }
+                
+                
                 this.AddConverter(type, new ListGenericConverter());
                 return this.GetConverter(type);
             }
