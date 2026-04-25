@@ -2,6 +2,7 @@ namespace BlueprintFlow.BlueprintControlFlow
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
@@ -48,7 +49,10 @@ namespace BlueprintFlow.BlueprintControlFlow
 
         public virtual async UniTask LoadBlueprint()
         {
-            this.logService.Log("[BlueprintReader] Start loading");
+            var sw = Stopwatch.StartNew();
+
+            this.logService.LogWithColor("[BlueprintReader] Start loading", Color.cyan);
+
             Dictionary<string, string> listRawBlueprints = null;
 
             if (this.blueprintConfig.IsResourceMode)
@@ -65,18 +69,14 @@ namespace BlueprintFlow.BlueprintControlFlow
                     await this.DownloadBlueprint(newBlueprintInfo.Url);
                 }
 
-                //Is blueprint zip file exists in storage
                 if (File.Exists(this.blueprintConfig.BlueprintZipFilepath))
                 {
-                    // Save blueprint info to local
                     this.handleUserDataServices.Save(newBlueprintInfo, true);
 
-                    // Unzip file to memory
 #if !UNITY_WEBGL
                     listRawBlueprints = await UniTask.RunOnThreadPool(this.UnzipBlueprint);
-
 #else
-                    listRawBlueprints = await UniTask.Create(this.UnzipBlueprint);
+                     listRawBlueprints = await UniTask.Create(this.UnzipBlueprint);
 #endif
                 }
             }
@@ -85,11 +85,12 @@ namespace BlueprintFlow.BlueprintControlFlow
 
             if (listRawBlueprints == null)
             {
-                //Show warning popup
+                sw.Stop();
+                this.logService.LogWithColor($"[BlueprintReader] Load failed - Time: {sw.ElapsedMilliseconds} ms", Color.cyan);
+
                 return;
             }
 
-            //Load all blueprints to instances
             try
             {
                 await this.ReadAllBlueprint(listRawBlueprints);
@@ -99,7 +100,8 @@ namespace BlueprintFlow.BlueprintControlFlow
                 this.logService.Exception(e);
             }
 
-            this.logService.Log("[BlueprintReader] All blueprint are loaded");
+            sw.Stop();
+            this.logService.LogWithColor($"[BlueprintReader] All blueprint are loaded in {sw.ElapsedMilliseconds} ms", Color.cyan);
 
             this.signalBus.Fire<LoadBlueprintDataSucceedSignal>();
         }
