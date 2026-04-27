@@ -82,6 +82,12 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
             return results;
         }
+
+        public static object ConvertToObject(string dataRotation, Type type)
+        {
+            var converter = TypeConverterCache.GetConverter(type);
+            return converter.ConvertFromString(dataRotation, type);
+        }
     }
     
     public class MemberInfo
