@@ -17,7 +17,6 @@ public class SceneToolbarCustomeEditor : UnityEditor.Editor
         {
             this.sceneToolBarExtend.Save();
         }
-
     }
 }
 
@@ -53,6 +52,7 @@ public class SceneToolBarExtend : ScriptableObject
         AssetDatabase.CreateAsset(instance, $"Assets/Resources/{fileName}.asset");
     }
 
+    [Header("Example : Assets/Folder1/FolderScene")]
     public List<string> sceneFolders = new();
 
     public void AddMoreSceneExtend(List<string> scenePaths, List<string> sceneNames)
@@ -77,5 +77,6 @@ public class SceneToolBarExtend : ScriptableObject
         EditorUtility.SetDirty(this);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+        EditorUtility.RequestScriptReload();
     }
 }
