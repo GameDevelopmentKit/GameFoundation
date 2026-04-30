@@ -1,4 +1,4 @@
-# GameBusiness Architecture
+﻿# GameBusiness Architecture
 
 This document is the single source of truth for the module's internal design.
 Written for three audiences: humans reading code, maintainers extending the
@@ -254,7 +254,7 @@ your `InterstitialManager` subclass and call `Verified(offerId)` or
 
 - **No BA imports.** Every `using` in module files must resolve to assemblies
   listed in `GameBusiness.asmdef`. If you need a type from `Game.Scripts`,
-  the design is wrong — inject it via generic/abstract instead.
+  the design is wrong â€” inject it via generic/abstract instead.
 - **Throw, don't handle.** `PurchaseExchangePackageAsync` must never catch
   its own exceptions. Let them propagate to the game handler.
 - **IShopData contract.** Any property added to `IShopData` becomes a
@@ -307,3 +307,19 @@ grep "Game.Scripts" Assets/SharedModules/GameBusiness/GameBusiness.asmdef
 |------|--------|--------|
 | 2026-04-07 | Initial extraction from BackpackAdventures (Phase 1: Shop + InterstitialOffer) | Claude Code + NINH |
 | 2026-04-08 | Added ShopInstaller, IShopService, ICostTextGenerator, base UI layer (BasePurchaseButton, BaseShopItemView, BaseShopSectionPresenter, ThemeConfig, ShopItemModel, ShopSectionModel). Migrated BA to extend module bases. | Claude Code + NINH |
+
+## Loot Pool Integration (Current)
+
+Shop random payouts are integrated through `Meta.Transactions` + `Meta.LootPool`.
+
+- `ExchangePackage` payout row may use `AssetType = Pool` and `PayoutAssetId = <pool id>`.
+- `PurchaseOptionRecord.AutoGeneratePayout = true` triggers pre-generation/caching in `ShopManager`.
+- `TransactionManager.FlattenPayoutAssets()` expands `Pool` via `IRandomGeneratePayoutService` (`PoolPayoutService`).
+- Generated rewards are persisted in `ExchangePackageData.CachedGeneratedPayoutAssets` until option refresh.
+
+This is the intended path for Daily Shop random offers.
+
+## Documentation Drift Notes
+
+- `ShopManager` currently contains `GenerateCostText(...)` helpers.
+- Earlier docs described cost-text behavior as handler-owned only; treat this as historical guidance.

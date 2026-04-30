@@ -1,4 +1,4 @@
-namespace GameBusiness.Shop.UI
+﻿namespace GameBusiness.Shop.UI
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -65,11 +65,11 @@ namespace GameBusiness.Shop.UI
             }
 
             this.BindTitle(model);
+            // Ensure auto-generated payouts are prepared before first icon render.
+            this.BindPurchaseButton(model);
             this.BindIcon(model);
             this.BindRewardAmount(model);
-            this.BindPurchaseButton(model);
         }
-
         #endregion
 
         #region Protected Hooks
@@ -128,3 +128,6 @@ namespace GameBusiness.Shop.UI
         #endregion
     }
 }
+
+
+
