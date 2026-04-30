@@ -48,6 +48,7 @@
     {
         public const string Currency = "Currency";
         public const string Item     = "Item";
+        public const string Pool     = "Pool";
     }
 
     public static class PaymentTypes

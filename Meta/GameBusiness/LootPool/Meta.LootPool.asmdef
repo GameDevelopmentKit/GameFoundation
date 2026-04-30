@@ -1,0 +1,19 @@
+﻿{
+    "name": "Meta.LootPool",
+    "rootNamespace": "",
+    "references": [
+        "GameFoundation.DataManager",
+        "Meta.Transactions",
+        "Zenject-Source",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
