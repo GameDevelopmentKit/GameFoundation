@@ -192,6 +192,8 @@ namespace DataManager.LocalSave.Provider
         public async UniTask<string> LoadAsync(string profileId, string key)
         {
             var filePath = this.GetFilePath(profileId, key);
+            var semaphore = this.fileLocks.GetOrAdd(filePath, _ => new SemaphoreSlim(1, 1));
+            await semaphore.WaitAsync();
 
             try
             {
@@ -217,19 +219,31 @@ namespace DataManager.LocalSave.Provider
                 this.logService.Error($"[FileStorage] Failed to load {key}: {ex.Message}");
                 throw;
             }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         /// <summary>
         /// Delete a JSON file by key.
         /// Also cleans up any associated .tmp and .bak files.
         /// </summary>
-        public UniTask DeleteAsync(string profileId, string key)
+        public async UniTask DeleteAsync(string profileId, string key)
         {
             var filePath = this.GetFilePath(profileId, key);
-            this.TryDeleteFile(filePath);
-            this.TryDeleteFile(filePath + TempExtension);
-            this.TryDeleteFile(filePath + BackupExtension);
-            return UniTask.CompletedTask;
+            var semaphore = this.fileLocks.GetOrAdd(filePath, _ => new SemaphoreSlim(1, 1));
+            await semaphore.WaitAsync();
+            try
+            {
+                this.TryDeleteFile(filePath);
+                this.TryDeleteFile(filePath + TempExtension);
+                this.TryDeleteFile(filePath + BackupExtension);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         #region Public Helpers (used by legacy migrator)
