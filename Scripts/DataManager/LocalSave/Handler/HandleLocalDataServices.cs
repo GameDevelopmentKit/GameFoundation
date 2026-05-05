@@ -688,10 +688,12 @@ namespace DataManager.LocalSave.Handler
                 return result;
             }
 
+            var dataKeys = metadata.DataKeys.ToArray();
+
             // Use cached type lookup (avoids scanning all assemblies per call)
             var localDataTypes = this.GetLocalDataTypeLookup();
 
-            foreach (var key in metadata.DataKeys)
+            foreach (var key in dataKeys)
             {
                 // Extract type name from key (e.g., "LD-WalletData" → "WalletData")
                 var typeName = key.StartsWith(UserDataPrefix) ? key.Substring(UserDataPrefix.Length) : key;
@@ -722,7 +724,7 @@ namespace DataManager.LocalSave.Handler
             }
 
             this.logService.LogWithColor(
-                $"[LocalData] Backup data: {result.Count}/{metadata.DataKeys.Count} keys collected.", Color.cyan);
+                $"[LocalData] Backup data: {result.Count}/{dataKeys.Length} keys collected.", Color.cyan);
             return result;
         }
 
