@@ -39,7 +39,8 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
             // Set the alpha to zero so the item is created
             // invisible. When the show method is called
             // the view will be made visible using a transition.
-            this.UpdateAlpha(0);
+            // setActive false to make sure the children objects call awake normally
+            this.SetState(0, false);
 
             this.AwakeUnityEvent();
             this.IsReadyToUse = true;
@@ -69,7 +70,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
 
         public virtual async UniTask Open()
         {
-            this.UpdateAlpha(1f);
+            this.SetState(1f);
             await this.ScreenTransition.PlayIntroAnim();
             // Debug.Log($"open screen view {this.name}");
             this.ViewDidOpen?.Invoke();
@@ -79,18 +80,21 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.View
         {
             await this.ScreenTransition.PlayOutroAnim();
             // Debug.Log($"Close screen view {this.name}");
-            this.UpdateAlpha(0);
+            this.SetState(0);
             this.ViewDidClose?.Invoke();
         }
-        public void Hide() { this.UpdateAlpha(0); }
-        public void Show() { this.UpdateAlpha(1); }
+        public void Hide() { this.SetState(0); }
+        public void Show() { this.SetState(1); }
 
         public void DestroySelf() { Destroy(this.gameObject); }
 
-        protected void UpdateAlpha(float value)
+        protected void SetState(float alpha, bool setActive = true)
         {
-            this.ViewRoot.alpha          = value;
-            this.ViewRoot.blocksRaycasts = value >= 1;
+            if(setActive)
+                this.gameObject.SetActive(alpha != 0f);
+
+            this.ViewRoot.alpha          = alpha;
+            this.ViewRoot.blocksRaycasts = alpha >= 1;
         }
     }
 }
