@@ -156,16 +156,25 @@ namespace DataManager.MasterData
 
                 var loadDataRequests = new List<IInitializeDataOnStart>();
                 var loadingDataTasks = new List<UniTask>();
+                // Deduplicate by type name — multiple BaseDataManager<T> subclasses sharing the
+                // same T (e.g. PlayerDataController and PlayerSkinManager both use UserProfile)
+                // must NOT trigger separate concurrent loads, otherwise the last write to
+                // localDataCache wins and the object returned via userDataCache diverges from it.
+                var scheduledTypes = new HashSet<string>();
                 foreach (var request in dataManagerLifecycles)
                 {
                     if (request is IInitializeDataOnStart initializeDataOnStart)
                     {
                         loadDataRequests.Add(initializeDataOnStart);
-                        loadingDataTasks.Add(this.GetDataInternal(initializeDataOnStart.GetDataType()));
+                        var typeName = initializeDataOnStart.GetDataType().Name;
+                        if (scheduledTypes.Add(typeName))
+                        {
+                            loadingDataTasks.Add(this.GetDataInternal(initializeDataOnStart.GetDataType()));
+                        }
                     }
                 }
 
-                // Load all data in parallel
+                // Load all data in parallel (one task per unique type)
                 await UniTask.WhenAll(loadingDataTasks);
 
                 // Provide loaded data to requests

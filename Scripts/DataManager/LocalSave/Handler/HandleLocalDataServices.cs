@@ -548,8 +548,17 @@ namespace DataManager.LocalSave.Handler
                 this.logService.Log($"[LocalData] Created new {key}");
             }
 
-            // Cache it
-            this.localDataCache[key] = data;
+            // Cache it — but if a concurrent load already stored a value for this key,
+            // use THAT instance to stay consistent (avoids the two-manager race condition
+            // where both BaseDataManager<T> subclasses load the same type simultaneously).
+            if (this.localDataCache.ContainsKey(key))
+            {
+                data = this.localDataCache[key];
+            }
+            else
+            {
+                this.localDataCache[key] = data;
+            }
             this.logService.LogWithColor($"[LocalData] Loaded {key}", Color.green);
 
             return data;
