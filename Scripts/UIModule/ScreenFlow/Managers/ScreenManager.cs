@@ -277,7 +277,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             var addressPath = screenInfo.Attribute.AddressableScreenPath;
             if (screenInfo.Presenter is ICustomPresenter customScreen) addressPath = customScreen.CustomAddressPath;
             
-            if (screenInfo.AddressPathToScreenView.TryGetValue(addressPath, out var viewObject))
+            if (screenInfo.AddressPathToScreenView.TryGetValue(addressPath, out var viewObject) && !viewObject.Equals(null))
             {
                 if (screenInfo.CurrentScreenViewPath != addressPath)
                     screenInfo.Presenter.SetView(viewObject);
@@ -300,7 +300,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
                 var viewObject = Instantiate(await this.gameAssets.LoadAssetAsync<GameObject>(address),
                     this.CheckPopupIsOverlay(screenInfo.Presenter) ? this.CurrentOverlayRoot : this.CurrentRootScreen).GetComponent<IScreenView>();
 
-                screenInfo.AddressPathToScreenView.Add(address, viewObject);
+                screenInfo.AddressPathToScreenView[address] = viewObject;
                 screenInfo.Presenter.SetView(viewObject);
                 screenInfo.CurrentScreenViewPath = address;
                 return viewObject;
