@@ -9,7 +9,7 @@ namespace DataManager.LocalSave.Editor
         protected override string ConfigPath { get; } = "GameConfigs";
         public override VisualElement LoadView()
         {
-            var dataManagerConfigTemplate = EditorGUIUtility.Load("Packages/com.gdk.core/Scripts/DataManager/LocalData/Editor/DataManagerConfigEditor.uxml") as VisualTreeAsset;
+            var dataManagerConfigTemplate = EditorGUIUtility.Load("Packages/com.gdk.core/Scripts/DataManager/LocalSave/Editor/DataManagerConfigEditor.uxml") as VisualTreeAsset;
 
             if (dataManagerConfigTemplate == null) return this;
             var dataManagerConfigVisual = dataManagerConfigTemplate.CloneTree();

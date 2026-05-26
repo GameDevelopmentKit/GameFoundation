@@ -37,8 +37,16 @@ namespace UIModule.Adapter
         // *For the method's full description check the base implementation
         protected override BaseItemViewsHolder CreateViewsHolder(int itemIndex)
         {
+            var prefabName = this.Models[itemIndex].PrefabName;
+            if (!this.Parameters.ItemPrefabs.TryGetValue(prefabName, out var itemPrefab))
+            {
+                throw new KeyNotFoundException(
+                    $"Item prefab '{prefabName}' is not registered for {this.GetType().Name}. " +
+                    $"Registered prefabs: {string.Join(", ", this.Parameters.ItemPrefabs.Keys)}");
+            }
+
             var vh = new BaseItemViewsHolder();
-            vh.Init(this.Parameters.ItemPrefabs[this.Models[itemIndex].PrefabName], this.Parameters.Content, itemIndex);
+            vh.Init(itemPrefab, this.Parameters.Content, itemIndex);
 
             return vh;
         }
@@ -87,6 +95,10 @@ namespace UIModule.Adapter
                 await UniTask.WaitUntil(() => this.IsInitialized);
             }
 
+            // OSA may rebuild visible holders while async prefab loading is in progress.
+            // Clear the old count first so stale models cannot request prefabs that were reset by params init.
+            this.ResetItems(0);
+
             // Try load all prefabs that are not already in the dictionary
             foreach (var model in models)
             {
@@ -99,7 +111,6 @@ namespace UIModule.Adapter
             }
             this.Parameters.UpdateItemSizes();
 
-            this.ResetItems(0);
             this.Models.ResetItems(models);
 
             if (this.Parameters.PrefabControlsDefaultItemSize)
@@ -146,7 +157,16 @@ namespace UIModule.Adapter
 
             if (this.itemPrefabs != null)
             {
-                ItemPrefabs = this.itemPrefabs.ToDictionary(prefab => prefab.name, prefab => prefab);
+                if (this.ItemPrefabs == null)
+                {
+                    this.ItemPrefabs = new Dictionary<string, RectTransform>();
+                }
+
+                foreach (var prefab in this.itemPrefabs.Where(prefab => prefab != null))
+                {
+                    this.ItemPrefabs[prefab.name] = prefab;
+                }
+
                 UpdateItemSizes();
             }
         }
