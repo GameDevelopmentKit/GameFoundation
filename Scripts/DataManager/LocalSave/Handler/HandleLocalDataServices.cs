@@ -2,6 +2,7 @@ namespace DataManager.LocalSave.Handler
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using Cysharp.Threading.Tasks;
     using DataManager.LocalSave.Encryption;
@@ -34,6 +35,7 @@ namespace DataManager.LocalSave.Handler
 
         public const string DefaultProfileId = "default";
         public const string UserDataPrefix = "LD-";
+        private const string LogPrefix = "[LocalData]";
         private const string ProfileRegistryKey = "__ProfileRegistry__";
         private const string ProfileMetadataKey = "ProfileMetadata";
 
@@ -141,7 +143,7 @@ namespace DataManager.LocalSave.Handler
                 return;
             }
 
-            this.logService.Log("[LocalData] Initializing...");
+            this.Log("Initializing...");
 
             // Initialize providers
             await this.primaryProvider.InitializeAsync();
@@ -152,13 +154,13 @@ namespace DataManager.LocalSave.Handler
             // 2. Create default profile if needed
             if (this.profileRegistry == null || !this.profileRegistry.HasProfile(DefaultProfileId))
             {
-                this.logService.Log("[LocalData] Creating default profile...");
+                this.Log("Creating default profile...");
                 this.profileRegistry = ProfileRegistry.CreateDefault(DefaultProfileId);
             }
 
             // 3. Finalize initialization
             this.isInitialized = true;
-            this.logService.LogWithColor($"[LocalData] Initialization complete (Profile: {this.CurrentProfileId})",
+            this.LogWithColor($"Initialization complete (Profile: {this.CurrentProfileId})",
                 Color.green);
 
             // 4. Load current profile metadata (manifest) and execute migrations if needed
@@ -247,7 +249,7 @@ namespace DataManager.LocalSave.Handler
             this.EnsureInitialized();
             if (this.CurrentProfileId == profileId)
             {
-                this.logService.Log($"Already on profile {profileId}");
+                this.Log($"Already on profile {profileId}");
                 return;
             }
 
@@ -272,14 +274,14 @@ namespace DataManager.LocalSave.Handler
 
             await this.UseProfileInternal(profileId);
 
-            this.logService.LogWithColor($"Switched from {oldProfileId} to {profileId}", Color.green);
+            this.LogWithColor($"Switched from {oldProfileId} to {profileId}", Color.green);
         }
 
         private async UniTask UseProfileInternal(string profileId)
         {
             // Update current profile (single source of truth)
             this.CurrentProfileId = profileId;
-            this.logService.Log($"[LocalData] Current profile: {this.CurrentProfileId}");
+            this.Log($"Current profile: {this.CurrentProfileId}");
 
             // Load profile metadata (per-profile manifest)
             this.currentProfileMetadata = await this.LoadCurrentProfileMetadataAsync();
@@ -291,16 +293,16 @@ namespace DataManager.LocalSave.Handler
             }
             else
             {
-                this.logService.Log(
-                    $"[LocalData] Loaded profile metadata - Version: {this.currentProfileMetadata.GameVersion}");
+                this.Log(
+                    $"Loaded profile metadata - Version: {this.currentProfileMetadata.GameVersion}");
             }
 
             // Check if migration needed
             var currentVersion = Application.version;
             if (this.currentProfileMetadata.GameVersion != currentVersion)
             {
-                this.logService.LogWithColor(
-                    $"[LocalData] Migration needed: {this.currentProfileMetadata.GameVersion} → {currentVersion}",
+                this.LogWithColor(
+                    $"Migration needed: {this.currentProfileMetadata.GameVersion} → {currentVersion}",
                     Color.yellow);
 
                 await this.migrationExecutor.ExecuteMigrations(this, this.currentProfileMetadata, currentVersion);
@@ -322,13 +324,13 @@ namespace DataManager.LocalSave.Handler
                 var existing = await this.LoadProfileMetadataAsync(profileId);
                 if (existing != null)
                 {
-                    this.logService.LogWithColor($"Profile {profileId} already exists", Color.yellow);
+                    this.LogWithColor($"Profile {profileId} already exists", Color.yellow);
                     return existing;
                 }
 
                 // Profile is in registry but metadata is missing/corrupt — recreate metadata below
-                this.logService.Warning(
-                    $"[LocalData] Profile {profileId} exists in registry but metadata is missing. Recreating metadata.");
+                this.Warning(
+                    $"Profile {profileId} exists in registry but metadata is missing. Recreating metadata.");
             }
 
             // Create metadata
@@ -342,7 +344,7 @@ namespace DataManager.LocalSave.Handler
             this.profileRegistry.AddProfile(profileId);
             await this.SaveProfileRegistryAsync();
 
-            this.logService.LogWithColor($"Created profile: {profileId}", Color.green);
+            this.LogWithColor($"Created profile: {profileId}", Color.green);
             return metadata;
         }
 
@@ -393,14 +395,14 @@ namespace DataManager.LocalSave.Handler
                 await this.SaveProfileRegistryAsync();
             }
 
-            this.logService.LogWithColor($"Deleted profile: {profileId}", Color.yellow);
+            this.LogWithColor($"Deleted profile: {profileId}", Color.yellow);
         }
 
         public async UniTask DeleteCurrentProfile()
         {
             this.EnsureInitialized();
             await this.DeleteProfileAsync(this.CurrentProfileId, canDeleteCurrent: true);
-            this.logService.LogWithColor($"Deleted all data for profile {this.CurrentProfileId}", Color.yellow);
+            this.LogWithColor($"Deleted all data for profile {this.CurrentProfileId}", Color.yellow);
         }
 
         #endregion
@@ -421,12 +423,12 @@ namespace DataManager.LocalSave.Handler
             // Update manifest save time
             await this.SaveCurrentProfileMetadataAsync();
 
-            this.logService.LogWithColor($"Saved {key}", Color.green);
+            this.LogWithColor($"Saved {key}", Color.green);
         }
 
         public async UniTask SaveCurrentProfile()
         {
-            this.logService.Log("[LocalData] Saving current profile...");
+            this.Log("Saving current profile...");
             this.EnsureInitialized();
 
             // Serialize all cached data concurrently (FileStorageProvider uses per-key locks)
@@ -437,7 +439,7 @@ namespace DataManager.LocalSave.Handler
             // Update manifest
             await this.SaveCurrentProfileMetadataAsync();
 
-            this.logService.LogWithColor($"Saved all data ({this.localDataCache.Count} items)", Color.green);
+            this.LogWithColor($"Saved all data ({this.localDataCache.Count} items)", Color.green);
         }
 
         /// <summary>
@@ -537,7 +539,7 @@ namespace DataManager.LocalSave.Handler
                 }
                 catch (Exception ex)
                 {
-                    this.logService.Error($"Deserialization error for {key}: {ex.Message}");
+                    this.Error($"Deserialization error for {key}: {ex.Message}");
                 }
             }
 
@@ -545,12 +547,12 @@ namespace DataManager.LocalSave.Handler
             if (data == null)
             {
                 data = (IUserData)Activator.CreateInstance(type);
-                this.logService.Log($"[LocalData] Created new {key}");
+                this.Log($"Created new {key}");
             }
 
             // Cache it
             this.localDataCache[key] = data;
-            this.logService.LogWithColor($"[LocalData] Loaded {key}", Color.green);
+            this.LogWithColor($"Loaded {key}", Color.green);
 
             return data;
         }
@@ -577,7 +579,7 @@ namespace DataManager.LocalSave.Handler
                 }
                 catch (Exception ex)
                 {
-                    this.logService.Error($"Failed to decrypt {key}: {ex.Message}");
+                    this.Error($"Failed to decrypt {key}: {ex.Message}");
                     throw; // Decryption failure is critical
                 }
             }
@@ -632,6 +634,39 @@ namespace DataManager.LocalSave.Handler
         /// </summary>
         private static string DataKeyOf(Type type) => $"{UserDataPrefix}{type.Name}";
 
+        [Conditional("UNITY_EDITOR")]
+        [Conditional("DEBUG_MODULE")]
+        private void Log(string message)
+        {
+            this.logService.Log(FormatLogMessage(message));
+        }
+
+        [Conditional("UNITY_EDITOR")]
+        [Conditional("DEBUG_MODULE")]
+        private void LogWithColor(string message, Color color)
+        {
+            this.logService.LogWithColor(FormatLogMessage(message), color);
+        }
+
+        [Conditional("UNITY_EDITOR")]
+        [Conditional("DEBUG_MODULE")]
+        private void Warning(string message)
+        {
+            this.logService.Warning(FormatLogMessage(message));
+        }
+
+        [Conditional("UNITY_EDITOR")]
+        [Conditional("DEBUG_MODULE")]
+        private void Error(string message)
+        {
+            this.logService.Error(FormatLogMessage(message));
+        }
+
+        private static string FormatLogMessage(string message)
+        {
+            return $"{LogPrefix} {message}";
+        }
+
         /// <summary>
         /// Lazily build and cache the typeName → Type mapping for all ILocalData implementations.
         /// Scanning all loaded assemblies is expensive (~50-100 KB transient allocations on mobile).
@@ -684,7 +719,7 @@ namespace DataManager.LocalSave.Handler
 
             if (metadata?.DataKeys == null || metadata.DataKeys.Count == 0)
             {
-                this.logService.Log("[LocalData] GetProfileDataForBackup: No data keys in profile metadata.");
+                this.Log("GetProfileDataForBackup: No data keys in profile metadata.");
                 return result;
             }
 
@@ -700,7 +735,7 @@ namespace DataManager.LocalSave.Handler
 
                 if (!localDataTypes.TryGetValue(typeName, out var dataType))
                 {
-                    this.logService.Log($"[LocalData] Skipping '{key}' — type '{typeName}' not found.");
+                    this.Log($"Skipping '{key}' — type '{typeName}' not found.");
                     continue;
                 }
 
@@ -715,16 +750,16 @@ namespace DataManager.LocalSave.Handler
                 var json = await this.LoadJsonFromPrimary(key, this.CurrentProfileId);
                 if (string.IsNullOrEmpty(json))
                 {
-                    this.logService.Log($"[LocalData] Skipping '{key}' — no data on disk.");
+                    this.Log($"Skipping '{key}' — no data on disk.");
                     continue;
                 }
 
                 result[key] = json;
-                this.logService.Log($"[LocalData] Collected '{key}' ({typeName}) for backup ({json.Length} chars).");
+                this.Log($"Collected '{key}' ({typeName}) for backup ({json.Length} chars).");
             }
 
-            this.logService.LogWithColor(
-                $"[LocalData] Backup data: {result.Count}/{dataKeys.Length} keys collected.", Color.cyan);
+            this.LogWithColor(
+                $"Backup data: {result.Count}/{dataKeys.Length} keys collected.", Color.cyan);
             return result;
         }
 
@@ -739,7 +774,7 @@ namespace DataManager.LocalSave.Handler
 
             if (keyValuePairs == null || keyValuePairs.Count == 0)
             {
-                this.logService.Log("[LocalData] ApplyBackupData: nothing to apply.");
+                this.Log("ApplyBackupData: nothing to apply.");
                 return;
             }
 
@@ -756,7 +791,7 @@ namespace DataManager.LocalSave.Handler
                 var localDataTypes = this.GetLocalDataTypeLookup();
                 if (!localDataTypes.TryGetValue(typeName, out var dataType))
                 {
-                    this.logService.Warning($"[LocalData] ApplyBackupData: Unknown type for key '{key}'. Skipping.");
+                    this.Warning($"ApplyBackupData: Unknown type for key '{key}'. Skipping.");
                     continue;
                 }
 
@@ -771,18 +806,18 @@ namespace DataManager.LocalSave.Handler
                         // Persist to primary provider
                         await this.SaveJsonInternal(key, data, this.CurrentProfileId);
 
-                        this.logService.Log($"[LocalData] Applied backup data: {key}");
+                        this.Log($"Applied backup data: {key}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    this.logService.Error($"[LocalData] Failed to apply backup data for {key}: {ex.Message}");
+                    this.Error($"Failed to apply backup data for {key}: {ex.Message}");
                 }
             }
 
             // Save updated profile metadata
             await this.SaveCurrentProfileMetadataAsync();
-            this.logService.LogWithColor("[LocalData] Backup data applied successfully.", Color.green);
+            this.LogWithColor("Backup data applied successfully.", Color.green);
         }
 
         /// <summary>
