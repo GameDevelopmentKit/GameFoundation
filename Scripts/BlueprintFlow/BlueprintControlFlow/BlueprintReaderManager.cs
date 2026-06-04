@@ -34,6 +34,24 @@ namespace BlueprintFlow.BlueprintControlFlow
         #endregion
 
         private readonly ReadBlueprintProgressSignal readBlueprintProgressSignal = new();
+        private          List<Type>                  allDerivedTypes;
+
+        // Zenject signals can be observed by UI code, so always dispatch from the main thread.
+        private void FireSignalOnMainThread<TSignal>(TSignal signal)
+        {
+            if (PlayerLoopHelper.IsMainThread)
+            {
+                this.signalBus.Fire(signal);
+
+                return;
+            }
+
+            UniTask.Void(async () =>
+            {
+                await UniTask.SwitchToMainThread();
+                this.signalBus.Fire(signal);
+            });
+        }
 
         public BlueprintReaderManager(ISignalBus signalBus, ILogService logService, DiContainer diContainer, IHandleUserDataServices handleUserDataServices, BlueprintConfig blueprintConfig,
             FetchBlueprintInfo fetchBlueprintInfo, BlueprintDownloader blueprintDownloader)
@@ -45,6 +63,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             this.blueprintConfig        = blueprintConfig;
             this.fetchBlueprintInfo     = fetchBlueprintInfo;
             this.blueprintDownloader    = blueprintDownloader;
+            this.allDerivedTypes        = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>().ToList();
         }
 
         public virtual async UniTask LoadBlueprint()
@@ -58,7 +77,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             if (this.blueprintConfig.IsResourceMode)
             {
                 listRawBlueprints = new Dictionary<string, string>();
-                this.signalBus.Fire(new LoadBlueprintDataProgressSignal { Percent = 1f });
+                this.FireSignalOnMainThread(new LoadBlueprintDataProgressSignal { Percent = 1f });
             }
             else
             {
@@ -103,7 +122,7 @@ namespace BlueprintFlow.BlueprintControlFlow
             sw.Stop();
             this.logService.LogWithColor($"[BlueprintReader] All blueprint are loaded in {sw.ElapsedMilliseconds} ms", Color.cyan);
 
-            this.signalBus.Fire<LoadBlueprintDataSucceedSignal>();
+            this.FireSignalOnMainThread(new LoadBlueprintDataSucceedSignal());
         }
 
         protected virtual UniTask LoadRawBlueprint(Dictionary<string, string> input) { return UniTask.CompletedTask; }
@@ -116,12 +135,12 @@ namespace BlueprintFlow.BlueprintControlFlow
         private async UniTask DownloadBlueprint(string blueprintDownloadLink)
         {
             var progressSignal = new LoadBlueprintDataProgressSignal { Percent = 0f };
-            this.signalBus.Fire(progressSignal); //Inform that we just starting dowloading blueprint
+            this.FireSignalOnMainThread(progressSignal); // Inform that we just start downloading blueprint.
 
             await this.blueprintDownloader.DownloadBlueprintAsync(blueprintDownloadLink, this.blueprintConfig.BlueprintZipFilepath, (downloaded, length) =>
             {
-                progressSignal.Percent = downloaded / (float)length * 100f;
-                this.signalBus.Fire(progressSignal);
+                progressSignal.Percent = length <= 0 ? 0f : downloaded / (float)length;
+                this.FireSignalOnMainThread(progressSignal);
             });
         }
 
@@ -157,13 +176,25 @@ namespace BlueprintFlow.BlueprintControlFlow
                     $"[BlueprintReader] {this.blueprintConfig.BlueprintZipFilepath} is not exists!!!, Continue load from resource");
             }
 
-            var listReadTask    = new List<UniTask>();
-            var allDerivedTypes = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>();
-            this.readBlueprintProgressSignal.MaxBlueprint    = allDerivedTypes.Count();
-            this.readBlueprintProgressSignal.CurrentProgress = 0;
-            this.signalBus.Fire(this.readBlueprintProgressSignal); // Inform that we just start reading blueprint
+            var                         listReadTask    = new List<UniTask>();
+           
+            ReadBlueprintProgressSignal progressSnapshot;
 
-            foreach (var blueprintType in allDerivedTypes)
+            lock (this.readBlueprintProgressSignal)
+            {
+                this.readBlueprintProgressSignal.MaxBlueprint    = this.allDerivedTypes.Count;
+                this.readBlueprintProgressSignal.CurrentProgress = 0;
+
+                progressSnapshot = new ReadBlueprintProgressSignal
+                {
+                    MaxBlueprint    = this.readBlueprintProgressSignal.MaxBlueprint,
+                    CurrentProgress = this.readBlueprintProgressSignal.CurrentProgress
+                };
+            }
+
+            this.FireSignalOnMainThread(progressSnapshot); // Inform that we just start reading blueprint.
+
+            foreach (var blueprintType in this.allDerivedTypes)
             {
                 var blueprintInstance = (IGenericBlueprintReader)this.diContainer.Resolve(blueprintType);
 
@@ -203,11 +234,20 @@ namespace BlueprintFlow.BlueprintControlFlow
                 {
                     await blueprintReader.DeserializeFromCsv(rawCsv);
 
+                    ReadBlueprintProgressSignal progressSnapshot;
+
                     lock (this.readBlueprintProgressSignal)
                     {
                         this.readBlueprintProgressSignal.CurrentProgress++;
-                        this.signalBus.Fire(this.readBlueprintProgressSignal);
+
+                        progressSnapshot = new ReadBlueprintProgressSignal
+                        {
+                            MaxBlueprint    = this.readBlueprintProgressSignal.MaxBlueprint,
+                            CurrentProgress = this.readBlueprintProgressSignal.CurrentProgress
+                        };
                     }
+
+                    this.FireSignalOnMainThread(progressSnapshot);
                 }
                 else
                     this.logService.Warning($"[BlueprintReader] Unable to load {bpAttribute.DataPath} from {(bpAttribute.IsLoadFromResource ? "resource folder" : "local folder")}!!!");

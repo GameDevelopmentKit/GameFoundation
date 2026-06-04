@@ -25,6 +25,6 @@ namespace BlueprintFlow.Signals
         public int MaxBlueprint;
         public int CurrentProgress;
 
-        public float Percent => 1f * this.CurrentProgress / this.MaxBlueprint;
+        public float Percent => this.MaxBlueprint <= 0 ? 1f : 1f * this.CurrentProgress / this.MaxBlueprint;
     }
 }
