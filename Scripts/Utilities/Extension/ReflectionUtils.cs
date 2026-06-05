@@ -7,6 +7,10 @@ namespace GameFoundation.Scripts.Utilities.Extension
 
     public static class ReflectionUtils
     {
+        // Cache derived-type lookups so repeated calls (e.g. blueprint types + user-data types) don't
+        // re-scan all AppDomain assemblies every time.
+        private static readonly Dictionary<Type, List<Type>> DerivedTypeCache = new();
+
         /// <summary>Get all types dives from T or Implement interface T that are not abstract. Note: only same assembly</summary>
         [Obsolete("Use GetAllDerivedTypes instead")]
         public static IEnumerable<Type> GetAllDriveType<T>()
@@ -15,16 +19,32 @@ namespace GameFoundation.Scripts.Utilities.Extension
         }
 
         /// <summary>
-        /// Get all type that derive from <typeparamref name="T"/>
+        /// Get all type that derive from <typeparamref name="T"/>.
+        /// Results are cached after the first call – safe to call from any thread.
         /// </summary>
         public static IEnumerable<Type> GetAllDerivedTypes<T>(bool sameAssembly = false)
         {
             var baseType = typeof(T);
-            var baseAsm  = Assembly.GetAssembly(baseType);
-            return AppDomain.CurrentDomain.GetAssemblies()
-                            .Where(asm => !asm.IsDynamic && (!sameAssembly || asm == baseAsm))
-                            .SelectMany(GetTypesSafely)
-                            .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type));
+
+            lock (DerivedTypeCache)
+            {
+                if (DerivedTypeCache.TryGetValue(baseType, out var cached))
+                    return cached;
+            }
+
+            var baseAsm = Assembly.GetAssembly(baseType);
+            var result = AppDomain.CurrentDomain.GetAssemblies()
+                                  .Where(asm => !asm.IsDynamic && (!sameAssembly || asm == baseAsm))
+                                  .SelectMany(GetTypesSafely)
+                                  .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type))
+                                  .ToList(); // materialise so we store a concrete list
+
+            lock (DerivedTypeCache)
+            {
+                DerivedTypeCache[baseType] = result;
+            }
+
+            return result;
         }
 
         public static void CopyTo(this object from, object to)

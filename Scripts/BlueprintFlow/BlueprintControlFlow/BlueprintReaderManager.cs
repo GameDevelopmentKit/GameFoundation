@@ -63,12 +63,12 @@ namespace BlueprintFlow.BlueprintControlFlow
             this.blueprintConfig        = blueprintConfig;
             this.fetchBlueprintInfo     = fetchBlueprintInfo;
             this.blueprintDownloader    = blueprintDownloader;
-            this.allDerivedTypes        = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>().ToList();
         }
 
         public virtual async UniTask LoadBlueprint()
         {
             var sw = Stopwatch.StartNew();
+            this.allDerivedTypes        = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>().ToList();
 
             this.logService.LogWithColor("[BlueprintReader] Start loading", Color.cyan);
 

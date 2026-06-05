@@ -11,12 +11,14 @@ namespace GameFoundation.Scripts.Utilities.Extension
         public static void BindIFactoryForAllDriveTypeFromPool<T>(this DiContainer container)
         {
             var bindMemoryPoolMethod = container.GetType().GetMethods().First(methodInfo => methodInfo.Name.Equals("BindIFactory") && methodInfo.GetGenericArguments().Length == 1);
+
             var fromPoolableMemoryPoolMethod = typeof(FactoryFromBinder0Extensions).GetMethods()
-                                                                                   .First(methodInfo => methodInfo.Name.Equals("FromPoolableMemoryPool") &&
-                                                                                                        methodInfo.GetGenericArguments().Length == 1 && methodInfo.GetParameters().Length == 1);
+                .First(methodInfo => methodInfo.Name.Equals("FromPoolableMemoryPool") &&
+                                     methodInfo.GetGenericArguments().Length == 1 && methodInfo.GetParameters().Length == 1);
 
             // Bind pool for all http request
             var allDriveType = ReflectionUtils.GetAllDerivedTypes<T>();
+
             foreach (var type in allDriveType)
             {
                 var factoryToChoiceIdBinder = bindMemoryPoolMethod.MakeGenericMethod(type).Invoke(container, null);
@@ -56,11 +58,18 @@ namespace GameFoundation.Scripts.Utilities.Extension
             }
         }
 
-        public static void BindInterfacesAndSelfToAllTypeDriveFrom<T>(this DiContainer diContainer)
+        public static void BindInterfacesAndSelfToAllTypeDriveFrom<T>(this DiContainer diContainer, bool nonLazy = true)
         {
             foreach (var type in ReflectionUtils.GetAllDerivedTypes<T>())
             {
-                diContainer.BindInterfacesAndSelfTo(type).AsCached().NonLazy();
+                if (nonLazy)
+                {
+                    diContainer.BindInterfacesAndSelfTo(type).AsCached().NonLazy();
+                }
+                else
+                {
+                    diContainer.BindInterfacesAndSelfTo(type).AsCached();
+                }
             }
         }
 
@@ -71,10 +80,7 @@ namespace GameFoundation.Scripts.Utilities.Extension
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static DiContainer GetCurrentContainer(this object obj)
-        {
-            return GetCurrentContainer();
-        }
+        public static DiContainer GetCurrentContainer(this object obj) { return GetCurrentContainer(); }
 
         public static DiContainer GetCurrentContainer()
         {
