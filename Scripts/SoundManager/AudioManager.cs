@@ -94,7 +94,15 @@ namespace GameFoundation.Scripts.Utilities
         {
             UniTask.Void(async () =>
             {
-                var clip = await gameAssets.LoadAssetAsync<AudioClip>(name).ToUniTask();
+                var handle = this.gameAssets.LoadAssetAsync<AudioClip>(name);
+
+                if (!handle.IsValid())
+                {
+                    Debug.LogError($"[AudioManager] PlaySound: invalid handle for '{name}', skipping.");
+                    return;
+                }
+
+                var clip = await handle.ToUniTask();
                 if (clip != null) sender.PlayOneShot(clip);
             });
         }
@@ -178,7 +186,19 @@ namespace GameFoundation.Scripts.Utilities
 
         public async UniTask PushContextBGM(string name, int priority, float fade = 1f, float volume = 1f)
         {
-            var clip = await gameAssets.LoadAssetAsync<AudioClip>(name).ToUniTask();
+            var handle = this.gameAssets.LoadAssetAsync<AudioClip>(name);
+
+            // The Addressables handle can be invalid/released (e.g. swept by UnloadUnusedAssets on a
+            // scene transition while a concurrent push is in flight, or returned as default after a
+            // load error). Awaiting .ToUniTask() on an invalid handle throws "Attempting to use an
+            // invalid operation handle" -> top crash on 0.4.3.101 (458 users). Guard before awaiting.
+            if (!handle.IsValid())
+            {
+                Debug.LogError($"[AudioManager] PushContextBGM: invalid handle for '{name}', skipping.");
+                return;
+            }
+
+            var clip = await handle.ToUniTask();
 
             if (clip == null) return;
 

@@ -95,10 +95,6 @@ namespace UIModule.Adapter
                 await UniTask.WaitUntil(() => this.IsInitialized);
             }
 
-            // OSA may rebuild visible holders while async prefab loading is in progress.
-            // Clear the old count first so stale models cannot request prefabs that were reset by params init.
-            this.ResetItems(0);
-
             // Try load all prefabs that are not already in the dictionary
             foreach (var model in models)
             {
