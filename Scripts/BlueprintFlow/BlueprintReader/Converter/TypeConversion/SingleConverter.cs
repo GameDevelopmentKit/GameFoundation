@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts a <see cref="float" /> to and from a <see cref="string" />.
     /// </summary>
-    public class SingleConverter : DefaultTypeConverter
+    public class SingleConverter : DefaultTypeSpanConverter
     {
         private readonly Lazy<string> defaultFormat =
             new(() => float.TryParse(float.MaxValue.ToString("R"), out var _) ? "R" : "G9");
@@ -39,6 +39,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             if (float.TryParse(text, out var f)) return f;
 
             return base.ConvertFromString(text, typeInfo);
+        }
+        
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            return float.Parse(span);
         }
     }
 }

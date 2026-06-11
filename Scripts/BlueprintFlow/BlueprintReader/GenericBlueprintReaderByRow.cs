@@ -4,8 +4,10 @@ namespace BlueprintFlow.BlueprintReader
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
     using BlueprintFlow.BlueprintReader.Converter;
+    using BlueprintFlow.BlueprintReader.Converter.TypeConversion;
     using Cysharp.Threading.Tasks;
     using Sylvan.Data.Csv;
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
@@ -20,8 +22,9 @@ namespace BlueprintFlow.BlueprintReader
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class NestedBlueprintAttribute : Attribute { }
-
+    public class NestedBlueprintAttribute : Attribute
+    {
+    }
 
     /// <summary>
     ///     An abstraction class for databases with row-based header fields
@@ -30,18 +33,21 @@ namespace BlueprintFlow.BlueprintReader
     /// <typeparam name="T2">Type of value</typeparam>
     public abstract class GenericBlueprintReaderByRow<T1, T2> : BlueprintByRow<T1, T2>, IGenericBlueprintReader
     {
-        public virtual async UniTask DeserializeFromCsv(string rawCsv)
+        public virtual UniTask DeserializeFromCsv(string rawCsv)
         {
             this.CleanUp();
-            await using var csv =
-                await CsvDataReader.CreateAsync(new StringReader(rawCsv), CsvHelper.CsvDataReaderOptions);
-            while (await csv.ReadAsync()) this.Add(csv);
+
+            using var csv = CsvDataReader.Create(new StringReader(rawCsv), CsvHelper.CsvDataReaderOptions);
+            while (csv.Read()) this.Add(csv);
+
+            return UniTask.CompletedTask;
         }
 
         public virtual List<List<string>> SerializeToRawData()
         {
             var rawData = this.ToRawData();
             rawData.Insert(0, this.GetHeader());
+
             return rawData;
         }
 
@@ -133,21 +139,53 @@ namespace BlueprintFlow.BlueprintReader
         private readonly Type recordType;
 
         private readonly List<MemberInfo>                              fieldAndProperties;
-        private          List<MemberInfo>                              blueprintCollectionMemberInfos;
+        private          List<CachedBlueprintCollection>               blueprintCollectionMemberInfos;
         private          Dictionary<MemberInfo, BlueprintRecordReader> nestedMemberInfoToRecordReader;
 
         private List<IBlueprintCollection> listBlueprintCollections;
 
         public string RequireKey;
 
-        private CustomTypeConverterAttribute customTypeConverter;
-
+        private          CustomTypeConverterAttribute customTypeConverter;
+        private          List<CachedMember>           cachedMembers;
+        private          bool                         isCacheInitialized;
+        private          List<string>                 cachedHeader;
+        private readonly Func<object>                 factory;
         public BlueprintRecordReader(Type blueprintType, Type recordType)
         {
             this.blueprintType      = blueprintType;
             this.recordType         = recordType;
             this.fieldAndProperties = new List<MemberInfo>();
+            var ctor = recordType.GetConstructor(Type.EmptyTypes) 
+                       ?? throw new InvalidOperationException($"{recordType.Name} requires a parameterless constructor.");
+            this.factory = Expression.Lambda<Func<object>>(Expression.New(ctor)).Compile();
             this.Setup();
+        }
+
+        private void InitializeCache(CsvDataReader csv)
+        {
+            if (this.isCacheInitialized)
+                return;
+
+            this.cachedMembers = new List<CachedMember>();
+
+            foreach (var memberInfo in this.fieldAndProperties)
+            {
+                var converter =
+                    CsvHelper.TypeConverterCache.GetConverter(
+                        memberInfo.MemberType);
+
+                this.cachedMembers.Add(new CachedMember
+                {
+                    MemberInfo    = memberInfo,
+                    Ordinal       = csv.GetOrdinal(memberInfo.MemberName),
+                    MemberType    = memberInfo.MemberType,
+                    Converter     = converter,
+                    SpanConverter = converter as ISpanTypeConverter
+                });
+            }
+
+            this.isCacheInitialized = true;
         }
 
         private void Setup()
@@ -169,8 +207,16 @@ namespace BlueprintFlow.BlueprintReader
             foreach (var memberInfo in memberInfos)
                 if (this.IsBlueprintCollection(memberInfo.MemberType))
                 {
-                    this.blueprintCollectionMemberInfos ??= new List<MemberInfo>();
-                    this.blueprintCollectionMemberInfos.Add(memberInfo);
+                    this.blueprintCollectionMemberInfos ??=
+                        new List<CachedBlueprintCollection>();
+
+                    var ctor = memberInfo.MemberType.GetConstructor(Type.EmptyTypes);
+                    this.blueprintCollectionMemberInfos.Add(new CachedBlueprintCollection
+                    {
+                        MemberInfo = memberInfo,
+                        Factory    =  Expression.Lambda<Func<object>>(Expression.New(ctor)).Compile(),
+                        FieldCount = memberInfo.MemberType.GetAllFieldAndProperties().Count
+                    });
                 }
                 else if (this.IsBlueprintNested(memberInfo))
                 {
@@ -193,40 +239,56 @@ namespace BlueprintFlow.BlueprintReader
             if (this.customTypeConverter != null)
                 return this.customTypeConverter.TypeConverter.ConvertFromCsv(inputCsv);
 
+            this.InitializeCache(inputCsv);
+
             object record = null;
 
-            if (!string.IsNullOrEmpty(inputCsv.GetField(this.RequireKey)))
+            if (!inputCsv.GetFieldSpan(inputCsv.GetOrdinal(this.RequireKey)).IsEmpty)
             {
-                record = Activator.CreateInstance(this.recordType);
+                record = this.factory();
 
-                foreach (var memberInfo in this.fieldAndProperties)
+                foreach (var member in this.cachedMembers)
+                {
                     try
                     {
-                        var ordinal = inputCsv.GetOrdinal(memberInfo.MemberName);
-                        memberInfo.SetValue(record, inputCsv.GetField(memberInfo.MemberType, ordinal));
+                        object value;
+
+                        if (member.SpanConverter != null)
+                        {
+                            value = member.SpanConverter.ConvertFromSpan(
+                                inputCsv.GetFieldSpan(member.Ordinal),
+                                member.MemberType);
+                        }
+                        else
+                        {
+                            value = member.Converter.ConvertFromString(
+                                inputCsv.GetString(member.Ordinal),
+                                member.MemberType);
+                        }
+
+                        member.MemberInfo.SetValue(record, value);
                     }
                     catch (IndexOutOfRangeException e)
                     {
                         throw new FieldDontExistInBlueprint(
-                            $"{this.recordType.Name} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
+                            $"{this.recordType.Name} - {inputCsv.GetField(this.RequireKey)} - {member.MemberInfo.MemberName} : {e}");
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"{this.blueprintType.FullName} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
+                        throw new Exception(
+                            $"{this.blueprintType.FullName} - {inputCsv.GetField(this.RequireKey)} - {member.MemberInfo.MemberName} : {e}");
                     }
+                }
 
                 if (this.blueprintCollectionMemberInfos != null)
                 {
-                    //Create new sub blueprints if exist
                     this.listBlueprintCollections ??= new List<IBlueprintCollection>();
                     this.listBlueprintCollections.Clear();
 
-                    foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
+                    foreach (var subBlueprint in this.blueprintCollectionMemberInfos)
                     {
-                        var subCollection =
-                            (IBlueprintCollection)Activator.CreateInstance(subBlueprintMemberInfo.MemberType);
-
-                        subBlueprintMemberInfo.SetValue(record, subCollection);
+                        var subCollection = (IBlueprintCollection)subBlueprint.Factory();
+                        subBlueprint.MemberInfo.SetValue(record, subCollection);
                         this.listBlueprintCollections.Add(subCollection);
                     }
                 }
@@ -235,7 +297,9 @@ namespace BlueprintFlow.BlueprintReader
                 {
                     foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
                     {
-                        nestedMemberInfo.SetValue(record, recordReader.GetRecord(inputCsv));
+                        nestedMemberInfo.SetValue(
+                            record,
+                            recordReader.GetRecord(inputCsv));
                     }
                 }
             }
@@ -251,34 +315,48 @@ namespace BlueprintFlow.BlueprintReader
             }
 
             if (this.listBlueprintCollections != null)
+            {
                 foreach (var subCollection in this.listBlueprintCollections)
+                {
                     subCollection.Add(inputCsv);
+                }
+            }
 
             return record;
         }
 
         public List<string> GetHeader()
         {
-            var result = new List<string>(this.fieldAndProperties.Select(memberInfo => memberInfo.MemberName));
+            if (this.cachedHeader != null)
+                return this.cachedHeader;
+
+            this.cachedHeader =
+                new List<string>(
+                    this.fieldAndProperties.Select(memberInfo => memberInfo.MemberName));
 
             if (this.nestedMemberInfoToRecordReader != null)
             {
-                foreach (var (nestedMemberInfo, recordReader) in this.nestedMemberInfoToRecordReader)
+                foreach (var (_, recordReader)
+                         in this.nestedMemberInfoToRecordReader)
                 {
-                    result.AddRange(recordReader.GetHeader());
+                    this.cachedHeader.AddRange(
+                        recordReader.GetHeader());
                 }
             }
 
             if (this.blueprintCollectionMemberInfos != null)
             {
-                foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
+                foreach (var subBlueprint
+                         in this.blueprintCollectionMemberInfos)
                 {
-                    var subCollection = (IBlueprintCollection)Activator.CreateInstance(subBlueprintMemberInfo.MemberType);
-                    result.AddRange(subCollection.GetHeader());
+                    var subCollection = (IBlueprintCollection)subBlueprint.Factory();
+
+                    this.cachedHeader.AddRange(
+                        subCollection.GetHeader());
                 }
             }
 
-            return result;
+            return this.cachedHeader;
         }
 
         public List<List<string>> ToRawData(object inputObject)
@@ -313,7 +391,7 @@ namespace BlueprintFlow.BlueprintReader
             if (this.blueprintCollectionMemberInfos != null)
                 foreach (var subBlueprintMemberInfo in this.blueprintCollectionMemberInfos)
                 {
-                    var subBlueprintData    = (IBlueprintCollection)subBlueprintMemberInfo.GetValue(inputObject);
+                    var subBlueprintData    = (IBlueprintCollection)subBlueprintMemberInfo.MemberInfo.GetValue(inputObject);
                     var subBlueprintRawData = subBlueprintData.ToRawData();
 
                     for (var index = 0; index < subBlueprintRawData.Count; index++)
@@ -330,7 +408,7 @@ namespace BlueprintFlow.BlueprintReader
                         result[index].AddRange(subBlueprintRawData[index]);
                     }
 
-                    notCollectionFieldCount += subBlueprintMemberInfo.MemberType.GetAllFieldAndProperties().Count;
+                    notCollectionFieldCount += subBlueprintMemberInfo.FieldCount;
                 }
 
             return result;

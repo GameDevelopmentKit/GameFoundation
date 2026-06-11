@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts a <see cref="bool" /> to and from a <see cref="string" />.
     /// </summary>
-    public class BooleanConverter : DefaultTypeConverter
+    public class BooleanConverter : DefaultTypeSpanConverter
     {
         /// <inheritdoc />
         public override object ConvertFromString(string text, Type typeInfo)
@@ -24,6 +24,10 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             }
 
             return base.ConvertFromString(text, typeInfo);
+        }
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            return bool.Parse(span);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts a <see cref="decimal" /> to and from a <see cref="string" />.
     /// </summary>
-    public class DecimalConverter : DefaultTypeConverter
+    public class DecimalConverter : DefaultTypeSpanConverter
     {
         /// <summary>
         ///     Converts the string to an object.
@@ -23,6 +23,10 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             if (decimal.TryParse(text, out var d)) return d;
 
             return base.ConvertFromString(text, typeInfo);
+        }
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            return decimal.Parse(span);
         }
     }
 }

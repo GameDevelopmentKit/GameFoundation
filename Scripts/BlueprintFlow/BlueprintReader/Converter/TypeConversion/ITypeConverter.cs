@@ -28,4 +28,9 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         /// <returns>The string representation of the object.</returns>
         string ConvertToString(object value, Type typeInfo);
     }
+    
+    public interface ISpanTypeConverter : ITypeConverter
+    {
+        object ConvertFromSpan(ReadOnlySpan<char> span, Type type);
+    }
 }

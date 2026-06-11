@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts a <see cref="byte" /> to and from a <see cref="string" />.
     /// </summary>
-    public class ByteConverter : DefaultTypeConverter
+    public class ByteConverter : DefaultTypeSpanConverter
     {
         /// <summary>
         ///     Converts the string to an object.
@@ -24,5 +24,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
             return base.ConvertFromString(text, typeInfo);
         }
+
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type) { return byte.Parse(span); }
     }
 }

@@ -3,7 +3,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     using System;
     using UnityEngine;
 
-    public class UnityVector3Converter : DefaultTypeConverter
+    public class UnityVector3Converter : DefaultTypeSpanConverter
     {
         private readonly char delimiter;
         public UnityVector3Converter(char delimiter = '|') { this.delimiter = delimiter; }
@@ -27,6 +27,29 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         {
             var vector = (Vector3)value;
             return $"{vector.x}{this.delimiter}{vector.y}{this.delimiter}{vector.z}";
+        }
+        
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            var comma1 = span.IndexOf(this.delimiter);
+
+            if (comma1 < 0)
+                return default(Vector3);
+
+            var remain = span[(comma1 + 1)..];
+
+            var comma2 = remain.IndexOf(this.delimiter);
+
+            if (comma2 < 0)
+                return default(Vector3);
+
+            var x = float.Parse(span[..comma1]);
+
+            var y = float.Parse(remain[..comma2]);
+
+            var z = float.Parse(remain[(comma2 + 1)..]);
+
+            return new Vector3(x, y, z);
         }
     }
 }

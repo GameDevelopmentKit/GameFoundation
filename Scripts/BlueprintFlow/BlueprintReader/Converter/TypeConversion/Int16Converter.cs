@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts a <see cref="short" /> to and from a <see cref="string" />.
     /// </summary>
-    public class Int16Converter : DefaultTypeConverter
+    public class Int16Converter : DefaultTypeSpanConverter
     {
         /// <summary>
         ///     Converts the string to an object.
@@ -23,6 +23,13 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             if (short.TryParse(text, out var s)) return s;
 
             return base.ConvertFromString(text, typeInfo);
+        }
+
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            var value= short.Parse(span);
+
+            return value;
         }
     }
 }

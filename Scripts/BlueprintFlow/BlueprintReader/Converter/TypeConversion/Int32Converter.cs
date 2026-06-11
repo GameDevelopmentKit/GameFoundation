@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts an <see cref="int" /> to and from a <see cref="string" />.
     /// </summary>
-    public class Int32Converter : DefaultTypeConverter
+    public class Int32Converter : DefaultTypeSpanConverter
     {
         /// <summary>
         ///     Converts the string to an object.
@@ -24,5 +24,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
 
             return base.ConvertFromString(text, typeInfo);
         }
+
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type) { return int.Parse(span); }
     }
 }

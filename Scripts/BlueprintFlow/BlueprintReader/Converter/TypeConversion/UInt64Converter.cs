@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts a <see cref="ulong" /> to and from a <see cref="string" />.
     /// </summary>
-    public class UInt64Converter : DefaultTypeConverter
+    public class UInt64Converter : DefaultTypeSpanConverter
     {
         /// <summary>
         ///     Converts the string to an object.
@@ -23,6 +23,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             if (ulong.TryParse(text, out var ul)) return ul;
 
             return base.ConvertFromString(text, typeInfo);
+        }
+        
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            return ulong.Parse(span);
         }
     }
 }

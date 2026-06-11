@@ -3,6 +3,7 @@ namespace BlueprintFlow.BlueprintReader.Converter
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using BlueprintFlow.BlueprintReader.Converter.TypeConversion;
     using Sylvan.Data.Csv;
     using UnityEngine;
@@ -18,15 +19,9 @@ namespace BlueprintFlow.BlueprintReader.Converter
             Delimiter  = ','
         };
 
-        public static void RegisterTypeConverter(Type type, ITypeConverter typeConverter)
-        {
-            TypeConverterCache.AddConverter(type, typeConverter);
-        }
+        public static void RegisterTypeConverter(Type type, ITypeConverter typeConverter) { TypeConverterCache.AddConverter(type, typeConverter); }
 
-        public static ITypeConverter GetTypeConverter(Type type)
-        {
-            return TypeConverterCache.GetConverter(type);
-        }
+        public static ITypeConverter GetTypeConverter(Type type) { return TypeConverterCache.GetConverter(type); }
 
         public static string GetField(this CsvDataReader csvReader, string name)
         {
@@ -36,7 +31,8 @@ namespace BlueprintFlow.BlueprintReader.Converter
             }
             catch (Exception e)
             {
-                Debug.LogError($"GetField - {name}:"+ e);
+                Debug.LogError($"GetField - {name}:" + e);
+
                 return string.Empty;
             }
         }
@@ -44,19 +40,32 @@ namespace BlueprintFlow.BlueprintReader.Converter
         public static T GetField<T>(this CsvDataReader csvReader, string name)
         {
             var index = csvReader.GetOrdinal(name);
+
             return (T)GetField(csvReader, typeof(T), index);
         }
 
-        public static T GetField<T>(this CsvDataReader csvReader, int index)
-        {
-            return (T)GetField(csvReader, typeof(T), index);
-        }
+        public static T GetField<T>(this CsvDataReader csvReader, int index) { return (T)GetField(csvReader, typeof(T), index); }
 
-        public static object GetField(this CsvDataReader csvReader, Type type, int index)
+        public static object GetField(this CsvDataReader csvReader, Type type, int ordinal)
         {
-            var field     = csvReader.GetString(index);
             var converter = TypeConverterCache.GetConverter(type);
-            return converter.ConvertFromString(field, type);
+
+            if (converter is ISpanTypeConverter spanConverter)
+            {
+                return spanConverter.ConvertFromSpan(
+                    csvReader.GetFieldSpan(ordinal),
+                    type);
+            }
+
+            return converter.ConvertFromString(
+                csvReader.GetString(ordinal),
+                type);
+        }
+
+        public static ReadOnlySpan<char> GetFieldSpan(this CsvDataReader csvReader, string name)
+        {
+            return csvReader.GetFieldSpan(
+                csvReader.GetOrdinal(name));
         }
 
         /// <summary>
@@ -68,28 +77,29 @@ namespace BlueprintFlow.BlueprintReader.Converter
 
             results = typeInfo.GetFields().Select(fieldInfo => new MemberInfo
             {
-                MemberName = fieldInfo.Name, MemberType = fieldInfo.FieldType,
-                SetValue = fieldInfo.SetValue, GetValue   = fieldInfo.GetValue,
-                IsDefined = type => fieldInfo.IsDefined(type,false)
+                MemberName = fieldInfo.Name, MemberType   = fieldInfo.FieldType,
+                SetValue   = fieldInfo.SetValue, GetValue = fieldInfo.GetValue,
+                IsDefined  = type => fieldInfo.IsDefined(type, false)
             }).ToList();
-            
+
             results.AddRange(typeInfo.GetProperties().Select(propertyInfo => new MemberInfo
             {
                 MemberName = propertyInfo.Name, MemberType   = propertyInfo.PropertyType,
                 SetValue   = propertyInfo.SetValue, GetValue = propertyInfo.GetValue,
-                IsDefined = type => propertyInfo.IsDefined(type,false)
+                IsDefined  = type => propertyInfo.IsDefined(type, false)
             }));
-
+            MemberInfosCache[typeInfo] = results;
             return results;
         }
 
         public static object ConvertToObject(string dataRotation, Type type)
         {
             var converter = TypeConverterCache.GetConverter(type);
+
             return converter.ConvertFromString(dataRotation, type);
         }
     }
-    
+
     public class MemberInfo
     {
         public Func<object, object>   GetValue;
@@ -97,5 +107,26 @@ namespace BlueprintFlow.BlueprintReader.Converter
         public Type                   MemberType;
         public Action<object, object> SetValue;
         public Func<Type, bool>       IsDefined;
+    }
+
+    public class CachedMember
+    {
+        public MemberInfo MemberInfo;
+
+        public int Ordinal;
+
+        public Type MemberType;
+
+        public ITypeConverter Converter;
+
+        public ISpanTypeConverter SpanConverter;
+    }
+
+    public class CachedBlueprintCollection
+    {
+        public MemberInfo MemberInfo;
+
+        public Func<object> Factory;
+        public int          FieldCount;
     }
 }

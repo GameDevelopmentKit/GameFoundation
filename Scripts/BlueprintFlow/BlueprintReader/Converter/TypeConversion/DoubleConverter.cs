@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts a <see cref="double" /> to and from a <see cref="string" />.
     /// </summary>
-    public class DoubleConverter : DefaultTypeConverter
+    public class DoubleConverter : DefaultTypeSpanConverter
     {
         private readonly Lazy<string> defaultFormat =
             new(() => double.TryParse(double.MaxValue.ToString("R"), out var _) ? "R" : "G17");
@@ -39,6 +39,10 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             if (double.TryParse(text, out var d)) return d;
 
             return base.ConvertFromString(text, typeInfo);
+        }
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            return double.Parse(span);
         }
     }
 }

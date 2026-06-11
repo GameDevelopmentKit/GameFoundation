@@ -10,7 +10,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// <summary>
     ///     Converts an <see cref="long" /> to and from a <see cref="string" />.
     /// </summary>
-    public class Int64Converter : DefaultTypeConverter
+    public class Int64Converter : DefaultTypeSpanConverter
     {
         /// <summary>
         ///     Converts the string to an object.
@@ -23,6 +23,11 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
             if (long.TryParse(text, out var l)) return l;
 
             return base.ConvertFromString(text, typeInfo);
+        }
+        
+        public override object ConvertFromSpan(ReadOnlySpan<char> span, Type type)
+        {
+            return long.Parse(span);
         }
     }
 }

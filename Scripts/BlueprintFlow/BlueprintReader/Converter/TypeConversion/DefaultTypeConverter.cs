@@ -13,7 +13,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
     /// </summary>
     public class DefaultTypeConverter : ITypeConverter
     {
-        private static readonly JsonSerializerSettings JsonSetting = new()
+        protected static readonly JsonSerializerSettings JsonSetting = new()
         {
             TypeNameHandling = TypeNameHandling.Auto,
         };
@@ -31,6 +31,7 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
                     $"The conversion cannot be performed.{Environment.NewLine}" +
                     $"    Text: '{text}'{Environment.NewLine}" +
                     $"    MemberType: {typeInfo.FullName}{Environment.NewLine}";
+
                 throw new Exception(message);
             }
         }
@@ -39,7 +40,30 @@ namespace BlueprintFlow.BlueprintReader.Converter.TypeConversion
         public virtual string ConvertToString(object value, Type typeInfo)
         {
             if (value == null) return string.Empty;
+
             return JsonConvert.SerializeObject(value, JsonSetting);
+        }
+    }
+
+    public class DefaultTypeSpanConverter : DefaultTypeConverter, ISpanTypeConverter
+    {
+        public virtual object ConvertFromSpan(ReadOnlySpan<char> span, Type typeInfo)
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject(span.ToString(), typeInfo, JsonSetting);
+            }
+            catch (Exception)
+            {
+                var text = span.ToString();
+
+                var message =
+                    $"The conversion cannot be performed.{Environment.NewLine}" +
+                    $"    Text: '{text}'{Environment.NewLine}" +
+                    $"    MemberType: {typeInfo.FullName}{Environment.NewLine}";
+
+                throw new Exception(message);
+            }
         }
     }
 }
