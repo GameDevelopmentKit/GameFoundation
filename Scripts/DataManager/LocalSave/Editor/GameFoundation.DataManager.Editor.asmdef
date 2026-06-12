@@ -4,7 +4,9 @@
     "references": [
         "GameFoundation.Editor",
         "GameFoundation.DataManager",
-        "GameFoundation.GameConfigs"
+        "GameFoundation.GameConfigs",
+        "GameFoundation.Utilities",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"
