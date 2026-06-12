@@ -1,0 +1,64 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:VisualElement name="local-save-viewer" class="local-save-viewer">
+        <ui:VisualElement class="local-save-viewer__header">
+            <ui:VisualElement class="local-save-viewer__title-row">
+                <ui:Label text="Local Save Viewer" class="local-save-viewer__title" />
+                <ui:Label name="provider-label" class="local-save-viewer__pill" />
+                <ui:Label name="path-label" class="local-save-viewer__path" />
+                <ui:Button name="refresh-button" text="Refresh" class="local-save-viewer__button" />
+                <ui:Button name="open-folder-button" text="Open Folder" class="local-save-viewer__button" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="local-save-viewer__config-row">
+                <uie:ObjectField name="config-field" label="Config" class="local-save-viewer__config-field" />
+                <ui:DropdownField name="profile-dropdown" label="Profile" class="local-save-viewer__profile-dropdown" />
+                <ui:Toggle name="saved-only-toggle" label="Show saved only" class="local-save-viewer__saved-only-toggle" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="local-save-viewer__main">
+            <ui:VisualElement class="local-save-viewer__sidebar">
+                <ui:TextField name="search-field" label="Search" class="local-save-viewer__search" />
+                <ui:ListView name="data-type-list" class="local-save-viewer__type-list" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="local-save-viewer__detail">
+                <ui:VisualElement class="local-save-viewer__selected-header">
+                    <ui:VisualElement class="local-save-viewer__selected-text">
+                        <ui:Label name="selected-type-label" text="Select a data type" class="local-save-viewer__selected-type" />
+                        <ui:Label name="selected-key-label" class="local-save-viewer__selected-key" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="local-save-viewer__selected-actions">
+                        <ui:Label name="selected-status-label" class="local-save-viewer__selected-status" />
+                        <ui:Button name="undo-button" text="Undo" class="local-save-viewer__button" />
+                        <ui:Button name="redo-button" text="Redo" class="local-save-viewer__button" />
+                        <ui:Button name="load-button" text="Reload" class="local-save-viewer__button" />
+                        <ui:Button name="save-button" text="Save" class="local-save-viewer__button--primary" />
+                        <ui:Button name="delete-button" text="Delete" class="local-save-viewer__button--danger" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="local-save-viewer__tabs">
+                    <ui:VisualElement class="local-save-viewer__tab-strip">
+                        <ui:Button name="object-tab-button" text="Object" class="local-save-viewer__tab" />
+                        <ui:Button name="json-tab-button" text="JSON" class="local-save-viewer__tab" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="json-tab-actions" class="local-save-viewer__json-actions">
+                        <ui:Button name="format-button" text="Format JSON" class="local-save-viewer__button" />
+                        <ui:Button name="apply-json-button" text="Apply to Object" class="local-save-viewer__button--primary" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:ScrollView name="object-panel" mode="Vertical" class="local-save-viewer__object-panel">
+                    <ui:VisualElement name="object-editor-root" class="local-save-viewer__object-editor" />
+                </ui:ScrollView>
+
+                <ui:VisualElement name="json-panel" class="local-save-viewer__json-panel">
+                    <ui:VisualElement name="json-editor-host" class="local-save-viewer__json-editor" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:Label name="status-label" class="local-save-viewer__status" />
+    </ui:VisualElement>
+</ui:UXML>
