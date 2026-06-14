@@ -48,7 +48,7 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.BaseScreen.Presenter
         {
             if (parent == null)
             {
-                this.logger.LogWithColor(parent.name + "is null", Color.green);
+                this.logger.LogWithColor($"Cannot set parent for {this.GetType().Name}: parent is null", Color.green);
                 return;
             }
 
