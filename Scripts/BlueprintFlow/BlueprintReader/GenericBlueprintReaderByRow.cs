@@ -10,6 +10,7 @@ namespace BlueprintFlow.BlueprintReader
     using BlueprintFlow.BlueprintReader.Converter.TypeConversion;
     using Cysharp.Threading.Tasks;
     using Sylvan.Data.Csv;
+    using UnityEngine;
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
 
     /// <summary> Attribute used to mark the Header Key for GenericDatabaseByRow </summary>
@@ -151,13 +152,16 @@ namespace BlueprintFlow.BlueprintReader
         private          bool                         isCacheInitialized;
         private          List<string>                 cachedHeader;
         private readonly Func<object>                 factory;
+
         public BlueprintRecordReader(Type blueprintType, Type recordType)
         {
             this.blueprintType      = blueprintType;
             this.recordType         = recordType;
             this.fieldAndProperties = new List<MemberInfo>();
-            var ctor = recordType.GetConstructor(Type.EmptyTypes) 
+
+            var ctor = recordType.GetConstructor(Type.EmptyTypes)
                        ?? throw new InvalidOperationException($"{recordType.Name} requires a parameterless constructor.");
+
             this.factory = Expression.Lambda<Func<object>>(Expression.New(ctor)).Compile();
             this.Setup();
         }
@@ -175,14 +179,21 @@ namespace BlueprintFlow.BlueprintReader
                     CsvHelper.TypeConverterCache.GetConverter(
                         memberInfo.MemberType);
 
-                this.cachedMembers.Add(new CachedMember
+                try
                 {
-                    MemberInfo    = memberInfo,
-                    Ordinal       = csv.GetOrdinal(memberInfo.MemberName),
-                    MemberType    = memberInfo.MemberType,
-                    Converter     = converter,
-                    SpanConverter = converter as ISpanTypeConverter
-                });
+                    this.cachedMembers.Add(new CachedMember
+                    {
+                        MemberInfo    = memberInfo,
+                        Ordinal       = csv.GetOrdinal(memberInfo.MemberName),
+                        MemberType    = memberInfo.MemberType,
+                        Converter     = converter,
+                        SpanConverter = converter as ISpanTypeConverter
+                    });
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($"{this.blueprintType.FullName} - {csv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {e}");
+                }
             }
 
             this.isCacheInitialized = true;
@@ -211,10 +222,11 @@ namespace BlueprintFlow.BlueprintReader
                         new List<CachedBlueprintCollection>();
 
                     var ctor = memberInfo.MemberType.GetConstructor(Type.EmptyTypes);
+
                     this.blueprintCollectionMemberInfos.Add(new CachedBlueprintCollection
                     {
                         MemberInfo = memberInfo,
-                        Factory    =  Expression.Lambda<Func<object>>(Expression.New(ctor)).Compile(),
+                        Factory    = Expression.Lambda<Func<object>>(Expression.New(ctor)).Compile(),
                         FieldCount = memberInfo.MemberType.GetAllFieldAndProperties().Count
                     });
                 }
