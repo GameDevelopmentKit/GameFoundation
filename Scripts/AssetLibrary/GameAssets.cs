@@ -9,12 +9,14 @@ namespace GameFoundation.Scripts.AssetLibrary
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
+    using UnityEngine.ResourceManagement.ResourceLocations;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
     using Object = UnityEngine.Object;
 
     public interface IGameAssets
     {
+        bool                 HasKey(object key);
         AsyncOperationHandle DownloadDependenciesAsync(AssetLabelReference labelReference);
         AsyncOperationHandle DownloadDependenciesAsync(IEnumerable keys, Addressables.MergeMode mode = Addressables.MergeMode.Intersection);
 
@@ -427,6 +429,20 @@ namespace GameFoundation.Scripts.AssetLibrary
             return this.InternalLoadAsync(this.loadedAssets, () => Addressables.LoadAssetAsync<T>(key), key, isAutoUnload, targetScene);
         }
 
+        
+        public bool HasKey(object key)
+        {
+            foreach (var locator in Addressables.ResourceLocators)
+            {
+                if (locator.Locate(key, typeof(object), out var locations))
+                {
+                    return locations is { Count: > 0 };
+                }
+            }
+
+            return false;
+        }
+        
         /// <summary>
         /// Load a single asset by AssetReference
         /// </summary>
