@@ -79,6 +79,7 @@ namespace DataManager.LocalSave.Handler
         private ProfileRegistry profileRegistry;
         private ProfileMetadata currentProfileMetadata;
         private readonly Dictionary<string, IUserData> localDataCache = new();
+        private readonly ProfileSaveGate profileSaveGate = new();
 
         /// <summary>
         /// Cached mapping of type name → Type for all ILocalData implementations.
@@ -125,6 +126,12 @@ namespace DataManager.LocalSave.Handler
         /// direct provider access (e.g., legacy migrator needs FileStorageProvider).
         /// </summary>
         public IStorageProvider PrimaryProvider => this.primaryProvider;
+
+        /// <summary>
+        /// True while a profile save drain is running. Used by lifecycle/backup code
+        /// to observe the central save gate instead of maintaining a separate guard.
+        /// </summary>
+        public bool IsSavingCurrentProfile => this.profileSaveGate.IsSaving;
 
         #endregion
 
@@ -418,28 +425,30 @@ namespace DataManager.LocalSave.Handler
 
             if (!force) return;
 
-            await this.SaveJsonInternal(key, data, CurrentProfileId);
-
-            // Update manifest save time
-            await this.SaveCurrentProfileMetadataAsync();
-
-            this.LogWithColor($"Saved {key}", Color.green);
+            await this.SaveCurrentProfile();
         }
 
-        public async UniTask SaveCurrentProfile()
+        public UniTask SaveCurrentProfile()
+        {
+            this.EnsureInitialized();
+            return this.profileSaveGate.RequestSave(this.SaveCurrentProfileOnce);
+        }
+
+        private async UniTask SaveCurrentProfileOnce()
         {
             this.Log("Saving current profile...");
-            this.EnsureInitialized();
+
+            var profileId = this.CurrentProfileId;
+            var cachedData = this.localDataCache.ToArray();
 
             // Serialize all cached data concurrently (FileStorageProvider uses per-key locks)
-            var saveTasks =
-                this.localDataCache.Select(kvp => this.SaveJsonInternal(kvp.Key, kvp.Value, CurrentProfileId));
+            var saveTasks = cachedData.Select(kvp => this.SaveJsonInternal(kvp.Key, kvp.Value, profileId));
             await UniTask.WhenAll(saveTasks);
 
             // Update manifest
             await this.SaveCurrentProfileMetadataAsync();
 
-            this.LogWithColor($"Saved all data ({this.localDataCache.Count} items)", Color.green);
+            this.LogWithColor($"Saved all data ({cachedData.Length} items)", Color.green);
         }
 
         /// <summary>

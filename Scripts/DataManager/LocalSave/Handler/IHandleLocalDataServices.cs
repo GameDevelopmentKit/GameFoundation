@@ -17,6 +17,11 @@ namespace DataManager.LocalSave.Handler
         bool IsInitialized { get; }
 
         /// <summary>
+        /// True while a profile save is actively being drained by the central save gate.
+        /// </summary>
+        bool IsSavingCurrentProfile { get; }
+
+        /// <summary>
         /// Save a class data to local
         /// </summary>
         /// <param name="data">class data</param>

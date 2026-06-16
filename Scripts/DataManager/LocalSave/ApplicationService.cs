@@ -1,7 +1,6 @@
 namespace DataManager.LocalSave
 {
     using System;
-    using System.Threading;
     using Cysharp.Threading.Tasks;
     using DataManager.LocalSave.Handler;
     using GameFoundation.Scripts.Utilities.ApplicationServices;
@@ -10,9 +9,8 @@ namespace DataManager.LocalSave
     using Zenject;
 
     /// <summary>
-    /// Catches application lifecycle events (pause, focus, quit, scene load) and saves local data.
-    /// Uses an atomic debounce guard to prevent concurrent/redundant saves when multiple events fire
-    /// in the same frame (e.g. OnApplicationPause + OnApplicationFocus on Android).
+    /// Catches application lifecycle events (pause, focus, quit, scene load) and requests local data saves.
+    /// Save coalescing is owned by HandleLocalDataServices so lifecycle events cannot drop requests.
     /// </summary>
     public class ApplicationService : MonoBehaviour
     {
@@ -25,17 +23,9 @@ namespace DataManager.LocalSave
         private DateTime timeBeforeAppPause = DateTime.Now;
 
         /// <summary>
-        /// Atomic save-in-progress flag. 0 = idle, 1 = saving.
-        /// Uses Interlocked so OnApplicationPause + OnApplicationFocus racing in the same
-        /// frame cannot both enter SaveAsync concurrently.
+        /// True while the central LocalSave service is draining a profile save.
         /// </summary>
-        private int saveInProgress;
-
-        /// <summary>
-        /// True while a save is in flight. Used by BackupLifecycleHandler to avoid
-        /// issuing a redundant parallel save on the same pause event.
-        /// </summary>
-        public bool IsSaving => this.saveInProgress != 0;
+        public bool IsSaving => this.handleLocalDataServices?.IsSavingCurrentProfile == true;
 
         //Todo need
         private const int MinimizeTimeToReload = 5;
@@ -96,15 +86,11 @@ namespace DataManager.LocalSave
         }
 
         /// <summary>
-        /// Atomically debounced save — prevents concurrent saves when multiple lifecycle events
-        /// fire in the same frame (e.g. OnApplicationPause + OnApplicationFocus on Android).
+        /// Request a profile save. Overlapping requests are coalesced by HandleLocalDataServices.
         /// </summary>
         private void RequestSave()
         {
             if (!this.handleLocalDataServices.IsInitialized) return;
-
-            // Atomic check-and-set: only one caller wins; losers return immediately.
-            if (Interlocked.CompareExchange(ref this.saveInProgress, 1, 0) != 0) return;
 
             SaveAsync().Forget();
         }
@@ -118,10 +104,6 @@ namespace DataManager.LocalSave
             catch (Exception ex)
             {
                 Debug.LogError($"[ApplicationService] Save failed: {ex.Message}");
-            }
-            finally
-            {
-                Interlocked.Exchange(ref this.saveInProgress, 0);
             }
         }
     }
