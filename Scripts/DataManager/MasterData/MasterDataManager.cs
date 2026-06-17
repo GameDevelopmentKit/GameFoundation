@@ -18,18 +18,18 @@ namespace DataManager.MasterData
     /// </summary>
     public class MasterDataManager : ITickable
     {
-        private readonly SignalBus signalBus;
+        private readonly SignalBus                            signalBus;
         private readonly LazyInject<IHandleLocalDataServices> handleLocalDataService;
-        private readonly LazyInject<BlueprintReaderManager> blueprintReaderManager;
-        private readonly LazyInject<LocalSaveConfig> dataManagerConfig;
-        private readonly LazyInject<IEncryptionService> encryptionService;
+        private readonly LazyInject<BlueprintReaderManager>   blueprintReaderManager;
+        private readonly LazyInject<LocalSaveConfig>          dataManagerConfig;
+        private readonly LazyInject<IEncryptionService>       encryptionService;
 
         public UniTaskCompletionSource<bool> IsReady { get; } = new();
 
         private readonly Dictionary<string, IUserData> userDataCache = new();
 
         protected virtual HashSet<IDataManagerLifecycle> DataManagerLifecyclesRequest { get; } = new();
-        protected virtual HashSet<Type> LoadedDataManagerTypes { get; } = new();
+        protected virtual HashSet<Type>                  LoadedDataManagerTypes       { get; } = new();
 
         private bool isEndOfFrameBatchScheduled = false;
 
@@ -37,11 +37,11 @@ namespace DataManager.MasterData
             LazyInject<BlueprintReaderManager> blueprintReaderManager, LazyInject<LocalSaveConfig> dataManagerConfig,
             LazyInject<IEncryptionService> encryptionService)
         {
-            this.signalBus = signalBus;
+            this.signalBus              = signalBus;
             this.handleLocalDataService = handleLocalDataService;
             this.blueprintReaderManager = blueprintReaderManager;
-            this.dataManagerConfig = dataManagerConfig;
-            this.encryptionService = encryptionService;
+            this.dataManagerConfig      = dataManagerConfig;
+            this.encryptionService      = encryptionService;
             this.signalBus.Subscribe<MasterDataRegisterSignal>(signal =>
                 RegisterDataManagerLifecycle(signal.DataManager));
         }
@@ -66,7 +66,6 @@ namespace DataManager.MasterData
                 }
 
                 await this.handleLocalDataService.Value.InitializeAsync();
-                await this.blueprintReaderManager.Value.LoadBlueprint();
             }
             catch (Exception e)
             {
@@ -78,6 +77,9 @@ namespace DataManager.MasterData
         public async UniTask InitializeAllRegisteredDataManagers()
         {
             if (this.IsReady.Task.Status == UniTaskStatus.Succeeded) return;
+            
+            await this.blueprintReaderManager.Value.LoadBlueprint();
+
             await FlushBatchDataRequestsAsync(force: true);
 
             this.IsReady.TrySetResult(true);
@@ -200,7 +202,7 @@ namespace DataManager.MasterData
         public async UniTask<T> Get<T>() where T : class, IUserData, new()
         {
             await this.IsReady.Task;
-            var type = typeof(T);
+            var type  = typeof(T);
             var value = await this.GetDataInternal(type);
 
             return value as T;

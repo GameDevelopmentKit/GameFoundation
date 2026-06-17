@@ -50,7 +50,7 @@ namespace DataManager.Blueprint.BlueprintController
             var listRawBlueprints = await this.LoadAllBlueprintFromSources();
 
             stopWatchLoadBlueprintFromSource.Stop();
-            this.logService.Log("[BlueprintReader] Load All Blueprint From Source, " + stopWatchLoadBlueprintFromSource.Elapsed.TotalSeconds + "s");
+            this.logService.Log("[BlueprintReader] Loaded All Blueprint From Source, " + stopWatchLoadBlueprintFromSource.Elapsed.TotalSeconds + "s");
 
             if (listRawBlueprints.Count == 0)
             {
@@ -79,6 +79,7 @@ namespace DataManager.Blueprint.BlueprintController
 
         private async UniTask<Dictionary<string, string>> LoadAllBlueprintFromSources()
         {
+            this.logService.Log($"[BlueprintReader] Loading all blueprints from {this.blueprintConfig.Source} source");
             var sourceTypeToListDataPath = new Dictionary<BlueprintSourceType, HashSet<string>>();
             var allDerivedTypes          = ReflectionUtils.GetAllDerivedTypes<IGenericBlueprintReader>();
             this.blueprintReaders = allDerivedTypes.Select(type => (IGenericBlueprintReader)this.diContainer.Resolve(type)).ToList();
@@ -139,6 +140,9 @@ namespace DataManager.Blueprint.BlueprintController
             // If there are still some data path that failed to load, try to load them from fallback source
             if (failedDataPathList.Count > 0)
             {
+                this.logService.Warning($"[BlueprintReader] Failed to load blueprints {string.Join(",", failedDataPathList)}.\n" +
+                                        $"Trying to load from fallback source {this.blueprintConfig.SourceFallback}");
+                
                 if (this.TryGetLoader(this.blueprintConfig.SourceFallback, out var fallbackLoader))
                 {
                     var fallbackResult = await fallbackLoader.LoadAllBlueprint(failedDataPathList);
@@ -154,7 +158,7 @@ namespace DataManager.Blueprint.BlueprintController
 
                     if (fallbackResult.failedDataPathList.Count > 0)
                     {
-                        this.logService.Warning($"[BlueprintReader] Failed to load blueprints from {string.Join(",", fallbackResult.failedDataPathList)}");
+                        this.logService.Warning($"[BlueprintReader] Failed to load blueprints {string.Join(",", fallbackResult.failedDataPathList)} from fallback source {this.blueprintConfig.SourceFallback}");
                     }
                 }
             }

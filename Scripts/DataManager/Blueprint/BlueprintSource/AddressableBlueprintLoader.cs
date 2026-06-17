@@ -31,16 +31,16 @@
         }
         private async UniTask LoadBlueprintTask(string dataPath, Dictionary<string, string> result, HashSet<string> failedDataPathList)
         {
+            object key       = $"{this.blueprintConfig.AddressableBlueprintPath}{dataPath}{this.blueprintConfig.BlueprintFileType}";
             try
             {
-                object key       = $"{this.blueprintConfig.AddressableBlueprintPath}{dataPath}{this.blueprintConfig.BlueprintFileType}";
                 var    textAsset = await this.gameAsset.LoadAssetAsync<TextAsset>(key);
                 result.Add(dataPath, textAsset.text);
                 this.gameAsset.ReleaseAsset(key);
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AddressableBlueprintLoader] Failed to load blueprint data from {dataPath}");
+                Debug.LogError($"[AddressableBlueprintLoader] Failed to load blueprint data from {key}");
                 Debug.LogException(e);
                 failedDataPathList.Add(dataPath);
             }
