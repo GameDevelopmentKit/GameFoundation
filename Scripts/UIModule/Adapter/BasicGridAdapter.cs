@@ -15,14 +15,13 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        public  SimpleDataHelper<TModel> Models { get; private set; }
-        private CanvasGroup              canvasGroup;
-        private List<TPresenter>         presenters;
+        public  SimpleDataHelper<TModel>    Models { get; private set; }
+        private CanvasGroup                 canvasGroup;
+        private Dictionary<int, TPresenter> presenters;
 
         private DiContainer diContainer;
 
         #region GridAdapter implementation
-
         protected override void Start()
         {
             this.Models = new SimpleDataHelper<TModel>(this);
@@ -48,21 +47,17 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             var model      = this.Models[index];
             var viewObject = v.root.GetComponentInChildren<TView>(true);
 
-            if (this.presenters.Count <= index)
+            if (!this.presenters.TryGetValue(index, out var presenter))
             {
-                var p = this.diContainer.Instantiate<TPresenter>();
-                p.SetView(viewObject);
-                p.BindData(model);
-                this.presenters.Add(p);
+                this.presenters[index] = presenter = this.diContainer.Instantiate<TPresenter>();
             }
             else
             {
-                this.presenters[index].SetView(viewObject);
                 this.presenters[index].Dispose();
-                this.presenters[index].BindData(model);
             }
+            presenter.SetView(viewObject);
+            presenter.BindData(model);
         }
-
         #endregion
 
         // These are common data manipulation methods
@@ -79,11 +74,10 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
-                    baseUIItemPresenter.Dispose();
+                    baseUIItemPresenter.Value.Dispose();
                 }
             }
-
-            this.presenters = new List<TPresenter>();
+            this.presenters = new Dictionary<int, TPresenter>(modelList.Count);
 
             await UniTask.WaitUntil(() => this.IsInitialized);
             this.Models.ResetItems(modelList);
@@ -108,8 +102,6 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
 
-        public List<TPresenter> GetPresenters() => this.presenters;
-
         protected override void Dispose()
         {
             base.Dispose();
@@ -117,7 +109,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
-                    baseUIItemPresenter.Dispose();
+                    baseUIItemPresenter.Value.Dispose();
                 }
                 presenters.Clear();
             }

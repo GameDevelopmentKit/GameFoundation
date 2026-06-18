@@ -19,9 +19,9 @@ namespace GameFoundation.Scripts.UIModule.Adapter
     {
         // Helper that stores data and notifies the adapter when items count changes
         // Can be iterated and can also have its elements accessed by the [] operator
-        private SimpleDataHelper<TModel> Models { get; set; }
-        private CanvasGroup              canvasGroup;
-        private List<TPresenter>         presenters = new List<TPresenter>();
+        private SimpleDataHelper<TModel>    Models { get; set; }
+        private CanvasGroup                 canvasGroup;
+        private Dictionary<int, TPresenter> presenters;
 
         private DiContainer diContainer;
 
@@ -63,19 +63,16 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             var model      = this.Models[index];
             var viewObject = v.root.GetComponentInChildren<TView>(true);
 
-            if (this.presenters.Count <= index)
+            if (!this.presenters.TryGetValue(index, out var presenter))
             {
-                var p = this.diContainer.Instantiate<TPresenter>();
-                p.SetView(viewObject);
-                p.BindData(model);
-                this.presenters.Add(p);
+                this.presenters[index] = presenter = this.diContainer.Instantiate<TPresenter>();
             }
             else
             {
-                this.presenters[index].SetView(viewObject);
                 this.presenters[index].Dispose();
-                this.presenters[index].BindData(model);
             }
+            presenter.SetView(viewObject);
+            presenter.BindData(model);
         }
         #endregion
 
@@ -93,12 +90,12 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
-                    baseUIItemPresenter.Dispose();
+                    baseUIItemPresenter.Value.Dispose();
                 }
             }
-
+            this.presenters = new Dictionary<int, TPresenter>(modelList.Count);
+            
             await UniTask.WaitUntil(() => this.IsInitialized, PlayerLoopTiming.Update, cancelToken);
-            //this.ResetItems(0);
             this.Models.ResetItems(modelList);
         }
 
@@ -127,7 +124,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
-                    baseUIItemPresenter.Dispose();
+                    baseUIItemPresenter.Value.Dispose();
                 }
 
                 presenters.Clear();
