@@ -82,7 +82,18 @@ namespace BlueprintFlow.BlueprintReader
         public void Add(CsvDataReader inputCsv)
         {
             var (hasValue, record) = this.blueprintRecordReader.GetRecord(inputCsv);
-            if (hasValue) this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
+
+            if (hasValue)
+            {                
+                try
+                {
+                   this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($"Blueprint {this.GetType().Name} {e}");
+                }
+            }
         }
 
         public List<string> GetHeader() { return this.blueprintRecordReader.GetHeader(); }
