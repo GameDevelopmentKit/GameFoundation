@@ -76,6 +76,12 @@ namespace GameFoundation.Scripts.Auth
 
         public UniTask<AuthResult> SignInWithProviderAsync(AuthProvider provider, string token)
         {
+            return this.SignInWithProviderAsync(AuthCredential.FromToken(provider, token));
+        }
+
+        public UniTask<AuthResult> SignInWithProviderAsync(AuthCredential credential)
+        {
+            var provider = credential?.Provider ?? AuthProvider.Anonymous;
             Debug.Log($"[EditorAuth] Mock sign-in with provider: {provider} (token ignored in Editor)");
 
             // Simulate switching to a "linked" account — keeps same PlayerId in Editor
@@ -92,6 +98,12 @@ namespace GameFoundation.Scripts.Auth
 
         public UniTask<LinkResult> LinkAccountAsync(AuthProvider provider, string token)
         {
+            return this.LinkAccountAsync(AuthCredential.FromToken(provider, token));
+        }
+
+        public UniTask<LinkResult> LinkAccountAsync(AuthCredential credential)
+        {
+            var provider = credential?.Provider ?? AuthProvider.Anonymous;
             Debug.Log($"[EditorAuth] Mock link account: {provider}");
 
             if (this.linkedProviders.Contains(provider))

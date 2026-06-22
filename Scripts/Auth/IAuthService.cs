@@ -78,6 +78,13 @@ namespace GameFoundation.Scripts.Auth
         UniTask<AuthResult> SignInWithProviderAsync(AuthProvider provider, string token);
 
         /// <summary>
+        /// Sign in with a provider credential. Use this for providers that need multiple fields,
+        /// such as Apple Game Center.
+        /// </summary>
+        /// <param name="credential">Provider-specific credential payload.</param>
+        UniTask<AuthResult> SignInWithProviderAsync(AuthCredential credential);
+
+        /// <summary>
         /// Link the current anonymous account to a platform provider.
         /// After linking, the account is recoverable across devices.
         /// </summary>
@@ -89,6 +96,13 @@ namespace GameFoundation.Scripts.Auth
         /// Failed — network or other error.
         /// </returns>
         UniTask<LinkResult> LinkAccountAsync(AuthProvider provider, string token);
+
+        /// <summary>
+        /// Link the current account to a provider credential. Use this for providers that need
+        /// multiple fields, such as Apple Game Center.
+        /// </summary>
+        /// <param name="credential">Provider-specific credential payload.</param>
+        UniTask<LinkResult> LinkAccountAsync(AuthCredential credential);
 
         /// <summary>
         /// Unlink a provider from the current account.

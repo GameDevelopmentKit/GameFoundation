@@ -131,20 +131,40 @@ namespace GameFoundation.Scripts.Auth.UGS
             }
         }
 
-        public async UniTask<AuthResult> SignInWithProviderAsync(AuthProvider provider, string token)
+        public UniTask<AuthResult> SignInWithProviderAsync(AuthProvider provider, string token)
         {
+            return this.SignInWithProviderAsync(AuthCredential.FromToken(provider, token));
+        }
+
+        public async UniTask<AuthResult> SignInWithProviderAsync(AuthCredential credential)
+        {
+            if (credential == null)
+            {
+                return AuthResult.Failure("Provider credential is null.");
+            }
+
+            var provider = credential.Provider;
+
             try
             {
                 switch (provider)
                 {
                     case AuthProvider.GooglePlayGames:
-                        await AuthenticationService.Instance.SignInWithGooglePlayGamesAsync(token);
+                        await AuthenticationService.Instance.SignInWithGooglePlayGamesAsync(credential.Token);
                         break;
                     case AuthProvider.Apple:
-                        await AuthenticationService.Instance.SignInWithAppleAsync(token);
+                        await AuthenticationService.Instance.SignInWithAppleAsync(credential.Token);
+                        break;
+                    case AuthProvider.AppleGameCenter:
+                        await AuthenticationService.Instance.SignInWithAppleGameCenterAsync(
+                            credential.Signature,
+                            credential.TeamPlayerId,
+                            credential.PublicKeyUrl,
+                            credential.Salt,
+                            credential.Timestamp);
                         break;
                     case AuthProvider.UnityPlayerAccount:
-                        await AuthenticationService.Instance.SignInWithUnityAsync(token);
+                        await AuthenticationService.Instance.SignInWithUnityAsync(credential.Token);
                         break;
                     default:
                         return AuthResult.Failure($"Unsupported provider for sign-in: {provider}");
@@ -170,11 +190,24 @@ namespace GameFoundation.Scripts.Auth.UGS
             }
         }
 
-        public async UniTask<LinkResult> LinkAccountAsync(AuthProvider provider, string token)
+        public UniTask<LinkResult> LinkAccountAsync(AuthProvider provider, string token)
         {
+            return this.LinkAccountAsync(AuthCredential.FromToken(provider, token));
+        }
+
+        public async UniTask<LinkResult> LinkAccountAsync(AuthCredential credential)
+        {
+            var provider = credential?.Provider ?? AuthProvider.Anonymous;
+
             if (!this.IsSignedIn)
             {
                 Debug.LogError("[UGSAuth] Cannot link account — not signed in.");
+                return LinkResult.Failed;
+            }
+
+            if (credential == null)
+            {
+                Debug.LogError("[UGSAuth] Cannot link account - provider credential is null.");
                 return LinkResult.Failed;
             }
 
@@ -183,13 +216,21 @@ namespace GameFoundation.Scripts.Auth.UGS
                 switch (provider)
                 {
                     case AuthProvider.GooglePlayGames:
-                        await AuthenticationService.Instance.LinkWithGooglePlayGamesAsync(token);
+                        await AuthenticationService.Instance.LinkWithGooglePlayGamesAsync(credential.Token);
                         break;
                     case AuthProvider.Apple:
-                        await AuthenticationService.Instance.LinkWithAppleAsync(token);
+                        await AuthenticationService.Instance.LinkWithAppleAsync(credential.Token);
+                        break;
+                    case AuthProvider.AppleGameCenter:
+                        await AuthenticationService.Instance.LinkWithAppleGameCenterAsync(
+                            credential.Signature,
+                            credential.TeamPlayerId,
+                            credential.PublicKeyUrl,
+                            credential.Salt,
+                            credential.Timestamp);
                         break;
                     case AuthProvider.UnityPlayerAccount:
-                        await AuthenticationService.Instance.LinkWithUnityAsync(token);
+                        await AuthenticationService.Instance.LinkWithUnityAsync(credential.Token);
                         break;
                     default:
                         Debug.LogError($"[UGSAuth] Unsupported provider for linking: {provider}");
@@ -235,6 +276,9 @@ namespace GameFoundation.Scripts.Auth.UGS
                         break;
                     case AuthProvider.Apple:
                         await AuthenticationService.Instance.UnlinkAppleAsync();
+                        break;
+                    case AuthProvider.AppleGameCenter:
+                        await AuthenticationService.Instance.UnlinkAppleGameCenterAsync();
                         break;
                     case AuthProvider.UnityPlayerAccount:
                         await AuthenticationService.Instance.UnlinkUnityAsync();
@@ -316,7 +360,11 @@ namespace GameFoundation.Scripts.Auth.UGS
                         this.linkedProviders.Add(AuthProvider.GooglePlayGames);
                         break;
                     case "apple":
+                    case "apple.com":
                         this.linkedProviders.Add(AuthProvider.Apple);
+                        break;
+                    case "apple-game-center":
+                        this.linkedProviders.Add(AuthProvider.AppleGameCenter);
                         break;
                     case "unity":
                         this.linkedProviders.Add(AuthProvider.UnityPlayerAccount);

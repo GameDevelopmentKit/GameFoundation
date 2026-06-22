@@ -117,6 +117,50 @@ namespace GameFoundation.Scripts.Auth
         GooglePlayGames,
         Apple,
         UnityPlayerAccount,
+        AppleGameCenter,
+    }
+
+    /// <summary>
+    /// Provider credential payload used by authentication providers that need more than one token string.
+    /// Simple providers use <see cref="Token"/>. Apple Game Center uses signature metadata.
+    /// </summary>
+    public class AuthCredential
+    {
+        public AuthProvider Provider { get; set; }
+        public string Token { get; set; }
+        public string Signature { get; set; }
+        public string TeamPlayerId { get; set; }
+        public string PublicKeyUrl { get; set; }
+        public string Salt { get; set; }
+        public ulong Timestamp { get; set; }
+
+        public static AuthCredential FromToken(AuthProvider provider, string token)
+        {
+            return new AuthCredential
+            {
+                Provider = provider,
+                Token = token,
+            };
+        }
+
+        public static AuthCredential FromAppleGameCenter(
+            string signature,
+            string teamPlayerId,
+            string publicKeyUrl,
+            string salt,
+            ulong timestamp)
+        {
+            return new AuthCredential
+            {
+                Provider = AuthProvider.AppleGameCenter,
+                Signature = signature,
+                Token = signature,
+                TeamPlayerId = teamPlayerId,
+                PublicKeyUrl = publicKeyUrl,
+                Salt = salt,
+                Timestamp = timestamp,
+            };
+        }
     }
 
     /// <summary>
