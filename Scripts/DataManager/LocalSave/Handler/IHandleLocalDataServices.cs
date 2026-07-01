@@ -123,7 +123,18 @@ namespace DataManager.LocalSave.Handler
         /// LoadData calls return the new values.
         /// </summary>
         /// <param name="keyValuePairs">Data key → raw JSON pairs from the backup.</param>
-        UniTask ApplyBackupDataAsync(Dictionary<string, string> keyValuePairs);
+        /// <param name="saveMetadata">
+        /// True to persist updated data keys as a local save. False when cloud profile metadata
+        /// will be applied immediately after this restore.
+        /// </param>
+        UniTask ApplyBackupDataAsync(Dictionary<string, string> keyValuePairs, bool saveMetadata = true);
+
+        /// <summary>
+        /// Apply cloud profile metadata after accepting/restoring cloud backup data.
+        /// Persists the metadata without recording a new local save, so the same cloud
+        /// restore is not detected as a fresh local change on the next recovery check.
+        /// </summary>
+        UniTask ApplyCloudProfileMetadataAsync(ProfileMetadata cloudMetadata);
 
         /// <summary>
         /// Increment the backup version counter and update the last backup timestamp.

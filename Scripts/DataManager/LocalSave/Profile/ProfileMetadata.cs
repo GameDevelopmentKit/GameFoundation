@@ -147,6 +147,33 @@ namespace DataManager.LocalSave.Profile
         #region Helper Methods
 
         /// <summary>
+        /// Copy all metadata values from another profile metadata instance.
+        /// Collection fields are cloned so future edits do not mutate the source object.
+        /// </summary>
+        public void CloneFrom(ProfileMetadata source, string fallbackProfileId = null)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            this.ProfileId = string.IsNullOrEmpty(source.ProfileId) ? fallbackProfileId : source.ProfileId;
+            this.DisplayName = source.DisplayName;
+            this.CreatedAt = source.CreatedAt;
+            this.LastPlayedAt = source.LastPlayedAt;
+            this.LastSavedAt = source.LastSavedAt;
+            this.PlayTimeSeconds = source.PlayTimeSeconds;
+            this.SaveCount = source.SaveCount;
+            this.GameVersion = source.GameVersion;
+            this.DeviceId = source.DeviceId;
+            this.BackupVersion = source.BackupVersion;
+            this.LastBackupTimestamp = source.LastBackupTimestamp;
+            this.MigrationHistory = source.MigrationHistory != null
+                ? new List<MigrationHistoryEntry>(source.MigrationHistory)
+                : new List<MigrationHistoryEntry>();
+            this.DataKeys = source.DataKeys != null
+                ? new HashSet<string>(source.DataKeys)
+                : new HashSet<string>();
+        }
+
+        /// <summary>
         /// Track a new data key (called when saving data)
         /// </summary>
         public void SetDataKey(string key)

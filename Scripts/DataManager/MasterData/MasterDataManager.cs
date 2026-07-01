@@ -123,8 +123,7 @@ namespace DataManager.MasterData
             //dispose all data manager lifecycle
             foreach (var type in this.LoadedDataManagerTypes)
             {
-                if (currentDiContainer.HasBinding(type) &&
-                    currentDiContainer.TryResolve(type) is IDataManagerLifecycle dataManagerLifecycle)
+                if (TryResolveLoadedDataManagerLifecycle(currentDiContainer, type, out var dataManagerLifecycle))
                 {
                     dataManagerLifecycle.Dispose();
                     DataManagerLifecyclesRequest.Add(dataManagerLifecycle);
@@ -196,6 +195,73 @@ namespace DataManager.MasterData
 
                 _ = FlushBatchDataRequestsAsync();
             }
+        }
+
+        private static bool TryResolveLoadedDataManagerLifecycle(DiContainer container, Type concreteType,
+            out IDataManagerLifecycle dataManagerLifecycle)
+        {
+            if (TryResolveDataManagerLifecycle(container, concreteType, concreteType, out dataManagerLifecycle))
+            {
+                return true;
+            }
+
+            foreach (var contractType in concreteType.GetInterfaces())
+            {
+                if (ShouldSkipLifecycleContract(contractType))
+                {
+                    continue;
+                }
+
+                if (TryResolveDataManagerLifecycle(container, contractType, concreteType, out dataManagerLifecycle))
+                {
+                    return true;
+                }
+            }
+
+            dataManagerLifecycle = null;
+            return false;
+        }
+
+        private static bool TryResolveDataManagerLifecycle(DiContainer container, Type contractType,
+            Type concreteType, out IDataManagerLifecycle dataManagerLifecycle)
+        {
+            dataManagerLifecycle = null;
+
+            try
+            {
+                if (!container.HasBinding(contractType))
+                {
+                    return false;
+                }
+
+                if (container.TryResolve(contractType) is not IDataManagerLifecycle resolvedLifecycle)
+                {
+                    return false;
+                }
+
+                if (!concreteType.IsInstanceOfType(resolvedLifecycle))
+                {
+                    return false;
+                }
+
+                dataManagerLifecycle = resolvedLifecycle;
+                return true;
+            }
+            catch (ZenjectException)
+            {
+                return false;
+            }
+        }
+
+        private static bool ShouldSkipLifecycleContract(Type contractType)
+        {
+            return contractType == typeof(IDataManagerLifecycle) ||
+                   contractType == typeof(IInitializeDataOnStart) ||
+                   contractType == typeof(IDisposable) ||
+                   contractType == typeof(IInitializable) ||
+                   contractType == typeof(ITickable) ||
+                   contractType == typeof(IFixedTickable) ||
+                   contractType == typeof(ILateTickable);
         }
 
 

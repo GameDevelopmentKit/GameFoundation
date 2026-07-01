@@ -179,11 +179,11 @@ namespace GameFoundation.Scripts.Backup
 
             try
             {
-                var data = await this.backupProvider.RestoreProfileDataAsync(profileId);
-                if (data != null)
+                var cloudMetadata = await this.TryFetchCloudMetadataAsync(profileId);
+                var restoredCount = await this.RestoreCloudProfileDataAsync(profileId, cloudMetadata);
+                if (restoredCount >= 0)
                 {
-                    await this.localDataServices.ApplyBackupDataAsync(data);
-                    this.logService.LogWithColor($"[Backup] Restored profile '{profileId}' ({data.Count} keys).",
+                    this.logService.LogWithColor($"[Backup] Restored profile '{profileId}' ({restoredCount} keys).",
                         Color.green);
                 }
                 else
@@ -257,14 +257,7 @@ namespace GameFoundation.Scripts.Backup
             {
                 // No local changes since last backup → safe to restore
                 this.logService.Log($"[Backup] Cloud is newer (v{cloudVersion} > v{localVersion}). Restoring...");
-                var data = await this.backupProvider.RestoreProfileDataAsync(currentProfileId);
-                if (data != null)
-                {
-                    await this.localDataServices.ApplyBackupDataAsync(data);
-                    // Update local metadata to match cloud
-                    this.localDataServices.IncrementBackupVersion();
-                    await this.localDataServices.SaveCurrentProfileMetadataAsync();
-                }
+                await this.RestoreCloudProfileDataAsync(currentProfileId, cloudMetadata);
 
                 return RecoveryResult.Restored();
             }
@@ -290,18 +283,50 @@ namespace GameFoundation.Scripts.Backup
 
                 case ConflictChoice.KeepCloud:
                     this.logService.Log("[Backup] Conflict resolved: Keep Cloud. Restoring...");
-                    var cloudData = await this.backupProvider.RestoreProfileDataAsync(currentProfileId);
-                    if (cloudData != null)
-                    {
-                        await this.localDataServices.ApplyBackupDataAsync(cloudData);
-                        this.localDataServices.IncrementBackupVersion();
-                        await this.localDataServices.SaveCurrentProfileMetadataAsync();
-                    }
+                    await this.RestoreCloudProfileDataAsync(currentProfileId, cloudMetadata);
 
                     break;
             }
 
             return RecoveryResult.ConflictResolved();
+        }
+
+        private async UniTask<int> RestoreCloudProfileDataAsync(string profileId, ProfileMetadata cloudMetadata)
+        {
+            var data = await this.backupProvider.RestoreProfileDataAsync(profileId);
+            if (data == null)
+            {
+                return -1;
+            }
+
+            await this.localDataServices.ApplyBackupDataAsync(data, cloudMetadata == null);
+
+            if (cloudMetadata != null)
+            {
+                await this.localDataServices.ApplyCloudProfileMetadataAsync(cloudMetadata);
+            }
+            else
+            {
+                this.logService.Warning(
+                    $"[Backup] Restored profile '{profileId}' without cloud metadata. Future recovery may need another comparison.");
+            }
+
+            return data.Count;
+        }
+
+        private async UniTask<ProfileMetadata> TryFetchCloudMetadataAsync(string profileId)
+        {
+            try
+            {
+                this.cachedManifest = await this.backupProvider.FetchManifestAsync();
+                return this.cachedManifest?.GetMetadata(profileId);
+            }
+            catch (Exception ex)
+            {
+                this.logService.Warning(
+                    $"[Backup] Failed to fetch cloud metadata for profile '{profileId}': {ex.Message}");
+                return null;
+            }
         }
 
         /// <summary>

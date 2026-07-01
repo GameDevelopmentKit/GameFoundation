@@ -777,7 +777,7 @@ namespace DataManager.LocalSave.Handler
         /// Deserializes each key's JSON, updates the in-memory cache, and persists to the primary provider.
         /// Keys not present in the backup are left untouched (we don't delete local-only data).
         /// </summary>
-        public async UniTask ApplyBackupDataAsync(Dictionary<string, string> keyValuePairs)
+        public async UniTask ApplyBackupDataAsync(Dictionary<string, string> keyValuePairs, bool saveMetadata = true)
         {
             this.EnsureInitialized();
 
@@ -824,9 +824,45 @@ namespace DataManager.LocalSave.Handler
                 }
             }
 
-            // Save updated profile metadata
-            await this.SaveCurrentProfileMetadataAsync();
+            if (saveMetadata)
+            {
+                await this.SaveCurrentProfileMetadataAsync();
+            }
+
             this.LogWithColor("Backup data applied successfully.", Color.green);
+        }
+
+        /// <summary>
+        /// Accept cloud metadata as the current local backup baseline without recording
+        /// an extra save. This keeps a resolved cloud restore from reappearing as a
+        /// conflict on the next launch.
+        /// </summary>
+        public async UniTask ApplyCloudProfileMetadataAsync(ProfileMetadata cloudMetadata)
+        {
+            this.EnsureInitialized();
+
+            if (cloudMetadata == null)
+            {
+                this.Log("ApplyCloudProfileMetadata: nothing to apply.");
+                return;
+            }
+
+            this.currentProfileMetadata.CloneFrom(cloudMetadata, this.CurrentProfileId);
+
+            var acceptedBackupTimestamp = cloudMetadata.LastBackupTimestamp;
+            if (!acceptedBackupTimestamp.HasValue || acceptedBackupTimestamp.Value < cloudMetadata.LastSavedAt)
+            {
+                acceptedBackupTimestamp = cloudMetadata.LastSavedAt == default
+                    ? DateTime.UtcNow
+                    : cloudMetadata.LastSavedAt;
+            }
+
+            this.currentProfileMetadata.LastBackupTimestamp = acceptedBackupTimestamp;
+
+            await this.SaveJsonInternal(ProfileMetadataKey, this.currentProfileMetadata, this.CurrentProfileId);
+            this.LogWithColor(
+                $"Cloud profile metadata applied (v{this.currentProfileMetadata.BackupVersion}).",
+                Color.green);
         }
 
         /// <summary>
