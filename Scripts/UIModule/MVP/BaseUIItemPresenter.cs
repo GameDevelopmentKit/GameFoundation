@@ -182,5 +182,17 @@
 
     public class TViewMono : MonoBehaviour, IUIView
     {
+
+    }
+
+    public class BaseUIItemView : TViewMono
+    {
+        public event Action OnEnabled;
+        public event Action OnDisabled;
+        public event Action OnDestroyed;
+
+        public void OnEnable()  { this.OnEnabled?.Invoke(); }
+        public void OnDisable() { this.OnDisabled?.Invoke(); }
+        public void OnDestroy() { this.OnDestroyed?.Invoke(); }
     }
 }
