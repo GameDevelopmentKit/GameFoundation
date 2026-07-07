@@ -104,6 +104,8 @@ namespace GameFoundation.Scripts.AssetLibrary
         Dictionary<object, AsyncOperationHandle> GetLoadingAssets();
 
         void SoftUnloadAssets(string sceneName, int capacity, List<string> listKeep = null);
+
+        void ReleaseAllAsset();
     }
 
     /// <summary>
@@ -159,8 +161,9 @@ namespace GameFoundation.Scripts.AssetLibrary
                 {
                     if (value.IsValid())
                     {
-                      return value.Convert<T>();
+                        return value.Convert<T>();
                     }
+
                     cachedSource.Remove(key);
                 }
 
@@ -389,6 +392,21 @@ namespace GameFoundation.Scripts.AssetLibrary
             }
         }
 
+        public void ReleaseAllAsset()
+        {
+            foreach (var key in this.loadedAssets.Keys.ToList())
+            {
+                this.ReleaseAsset(key);
+            }
+
+            foreach (var key in this.loadedScenes.Keys.ToList())
+            {
+                this.UnloadSceneAsync(key);
+            }
+
+            this.assetsAutoUnloadByScene.Clear();
+        }
+
         /// <summary>
         ///     Preload assets.
         /// </summary>
@@ -429,7 +447,6 @@ namespace GameFoundation.Scripts.AssetLibrary
             return this.InternalLoadAsync(this.loadedAssets, () => Addressables.LoadAssetAsync<T>(key), key, isAutoUnload, targetScene);
         }
 
-        
         public bool HasKey(object key)
         {
             foreach (var locator in Addressables.ResourceLocators)
@@ -442,7 +459,7 @@ namespace GameFoundation.Scripts.AssetLibrary
 
             return false;
         }
-        
+
         /// <summary>
         /// Load a single asset by AssetReference
         /// </summary>
