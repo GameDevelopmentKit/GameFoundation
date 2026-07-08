@@ -280,7 +280,10 @@ namespace GameFoundation.Scripts.UIModule.ScreenFlow.Managers
             if (screenInfo.AddressPathToScreenView.TryGetValue(addressPath, out var viewObject) && !viewObject.Equals(null))
             {
                 if (screenInfo.CurrentScreenViewPath != addressPath)
+                {
                     screenInfo.Presenter.SetView(viewObject);
+                    screenInfo.CurrentScreenViewPath = addressPath;
+                }
                 return viewObject;
             }
 
