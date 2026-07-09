@@ -101,6 +101,33 @@ namespace UIModule.Utilities
 
         public static string ConvertSecondToShortTime(this long second, bool useSemiColon = true) => TimeSpan.FromSeconds(second).ToShortTimeString(useSemiColon);
 
+        private const string DefaultCountdownDaysHoursMinutesFormat = "{0}d {1}h {2}m";
+
+        public static string ToCountdownString(this TimeSpan timeSpan, string daysHoursMinutesFormat = DefaultCountdownDaysHoursMinutesFormat)
+        {
+            if (timeSpan.TotalSeconds <= 0) return "00:00:00";
+
+            return timeSpan.TotalDays >= 1
+                ? FormatCountdownDays(timeSpan, daysHoursMinutesFormat)
+                : timeSpan.ToString(@"hh\:mm\:ss");
+        }
+
+        private static string FormatCountdownDays(TimeSpan timeSpan, string daysHoursMinutesFormat)
+        {
+            var format = string.IsNullOrEmpty(daysHoursMinutesFormat)
+                ? DefaultCountdownDaysHoursMinutesFormat
+                : daysHoursMinutesFormat;
+
+            try
+            {
+                return string.Format(format, (int)timeSpan.TotalDays, timeSpan.Hours, timeSpan.Minutes);
+            }
+            catch (FormatException)
+            {
+                return string.Format(DefaultCountdownDaysHoursMinutesFormat, (int)timeSpan.TotalDays, timeSpan.Hours, timeSpan.Minutes);
+            }
+        }
+
         public static string ToLongTimeString(this TimeSpan timeSpan, bool useSemiColon = false, bool space = false)
         {
             if (timeSpan.Days >= 1)
