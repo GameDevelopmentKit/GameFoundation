@@ -10,7 +10,8 @@
         "UniTask",
         "GameFoundation.GameConfigs",
         "GameFoundation.SoundManager",
-        "GameFoundation.DataManager"
+        "GameFoundation.DataManager",
+        "GameFoundation.Localization"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
