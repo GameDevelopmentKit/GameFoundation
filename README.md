@@ -1,6 +1,14 @@
 # GameFoundation
 Game Foundation provides pre-built common game systems that are flexible and extensible so that developers can focus on building unique gameplay.
 
+## Runtime Modules
+
+- `DataManager` - local/user data framework and blueprint loading.
+- `UIModule` - MVP screen, popup, and scene-flow framework.
+- `Localization` - Unity Localization wrapper behind `ILocalizationService`; see `Scripts/Localization/docs/localization_module.md`.
+- `AppUpdate` - provider-agnostic force/optional app update gate; see `Scripts/AppUpdate/docs/app_update_module.md`.
+- `SoundManager`, `AssetLibrary`, `GameConfigs`, and shared `Utilities`.
+
 # Assembly
 For game assembly, normally, you will add these
 

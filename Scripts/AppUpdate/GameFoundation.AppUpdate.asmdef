@@ -1,18 +1,12 @@
 {
-    "name": "GameFoundation.Script",
+    "name": "GameFoundation.AppUpdate",
     "rootNamespace": "",
     "references": [
         "GameFoundation.Utilities",
-        "GameFoundation.AssetLibrary",
         "GameFoundation.UIModule",
-        "Zenject-Source",
-        "Zenject-Signals",
-        "UniTask",
-        "GameFoundation.GameConfigs",
-        "GameFoundation.SoundManager",
-        "GameFoundation.DataManager",
         "GameFoundation.Localization",
-        "GameFoundation.AppUpdate"
+        "Zenject-Source",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -38,6 +38,11 @@ namespace DataManager.Blueprint.BlueprintController
         private void OnEnable() { this.persistentDataPath = Application.persistentDataPath; }
 
         public void SetCurrentBlueprintVersion(string version) { this.currentBlueprintVersion = version; }
+
+        public void SetBlueprintSource(BlueprintSourceType type)
+        {
+            this.source = type;
+        }
     }
 
     public enum BlueprintSourceType

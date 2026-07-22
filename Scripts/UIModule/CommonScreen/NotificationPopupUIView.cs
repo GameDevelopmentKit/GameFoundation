@@ -41,12 +41,17 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     public class NotificationPopupPresenter : BasePopupPresenter<NotificationPopupUIView, NotificationPopupModel>
     {
         private readonly IAudioManager audioManager;
+        private string defaultOkButtonText;
+        private string defaultOkNoticeButtonText;
+        private string defaultCancelButtonText;
+
         public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioManager audioManager) : base(signalBus, logService) { this.audioManager = audioManager; }
 
         public override UniTask BindData(NotificationPopupModel popupPopupModel)
         {
             this.Init();
             this.SetNotificationContent();
+            this.SetButtonTexts();
             this.SwitchMode();
 
             return UniTask.CompletedTask;
@@ -54,6 +59,11 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         private void Init()
         {
+            this.CacheDefaultButtonTexts();
+            this.View.BtnOk.onClick.RemoveListener(this.OkAction);
+            this.View.BtnOkNotice.onClick.RemoveListener(this.OkAction);
+            this.View.BtnCancel.onClick.RemoveListener(this.CancelAction);
+
             this.View.BtnOk.onClick.AddListener(this.OkAction);
             this.View.BtnOkNotice.onClick.AddListener(this.OkAction);
             this.View.BtnCancel.onClick.AddListener(this.CancelAction);
@@ -84,6 +94,35 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
             this.View.TxtTitle.text   = this.Model.Title;
             this.View.TxtContent.text = this.Model.Content;
         }
+
+        private void SetButtonTexts()
+        {
+            this.SetButtonText(this.View.BtnOk, this.Model.OkButtonText, this.defaultOkButtonText);
+            this.SetButtonText(this.View.BtnOkNotice, this.Model.OkButtonText, this.defaultOkNoticeButtonText);
+            this.SetButtonText(this.View.BtnCancel, this.Model.CancelButtonText, this.defaultCancelButtonText);
+        }
+
+        private void CacheDefaultButtonTexts()
+        {
+            this.defaultOkButtonText ??= this.GetButtonText(this.View.BtnOk);
+            this.defaultOkNoticeButtonText ??= this.GetButtonText(this.View.BtnOkNotice);
+            this.defaultCancelButtonText ??= this.GetButtonText(this.View.BtnCancel);
+        }
+
+        private void SetButtonText(Button button, string text, string fallbackText)
+        {
+            if (button == null) return;
+            var label = button.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (label == null) return;
+            label.text = string.IsNullOrWhiteSpace(text) ? fallbackText : text;
+        }
+
+        private string GetButtonText(Button button)
+        {
+            if (button == null) return string.Empty;
+            var label = button.GetComponentInChildren<TextMeshProUGUI>(true);
+            return label == null ? string.Empty : label.text;
+        }
         
         public override void CloseView()
         {
@@ -105,6 +144,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         public string           Title;
         public string           Content;
         public NotificationType Type;
+        public string           OkButtonText;
+        public string           CancelButtonText;
 
         public Action OkAction       { get; set; }
         public Action CancelAction   { get; set; }

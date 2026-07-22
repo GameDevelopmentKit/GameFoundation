@@ -8,6 +8,8 @@
         {
             this.Container.DeclareSignal<ApplicationPauseSignal>();
             this.Container.DeclareSignal<UpdateTimeAfterFocusSignal>();
+            this.Container.Bind<IApplicationBuildInfoProvider>().To<UnityApplicationBuildInfoProvider>().AsSingle();
+            this.Container.Bind<ApplicationVersionService>().AsSingle();
         }
     }
 }

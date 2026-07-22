@@ -3,6 +3,7 @@
     using DataManager.LocalSave;
     using DataManager.MasterData;
     using GameConfigs;
+    using GameFoundation.Scripts.AppUpdate;
     using GameFoundation.Scripts.AssetLibrary;
     using GameFoundation.Scripts.UIModule.ScreenFlow.Managers;
     using GameFoundation.Scripts.UIModule.Utilities.GameQueueAction;
@@ -23,6 +24,8 @@
 
             SignalBusInstaller.Install(this.Container);
             LocalizationInstaller.Install(this.Container);
+            ApplicationServiceInstaller.Install(this.Container);
+            AppUpdateInstaller.Install(this.Container);
 
             this.Container.Bind<GDKConfig>().FromResource("GameConfigs/GDKConfig").AsSingle().NonLazy();
 
@@ -37,7 +40,6 @@
             this.Container.Bind<LoadImageHelper>().AsCached();
             //Installer
             ScreenFlowInstaller.Install(this.Container);
-            ApplicationServiceInstaller.Install(this.Container);
             GameQueueActionInstaller.Install(this.Container);
             
         }
