@@ -118,7 +118,7 @@ namespace UIModule.Adapter
             }
         }
 
-        public BaseUIItemPresenter<TView, TModel> GetPresenterAtIndex(int index) { return this.indexToPresenter[index]; }
+        public BaseUIItemPresenter<TView, TModel> GetPresenterAtIndex(int index) => this.indexToPresenter.GetValueOrDefault(index);
 
         public List<BaseUIItemPresenter<TView, TModel>> GetPresenters() { return this.indexToPresenter.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList(); }
 

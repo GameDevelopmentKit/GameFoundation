@@ -100,7 +100,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
             }
         }
 
-        public TPresenter GetPresenterAtIndex(int index) => this.presenters[index];
+        public TPresenter GetPresenterAtIndex(int index) => this.presenters.GetValueOrDefault(index);
 
         protected override void Dispose()
         {
