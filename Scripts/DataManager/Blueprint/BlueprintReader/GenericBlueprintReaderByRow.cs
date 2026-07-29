@@ -219,7 +219,7 @@ namespace DataManager.Blueprint.BlueprintReader
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"{this.blueprintType.FullName} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
+                        throw new Exception($"{this.blueprintType.FullName} - {inputCsv.RowNumber} - {inputCsv.GetField(this.RequireKey)} - {memberInfo.MemberName} : {inputCsv.GetField(memberInfo.MemberName)} - {e}");
                     }
 
 
