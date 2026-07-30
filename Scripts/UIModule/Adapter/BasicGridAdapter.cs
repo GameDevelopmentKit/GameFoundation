@@ -18,6 +18,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         public  SimpleDataHelper<TModel>    Models { get; private set; }
         private CanvasGroup                 canvasGroup;
         private Dictionary<int, TPresenter> presenters;
+        private int                         initItemAdapterVersion;
 
         private DiContainer diContainer;
 
@@ -67,20 +68,28 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer)
         {
-            this.diContainer = diContainer;
-            this.Models      = new SimpleDataHelper<TModel>(this);
+            await this.TryInitItemAdapter(modelList, diContainer);
+        }
 
-            if (this.presenters != null)
-            {
-                foreach (var baseUIItemPresenter in this.presenters)
-                {
-                    baseUIItemPresenter.Value.Dispose();
-                }
-            }
-            this.presenters = new Dictionary<int, TPresenter>(modelList.Count);
+        protected async UniTask<bool> TryInitItemAdapter(List<TModel> modelList, DiContainer diContainer)
+        {
+            // This is used to prevent race conditions, only the last call to InitItemAdapter will be effective after initialization
+            var initVersion = ++this.initItemAdapterVersion;
+            var models      = modelList != null ? new List<TModel>(modelList) : new List<TModel>();
 
             await UniTask.WaitUntil(() => this.IsInitialized);
-            this.Models.ResetItems(modelList);
+            if (initVersion != this.initItemAdapterVersion)
+            {
+                return false;
+            }
+
+            this.diContainer = diContainer;
+            this.Models      = new SimpleDataHelper<TModel>(this);
+            this.DisposePresenters();
+            this.presenters = new Dictionary<int, TPresenter>(models.Count);
+
+            this.Models.ResetItems(models);
+            return true;
         }
 
         /// <summary>
@@ -105,13 +114,19 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override void Dispose()
         {
             base.Dispose();
+            this.DisposePresenters();
+        }
+
+        private void DisposePresenters()
+        {
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
-                    baseUIItemPresenter.Value.Dispose();
+                    baseUIItemPresenter.Value?.Dispose();
                 }
-                presenters.Clear();
+
+                this.presenters.Clear();
             }
         }
     }

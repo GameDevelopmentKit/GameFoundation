@@ -23,6 +23,7 @@ namespace UIModule.Adapter
         private          DiContainer                                           container;
         private readonly Dictionary<TView, BaseUIItemPresenter<TView, TModel>> viewToPresenter  = new();
         private readonly Dictionary<int, BaseUIItemPresenter<TView, TModel>>   indexToPresenter = new();
+        private          int                                                   initItemAdapterVersion;
 
         #region OSA implementation
         protected override void Awake()
@@ -88,34 +89,70 @@ namespace UIModule.Adapter
 
         public virtual async UniTask InitItemAdapter(List<TModel> models, DiContainer diContainer)
         {
-            this.container = diContainer;
+            await this.TryInitItemAdapter(models, diContainer);
+        }
+
+        protected async UniTask<bool> TryInitItemAdapter(List<TModel> models, DiContainer diContainer)
+        {
+            // This is used to prevent race conditions, only the last call to InitItemAdapter will be effective after initialization
+            var initVersion = ++this.initItemAdapterVersion;
+            var modelList   = models != null ? new List<TModel>(models) : new List<TModel>();
 
             if (!this.IsInitialized)
             {
                 await UniTask.WaitUntil(() => this.IsInitialized);
             }
 
-            // Try load all prefabs that are not already in the dictionary
-            foreach (var model in models)
+            if (initVersion != this.initItemAdapterVersion)
             {
-                if (!this.Parameters.ItemPrefabs.ContainsKey(model.PrefabName))
+                return false;
+            }
+
+            var gameAssets     = diContainer.Resolve<IGameAssets>();
+            var loadedPrefabs  = new Dictionary<string, RectTransform>();
+
+            // Try load all prefabs that are not already in the dictionary
+            foreach (var model in modelList)
+            {
+                if (this.Parameters.ItemPrefabs.ContainsKey(model.PrefabName) || loadedPrefabs.ContainsKey(model.PrefabName))
                 {
-                    var itemPrefab   = await diContainer.Resolve<IGameAssets>().LoadAssetAsync<GameObject>(model.PrefabName);
-                    var itemPrefabRt = itemPrefab.GetComponent<RectTransform>();
-                    this.Parameters.ItemPrefabs[model.PrefabName] = itemPrefabRt;
+                    continue;
                 }
+
+                var itemPrefab = await gameAssets.LoadAssetAsync<GameObject>(model.PrefabName);
+                if (initVersion != this.initItemAdapterVersion)
+                {
+                    return false;
+                }
+
+                loadedPrefabs[model.PrefabName] = itemPrefab.GetComponent<RectTransform>();
+            }
+
+            if (initVersion != this.initItemAdapterVersion)
+            {
+                return false;
+            }
+
+            this.container = diContainer;
+
+            foreach (var itemPrefab in loadedPrefabs)
+            {
+                this.Parameters.ItemPrefabs[itemPrefab.Key] = itemPrefab.Value;
             }
             this.Parameters.UpdateItemSizes();
 
-            this.Models.ResetItems(models);
+            this.indexToPresenter.Clear();
+            this.Models.ResetItems(modelList);
 
             if (this.Parameters.PrefabControlsDefaultItemSize)
             {
-                for (var i = 0; i < models.Count; ++i)
+                for (var i = 0; i < modelList.Count; ++i)
                 {
-                    this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[models[i].PrefabName]);
+                    this.RequestChangeItemSizeAndUpdateLayout(i, this.Parameters.ItemSizes[modelList[i].PrefabName]);
                 }
             }
+
+            return true;
         }
 
         public BaseUIItemPresenter<TView, TModel> GetPresenterAtIndex(int index) => this.indexToPresenter.GetValueOrDefault(index);

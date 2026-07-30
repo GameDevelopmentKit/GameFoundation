@@ -22,6 +22,7 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         private SimpleDataHelper<TModel>    Models { get; set; }
         private CanvasGroup                 canvasGroup;
         private Dictionary<int, TPresenter> presenters;
+        private int                         initItemAdapterVersion;
 
         private DiContainer diContainer;
 
@@ -83,20 +84,28 @@ namespace GameFoundation.Scripts.UIModule.Adapter
 
         public async UniTask InitItemAdapter(List<TModel> modelList, DiContainer diContainer, CancellationToken cancelToken = default)
         {
+            await this.TryInitItemAdapter(modelList, diContainer, cancelToken);
+        }
+
+        protected async UniTask<bool> TryInitItemAdapter(List<TModel> modelList, DiContainer diContainer, CancellationToken cancelToken = default)
+        {
+            // This is used to prevent race conditions, only the last call to InitItemAdapter will be effective after initialization
+            var initVersion = ++this.initItemAdapterVersion;
+            var models      = modelList != null ? new List<TModel>(modelList) : new List<TModel>();
+
+            await UniTask.WaitUntil(() => this.IsInitialized, PlayerLoopTiming.Update, cancelToken);
+            if (initVersion != this.initItemAdapterVersion)
+            {
+                return false;
+            }
+
             this.diContainer = diContainer;
             this.Models      = new SimpleDataHelper<TModel>(this);
+            this.DisposePresenters();
+            this.presenters = new Dictionary<int, TPresenter>(models.Count);
 
-            if (this.presenters != null)
-            {
-                foreach (var baseUIItemPresenter in this.presenters)
-                {
-                    baseUIItemPresenter.Value.Dispose();
-                }
-            }
-            this.presenters = new Dictionary<int, TPresenter>(modelList.Count);
-            
-            await UniTask.WaitUntil(() => this.IsInitialized, PlayerLoopTiming.Update, cancelToken);
-            this.Models.ResetItems(modelList);
+            this.Models.ResetItems(models);
+            return true;
         }
 
         /// <summary>
@@ -120,14 +129,19 @@ namespace GameFoundation.Scripts.UIModule.Adapter
         protected override void Dispose()
         {
             base.Dispose();
+            this.DisposePresenters();
+        }
+
+        private void DisposePresenters()
+        {
             if (this.presenters != null)
             {
                 foreach (var baseUIItemPresenter in this.presenters)
                 {
-                    baseUIItemPresenter.Value.Dispose();
+                    baseUIItemPresenter.Value?.Dispose();
                 }
 
-                presenters.Clear();
+                this.presenters.Clear();
             }
         }
     }
