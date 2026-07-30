@@ -16,6 +16,7 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
     {
         Close,
         Option,
+        Blocking,
     }
 
     public class NotificationPopupUIView : BaseView
@@ -44,11 +45,15 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         private string defaultOkButtonText;
         private string defaultOkNoticeButtonText;
         private string defaultCancelButtonText;
+        private bool   allowBlockingClose;
+
+        public bool IsBlocking => this.Model?.Type == NotificationType.Blocking;
 
         public NotificationPopupPresenter(SignalBus signalBus, ILogService logService, IAudioManager audioManager) : base(signalBus, logService) { this.audioManager = audioManager; }
 
         public override UniTask BindData(NotificationPopupModel popupPopupModel)
         {
+            this.allowBlockingClose = false;
             this.Init();
             this.SetNotificationContent();
             this.SetButtonTexts();
@@ -77,6 +82,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
 
         public void CancelAction()
         {
+            if (this.IsBlocking) return;
+
             this.audioManager.PlaySound("button_click");
             base.CloseView();
             this.Model.CancelAction?.Invoke();
@@ -84,6 +91,8 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
         
         private void OkAction()
         {
+            if (this.IsBlocking) return;
+
             this.audioManager.PlaySound("button_click");
             this.CloseView();
             this.Model.OkAction?.Invoke();
@@ -124,10 +133,36 @@ namespace GameFoundation.Scripts.UIModule.CommonScreen
             return label == null ? string.Empty : label.text;
         }
         
+        public override async UniTask CloseViewAsync()
+        {
+            if (this.IsBlocking && !this.allowBlockingClose) return;
+
+            await base.CloseViewAsync();
+        }
+
         public override void CloseView()
         {
+            if (this.IsBlocking && !this.allowBlockingClose) return;
+
             base.CloseView();
             this.Model.CloseAction?.Invoke();
+        }
+
+        public async UniTask CompleteAndClose()
+        {
+            if (!this.IsBlocking) return;
+
+            this.allowBlockingClose = true;
+
+            try
+            {
+                await this.CloseViewAsync();
+                this.Model.CloseAction?.Invoke();
+            }
+            finally
+            {
+                this.allowBlockingClose = false;
+            }
         }
 
         public override void Dispose()
