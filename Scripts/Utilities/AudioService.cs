@@ -243,8 +243,9 @@
             this.StopPlayList();
 
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName, isAutoUnload: autoUnload);
-            this.MusicAudioSource      = await this.GetAudioSource();
-            this.MusicAudioSource.clip = audioClip;
+            this.MusicAudioSource       = await this.GetAudioSource();
+            this.MusicAudioSource.clip  = audioClip;
+            this.MusicAudioSource.pitch = 1;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
@@ -252,8 +253,9 @@
         {
             this.StopPlayList();
 
-            this.MusicAudioSource      = await this.GetAudioSource();
-            this.MusicAudioSource.clip = audioClip;
+            this.MusicAudioSource       = await this.GetAudioSource();
+            this.MusicAudioSource.clip  = audioClip;
+            this.MusicAudioSource.pitch = 1;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
