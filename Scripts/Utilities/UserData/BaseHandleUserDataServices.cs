@@ -18,17 +18,15 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         public static readonly JsonSerializerSettings JsonSetting = new()
         {
-            TypeNameHandling = TypeNameHandling.Auto,
+            TypeNameHandling      = TypeNameHandling.Auto,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         };
 
         private readonly ILogService                    logService;
         private readonly Dictionary<string, ILocalData> userDataCache = new();
+        public           Dictionary<string, ILocalData> UserDataCache => this.userDataCache;
 
-        protected BaseHandleUserDataServices(ILogService logService)
-        {
-            this.logService = logService;
-        }
+        protected BaseHandleUserDataServices(ILogService logService) { this.logService = logService; }
 
         public async UniTask Save<T>(T data, bool force = false) where T : class, ILocalData
         {
@@ -45,10 +43,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
             this.logService.LogWithColor($"Saved {key}", Color.green);
         }
 
-        public async UniTask<T> Load<T>() where T : class, ILocalData
-        {
-            return (T)(await this.Load(typeof(T)))[0];
-        }
+        public async UniTask<T> Load<T>() where T : class, ILocalData { return (T)(await this.Load(typeof(T)))[0]; }
 
         public async UniTask<ILocalData[]> Load(params Type[] types)
         {
@@ -63,6 +58,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
                     if (result is not ILocalData data)
                     {
                         this.logService.Error($"Failed to load data {key}");
+
                         return null;
                     }
 
@@ -72,6 +68,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
                     }
 
                     this.logService.LogWithColor($"Loaded {key}", Color.green);
+
                     return data;
                 });
             }).ToArray();
@@ -82,8 +79,10 @@ namespace GameFoundation.Scripts.Utilities.UserData
             await this.SaveJsons(this.userDataCache.Select(value =>
             {
                 this.logService.LogWithColor($"Saved {value.Key}", Color.green);
+
                 return (value.Key, JsonConvert.SerializeObject(value.Value, JsonSetting));
             }).ToArray());
+
             this.logService.LogWithColor("Saved all data", Color.green);
         }
 

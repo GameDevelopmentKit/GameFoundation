@@ -1,6 +1,7 @@
 namespace GameFoundation.Scripts.Utilities.UserData
 {
     using System;
+    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using GameFoundation.Scripts.Interfaces;
 
@@ -23,6 +24,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
 
         public UniTask<ILocalData[]> Load(params Type[] types);
 
-        public UniTask SaveAll();
+        public UniTask                 SaveAll();
+        Dictionary<string, ILocalData> UserDataCache { get; }
     }
 }
