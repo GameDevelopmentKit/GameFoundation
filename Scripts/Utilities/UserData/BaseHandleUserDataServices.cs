@@ -32,10 +32,7 @@ namespace GameFoundation.Scripts.Utilities.UserData
         {
             var key = KeyOf(typeof(T));
 
-            if (!this.userDataCache.ContainsKey(key))
-            {
-                this.userDataCache.Add(key, data);
-            }
+            this.userDataCache.TryAdd(key, data);
 
             if (!force) return;
 
