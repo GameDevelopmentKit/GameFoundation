@@ -10,8 +10,12 @@ namespace BlueprintFlow.BlueprintReader
     using BlueprintFlow.BlueprintReader.Converter.TypeConversion;
     using Cysharp.Threading.Tasks;
     using Sylvan.Data.Csv;
-    using UnityEngine;
     using MemberInfo = BlueprintFlow.BlueprintReader.Converter.MemberInfo;
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    public class IgnoreBlueprintAttribute : Attribute
+    {
+    }
 
     /// <summary> Attribute used to mark the Header Key for GenericDatabaseByRow </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Struct)]
@@ -84,10 +88,10 @@ namespace BlueprintFlow.BlueprintReader
             var (hasValue, record) = this.blueprintRecordReader.GetRecord(inputCsv);
 
             if (hasValue)
-            {                
+            {
                 try
                 {
-                   this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
+                    this.Add(inputCsv.GetField<TKey>(this.blueprintRecordReader.RequireKey), record);
                 }
                 catch (Exception e)
                 {
@@ -186,9 +190,10 @@ namespace BlueprintFlow.BlueprintReader
 
             foreach (var memberInfo in this.fieldAndProperties)
             {
-                var converter =
-                    CsvHelper.TypeConverterCache.GetConverter(
-                        memberInfo.MemberType);
+                if (memberInfo.IsDefined(typeof(IgnoreBlueprintAttribute)))
+                    continue;
+
+                var converter = CsvHelper.TypeConverterCache.GetConverter(memberInfo.MemberType);
 
                 try
                 {
@@ -227,6 +232,10 @@ namespace BlueprintFlow.BlueprintReader
             var memberInfos = this.recordType.GetAllFieldAndProperties();
 
             foreach (var memberInfo in memberInfos)
+            {
+                if (memberInfo.IsDefined(typeof(IgnoreBlueprintAttribute)))
+                    continue;
+
                 if (this.IsBlueprintCollection(memberInfo.MemberType))
                 {
                     this.blueprintCollectionMemberInfos ??=
@@ -253,6 +262,7 @@ namespace BlueprintFlow.BlueprintReader
 
                     this.fieldAndProperties.Add(memberInfo);
                 }
+            }
 
             this.customTypeConverter = this.recordType.GetCustomAttribute<CustomTypeConverterAttribute>();
         }

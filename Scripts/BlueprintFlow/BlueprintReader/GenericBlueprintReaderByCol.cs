@@ -13,20 +13,13 @@ namespace BlueprintFlow.BlueprintReader
     {
         public UniTask DeserializeFromCsv(string rawCsv)
         {
-            using var csv =
-                CsvDataReader.Create(
-                    new StringReader(rawCsv),
-                    CsvHelper.CsvDataReaderOptions);
+            using var csv = CsvDataReader.Create(new StringReader(rawCsv), CsvHelper.CsvDataReaderOptions);
 
-            var allMembers = this.GetType()
-                .GetAllFieldAndProperties()
-                .ToDictionary(
-                    info => info.MemberName,
-                    info => new
-                    {
-                        Member    = info,
-                        Converter = CsvHelper.TypeConverterCache.GetConverter(info.MemberType)
-                    });
+            var allMembers = this.GetType().GetAllFieldAndProperties().Where(x => !x.IsDefined(typeof(IgnoreBlueprintAttribute))).ToDictionary(info => info.MemberName, info => new
+            {
+                Member    = info,
+                Converter = CsvHelper.TypeConverterCache.GetConverter(info.MemberType)
+            });
 
             while (csv.Read())
             {

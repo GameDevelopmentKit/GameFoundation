@@ -17,8 +17,8 @@
     public interface IAudioService
     {
         UniTask PlaySound(string name, AudioSource sender);
-        UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true);
-        UniTask PlaySoundFrequency(string name, float frequency, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true);
+        UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true, float pitch = 1f);
+        UniTask PlaySoundFrequency(string name, float frequency, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true, float pitch = 1f);
         void    StopSoundFrequency(string name);
         void    StopSound(string name);
         void    StopAllSound();
@@ -103,11 +103,13 @@
             sender.PlayOneShotSoundManaged(audioClip);
         }
 
-        public virtual async UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true)
+        public virtual async UniTask PlaySound(string name, bool isLoop = false, float volumeScale = 1f, float fadeSeconds = 1f, bool isAverage = false, bool autoUnload = true, float pitch = 1f)
         {
             var audioClip   = await this.gameAssets.LoadAssetAsync<AudioClip>(name, isAutoUnload: autoUnload);
             var audioSource = await this.GetAudioSource();
             audioSource.gameObject.SetActive(true);
+            audioSource.pitch = pitch;
+
             if (isLoop)
             {
                 if (this.loopingSoundNameToSources.ContainsKey(name))
@@ -129,13 +131,7 @@
             }
         }
 
-        public async UniTask PlaySoundFrequency(
-            string name,
-            float frequency,
-            float volumeScale = 1,
-            float fadeSeconds = 1,
-            bool isAverage = false,
-            bool autoUnload = true)
+        public async UniTask PlaySoundFrequency(string name, float frequency, float volumeScale = 1, float fadeSeconds = 1, bool isAverage = false, bool autoUnload = true, float pitch = 1)
         {
             if (!this.frequencySoundDic.TryGetValue(name, out var token))
             {
@@ -153,19 +149,9 @@
             {
                 while (!token.IsCancellationRequested)
                 {
-                    await this.PlaySound(
-                        name,
-                        isLoop: false,
-                        volumeScale: volumeScale,
-                        fadeSeconds: fadeSeconds,
-                        isAverage: isAverage,
-                        autoUnload: autoUnload
-                    );
+                    await this.PlaySound(name, isLoop: false, volumeScale: volumeScale, fadeSeconds: fadeSeconds, isAverage: isAverage, autoUnload: autoUnload, pitch);
 
-                    await UniTask.Delay(
-                        TimeSpan.FromSeconds(frequency),
-                        cancellationToken: token.Token
-                    );
+                    await UniTask.Delay(TimeSpan.FromSeconds(frequency), cancellationToken: token.Token);
                 }
             }
             catch (OperationCanceledException)
@@ -180,6 +166,7 @@
                 {
                     this.frequencySoundDic.Remove(name);
                 }
+
                 token.Dispose();
             }
         }
@@ -256,8 +243,9 @@
             this.StopPlayList();
 
             var audioClip = await this.gameAssets.LoadAssetAsync<AudioClip>(musicName, isAutoUnload: autoUnload);
-            this.MusicAudioSource      = await this.GetAudioSource();
-            this.MusicAudioSource.clip = audioClip;
+            this.MusicAudioSource       = await this.GetAudioSource();
+            this.MusicAudioSource.clip  = audioClip;
+            this.MusicAudioSource.pitch = 1;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
@@ -265,8 +253,9 @@
         {
             this.StopPlayList();
 
-            this.MusicAudioSource      = await this.GetAudioSource();
-            this.MusicAudioSource.clip = audioClip;
+            this.MusicAudioSource       = await this.GetAudioSource();
+            this.MusicAudioSource.clip  = audioClip;
+            this.MusicAudioSource.pitch = 1;
             this.MusicAudioSource.PlayLoopingMusicManaged(volumeScale, fadeSeconds, persist);
         }
 
