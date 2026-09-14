@@ -76,6 +76,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
     using Sirenix.Utilities.Editor;
     using Sirenix.OdinInspector.Modules.Addressables.Editor.Internal;
     using Sirenix.Reflection.Editor;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -985,9 +986,9 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
                     searchFilter += $"t:{filterType.Name} ";
                 }
 
-                IEnumerator<HierarchyProperty> enumerator = AssetDatabase_Internals.EnumerateAllAssets(searchFilter, false, AssetDatabaseSearchArea.InAssetsOnly);
+                IEnumerator<AssetDatabaseAssetInfo> enumerator = AssetDatabase_Internals.EnumerateAllAssets(searchFilter, false, AssetDatabaseSearchArea.InAssetsOnly);
 
-                if (enumerator.MoveNext())
+                if (enumerator != null && enumerator.MoveNext())
                 {
                     var addedGuids = new HashSet<string>();
 
@@ -1007,26 +1008,26 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 
                     do
                     {
-                        HierarchyProperty current = enumerator.Current;
+                        AssetDatabaseAssetInfo current = enumerator.Current;
 
-                        if (addedGuids.Contains(current.guid) || !current.isMainRepresentation)
+                        if (!current.IsValid)
                         {
                             continue;
                         }
-
-                        AddressableAssetEntry entry = OdinAddressableUtility.CreateFakeAddressableAssetEntry(current.guid);
+                        
+                        AddressableAssetEntry entry = OdinAddressableUtility.CreateFakeAddressableAssetEntry(current.Guid);
 
                         if (listMode == SelectorListMode.Flat)
                         {
-                            var item = new OdinMenuItem(tree, current.name, entry) {Icon = current.icon};
+                            var item = new OdinMenuItem(tree, current.Name, entry) {Icon = current.Icon};
 
                             nonAddressablesItem.ChildMenuItems.Add(item);
                         }
                         else
                         {
-                            string path = AssetDatabase.GetAssetPath(current.instanceID);
+                            string path = current.AssetPath;
 
-                            if (!current.isFolder)
+                            if (!current.IsFolder)
                             {
                                 int extensionEndingIndex = GetExtensionsEndingIndex(path);
 
@@ -1038,7 +1039,7 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 
                             path = RemoveBaseDirectoryFromAssetPath(path);
 
-                            tree.Add($"{NON_ADDRESSABLES_ITEM_NAME}/{path}", entry, current.icon);
+                            tree.Add($"{NON_ADDRESSABLES_ITEM_NAME}/{path}", entry, current.Icon);
                         }
                     } while (enumerator.MoveNext());
 
@@ -1070,6 +1071,36 @@ namespace Sirenix.OdinInspector.Modules.Addressables.Editor
 
             noneItem.SdfIcon = SdfIconType.X;
             tree.MenuItems.Insert(0, noneItem);
+        }
+
+        private static T GetReflectedValue<T>(object target, string memberName, T defaultValue = default)
+        {
+            Type type = target.GetType();
+            FieldInfo field = type.GetField(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            if (field != null)
+            {
+                object fieldValue = field.GetValue(target);
+
+                if (fieldValue is T fieldResult)
+                {
+                    return fieldResult;
+                }
+            }
+
+            PropertyInfo property = type.GetProperty(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            if (property != null)
+            {
+                object propertyValue = property.GetValue(target, null);
+
+                if (propertyValue is T propertyResult)
+                {
+                    return propertyResult;
+                }
+            }
+
+            return defaultValue;
         }
 
         private static int GetExtensionsEndingIndex(string path)

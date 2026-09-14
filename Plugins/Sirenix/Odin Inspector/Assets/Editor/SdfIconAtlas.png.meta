@@ -130,6 +130,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 89041
   packageName: Odin Inspector and Serializer
-  packageVersion: 4.0.1.4
-  assetPath: Packages/com.gdk.core/Plugins/Sirenix/Odin Inspector/Assets/Editor/SdfIconAtlas.png
-  uploadId: 868874
+  packageVersion: 4.0.2.4
+  assetPath: Assets/Plugins/Sirenix/Odin Inspector/Assets/Editor/SdfIconAtlas.png
+  uploadId: 970872

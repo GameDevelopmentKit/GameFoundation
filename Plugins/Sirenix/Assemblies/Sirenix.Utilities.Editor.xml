@@ -1563,6 +1563,14 @@
             <c>true</c> if the current window has focus. Otherwise, <c>false</c>.
             </value>
         </member>
+        <member name="P:Sirenix.Utilities.Editor.GUIHelper.CurrentWindowEntityId">
+            <summary>
+            Gets the Entity Id of the current editor window.
+            </summary>
+            <value>
+            The Entity Id of the current editor window.
+            </value>
+        </member>
         <member name="P:Sirenix.Utilities.Editor.GUIHelper.CurrentWindowInstanceID">
             <summary>
             Gets the ID of the current editor window.
