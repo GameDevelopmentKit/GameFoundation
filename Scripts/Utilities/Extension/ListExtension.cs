@@ -61,6 +61,16 @@
         {
             return source.PickRandom(1).Single();
         }
+        
+        public static T PickRandomAndRemove<T>(this IList<T> source)
+        {
+            var index = Random.Range(0, source.Count);
+            var item  = source[index];
+
+            source.RemoveAt(index);
+
+            return item;
+        }
 
         public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, int count)
         {
